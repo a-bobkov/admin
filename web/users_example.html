@@ -1,0 +1,482 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="title" content="MaxPoster - Управление пользователями"/>
+    <meta name="description" content="MaxPoster - Управление пользователями"/>
+    <title>MaxPoster - Управление пользователями</title>
+    <link rel="shortcut icon" href="favicon.ico"/>
+    <link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection"/>
+    <link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print"/>
+    <!--[if IE]>
+    <link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"/>
+    <![endif]-->
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript">!window.jQuery && document.write('<' + 'script src="js/jquery/jquery-1.7.2.min.js"><\/script>');</script>
+    <script type="text/javascript">
+        //<![CDATA[
+
+        $(function () {
+            $('#content_frame').removeClass('hide');
+        });
+
+        //]]>
+    </script>
+</head>
+<body>
+<div class="container" id="container">
+
+<div id="top">
+    <div class="span-7">
+        <a href="/"><img src="images/logo.png" id="logo" alt="Логотип MaxPoster"/></a>
+    </div>
+    <div class="mainmenu span-17 last">
+        <div><a href="/">Главная</a></div>
+        <div><a href="/avtosalonam">Автосалонам</a></div>
+        <div><a href="/avtosaitam">Автосайтам</a></div>
+        <div><a href="/contacts">Контакты</a></div>
+    </div>
+    <div class="submenu span-24">
+        <table>
+            <tr>
+                <td class="tdl">
+                    <span><a href="/user">Пользователи</a></span>
+                    <span><a href="/auto">Объявления</a></span>
+                    <span><a href="/report/admin">Отчеты</a></span>
+                </td>
+                <td class="tdr">
+                    <span><a href="/profile">Профиль</a></span>
+                    <span><a href="/logout">Выйти</a></span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="content_frame" class="span-24 last hide">
+    <h1>Список пользователей</h1>
+
+    <div class="span-6">
+        <h3>Количество записей: 301</h3>
+    </div>
+
+    <div class="append-bottom">
+        <form action="/user/new" method="get">
+            <input type="submit" value="Добавить пользователя"/>
+        </form>
+    </div>
+
+    <div class="span-16">
+        <table class="list">
+            <thead>
+                <tr>
+                    <th class="active">
+                        <a href="/user?sort=id&amp;sort_type=desc">Код</a> <span>&#160;&#8595;</span>
+                    </th>
+                    <th>
+                        <a href="/user?sort=email&amp;sort_type=asc">Email</a></th>
+                    <th>
+                        <a href="/user?sort=last_login&amp;sort_type=asc">Был на сайте</a></th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="even">
+                    <td class="text"><a href="/user/2/edit">2</a></td>
+                    <td class="text"><a href="/user/2/edit">avorobiev@supersite.ru</a></td>
+                    <td class="date">24.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/2/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/2/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="odd">
+                    <td class="text"><a href="/user/1/edit">1</a></td>
+                    <td class="text"><a href="/user/1/edit">mmm@supersite.ru</a></td>
+                    <td class="date">23.01.14</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href="/user/1/edit">изменить</a></li>
+                            <li class="switch"><a href="/user/1/switch">войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="pagination">
+            <tr>
+                <td class="back">
+                    <a href="/user?page=1" class="bigger">&#8592;&#160;Предыдущая</a>
+                    <a href="/user?page=1" class="smaller">Первая</a>
+                </td>
+                <td class="pages">
+                    <span>1</span>
+                    <a href="/user?page=2">2</a>
+                    <a href="/user?page=3">3</a>
+                    <a href="/user?page=4">4</a>
+                    <a href="/user?page=5">5</a>
+                    <a href="/user?page=6">6</a>
+                    <a href="/user?page=7">7</a>
+                    <a href="/user?page=8">8</a>
+                    <a href="/user?page=9">9</a>
+                    <a href="/user?page=10">10</a>
+                </td>
+                <td class="forward">
+                    <a href="/user?page=2" class="bigger">Следующая&#160;&#8594;</a>
+                    <a href="/user?page=13" class="smaller">Последняя</a>
+                </td>
+            </tr>
+        </table>
+
+        <div class="append-bottom">
+            <form action="user/new" method="get">
+                <input type="submit" value="Добавить пользователя"/>
+            </form>
+        </div>
+    </div>
+
+    <div class="span-8 last">
+        <form action="user/filter/action" method="post">
+            <fieldset class="span-8 last">
+                <legend>Фильтр</legend>
+                <table>
+                    <tfoot>
+                        <tr>
+                            <td>
+                                <ul class="actions">
+                                    <li class="list">
+                                        <a onclick="var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'post'; f.action = this.href;f.submit();return false;" href="/user/filter/action?_reset">Сбросить</a>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td><input type="submit" value="Фильтровать"/></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr>
+                            <th><label for="sf_guard_user_filters_id">Код</label></th>
+                            <td>
+                                <input maxlength="4" type="text" name="sf_guard_user_filters[id]" id="sf_guard_user_filters_id"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="sf_guard_user_filters_email">Email</label></th>
+                            <td>
+                                <input type="text" id="sf_guard_user_filters_email" name="sf_guard_user_filters[email][text]" value=""/>
+                                <br/>
+                                <input type="checkbox" name="sf_guard_user_filters[email][is_empty]" id="sf_guard_user_filters_email_is_empty"/>
+                                <label for="sf_guard_user_filters_email_is_empty">не задан</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="sf_guard_user_filters_status">Статус</label></th>
+                            <td>
+                                <select name="sf_guard_user_filters[status]" id="sf_guard_user_filters_status">
+                                    <option value=""></option>
+                                    <option value="active" selected="selected">Активные</option>
+                                    <option value="inactive">Не активные</option>
+                                    <option value="blocked">Блокированные</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="sf_guard_user_filters_tag_id">Тэг</label></th>
+                            <td>
+                                <select name="sf_guard_user_filters[tag_id]" id="sf_guard_user_filters_tag_id">
+                                    <option value="" selected="selected"></option>
+                                    <option value="2">Инна</option>
+                                    <option value="1">Катя</option>
+                                    <option value="4">Потеряшки</option>
+                                    <option value="without_tag">Без тэга</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<noscript>
+    <div class="span-24">
+        <h1>Отключен JavaScript</h1>
+        <p>Для корректной работы этого раздела сайта необходим JavaScript, который в вашем браузере отключен.</p>
+    </div>
+</noscript>
+
+<div class="span-24 h5">&#160;</div>
+
+<div id="bottom" class="span-24">
+    <table>
+        <tr>
+            <td>
+                <span>Email:</span> <a href="mailto:info@maxposter.ru">info@maxposter.ru</a><br/>
+                <span>Телефон:</span> +7 (911) 101-66-62
+            </td>
+            <td class="r">MaxPoster &copy; 2009 - 2014</td>
+        </tr>
+    </table>
+</div>
+
+</div>
+
+</body>
+</html>
