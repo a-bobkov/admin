@@ -12,12 +12,12 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
  */
 .factory('UserApi', function($q, Api){
     var UserApi = {};
-  
+
     /**
      * @param {Number} id
      * @returns {Promise}
      */
-    UserApi.get = function(id){
+    UserApi.get = function(id) {
         return Api.get('/users/' + id).then(
             function(response){
                 return response.data.result;
@@ -44,7 +44,7 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
             }
         );
     };
-    
+
     /**
      * @param {object} data
      * @returns {Promise}
