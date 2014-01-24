@@ -31,7 +31,7 @@ describe('У объекта app.dal.api', function() {
                 });
 
             api.get(url).then(function(response) {
-                actual = response.data.data;
+                actual = response;
             });
 
             $httpBackend.flush();

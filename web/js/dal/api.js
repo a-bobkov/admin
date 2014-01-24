@@ -23,15 +23,22 @@ angular.module('app.dal.api', [])
         };
 
         var responseHandler = function(response) {
-            var data = response.data;
-            if (   typeof data.status === 'undefined'
-                || data.status !== 'success'
-                || typeof data.data  === 'undefined'
-            ) {
-                return $q.reject(response);
+            var errorMessage,
+                data = response.data;
+
+            if (typeof data.status === 'undefined') {
+                errorMessage = 'Ответ сервера не соответствует формату JSend';
+            } else if (-1 === ['success', 'error'].indexOf(data.status)) {
+                errorMessage = 'Сервер возвратил некорректный статус ответа: ' + data.status;
+            } else if (data.status !== 'success') {
+                errorMessage = 'Сервер возвратил ошибку: ' + data.message;
             }
 
-            return response.data;
+            if (errorMessage) {
+                return $q.reject(errorMessage);
+            }
+
+            return response.data.data;
         }
 
         Api.setErrorHandler = function(handler) {
@@ -50,7 +57,7 @@ angular.module('app.dal.api', [])
                 url: options.apiUrl + name,
                 params: params,
                 withCredentials: true
-            }).then(null, errorHandler);
+            }).then(responseHandler, errorHandler);
         };
 
         /**
