@@ -15,6 +15,7 @@ module.exports = function(config){
 
         // функционал
         'web/js/dal/api.js',
+        'web/js/dal/rest/user.js',
 
         // тесты
         'test/unit/**/*.js'
