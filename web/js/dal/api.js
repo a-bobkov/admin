@@ -30,8 +30,10 @@ angular.module('app.dal.api', [])
                 errorMessage = 'Ответ сервера не соответствует формату JSend';
             } else if (-1 === ['success', 'error'].indexOf(data.status)) {
                 errorMessage = 'Сервер возвратил некорректный статус ответа: ' + data.status;
-            } else if (data.status !== 'success') {
+            } else if (data.status === 'error') {
                 errorMessage = 'Сервер возвратил ошибку: ' + data.message;
+            } else if (typeof data.data === 'undefined') {
+                errorMessage = 'Ответ сервера не содержит данных';
             }
 
             if (errorMessage) {

@@ -39,7 +39,7 @@ describe('У объекта app.dal.api', function() {
             expect(actual).toBe(expected);
         });
 
-        it('должен вызывать обработчик ошибок при сбое', function(){
+        it('должен вызывать обработчик ошибок если код ответа не 2xx', function(){
             var url = '/test/url',
                 errorHandler;
 
@@ -55,6 +55,79 @@ describe('У объекта app.dal.api', function() {
             $httpBackend.flush();
 
             expect(errorHandler).toHaveBeenCalled();
+        });
+
+        it('должен возвращать сообщение об ошибке при отсутствии параметра status в ответе', function(){
+            var url = '/test/url',
+                message;
+
+            $httpBackend
+                .expectGET(url)
+                .respond({});
+
+            api.get(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Ответ сервера не соответствует формату JSend');
+        });
+
+        it('должен возвращать сообщение об ошибке при неверном значении status в ответе', function(){
+            var url = '/test/url',
+                message;
+
+            $httpBackend
+                .expectGET(url)
+                .respond({ status: 123 });
+
+            api.get(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Сервер возвратил некорректный статус ответа: 123');
+        });
+
+        it('должен возвращать сообщение об ошибке если status="error"', function(){
+            var url = '/test/url',
+                message;
+
+            $httpBackend
+                .expectGET(url)
+                .respond({
+                    status: 'error',
+                    message: 'На сервере ошибка'
+                });
+
+            api.get(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Сервер возвратил ошибку: На сервере ошибка');
+        });
+
+        it('должен возвращать сообщение об ошибке при отсутствии параметра data', function(){
+            var url = '/test/url',
+                message;
+
+            $httpBackend
+                .expectGET(url)
+                .respond({
+                    status: 'success'
+                });
+
+            api.get(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Ответ сервера не содержит данных');
         });
     });
 
