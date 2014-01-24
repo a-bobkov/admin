@@ -17,12 +17,18 @@ describe('У объекта app.dal.api', function() {
     describe('Метод get()', function() {
         it('должен возвращать запрошенные данные', function(){
             var url = '/test/url',
-                expected = 'test string',
+                expected = {
+                    one: 'data',
+                    two: 'other data'
+                },
                 actual;
 
             $httpBackend
                 .expectGET(url)
-                .respond(expected);
+                .respond({
+                    status: 'success',
+                    data: expected
+                });
 
             api.get(url).then(function(response) {
                 actual = response;
@@ -30,7 +36,7 @@ describe('У объекта app.dal.api', function() {
 
             $httpBackend.flush();
 
-            expect(actual.data).toBe(expected);
+            expect(actual).toBe(expected);
         });
 
         it('должен вызывать обработчик ошибок при сбое', function(){

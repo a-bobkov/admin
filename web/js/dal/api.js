@@ -22,6 +22,18 @@ angular.module('app.dal.api', [])
             return $q.reject(response);
         };
 
+        var responseHandler = function(response) {
+            var data = response.data;
+            if (   typeof data.status === 'undefined'
+                || data.status !== 'success'
+                || typeof data.data  === 'undefined'
+            ) {
+                return $q.reject(response);
+            }
+
+            return response.data;
+        }
+
         Api.setErrorHandler = function(handler) {
             errorHandler = handler;
         }
