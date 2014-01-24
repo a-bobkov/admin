@@ -1,0 +1,23 @@
+{
+  "name": "mp-adm",
+  "description": "MaxPoster Admin with angular",
+  "repository": "https://github.com/avorobiev/maxposter_frontend",
+  "devDependencies": {
+    "phantomjs": "~1.9",
+    "karma": "~0.10.4",
+    "karma-junit-reporter": "~0.1",
+    "karma-jasmine": "~0.1.3",
+    "karma-ng-scenario": "~0.1",
+    "karma-chrome-launcher": "~0.1.0",
+    "karma-firefox-launcher": "~0.1.0",
+    "karma-html2js-preprocessor": "~0.1.0",
+    "karma-requirejs": "~0.1.0",
+    "karma-coffee-preprocessor": "~0.1.0",
+    "karma-phantomjs-launcher": "~0.1.0",
+    "karma-script-launcher": "~0.1.0",
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-uglify": "~0.2.2"
+  }
+}
