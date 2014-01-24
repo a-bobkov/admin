@@ -39,6 +39,26 @@ describe('У объекта app.dal.rest.user', function() {
             expect(actual).toBe(expected);
         });
 
+        it('Должен корерктно обрабатывать ошибку', function() {
+            var expected = 404,
+                actual;
+
+            spyOn(api, 'get').andReturn($q.reject({
+                data: {
+                    error_code: expected
+                }
+            }));
+
+            userApi.get(1).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(api.get).toHaveBeenCalledWith("/users/1");
+            expect(actual).toBe(expected);
+        });
+
     });
 
 });
