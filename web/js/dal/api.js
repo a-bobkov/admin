@@ -58,7 +58,7 @@ angular.module('app.dal.api', [])
          * @returns {Promise}
          */
         Api.remove = function(name, params) {
-            return $http.remove(options.apiUrl + name, {withCredentials: true, params: params}).then(null,errorHandler);
+            return $http['delete'](options.apiUrl + name, {withCredentials: true, params: params}).then(null,errorHandler);
         };
 
         /**

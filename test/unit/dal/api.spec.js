@@ -37,7 +37,7 @@ describe('У объекта app.dal.api', function() {
             var url = '/test/url',
                 errorHandler;
 
-            errorHandler = jasmine.createSpy('errorHandler')
+            errorHandler = jasmine.createSpy('errorHandler');
             api.setErrorHandler(errorHandler);
 
             $httpBackend
@@ -52,5 +52,121 @@ describe('У объекта app.dal.api', function() {
         });
     });
 
+    describe('Метод post()', function() {
+        it('должен отправлять данные и принимать ответ', function(){
+            var url = '/test/url',
+                data = {some: 'data'},
+                expected = 'test string',
+                actual;
 
+            $httpBackend
+                .expectPOST(url, data)
+                .respond(expected);
+
+            api.post(url, data).then(function(response) {
+                actual = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(actual.data).toBe(expected);
+        });
+
+        it('должен вызывать обработчик ошибок при сбое', function(){
+            var url = '/test/url',
+                errorHandler,
+                data = {some: 'data'};
+
+            errorHandler = jasmine.createSpy('errorHandler');
+            api.setErrorHandler(errorHandler);
+
+            $httpBackend
+                .expectPOST(url, data)
+                .respond(404);
+
+            api.post(url, data);
+
+            $httpBackend.flush();
+
+            expect(errorHandler).toHaveBeenCalled();
+        });
+    });
+
+    describe('Метод remove()', function() {
+        it('должен вызывать URL и получать ответ', function(){
+            var url = '/test/url',
+                expected = 'test string',
+                actual;
+
+            $httpBackend
+                .expectDELETE(url)
+                .respond(expected);
+
+            api.remove(url).then(function(response) {
+                actual = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(actual.data).toBe(expected);
+        });
+
+        it('должен вызывать обработчик ошибок при сбое', function(){
+            var url = '/test/url',
+                errorHandler;
+
+            errorHandler = jasmine.createSpy('errorHandler');
+            api.setErrorHandler(errorHandler);
+
+            $httpBackend
+                .expectDELETE(url)
+                .respond(404);
+
+            api.remove(url);
+
+            $httpBackend.flush();
+
+            expect(errorHandler).toHaveBeenCalled();
+        });
+    });
+
+    describe('Метод put()', function() {
+        it('должен отправлять данные и принимать ответ', function(){
+            var url = '/test/url',
+                data = {some: 'data'},
+                expected = 'test string',
+                actual;
+
+            $httpBackend
+                .expectPUT(url, data)
+                .respond(expected);
+
+            api.put(url, data).then(function(response) {
+                actual = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(actual.data).toBe(expected);
+        });
+
+        it('должен вызывать обработчик ошибок при сбое', function(){
+            var url = '/test/url',
+                errorHandler,
+                data = {some: 'data'};
+
+            errorHandler = jasmine.createSpy('errorHandler');
+            api.setErrorHandler(errorHandler);
+
+            $httpBackend
+                .expectPUT(url, data)
+                .respond(404);
+
+            api.put(url, data);
+
+            $httpBackend.flush();
+
+            expect(errorHandler).toHaveBeenCalled();
+        });
+    });
 });
