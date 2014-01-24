@@ -22,6 +22,10 @@ angular.module('app.dal.api', [])
             return $q.reject(response);
         };
 
+        Api.setErrorHandler = function(handler) {
+            errorHandler = handler;
+        }
+
         /**
          * Generic GET method call
          * @param name
