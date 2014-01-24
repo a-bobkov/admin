@@ -4,17 +4,20 @@ module.exports = function(config){
 
     files : [
         // библиотеки
-    	'app/js/lib/angular/angular.js',
-    	'app/js/lib/angular/angular-route.js',
-        'app/js/lib/angular/angular-mocks.js',
-        'app/js/lib/angular/i18n/angular-locale_ru-ru.js',
-        'app/js/lib/lodash/lodash.min.js',
+    	'web/js/lib/angular/angular.js',
+    	'web/js/lib/angular/angular-route.js',
+        'web/js/lib/angular/angular-mocks.js',
+        'web/js/lib/angular/i18n/angular-locale_ru-ru.js',
+        'web/js/lib/lodash/lodash.min.js',
 
         // хелперы
         'test/lib/helpers.js',
 
         // функционал
-        'app/js/dal/api.js'
+        'web/js/dal/api.js',
+
+        // тесты
+        'test/unit/**/*.js'
     ],
 
     exclude : [
