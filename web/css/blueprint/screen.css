@@ -469,7 +469,7 @@ TABLE.contacts { width:100%; }
 
 .actions A, .action {
   padding-left: 20px;
-  background: url(/images/default.png) no-repeat 0 0;
+  background: url(../../images/default.png) no-repeat 0 0;
   text-decoration: none;
   color: black;
   cursor: pointer;
@@ -482,43 +482,43 @@ TABLE.contacts { width:100%; }
 .actions INPUT {vertical-align: middle;}
 
 LI.delete A, A.delete {
-  background: url(/images/delete.png) no-repeat 0 0;
+  background: url(../../images/delete.png) no-repeat 0 0;
 }
 
 LI.edit A {
-  background: url(/images/edit.png) no-repeat 0 0;
+  background: url(../../images/edit.png) no-repeat 0 0;
 }
 
 LI.new A, A.new, .action.new {
-  background: url(/images/new.png) no-repeat 0 0;
+  background: url(../../images/new.png) no-repeat 0 0;
 }
 
 LI.publicate A {
-  background: url(/images/publicate.png) no-repeat 0 0;
+  background: url(../../images/publicate.png) no-repeat 0 0;
 }
 
 LI.prolong A {
-  background: url(/images/prolong.png) no-repeat 0 0;
+  background: url(../../images/prolong.png) no-repeat 0 0;
 }
 
 LI.close A {
-  background: url(/images/close.png) no-repeat 0 0;
+  background: url(../../images/close.png) no-repeat 0 0;
 }
 
 LI.switch A {
-  background: url(/images/switch.png) no-repeat 0 0;
+  background: url(../../images/switch.png) no-repeat 0 0;
 }
 
 LI.pricelist A {
-  background: url(/images/pricelist_generate.png) no-repeat 0 0;
+  background: url(../../images/pricelist_generate.png) no-repeat 0 0;
 }
 
 LI.unblock A {
-  background: url(/images/unlock.png) no-repeat 0 0;
+  background: url(../../images/unlock.png) no-repeat 0 0;
 }
 
 LI.excel A {
-  background: url(/images/excel.png) no-repeat 0 20%;
+  background: url(../../images/excel.png) no-repeat 0 20%;
 }
 
 UL.report {
@@ -711,7 +711,7 @@ DIV.photo-load {
 }
 
 .photo-load img.progress {
-  background: url(/images/progress.gif) no-repeat;
+  background: url(../../images/progress.gif) no-repeat;
 	background-position: 100% 0;
 	vertical-align: middle;
 }
