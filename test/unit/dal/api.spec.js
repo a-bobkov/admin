@@ -132,15 +132,26 @@ describe('У объекта app.dal.api', function() {
     });
 
     describe('Метод post()', function() {
-        it('должен отправлять данные и принимать ответ', function(){
+        it('должен возвращать отправленные данные, а также присвоенный id', function(){
             var url = '/test/url',
-                data = {some: 'data'},
-                expected = 'test string',
+                data = {
+                    one: 'data',
+                    two: 'other data'
+                },
+                expected = {
+                    id:  '999', 
+                    one: 'data',
+                    two: 'other data',
+                    ext: 'extra data'
+                },
                 actual;
 
             $httpBackend
                 .expectPOST(url, data)
-                .respond(expected);
+                .respond({
+                    status: 'success',
+                    data: expected
+                });
 
             Api.post(url, data).then(function(response) {
                 actual = response;
@@ -148,13 +159,22 @@ describe('У объекта app.dal.api', function() {
 
             $httpBackend.flush();
 
-            expect(actual.data).toBe(expected);
+            expect(actual.id).toBe(expected.id);
+
+            var key;
+            for (key in data) {
+                expect(actual[key]).toBe(expected[key]);
+            }
+
         });
 
-        it('должен вызывать обработчик ошибок при сбое', function(){
+        it('должен вызывать обработчик ошибок если код ответа не 2xx', function(){
             var url = '/test/url',
-                errorHandler,
-                data = {some: 'data'};
+                data = {
+                    one: 'data',
+                    two: 'other data'
+                },
+                errorHandler;
 
             errorHandler = jasmine.createSpy('errorHandler');
             Api.setErrorHandler(errorHandler);
@@ -169,6 +189,97 @@ describe('У объекта app.dal.api', function() {
 
             expect(errorHandler).toHaveBeenCalled();
         });
+
+        it('должен возвращать сообщение об ошибке при отсутствии параметра status в ответе', function(){
+            var url = '/test/url',
+                data = {
+                    one: 'data',
+                    two: 'other data'
+                },
+                message;
+
+            $httpBackend
+                .expectPOST(url, data)
+                .respond({});
+
+            Api.post(url, data).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Ответ сервера не соответствует формату JSend');
+        });
+
+        it('должен возвращать сообщение об ошибке при неверном значении status в ответе', function(){
+            var url = '/test/url',
+                data = {
+                    one: 'data',
+                    two: 'other data'
+                },
+                message;
+
+            $httpBackend
+                .expectPOST(url, data)
+                .respond({ status: 123 });
+
+            Api.post(url, data).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Сервер возвратил некорректный статус ответа: 123');
+        });
+
+        it('должен возвращать сообщение об ошибке если status="error"', function(){
+            var url = '/test/url',
+                data = {
+                    one: 'data',
+                    two: 'other data'
+                },
+                message;
+
+            $httpBackend
+                .expectPOST(url, data)
+                .respond({
+                    status: 'error',
+                    message: 'На сервере ошибка'
+                });
+
+            Api.post(url, data).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Сервер возвратил ошибку: На сервере ошибка');
+        });
+
+        it('должен возвращать сообщение об ошибке при отсутствии параметра data', function(){
+            var url = '/test/url',
+                data = {
+                    one: 'data',
+                    two: 'other data'
+                },
+                message;
+
+            $httpBackend
+                .expectPOST(url, data)
+                .respond({
+                    status: 'success'
+                });
+
+            Api.post(url, data).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Ответ сервера не содержит данных');
+        });
+
+
     });
 
     describe('Метод remove()', function() {
