@@ -78,6 +78,21 @@ angular.module('app.dal.api', [])
         };
 
         /**
+         * Generic PUT method call
+         * @param name
+         * @param params
+         * @returns HttpPromise
+         */
+        Api.put = function(name, data) {
+            return $http({
+                method: 'PUT',
+                url: options.apiUrl + name,
+                data: data,
+                withCredentials: true
+            }).then(responseHandler, errorHandler);
+        };
+
+        /**
          * Generic DELETE method call
          * @param name
          * @param params
@@ -85,16 +100,6 @@ angular.module('app.dal.api', [])
          */
         Api.remove = function(name, params) {
             return $http['delete'](options.apiUrl + name, {withCredentials: true, params: params}).then(null,errorHandler);
-        };
-
-        /**
-         * Generic PUT method call
-         * @param name
-         * @param params
-         * @returns HttpPromise
-         */
-        Api.put = function(name, params) {
-            return $http.put(options.apiUrl+name, params, {withCredentials: true}).then(null,errorHandler);
         };
 
         return Api;
