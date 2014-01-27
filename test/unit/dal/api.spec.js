@@ -134,17 +134,20 @@ describe('У объекта app.dal.api', function() {
     describe('Метод post()', function() {
         it('должен возвращать отправленные данные, а также присвоенный id', function(){
             var url = '/test/url',
-                data = {
-                    one: 'data',
-                    two: 'other data'
-                },
-                expected = {
-                    id:  '999', 
-                    one: 'data',
-                    two: 'other data',
-                    ext: 'extra data'
-                },
+                data,
+                expected,
                 actual;
+
+            data = {
+                one: 'data',
+                two: 'other data'
+            };
+
+            expected = angular.extend(data, {
+                id:  '999',
+                ext: 'extra data'
+
+            });
 
             $httpBackend
                 .expectPOST(url, data)
