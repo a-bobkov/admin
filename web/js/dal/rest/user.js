@@ -10,18 +10,49 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
  *
  * One common rule: "one endpoint - one method"
  */
-.factory('UserApi', function($q, Api){
+.factory('UserApi', function($q, Api) {
     var UserApi = {};
 
     var errorHandler = function(response) {
-        return $q.reject(response.data.error_code);
+        if (typeof response === 'string') {             // пришла строка с ошибкой из api.responseHandler
+            return response;
+        } else {
+            return $q.reject(response.data.error_code);     // пришел объект с ошибкой из api.errorHandler
+        }
+        return $q.reject(response);
     };
 
-    var responseHandler = function(response) {
-        return response.data.result;
+    var responseHandlerUser = function(response, id) {
+        var errorMessage,
+            user = response.user;
+
+        if (typeof user === 'undefined') {
+            errorMessage = 'Ответ сервера не содержит данных пользователя';
+        }
+
+        if (errorMessage) {
+            return $q.reject(errorMessage);
+        }
+
+        return user;
     }
 
-    Api.setErrorHandler = function(handler) {
+    var responseHandlerUsers = function(response) {
+        var errorMessage,
+            users = response.users;
+
+        if (typeof users === 'undefined') {
+            errorMessage = 'Ответ сервера не содержит данных пользователей';
+        }
+
+        if (errorMessage) {
+            return $q.reject(errorMessage);
+        }
+
+        return users;
+    }
+
+    UserApi.setErrorHandler = function(handler) {
         errorHandler = handler;
     }
 
@@ -30,7 +61,7 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.get = function(id) {
-        return Api.get('/users/' + id).then(responseHandler, errorHandler);
+        return Api.get('/users/' + id).then(responseHandlerUser, errorHandler);
     };
 
     /**
@@ -48,7 +79,7 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.create = function(data) {
-        return Api.post('/users/', data).then(responseHandler, errorHandler);
+        return Api.post('/users/', data).then(responseHandlerUser, errorHandler);
     };
 
     /**
@@ -56,7 +87,7 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.update = function(data) {
-        return Api.put('/users/' + data.id, data).then(responseHandler, errorHandler);
+        return Api.put('/users/' + data.id, data).then(responseHandlerUser, errorHandler);
     };
 
     /**
@@ -64,7 +95,7 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.remove = function(id) {
-        return Api.remove('/users/' + id).then(responseHandler, errorHandler);
+        return Api.remove('/users/' + id).then(null, errorHandler);
     };
 
     return UserApi;
