@@ -439,27 +439,9 @@ describe('У объекта app.dal.api', function() {
         });
     });
 
-    xdescribe('Метод remove()', function() {
-        it('должен вызывать URL и получать ответ', function(){
-            var url = '/test/url',
-                expected = 'test string',
-                actual;
-
-            $httpBackend
-                .expectDELETE(url)
-                .respond(expected);
-
-            Api.remove(url).then(function(response) {
-                actual = response;
-            });
-
-            $httpBackend.flush();
-
-            expect(actual.data).toBe(expected);
-        });
-
-        it('должен вызывать обработчик ошибок при сбое', function(){
-            var url = '/test/url',
+    describe('Метод remove()', function() {
+        it('должен вызывать обработчик ошибок если код ответа не 2xx', function(){
+            var url = '/api2/users/999',
                 errorHandler;
 
             errorHandler = jasmine.createSpy('errorHandler');
@@ -475,6 +457,99 @@ describe('У объекта app.dal.api', function() {
 
             expect(errorHandler).toHaveBeenCalled();
         });
-    });
 
+        it('должен возвращать сообщение об ошибке при отсутствии параметра status в ответе', function(){
+            var url = '/api2/users/1',
+                message;
+
+            $httpBackend
+                .expectDELETE(url)
+                .respond({});
+
+            Api.remove(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Ответ сервера не соответствует формату JSend');
+        });
+
+        it('должен возвращать сообщение об ошибке при неверном значении status в ответе', function(){
+            var url = '/api2/users/1',
+                message;
+
+            $httpBackend
+                .expectDELETE(url)
+                .respond({ status: 123 });
+
+            Api.remove(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Сервер возвратил некорректный статус ответа: 123');
+        });
+
+        it('должен возвращать сообщение об ошибке если status="error"', function(){
+            var url = '/api2/users/1',
+                message;
+
+            $httpBackend
+                .expectDELETE(url)
+                .respond({
+                    status: 'error',
+                    message: 'На сервере ошибка'
+                });
+
+            Api.remove(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Сервер возвратил ошибку: На сервере ошибка');
+        });
+
+        it('должен возвращать сообщение об ошибке при отсутствии параметра data', function(){
+            var url = '/api2/users/1',
+                message;
+
+            $httpBackend
+                .expectDELETE(url)
+                .respond({
+                    status: 'success'
+                });
+
+            Api.remove(url).then(null, function(response) {
+                message = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(message).toBe('Ответ сервера не содержит данных');
+        });
+
+        it('должен возвращать null в качестве данных', function(){
+            var url = '/api2/users/1',
+                expected = null,
+                actual;
+
+            $httpBackend
+                .expectDELETE(url)
+                .respond({
+                    status: 'success',
+                    data: expected
+                });
+
+            Api.remove(url).then(function(response) {
+                actual = response;
+            });
+
+            $httpBackend.flush();
+
+            expect(actual).toBe(expected);
+        });
+    });
 });
