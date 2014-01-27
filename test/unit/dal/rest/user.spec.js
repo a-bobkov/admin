@@ -3,8 +3,8 @@
 describe('У объекта app.dal.rest.user', function() {
     var $rootScope,
         $q,
-        userApi,
-        api;
+        UserApi,
+        Api;
 
     beforeEach(function() {
         module('app.dal.rest.user');
@@ -12,8 +12,8 @@ describe('У объекта app.dal.rest.user', function() {
         inject(function(_$rootScope_, _$q_, _UserApi_, _Api_) {
             $rootScope = _$rootScope_;
             $q = _$q_;
-            userApi = _UserApi_;
-            api = _Api_;
+            UserApi = _UserApi_;
+            Api = _Api_;
         });
     });
 
@@ -23,19 +23,19 @@ describe('У объекта app.dal.rest.user', function() {
             var expected = 'test',
                 actual;
 
-            spyOn(api, 'get').andReturn($q.when({
+            spyOn(Api, 'get').andReturn($q.when({
                 data: {
                     result: expected
                 }
             }));
 
-            userApi.get(1).then(function(respond) {
+            UserApi.get(1).then(function(respond) {
                 actual = respond;
             });
 
             $rootScope.$digest();
 
-            expect(api.get).toHaveBeenCalledWith("/users/1");
+            expect(Api.get).toHaveBeenCalledWith("/users/1");
             expect(actual).toBe(expected);
         });
 
@@ -43,19 +43,19 @@ describe('У объекта app.dal.rest.user', function() {
             var expected = 404,
                 actual;
 
-            spyOn(api, 'get').andReturn($q.reject({
+            spyOn(Api, 'get').andReturn($q.reject({
                 data: {
                     error_code: expected
                 }
             }));
 
-            userApi.get(1).then(null, function(respond) {
+            UserApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
             $rootScope.$digest();
 
-            expect(api.get).toHaveBeenCalledWith("/users/1");
+            expect(Api.get).toHaveBeenCalledWith("/users/1");
             expect(actual).toBe(expected);
         });
 
