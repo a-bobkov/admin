@@ -146,14 +146,15 @@ describe('У объекта app.dal.api', function() {
             expected = angular.extend(data, {
                 id:  '999',
                 ext: 'extra data'
-
             });
 
             $httpBackend
                 .expectPOST(url, data)
                 .respond({
                     status: 'success',
-                    data: expected
+                    data: {
+                        user: expected
+                    }
                 });
 
             Api.post(url, data).then(function(response) {
@@ -162,11 +163,11 @@ describe('У объекта app.dal.api', function() {
 
             $httpBackend.flush();
 
-            expect(actual.id).toBe(expected.id);
+            expect(actual.user.id).toBe(expected.id);
 
             var key;
             for (key in data) {
-                expect(actual[key]).toBe(expected[key]);
+                expect(actual.user[key]).toBe(expected[key]);
             }
 
         });
