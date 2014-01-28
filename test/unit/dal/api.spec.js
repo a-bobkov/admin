@@ -163,10 +163,8 @@ describe('У объекта app.dal.api', function() {
 
             $httpBackend.flush();
 
-            expect(actual.user.id).toBe(expected.id);
-
             var key;
-            for (key in data) {
+            for (key in expected) {
                 expect(actual.user[key]).toBe(expected[key]);
             }
 
@@ -433,7 +431,7 @@ describe('У объекта app.dal.api', function() {
             $httpBackend.flush();
 
             var key;
-            for (key in data) {
+            for (key in expected) {
                 expect(actual.user[key]).toBe(expected[key]);
             }
         });
@@ -531,7 +529,7 @@ describe('У объекта app.dal.api', function() {
             expect(message).toBe('Ответ сервера не содержит данных');
         });
 
-        it('должен возвращать null в качестве данных', function(){
+        it('должен принимать null в качестве данных', function(){
             var url = '/api2/users/1',
                 expected = null,
                 actual;
