@@ -42,8 +42,6 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
 
     var responseHandlerUser = responseHandlerConstructor('user');
 
-    var responseHandlerUsers = responseHandlerConstructor('users')
-
     UserApi.setErrorHandler = function(handler) {
         errorHandler = handler;
     }
@@ -63,7 +61,8 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.query = function(params) {
-        return Api.get('/users/', params || {}).then(responseHandler, errorHandler);
+        // todo: непокрыто тестами, может не работать
+        return Api.get('/users/', params || {}).then(responseHandlerConstructor('users'), errorHandler);
     };
 
     /**
