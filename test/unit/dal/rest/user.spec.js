@@ -448,4 +448,66 @@ describe('У объекта app.dal.rest.user', function() {
             expect(actual).toBe(500);
         });
     });
+
+    describe('Метод remove(id)', function() {
+
+        it('должен вызывать Api и возвращать null', function() {
+            var id = 1,
+                expected = null,
+                actual;
+
+            spyOn(Api, 'remove').andReturn($q.when(
+                expected
+            ));
+
+            UserApi.remove(id).then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(Api.remove).toHaveBeenCalledWith("/users/1");
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
+            var id = 1,
+                expected = "Сообщение об ошибке",
+                actual;
+
+            spyOn(Api, 'remove').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.remove(id).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
+            var id = 1,
+                expected = {
+                    data: {
+                        error_code: 500
+                    }
+                },
+                actual;
+
+            spyOn(Api, 'remove').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.remove(id).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(500);
+        });
+    });
 });
