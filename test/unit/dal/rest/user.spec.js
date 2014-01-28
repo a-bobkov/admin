@@ -20,13 +20,11 @@ describe('У объекта app.dal.rest.user', function() {
     describe('Метод get(id)', function() {
 
         it('Должен создавать URL, вызывать Api и возвращать полученные данные', function() {
-            var expected = 'test',
+            var expected = {id: 1, name: 'имя пользователя'},
                 actual;
 
             spyOn(Api, 'get').andReturn($q.when({
-                data: {
-                    result: expected
-                }
+                user: expected
             }));
 
             UserApi.get(1).then(function(respond) {
