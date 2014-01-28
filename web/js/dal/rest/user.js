@@ -112,7 +112,8 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.update = function(data) {
-        return Api.put('/users/' + data.id, data).then(responseHandlerUser, errorHandler);
+        var responseHandler = responseHandlerConstructor('user', data.id);
+        return Api.put('/users/' + data.id, data).then(responseHandler, errorHandler);
     };
 
     /**

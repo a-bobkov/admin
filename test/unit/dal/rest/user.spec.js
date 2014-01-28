@@ -323,4 +323,129 @@ describe('У объекта app.dal.rest.user', function() {
             expect(actual).toBe(500);
         });
     });
+
+    describe('Метод update(data)', function() {
+
+        it('должен вызывать Api и возвращать полученные данные без секции user', function() {
+            var data = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'put').andReturn($q.when({
+                user: expected
+            }));
+
+            UserApi.update(data).then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(Api.put).toHaveBeenCalledWith("/users/1", data);
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать сообщение об ошибке при отсутствии в ответе секции user', function(){
+            var data = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'put').andReturn($q.when(
+                expected
+            ));
+
+            UserApi.update(data).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe('Ответ сервера не содержит секции user');
+        });
+
+        it('должен возвращать сообщение об ошибке при получении данных о другом пользователе', function(){
+            var data = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'put').andReturn($q.when({
+                user: {
+                    id: 5,
+                    name: 'имя другого пользователя'
+                }
+            }));
+
+            UserApi.update(data).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe('Ответ сервера не содержит данных требуемого пользователя 1');
+        });
+
+        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
+            var data = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                expected = "Сообщение об ошибке",
+                actual;
+
+            spyOn(Api, 'put').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.update(data).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
+            var data = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                expected = {
+                    data: {
+                        error_code: 500
+                    }
+                },
+                actual;
+
+            spyOn(Api, 'put').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.update(data).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(500);
+        });
+    });
 });
