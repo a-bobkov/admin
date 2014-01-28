@@ -41,6 +41,25 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
 
     var responseHandlerUser = responseHandlerConstructor('user');
 
+    var responseHandlerUsers = function (response) {
+        var errorMessage,
+            data = response['users'];
+
+        var toClass = {}.toString;
+
+        if (typeof data === 'undefined') {
+            errorMessage = 'Ответ сервера не содержит секции users';
+        } else if (toClass.call(data) !== '[object Array]') {
+            errorMessage = 'Ответ сервера не содержит массив в секции users';
+        }
+
+        if (errorMessage) {
+            return $q.reject(errorMessage);
+        }
+
+        return data;
+    };
+
     UserApi.setErrorHandler = function(handler) {
         errorHandler = handler;
     }
@@ -60,7 +79,7 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.query = function(params) {
-        return Api.get('/users/', params || {}).then(responseHandlerConstructor('users'), errorHandler);
+        return Api.get('/users/', params || {}).then(responseHandlerUsers, errorHandler);
     };
 
     /**
