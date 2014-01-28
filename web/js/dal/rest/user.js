@@ -22,21 +22,6 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
         return $q.reject(response);
     };
 
-    var responseHandlerUser = function(response, id) {
-        var errorMessage,
-            user = response.user;
-
-        if (typeof user === 'undefined') {
-            errorMessage = 'Ответ сервера не содержит данных пользователя';
-        }
-
-        if (errorMessage) {
-            return $q.reject(errorMessage);
-        }
-
-        return user;
-    }
-
     var responseHandlerUsers = function(response) {
         var errorMessage,
             users = response.users;
