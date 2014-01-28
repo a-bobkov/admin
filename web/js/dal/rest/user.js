@@ -29,6 +29,8 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
 
             if (typeof data === 'undefined') {
                 errorMessage = 'Ответ сервера не содержит секции ' + sectionName;
+            } else if (sectionName === 'users' && ({}.toString.call(data)) !== '[object Array]') {
+                errorMessage = 'Ответ сервера не содержит массив в секции users';
             } else if (id && id !== data.id) {
                 errorMessage = 'Ответ сервера не содержит данных требуемого пользователя ' + id;
             }
@@ -40,44 +42,6 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
             return data;
         }
     };
-
-    var responseHandlerUser = function (response) {
-        var errorMessage,
-            data = response['user'];
-
-        if (typeof data === 'undefined') {
-            errorMessage = 'Ответ сервера не содержит секции users';
-        }
-
-        if (errorMessage) {
-            return $q.reject(errorMessage);
-        }
-
-        return data;
-    };
-
-    var responseHandlerUsers = function (response) {
-        var errorMessage,
-            data = response['users'];
-
-        var toClass = {}.toString;
-
-        if (typeof data === 'undefined') {
-            errorMessage = 'Ответ сервера не содержит секции users';
-        } else if (toClass.call(data) !== '[object Array]') {
-            errorMessage = 'Ответ сервера не содержит массив в секции users';
-        }
-
-        if (errorMessage) {
-            return $q.reject(errorMessage);
-        }
-
-        return data;
-    };
-
-    UserApi.setErrorHandler = function(handler) {
-        errorHandler = handler;
-    }
 
     /**
      * @param {Number} id
@@ -95,7 +59,8 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.query = function(params) {
-        return Api.get('/users/', params || {}).then(responseHandlerUsers, errorHandler);
+        var responseHandler = responseHandlerConstructor('users');
+        return Api.get('/users/', params || {}).then(responseHandler, errorHandler);
     };
 
     /**
