@@ -19,8 +19,11 @@ describe('У объекта app.dal.rest.user', function() {
 
     describe('Метод get(id)', function() {
 
-        it('Должен создавать URL, вызывать Api и возвращать полученные данные', function() {
-            var expected = {id: 1, name: 'имя пользователя'},
+        it('должен вызывать Api и возвращать полученные данные без секции user', function() {
+            var expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
                 actual;
 
             spyOn(Api, 'get').andReturn($q.when({
@@ -37,15 +40,16 @@ describe('У объекта app.dal.rest.user', function() {
             expect(actual).toBe(expected);
         });
 
-        it('Должен корерктно обрабатывать ошибку', function() {
-            var expected = 404,
+        it('должен возвращать сообщение об ошибке при отсутствии секции user', function(){
+            var expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
                 actual;
 
-            spyOn(Api, 'get').andReturn($q.reject({
-                data: {
-                    error_code: expected
-                }
-            }));
+            spyOn(Api, 'get').andReturn($q.when(
+                expected
+            ));
 
             UserApi.get(1).then(null, function(respond) {
                 actual = respond;
@@ -53,8 +57,45 @@ describe('У объекта app.dal.rest.user', function() {
 
             $rootScope.$digest();
 
-            expect(Api.get).toHaveBeenCalledWith("/users/1");
+            expect(actual).toBe('Ответ сервера не содержит секции user');
+        });
+
+        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
+            var expected = "Сообщение об ошибке",
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.get(1).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
             expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
+            var expected = {
+                    data: {
+                        error_code: 500
+                    }
+                },
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.get(1).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(500);
         });
 
     });
