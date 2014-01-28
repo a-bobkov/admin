@@ -207,4 +207,97 @@ describe('У объекта app.dal.rest.user', function() {
         });
     });
 
+    describe('Метод create(data)', function() {
+
+        it('должен вызывать Api и возвращать полученные данные без секции user', function() {
+            var data = {
+                    name: 'имя пользователя'
+                },
+                expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'post').andReturn($q.when({
+                user: expected
+            }));
+
+            UserApi.create(data).then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(Api.post).toHaveBeenCalledWith("/users/", data);
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать сообщение об ошибке при отсутствии секции user', function(){
+            var data = {
+                    name: 'имя пользователя'
+                },
+                expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'post').andReturn($q.when(
+                expected
+            ));
+
+            UserApi.create(data).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe('Ответ сервера не содержит секции user');
+        });
+
+        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
+            var data = {
+                    name: 'имя пользователя'
+                },
+                expected = "Сообщение об ошибке",
+                actual;
+
+            spyOn(Api, 'post').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.create(data).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
+            var data = {
+                    name: 'имя пользователя'
+                },
+                expected = {
+                    data: {
+                        error_code: 500
+                    }
+                },
+                actual;
+
+            spyOn(Api, 'post').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.create(data).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(500);
+        });
+    });
 });
