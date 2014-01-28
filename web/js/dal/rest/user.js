@@ -21,7 +21,7 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
         }
     };
 
-    var responseHandlerConstructor = function (sectionName) {
+    var responseHandlerConstructor = function (sectionName, id) {
 
         return function(response) {
             var errorMessage,
@@ -29,6 +29,8 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
 
             if (typeof data === 'undefined') {
                 errorMessage = 'Ответ сервера не содержит секции ' + sectionName;
+            } else if (id && id !== data.id) {
+                errorMessage = 'Ответ сервера не содержит данных требуемого пользователя ' + id;
             }
 
             if (errorMessage) {
@@ -39,7 +41,20 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
         }
     };
 
-    var responseHandlerUser = responseHandlerConstructor('user');
+    var responseHandlerUser = function (response) {
+        var errorMessage,
+            data = response['user'];
+
+        if (typeof data === 'undefined') {
+            errorMessage = 'Ответ сервера не содержит секции users';
+        }
+
+        if (errorMessage) {
+            return $q.reject(errorMessage);
+        }
+
+        return data;
+    };
 
     var responseHandlerUsers = function (response) {
         var errorMessage,
@@ -69,7 +84,8 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.get = function(id) {
-        return Api.get('/users/' + id).then(responseHandlerUser, errorHandler);
+        var responseHandler = responseHandlerConstructor('user', id);
+        return Api.get('/users/' + id).then(responseHandler, errorHandler);
     };
 
     /**
@@ -87,7 +103,8 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.create = function(data) {
-        return Api.post('/users/', data).then(responseHandlerUser, errorHandler);
+        var responseHandler = responseHandlerConstructor('user');
+        return Api.post('/users/', data).then(responseHandler, errorHandler);
     };
 
     /**

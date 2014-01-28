@@ -60,6 +60,29 @@ describe('У объекта app.dal.rest.user', function() {
             expect(actual).toBe('Ответ сервера не содержит секции user');
         });
 
+        it('должен возвращать сообщение об ошибке при получении данных о другом пользователе', function(){
+            var expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.when({
+                user: {
+                    id: 5,
+                    name: 'имя другого пользователя'
+                }
+            }));
+
+            UserApi.get(1).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe('Ответ сервера не содержит данных требуемого пользователя 1');
+        });
+
         it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
             var expected = "Сообщение об ошибке",
                 actual;
