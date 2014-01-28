@@ -22,35 +22,27 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
         return $q.reject(response);
     };
 
-    var responseHandlerUser = function(response, id) {
-        var errorMessage,
-            user = response.user;
+    var responseHandlerConstructor = function (sectionName) {
 
-        if (typeof user === 'undefined') {
-            errorMessage = 'Ответ сервера не содержит данных пользователя';
+        return function(response) {
+            var errorMessage,
+                data = response[sectionName];
+
+            if (typeof data === 'undefined') {
+                errorMessage = 'Ответ сервера не содержит секции ' + sectionName;
+            }
+
+            if (errorMessage) {
+                return $q.reject(errorMessage);
+            }
+
+            return data;
         }
+    };
 
-        if (errorMessage) {
-            return $q.reject(errorMessage);
-        }
+    var responseHandlerUser = responseHandlerConstructor('user');
 
-        return user;
-    }
-
-    var responseHandlerUsers = function(response) {
-        var errorMessage,
-            users = response.users;
-
-        if (typeof users === 'undefined') {
-            errorMessage = 'Ответ сервера не содержит данных пользователей';
-        }
-
-        if (errorMessage) {
-            return $q.reject(errorMessage);
-        }
-
-        return users;
-    }
+    var responseHandlerUsers = responseHandlerConstructor('users')
 
     UserApi.setErrorHandler = function(handler) {
         errorHandler = handler;
