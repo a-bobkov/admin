@@ -14,8 +14,7 @@ module.exports = function(config){
         'test/lib/helpers.js',
 
         // функционал
-        'web/js/dal/api.js',
-        'web/js/dal/rest/user.js',
+        'web/js/dal/**/*.js',
 
         // тесты
         'test/unit/**/*.js'
