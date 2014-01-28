@@ -14,12 +14,11 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
     var UserApi = {};
 
     var errorHandler = function(response) {
-        if (typeof response === 'string') {             // пришла строка с ошибкой из api.responseHandler
-            return response;
+        if (typeof response === 'string') {
+            return $q.reject(response);                     // пришла строка с ошибкой из api.responseHandler
         } else {
             return $q.reject(response.data.error_code);     // пришел объект с ошибкой из api.errorHandler
         }
-        return $q.reject(response);
     };
 
     var responseHandlerConstructor = function (sectionName) {
@@ -61,7 +60,6 @@ angular.module('app.dal.rest.user', ['app.dal.api'])
      * @returns {Promise}
      */
     UserApi.query = function(params) {
-        // todo: непокрыто тестами, может не работать
         return Api.get('/users/', params || {}).then(responseHandlerConstructor('users'), errorHandler);
     };
 
