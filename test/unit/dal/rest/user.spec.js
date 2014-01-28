@@ -97,7 +97,114 @@ describe('У объекта app.dal.rest.user', function() {
 
             expect(actual).toBe(500);
         });
+    });
 
+    describe('Метод query()', function() {
+
+        it('должен вызывать Api и возвращать полученные данные без секции users', function() {
+            var expected = [
+                    {
+                        id: 1,
+                        name: 'имя пользователя'
+                    },
+                    {
+                        id: 3,
+                        name: 'имя другого пользователя'
+                    }
+                ],
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.when({
+                users: expected
+            }));
+
+            UserApi.query().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(Api.get).toHaveBeenCalledWith("/users/", {});
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать сообщение об ошибке, если полученные данные - не массив', function(){
+            var expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.when({
+                users: expected
+            }));
+
+            UserApi.query().then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe('Ответ сервера не содержит массив в секции users');
+        });
+
+        it('должен возвращать сообщение об ошибке при отсутствии секции users', function(){
+            var expected = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.when(
+                expected
+            ));
+
+            UserApi.query().then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe('Ответ сервера не содержит секции users');
+        });
+
+        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
+            var expected = "Сообщение об ошибке",
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.query().then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(expected);
+        });
+
+        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
+            var expected = {
+                    data: {
+                        error_code: 500
+                    }
+                },
+                actual;
+
+            spyOn(Api, 'get').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.query().then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(500);
+        });
     });
 
 });
