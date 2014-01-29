@@ -53,19 +53,23 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         return _.find(this.getAll(), {id: id});
     };
 
-    /**
-     * todo: Надо покрыть тестами случаи:
-     *   - отсутствие идентификатора в коллекции;
-     *   - сбой при запросе на удаление на сервере
-     * @param id
-     */
+    var errorHandler = function(response) {
+        if (typeof response === 'string') {
+            return response;                     // пришла строка с ошибкой из RESTapi.responseHandler
+        } else {
+            return "Сервер вернул ошибку: " + error_code;     // пришел объект с ошибкой из RESTapi.errorHandler
+        }
+    };
+
     Collection.prototype.remove = function(id) {
         var collection = this.getAll(),
             idx = _.findIndex(collection, {id: id});
         if (-1 !== idx) {
             this.getRestApiProvider().remove(id).then(function(response){
                 collection.splice(idx, 1);
-            });
+            }, errorHandler);
+        } else {
+            return "В памяти не найден требуемый элемент " + id;
         }
     };
 
@@ -87,7 +91,10 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 
     User.prototype.remove = function () {
         if (typeof this.id !== 'undefined') {
-            users.remove(this.id);
+            var message = users.remove(this.id);
+            if (message) {
+                // здесь должна быть визуализация диалогового окна с полученным собщением и кнопкой "Осознал"
+            }
         }
     }
 

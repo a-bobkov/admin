@@ -1,14 +1,18 @@
 'use strict';
 
 describe('Сервис users из модуля app.dal.entities.user', function() {
-    var users,
+    var $rootScope,
+        $q,
+        users,
         User,
         UserApi;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_users_, _User_, _UserApi_)  {
+        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_)  {
+            $rootScope = _$rootScope_;
+            $q = _$q_;
             users = _users_;
             User = _User_;
             UserApi = _UserApi_;
@@ -140,19 +144,43 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
 
-            // Fixme: Наверно можно написать лучше?
-            spyOn(UserApi, 'remove').andReturn({
-                then: function(successCallback) {
-                    successCallback();
-                }
-            });
+            spyOn(UserApi, 'remove').andReturn($q.when(null));
 
             users.remove(2);
 
+            $rootScope.$digest();
+
             expect(users.getAll().length).toEqual(2);
             expect(UserApi.remove).toHaveBeenCalled()
-            expect(UserApi.remove.calls[0].args[0]).toEqual(2)
+            expect(UserApi.remove).toHaveBeenCalledWith(2);
         });
+
+        it('Удаление элемента: выдавать ошибку, если элемент не найден в коллекции', function() {
+            var actual;
+
+            actual = users.remove(5);
+
+            expect(actual).toBe('В памяти не найден требуемый элемент 5');
+        });
+
+        it('Удаление элемента: выдавать ошибку, если сервер вернул строку с ошибкой', function() {
+            var id = 1,
+                expected = "Сообщение об ошибке",
+                actual;
+
+            spyOn(UserApi, 'remove').andReturn($q.reject(
+                expected
+            ));
+
+            UserApi.remove(id).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBe(expected);
+        });
+
     });
 });
 
