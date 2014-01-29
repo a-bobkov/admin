@@ -62,36 +62,68 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
     describe('хранит коллекцию объектов, для чего умеет', function() {
         beforeEach(function() {
-            UserApi.query = function() {
-                return [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ];
-            }
         });
 
         it('запрашивать данные коллекции с сервера один раз', function() {
-            spyOn(UserApi, 'query');
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
 
             users.getAll();
+            $rootScope.$digest();
+
             users.getAll();
+            $rootScope.$digest();
 
             expect(UserApi.query).toHaveBeenCalled();
             expect(UserApi.query.calls.length).toEqual(1);
         });
 
         it('иметь возможность принудительно повторно запрашивать данные', function() {
-            spyOn(UserApi, 'query');
+            var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
 
             users.getAll();
-            users.load();
+            $rootScope.$digest();
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
 
             expect(UserApi.query).toHaveBeenCalled();
             expect(UserApi.query.calls.length).toEqual(2);
         });
 
         it('создавать коллекцию из полученных данных используя конструктор элементов коллекции', function() {
+            var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
             var items = users.getAll();
 
             _.forEach(items, function(item) {
@@ -100,43 +132,70 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('проверять наличие идентификатора у элементов коллекции', function() {
-            UserApi.query = function(param) {
-                return [
-                    {id: 1, name: 'Первый'},
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
                     {name: 'Без идентификатора'}
-                ];
-            };
+                ]
+            ));
 
-            expect( function () { users.getAll(); } )
-                .toThrow('Элемент коллекции {"name":"Без идентификатора"} не имеет параметра id.');
+            expect( function () {
+                users.load().then(function(respond) {
+                    actual = respond;
+                });
+                $rootScope.$digest();
+             }).toThrow('Элемент коллекции {"name":"Без идентификатора"} не имеет параметра id.');
         });
 
-        it('возвращать коллекцию объектов', function() {
+        it('возвращать массив объектов', function() {
+            var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
             this.addMatchers({
                 toBeArray: function () {
                     return Object.prototype.toString.call( this.actual ) === '[object Array]';
                 }
             });
 
-            var expected = users.getAll();
-            expect(expected).toBeArray();
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(actual).toBeArray();
         });
     });
 
     describe('должен управлять коллекцией объектов, для чего уметь', function() {
 
         beforeEach(function() {
-            UserApi.query = function() {
-                return [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ];
-            }
         });
 
         it('возвращать объект из коллекции', function() {
+            var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
+
             var user = users.get(1);
+
             expect(user instanceof User).toBeTruthy();
             expect(user.id).toEqual(1);
             expect(user.name).toEqual('Первый');
@@ -145,7 +204,20 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
             var actual;
 
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
             spyOn(UserApi, 'remove').andReturn($q.when(null));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
 
             users.remove(2).then(function(respond) {
                 actual = respond;
@@ -158,8 +230,21 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             expect(UserApi.remove).toHaveBeenCalledWith(2);
         });
 
-        it('Удаление элемента: выдавать ошибку, если элемент не найден в коллекции', function() {
+        it('выдавать ошибку при удалении элемента, если элемент не найден в коллекции', function() {
             var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
 
             users.remove(5).then(null, function(respond) {
                 actual = respond;
@@ -171,18 +256,29 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('Удаление элемента: выдавать ошибку, если сервер вернул строку с ошибкой', function() {
-            var id = 1,
-                expected = "Сообщение об ошибке",
+            var expected = "Сообщение об ошибке",
                 actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
 
             spyOn(UserApi, 'remove').andReturn($q.reject(
                 expected
             ));
 
-            UserApi.remove(id).then(null, function(respond) {
+            users.load().then(function(respond) {
                 actual = respond;
             });
+            $rootScope.$digest();
 
+            users.remove(1).then(null, function(respond) {
+                actual = respond;
+            });
             $rootScope.$digest();
 
             expect(actual).toBe(expected);
@@ -192,43 +288,47 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 });
 
 describe('Сервис-конструктор User из модуля app.dal.entities.user умеет', function() {
-    var users,
+    var $rootScope,
+        $q,
+        users,
         User,
         UserApi;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_users_, _User_, _UserApi_)  {
+        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_)  {
+            $rootScope = _$rootScope_;
+            $q = _$q_;
             users = _users_;
             User = _User_;
             UserApi = _UserApi_;
         });
-
-        UserApi.query = function() {
-            return [
-                { id: 1, name: 'Первый' },
-                { id: 2, name: 'Второй' },
-                { id: 3, name: 'Третий' }
-            ];
-        }
     });
 
     it('удалять пользователя из коллекции', function() {
+        var actual;
 
-        var user = users.get(2);
+        spyOn(UserApi, 'query').andReturn($q.when(
+            [
+                { id: 1, name: 'Первый' },
+                { id: 2, name: 'Второй' },
+                { id: 3, name: 'Третий' }
+            ]
+        ));
 
-        // Fixme: Наверно можно написать лучше?
-        spyOn(UserApi, 'remove').andReturn({
-            then: function(successCallback) {
-                successCallback();
-            }
+        users.load().then(function(respond) {
+            actual = respond;
         });
-
+        $rootScope.$digest();
         expect(users.getAll().length).toEqual(3);
 
+        spyOn(UserApi, 'remove').andReturn($q.when(null));
+
+        var user = users.get(2);
         user.remove();
 
+        $rootScope.$digest();
         expect(users.getAll().length).toEqual(2);
     })
 });

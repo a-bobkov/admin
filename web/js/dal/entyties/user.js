@@ -31,6 +31,11 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         return this.restApiProvider;
     };
 
+    /**
+     * @param -
+     * @returns {Promise}
+     */
+
     Collection.prototype.load = function() {
         var ItemConstructor = this.getItemConstructor(),
             createItem = function(i){
@@ -39,7 +44,13 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
                 }
                 return _.extend(new ItemConstructor(), i);
             };
-        this.collection = _.collect(this.getRestApiProvider().query(), createItem);
+        var self = this;
+
+        return this.getRestApiProvider().query().then(function (response) {
+            self.collection = _.collect(response, createItem);
+            return self.collection;
+        });
+
     };
 
     Collection.prototype.getAll = function() {
@@ -55,9 +66,9 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 
     var errorHandler = function(response) {
         if (typeof response === 'string') {
-            return response;                     // пришла строка с ошибкой из RESTapi.responseHandler
+            return $q.reject(response);                              // пришла строка с ошибкой из RESTapi.responseHandler
         } else {
-            return "Сервер вернул ошибку: " + error_code;     // пришел объект с ошибкой из RESTapi.errorHandler
+            return $q.reject("Сервер вернул ошибку: " + error_code);     // пришел объект с ошибкой из RESTapi.errorHandler
         }
     };
 
