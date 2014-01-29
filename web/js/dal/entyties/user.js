@@ -31,6 +31,14 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         return this.restApiProvider;
     };
 
+    var errorHandler = function(response) {
+        if (typeof response === 'string') {
+            return $q.reject(response);                              // пришла строка с ошибкой из RESTapi.responseHandler
+        } else {
+            return $q.reject("Сервер вернул ошибку: " + error_code);     // пришел объект с ошибкой из RESTapi.errorHandler
+        }
+    };
+
     /**
      * @param -
      * @returns {Promise}
@@ -44,32 +52,32 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
                 }
                 return _.extend(new ItemConstructor(), i);
             };
-        var self = this;
 
+        var self = this;
         return this.getRestApiProvider().query().then(function (response) {
             self.collection = _.collect(response, createItem);
             return self.collection;
-        });
+        }, errorHandler);
 
     };
 
+    /**
+     * @param -
+     * @returns {Promise}
+     */
+
     Collection.prototype.getAll = function() {
         if (!this.collection) {
-            this.load();
+            var self = this;
+            return this.load().then(function (response) {
+                return self.collection;
+            }, errorHandler);
         }
-        return this.collection;
+        return $q.when(this.collection);
     };
 
     Collection.prototype.get = function(id) {
         return _.find(this.getAll(), {id: id});
-    };
-
-    var errorHandler = function(response) {
-        if (typeof response === 'string') {
-            return $q.reject(response);                              // пришла строка с ошибкой из RESTapi.responseHandler
-        } else {
-            return $q.reject("Сервер вернул ошибку: " + error_code);     // пришел объект с ошибкой из RESTapi.errorHandler
-        }
     };
 
     /**
@@ -78,7 +86,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
      */
 
     Collection.prototype.remove = function(id) {
-        var collection = this.getAll(),
+        var collection = this.collection,
             idx = _.findIndex(collection, {id: id});
 
         if (-1 === idx) {
