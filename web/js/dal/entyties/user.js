@@ -2,14 +2,12 @@
 
 angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 
-.factory('users', function(UserApi) {
-
-    var Collection = function () {},
-        collection;
-
+.factory('Collection', function() {
     /**
      * Реализация базовой функциональности для работы с коллекциями объектов
      */
+    var Collection = function () {};
+
     Collection.prototype.setItemConstructor = function(ItemConstructor) {
         this.ItemConstructor = ItemConstructor;
     };
@@ -70,6 +68,13 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
             });
         }
     };
+
+    return Collection;
+})
+
+.factory('users', function(Collection, UserApi) {
+
+    var collection;
 
     collection = new Collection;
     collection.setRestApiProvider(UserApi);
