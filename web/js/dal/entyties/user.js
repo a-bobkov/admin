@@ -2,7 +2,7 @@
 
 angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 
-.factory('Collection', function() {
+.factory('Collection', function($q) {
     /**
      * Реализация базовой функциональности для работы с коллекциями объектов
      */
@@ -61,15 +61,21 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         }
     };
 
+    /**
+     * @param {Number} id
+     * @returns {Promise}
+     */
+
     Collection.prototype.remove = function(id) {
         var collection = this.getAll(),
             idx = _.findIndex(collection, {id: id});
-        if (-1 !== idx) {
-            this.getRestApiProvider().remove(id).then(function(response){
+
+        if (-1 === idx) {
+            return $q.reject("В памяти не найден требуемый элемент " + id);
+        } else {
+            return this.getRestApiProvider().remove(id).then(function(response){
                 collection.splice(idx, 1);
             }, errorHandler);
-        } else {
-            return "В памяти не найден требуемый элемент " + id;
         }
     };
 

@@ -143,10 +143,13 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
+            var actual;
 
             spyOn(UserApi, 'remove').andReturn($q.when(null));
 
-            users.remove(2);
+            users.remove(2).then(function(respond) {
+                actual = respond;
+            });
 
             $rootScope.$digest();
 
@@ -158,7 +161,11 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('Удаление элемента: выдавать ошибку, если элемент не найден в коллекции', function() {
             var actual;
 
-            actual = users.remove(5);
+            users.remove(5).then(null, function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
 
             expect(actual).toBe('В памяти не найден требуемый элемент 5');
         });
