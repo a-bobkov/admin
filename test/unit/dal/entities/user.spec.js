@@ -144,9 +144,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             ));
 
             expect( function () {
-                users.load().then(function(respond) {
-                    actual = respond;
-                });
+                users.load();
                 $rootScope.$digest();
              }).toThrow('Элемент коллекции {"name":"Без идентификатора"} не имеет параметра id.');
         });
