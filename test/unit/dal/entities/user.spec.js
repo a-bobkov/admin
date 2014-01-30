@@ -173,14 +173,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
             expect(actual).toBeArray();
         });
-    });
 
-    describe('должен управлять коллекцией объектов, для чего уметь', function() {
-
-        beforeEach(function() {
-        });
-
-        xit('возвращать объект из коллекции', function() {      // не работает, так как надо переделать get на промисы
+        it('возвращать объект коллекции по id', function() {
             var actual;
 
             spyOn(UserApi, 'query').andReturn($q.when(
@@ -194,13 +188,160 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             users.load().then(function(respond) {
                 actual = respond;
             });
+
+            $rootScope.$digest();
+            var user = users.getById(3);
+            expect(user instanceof User).toBeTruthy();
+        });
+
+        it('возвращать индекс объекта коллекции по id', function() {
+            var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+            var idx = users.findIndex(3);
+            expect(users.collection[idx] instanceof User).toBeTruthy();
+        });
+    });
+
+    describe('должен управлять коллекцией объектов, для чего уметь', function() {
+
+        it('возвращать объект с сервера, обновляя данный элемент коллекции', function() {
+            var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+            var user = users.findIndex(3);
+            expect(user.ext).toBeUndefined();
+
+            spyOn(UserApi, 'get').andReturn($q.when(
+                { id: 3, name: 'Третий', ext: 'Ещё свойство' }
+            ));
+
+            users.get(3).then(function(respond) {
+                user = respond;
+            });
             $rootScope.$digest();
 
-            var user = users.get(1);
+            expect(user.ext).toEqual('Ещё свойство');
+        });
 
-            expect(user instanceof User).toBeTruthy();
-            expect(user.id).toEqual(1);
-            expect(user.name).toEqual('Первый');
+        it('выдавать ошибку, если требуемый элемент не найден в коллекции', function() {
+            var actual;
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            spyOn(UserApi, 'get').andReturn($q.when(
+                { id: 5, name: 'Пропущенный'}
+            ));
+
+            users.get(5).then(null, function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
+
+            expect(actual).toEqual('В коллекции не найден требуемый элемент: 5');
+        });
+
+        it('обновлять элемент в коллекции после получения подтверждения от сервера', function() {
+            var actual,
+                expected = {
+                    id: 2,
+                    name: 'Другой',
+                    ext: 'Extra'
+                };
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            spyOn(UserApi, 'update').andReturn($q.when(expected));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
+
+            var user = users.getById(2);
+            user.name = 'Другой';
+
+            users.save(user).then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
+            expect(UserApi.update).toHaveBeenCalled()
+            expect(actual).toEqualData(expected);
+        });
+
+        it('создавать элемент в коллекции после получения подтверждения от сервера', function() {
+            var actual,
+                expected = {
+                    id: 4,
+                    name: 'Другой',
+                    ext: 'Extra'
+                };
+
+            spyOn(UserApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            spyOn(UserApi, 'create').andReturn($q.when(expected));
+
+            users.load().then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
+            expect(users.collection.length).toEqual(3);
+
+            var user = new User (expected);
+
+            users.save(user).then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
+            expect(users.collection.length).toEqual(4);
         });
 
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
@@ -220,6 +361,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 actual = respond;
             });
             $rootScope.$digest();
+            expect(actual.length).toEqual(3);
 
             users.remove(2).then(function(respond) {
                 actual = respond;
@@ -257,7 +399,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
             $rootScope.$digest();
 
-            expect(actual).toBe('В памяти не найден требуемый элемент 5');
+            expect(actual).toBe('В коллекции не найден требуемый элемент: 5');
         });
 
         it('Удаление элемента: выдавать ошибку, если сервер вернул строку с ошибкой', function() {

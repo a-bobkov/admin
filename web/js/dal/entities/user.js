@@ -76,8 +76,70 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         return $q.when(this.collection);
     };
 
+    /**
+     * @param {Number} id
+     * @returns {User}
+     */
+
+    Collection.prototype.getById = function(id) {
+        return _.find(this.collection, {id: id});
+    };
+
+    /**
+     * @param {Number} id
+     * @returns {Number}
+     */
+
+    Collection.prototype.findIndex = function(id) {
+        return _.findIndex(this.collection, {id: id});
+    };
+
+    /**
+     * @param {Number} id
+     * @returns {Promise}
+     */
+
     Collection.prototype.get = function(id) {
-        return _.find(this.getAll(), {id: id});
+        var collection = this.collection,
+            idx = this.findIndex(id);
+
+        if (-1 === idx) {
+            return $q.reject("В коллекции не найден требуемый элемент: " + id);
+        } else {
+            return this.getRestApiProvider().get(id).then(function(response){
+                return _.extend(collection[idx], response);
+            }, errorHandler);
+        }
+    };
+
+    /**
+     * @param {User} id
+     * @returns {Promise}
+     */
+
+    Collection.prototype.save = function(user) {
+
+        if (user.id) {      // пользователь не новый
+            var collection = this.collection,
+                idx = this.findIndex(user.id);
+
+            if (-1 === idx) {
+                return $q.reject("В коллекции не найден требуемый элемент: " + id);
+            } else {
+                return this.getRestApiProvider().update(user).then(function(response){
+                    return _.extend(collection[idx], response);
+                }, errorHandler);
+            }
+
+        } else {
+            var collection = this.collection;
+            return this.getRestApiProvider().create(user).then(function(response){
+                collection.push(user);
+                console.log(collection.length);
+                return _.extend(user, response);
+            }, errorHandler);
+
+        }
     };
 
     /**
@@ -87,10 +149,10 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 
     Collection.prototype.remove = function(id) {
         var collection = this.collection,
-            idx = _.findIndex(collection, {id: id});
+            idx = this.findIndex(id);
 
         if (-1 === idx) {
-            return $q.reject("В памяти не найден требуемый элемент " + id);
+            return $q.reject("В коллекции не найден требуемый элемент: " + id);
         } else {
             return this.getRestApiProvider().remove(id).then(function(response){
                 collection.splice(idx, 1);
