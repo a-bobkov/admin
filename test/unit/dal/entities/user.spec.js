@@ -338,8 +338,10 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             var user = new User (expected);
 
             users.save(user).then(function(respond) {
+                console.log(respond);
                 actual = respond;
             });
+
             $rootScope.$digest();
             expect(users.collection.length).toEqual(4);
         });

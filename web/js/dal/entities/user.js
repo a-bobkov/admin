@@ -50,7 +50,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
                 if (typeof i.id ===  'undefined') {
                     throw new Error('Элемент коллекции ' + JSON.stringify(i) + ' не имеет параметра id.');
                 }
-                return _.extend(new ItemConstructor(), i);
+                return new ItemConstructor(i);
             };
 
         var self = this;
@@ -107,7 +107,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
             return $q.reject("В коллекции не найден требуемый элемент: " + id);
         } else {
             return this.getRestApiProvider().get(id).then(function(response){
-                return _.extend(collection[idx], response);
+                return collection[idx].deserialize(response);
             }, errorHandler);
         }
     };
@@ -119,26 +119,25 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 
     Collection.prototype.save = function(user) {
 
-        if (user.id) {      // пользователь не новый
+        if (user.id) {      // пользователь должен быть в коллекции
             var collection = this.collection,
                 idx = this.findIndex(user.id);
 
             if (-1 === idx) {
-                return $q.reject("В коллекции не найден требуемый элемент: " + id);
+                return $q.reject("В коллекции не найден требуемый элемент: " + user.id);
             } else {
-                return this.getRestApiProvider().update(user).then(function(response){
-                    return _.extend(collection[idx], response);
+                return this.getRestApiProvider().update(user.serialize()).then(function(response){
+                    return collection[idx].deserialize(response);
                 }, errorHandler);
             }
 
         } else {
             var collection = this.collection;
-            return this.getRestApiProvider().create(user).then(function(response){
+            return this.getRestApiProvider().create(user.serialize()).then(function(response){
+                user.deserialize(response);
                 collection.push(user);
-                console.log(collection.length);
-                return _.extend(user, response);
+                return user;
             }, errorHandler);
-
         }
     };
 
@@ -174,7 +173,47 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 })
 
 .factory('User', function(users) {
-    var User = function () {};
+    var User = function (data) {
+        this.deserialize(data);
+    };
+
+    User.prototype.deserialize = function(data) {
+        var key;
+
+        for (key in data) {
+            if (typeof this[key] === "Object") {
+                this[key] = data[key].id;
+                // на самом деле здесь должен быть вызов конструктора объекта (data[key]) и сохранение ссылки на него
+            } else {
+                this[key] = data[key];
+            }
+        }
+        // здесь обработка имеющихся серверных и клиентских справочников
+        // this.status = optionsStatus.getStatusById(this.status);
+        // this.tag_id = optionsTag.getTagById(this.tag_id);
+        // this.phone_from = optionsHour.getHourById(this.phone_from);
+        // this.phone_to = optionsHour.getHourById(this.phone_to);
+        // this.phone2_from = optionsHour.getHourById(this.phone2_from);
+        // this.phone2_to = optionsHour.getHourById(this.phone2_to);
+        // this.phone3_from = optionsHour.getHourById(this.phone3_from);
+        // this.phone3_to = optionsHour.getHourById(this.phone3_to);
+        return this;
+    }
+
+    User.prototype.serialize = function() {
+        var key,
+            data = {};
+
+        for (key in this) {
+            if (typeof this[key] === "Object") {
+                data[key] = this[key].id;
+                //data[key] = this[key].serialize();          // на самом деле здесь должно быть так
+            } else {
+                data[key] = this[key];
+            }
+        }
+        return data;
+    }
 
     User.prototype.remove = function () {
         if (typeof this.id !== 'undefined') {
