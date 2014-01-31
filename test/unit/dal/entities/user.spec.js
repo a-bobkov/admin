@@ -498,3 +498,115 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         expect(actual).toEqualData(expected);
     });
 });
+
+describe('Сервис опций User из модуля app.dal.entities.user умеет', function() {
+    var $rootScope,
+        $q,
+        Api,
+        UserOptions;
+
+    beforeEach(function() {
+        module('app.dal.entities.user');
+
+        inject(function(_$rootScope_, _$q_, _Api_, _UserOptions_)  {
+            $rootScope = _$rootScope_;
+            $q = _$q_;
+            Api = _Api_;
+            UserOptions = _UserOptions_;
+        });
+    });
+
+    it('загружать опции с сервера', function() {
+        var actual,
+            url = '/api2/combined/users/',
+            expected = {
+                roleList: [
+                    {id: 1, name: 'Роль один'},
+                    {id: 2, name: 'Роль два'}
+                ],
+                managerList: [
+                    {id: 3, name: 'Менеджер один'},
+                    {id: 4, name: 'Менеджер два'}
+                ],
+                cityList: [
+                    {id: 5, name: 'Город один'},
+                    {id: 6, name: 'Город два'}
+                ],
+                marketList: [
+                    {id: 7, name: 'Рынок один', city: {id: 6}},
+                    {id: 8, name: 'Рынок два', city: {id: 5}}
+                ],
+                metroList: [
+                    {id: 9, name: 'Метро один', city: {id: 5}},
+                    {id: 10, name: 'Метро два', city: {id: 6}}
+                ],
+                siteList: [
+                    {id: 11, name: 'Сайт один'},
+                    {id: 12, name: 'Сайт два'}
+                ]
+            };
+
+        spyOn(Api, 'get').andReturn($q.when(
+            expected
+        ));
+
+        UserOptions.getOptions().then(function(respond) {
+            actual = respond;
+        });
+
+        $rootScope.$digest();
+
+        expect(Api.get).toHaveBeenCalledWith(url);
+        expect(actual).toEqualData(expected);
+        expect(actual.marketList[0].city).toBe(actual.cityList[1]);
+        expect(actual.marketList[1].city).toBe(actual.cityList[0]);
+        expect(actual.metroList[0].city).toBe(actual.cityList[0]);
+        expect(actual.metroList[1].city).toBe(actual.cityList[1]);
+    });
+
+    it('проверять корректность ответа при загрузке опций с сервера и выдавать полный список ошибок', function() {
+        var actual,
+            url = '/api2/combined/users/',
+            expected = {
+                roles:
+                    {id: 1, name: 'Роль один'},
+                managerList: [
+                    {name: 'Менеджер один'},
+                    {id: 4, name: 'Менеджер два'}
+                ],
+                cityList: [
+                    {id: 5, name: 'Город один'},
+                    {id: 6, name: 'Город два'}
+                ],
+                marketList: [
+                    {id: 7, name: 'Рынок один', city: {id: 5}},
+                    {id: 8, name: 'Рынок два', city: {ident: 6}}
+                ],
+                metroList: [
+                    {id: 9, name: 'Метро один', city: {id: 55}},
+                    {id: 10, name: 'Метро два', city: {id: 6}}
+                ],
+                siteList: [
+                    {id: 11, name: 'Сайт один'},
+                    {id: 12, name: 'Сайт два'}
+                ]
+            };
+
+        spyOn(Api, 'get').andReturn($q.when(
+            expected
+        ));
+
+        UserOptions.getOptions().then(null, function(respond) {
+            actual = respond;
+        });
+
+        $rootScope.$digest();
+
+        expect(actual).toEqual('\nОтвет сервера содержит неправильное название секции: roles (должно быть "(\\w+)List)"'
+            + '\nОтвет сервера не содержит массив в секции: roles'
+            + '\nОтвет сервера не содержит параметр id в секции: managerList, элементе: {"name":"Менеджер один"}'
+            + '\nОтвет сервера не содержит ссылочный id в секции: marketList, элементе с id: 8, параметре: city'
+            + '\nОтвет сервера не содержит ссылочный элемент для секции: metroList, элемента с id: 9, параметра: city'
+        );
+    });
+});
