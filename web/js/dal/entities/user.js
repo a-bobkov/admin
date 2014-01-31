@@ -173,10 +173,12 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         var key;
 
         for (key in data) {
-            if (typeof this[key] === "Object") {
+            if (typeof data[key] === "object") {
                 this[key] = data[key].id;
                 // на самом деле здесь должен быть вызов конструктора объекта (data[key]) и сохранение ссылки на него
-            } else {
+            } else if (typeof data[key] === "number") {
+                this[key] = data[key];
+            } else if (typeof data[key] === "string") {
                 this[key] = data[key];
             }
         }
@@ -197,10 +199,12 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
             data = {};
 
         for (key in this) {
-            if (typeof this[key] === "Object") {
+            if (typeof this[key] === "object") {
                 data[key] = this[key].id;
                 //data[key] = this[key].serialize();          // на самом деле здесь должно быть так
-            } else {
+            } else if (typeof this[key] === "number") {
+                data[key] = this[key];
+            } else if (typeof this[key] === "string") {
                 data[key] = this[key];
             }
         }

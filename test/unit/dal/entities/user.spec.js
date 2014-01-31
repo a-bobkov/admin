@@ -453,37 +453,48 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         });
     });
 
-    xit('сериализовать пользователя', function() {
-        user = new User ({
+    it('десериализовать пользователя', function() {
+        var expected = {
             id: 1, 
             name: 'Первый',
-            date: '2011-12-11'
+            obj: 2
+        }
+
+        var user = new User ({
+            id: 1, 
+            name: 'Первый',
+            obj: {
+                id: 2, 
+                name: 'Вложенный'
+            }
         });
 
+        expect(user).toEqualData(expected);
+    });
 
+    it('сериализовать пользователя', function() {
+        var actual,
+            expected = {
+            id: 1, 
+            name: 'Первый',
+            obj: 2
+        }
 
-        var actual;
-
-        spyOn(UserApi, 'query').andReturn($q.when(
-            [
-                { id: 1, name: 'Первый' },
-                { id: 2, name: 'Второй' },
-                { id: 3, name: 'Третий' }
-            ]
-        ));
-
-        users.load().then(function(respond) {
-            actual = respond;
+        var user = new User ({
+            id: 1, 
+            name: 'Первый',
+            obj: {
+                id: 2, 
+                name: 'Вложенный'
+            }
         });
-        $rootScope.$digest();
-        expect(users.getAll().length).toEqual(3);
 
-        spyOn(UserApi, 'remove').andReturn($q.when(null));
+        user.obj = {
+            id: 2, 
+            name: 'Вложенный'
+        }
 
-        var user = users.get(2);
-        user.remove();
-
-        $rootScope.$digest();
-        expect(users.getAll().length).toEqual(2);
+        actual = user.serialize();
+        expect(actual).toEqualData(expected);
     });
 });
