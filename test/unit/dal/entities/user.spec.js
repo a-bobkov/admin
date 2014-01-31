@@ -1,22 +1,68 @@
 'use strict';
 
-describe('Сервис users из модуля app.dal.entities.user', function() {
+xdescribe('Сервис users из модуля app.dal.entities.user', function() {
     var $rootScope,
         $q,
         users,
         User,
-        UserApi;
+        UserApi,
+        UserOptions,
+        Api;
+
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_)  {
+        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_, _UserOptions_, _Api_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             users = _users_;
             User = _User_;
             UserApi = _UserApi_;
+            UserOptions = _UserOptions_;
+            Api = _Api_;
         });
+    });
+
+    beforeEach(function() {
+        var actual,
+            url = '/api2/combined/users/',
+            expected = {
+                roleList: [
+                    {id: 1, name: 'Роль один'},
+                    {id: 2, name: 'Роль два'}
+                ],
+                managerList: [
+                    {id: 3, name: 'Менеджер один'},
+                    {id: 4, name: 'Менеджер два'}
+                ],
+                cityList: [
+                    {id: 5, name: 'Город один'},
+                    {id: 6, name: 'Город два'}
+                ],
+                marketList: [
+                    {id: 7, name: 'Рынок один', city: {id: 6}},
+                    {id: 8, name: 'Рынок два', city: {id: 5}}
+                ],
+                metroList: [
+                    {id: 9, name: 'Метро один', city: {id: 5}},
+                    {id: 10, name: 'Метро два', city: {id: 6}}
+                ],
+                siteList: [
+                    {id: 11, name: 'Сайт один'},
+                    {id: 12, name: 'Сайт два'}
+                ]
+            };
+
+        spyOn(Api, 'get').andReturn($q.when(
+            expected
+        ));
+
+        UserOptions.getOptions().then(function(respond) {
+            actual = respond;
+        });
+
+        $rootScope.$digest();
     });
 
     describe('должен знать провайдера REST API, для чего', function() {
@@ -439,19 +485,65 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         $q,
         users,
         User,
-        UserApi;
+        UserApi,
+        UserOptions,
+        Api;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_)  {
+        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_, _UserOptions_, _Api_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             users = _users_;
             User = _User_;
             UserApi = _UserApi_;
+            UserOptions = _UserOptions_;
+            Api = _Api_;
         });
     });
+
+    beforeEach(function() {
+        var actual,
+            url = '/api2/combined/users/',
+            expected = {
+                roleList: [
+                    {id: 1, name: 'Роль один'},
+                    {id: 2, name: 'Роль два'}
+                ],
+                managerList: [
+                    {id: 3, name: 'Менеджер один'},
+                    {id: 4, name: 'Менеджер два'}
+                ],
+                cityList: [
+                    {id: 5, name: 'Город один'},
+                    {id: 6, name: 'Город два'}
+                ],
+                marketList: [
+                    {id: 7, name: 'Рынок один', city: {id: 6}},
+                    {id: 8, name: 'Рынок два', city: {id: 5}}
+                ],
+                metroList: [
+                    {id: 9, name: 'Метро один', city: {id: 5}},
+                    {id: 10, name: 'Метро два', city: {id: 6}}
+                ],
+                siteList: [
+                    {id: 11, name: 'Сайт один'},
+                    {id: 12, name: 'Сайт два'}
+                ]
+            };
+
+        spyOn(Api, 'get').andReturn($q.when(
+            expected
+        ));
+
+        UserOptions.getOptions().then(function(respond) {
+            actual = respond;
+        });
+
+        $rootScope.$digest();
+    });
+
 
     it('десериализовать пользователя', function() {
         var expected = {

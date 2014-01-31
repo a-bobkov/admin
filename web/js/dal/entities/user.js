@@ -137,7 +137,6 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
      * @param {Number} id
      * @returns {Promise}
      */
-
     Collection.prototype.remove = function(id) {
         var collection = this.collection,
             idx = this.findIndex(id);
@@ -154,7 +153,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
     return Collection;
 })
 
-.factory('users', function(Collection, UserApi) {
+.factory('users', function(Collection, UserApi, UserOptions, $rootScope) {
 
     var collection;
 
@@ -164,8 +163,15 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
     return collection;
 })
 
-.factory('User', function(users) {
+.factory('User', function(users, UserOptions, $rootScope) {
     var User = function (data) {
+        if (!UserOptions.data) {
+            UserOptions.getOptions().then(function(respond) {
+                UserOptions.data = respond;
+            });
+            $rootScope.$digest();
+        }
+
         this.deserialize(data);
     };
 
@@ -183,6 +189,9 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
             }
         }
         // здесь обработка имеющихся серверных и клиентских справочников
+        //this.tag_id = UserOptions.getbyId('manager',this.tag_id)
+
+
         // this.status = optionsStatus.getStatusById(this.status);
         // this.tag_id = optionsTag.getTagById(this.tag_id);
         // this.phone_from = optionsHour.getHourById(this.phone_from);
@@ -273,14 +282,23 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         return data;
     };
 
+    /**
+     * @param -
+     * @returns {Promise}
+     */
     this.getOptions = function() {
         return Api.get('/api2/combined/users/').then(responseHandler);
     };
 
-    // this.getOptions().then(function(respond) {
-    //     this.data = respond;
-    // });
-
     this.getById = function(optionName, id) {
+        var section = this.data[optionName+'List'];
+        if (section) {
+            for (var i=0; i<section.length; i++) {
+                if (section[i].id == id) {
+                    return section[i];
+                }
+            }
+        return id;
+        }
     }
 });
