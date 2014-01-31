@@ -31,14 +31,6 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         return this.restApiProvider;
     };
 
-    var errorHandler = function(response) {
-        if (typeof response === 'string') {
-            return $q.reject(response);                              // пришла строка с ошибкой из RESTapi.responseHandler
-        } else {
-            return $q.reject("Сервер вернул ошибку: " + error_code);     // пришел объект с ошибкой из RESTapi.errorHandler
-        }
-    };
-
     /**
      * @param -
      * @returns {Promise}
@@ -57,7 +49,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         return this.getRestApiProvider().query().then(function (response) {
             self.collection = _.collect(response, createItem);
             return self.collection;
-        }, errorHandler);
+        });
 
     };
 
@@ -71,7 +63,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
             var self = this;
             return this.load().then(function (response) {
                 return self.collection;
-            }, errorHandler);
+            });
         }
         return $q.when(this.collection);
     };
@@ -108,7 +100,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         } else {
             return this.getRestApiProvider().get(id).then(function(response){
                 return collection[idx].deserialize(response);
-            }, errorHandler);
+            });
         }
     };
 
@@ -128,7 +120,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
             } else {
                 return this.getRestApiProvider().update(user.serialize()).then(function(response){
                     return collection[idx].deserialize(response);
-                }, errorHandler);
+                });
             }
 
         } else {
@@ -137,7 +129,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
                 user.deserialize(response);
                 collection.push(user);
                 return user;
-            }, errorHandler);
+            });
         }
     };
 
@@ -155,7 +147,7 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
         } else {
             return this.getRestApiProvider().remove(id).then(function(response){
                 collection.splice(idx, 1);
-            }, errorHandler);
+            });
         }
     };
 
