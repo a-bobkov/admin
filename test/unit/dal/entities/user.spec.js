@@ -210,8 +210,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-            var idx = users.findIndex(3);
-            expect(users.collection[idx] instanceof User).toBeTruthy();
+            var user = users.getById(3);
+            expect(user instanceof User).toBeTruthy();
         });
     });
 
@@ -233,7 +233,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-            var user = users.findIndex(3);
+            var user = users.getById(3);
             expect(user.ext).toBeUndefined();
 
             spyOn(UserApi, 'get').andReturn($q.when(
@@ -314,7 +314,6 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('создавать элемент в коллекции после получения подтверждения от сервера', function() {
             var actual,
                 expected = {
-                    id: 4,
                     name: 'Другой',
                     ext: 'Extra'
                 };
@@ -338,7 +337,6 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             var user = new User (expected);
 
             users.save(user).then(function(respond) {
-                console.log(respond);
                 actual = respond;
             });
 
@@ -455,7 +453,15 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         });
     });
 
-    xit('удалять пользователя из коллекции', function() {     // не работает, так как надо переделать get на промисы
+    xit('сериализовать пользователя', function() {
+        user = new User ({
+            id: 1, 
+            name: 'Первый',
+            date: '2011-12-11'
+        });
+
+
+
         var actual;
 
         spyOn(UserApi, 'query').andReturn($q.when(
@@ -479,5 +485,5 @@ describe('Сервис-конструктор User из модуля app.dal.ent
 
         $rootScope.$digest();
         expect(users.getAll().length).toEqual(2);
-    })
+    });
 });
