@@ -1,20 +1,23 @@
 'use strict';
 
-describe('У объекта app.dal.rest.city', function() {
+describe('У объекта app.dal.rest.api', function() {
     var $rootScope,
         $q,
-        cityApi,
-        Api;
+        Api,
+        RestApi,
+        cityApi;
 
     beforeEach(function() {
-        module('app.dal.rest.city');
+        module('app.dal.rest.api');
 
-        inject(function(_$rootScope_, _$q_, _cityApi_, _Api_) {
+        inject(function(_$rootScope_, _$q_, _Api_, _RestApi_) {
             $rootScope = _$rootScope_;
             $q = _$q_;
-            cityApi = _cityApi_;
             Api = _Api_;
+            RestApi = _RestApi_;
         });
+    
+        cityApi = new RestApi('cities', 'city');
     });
 
     describe('Метод get(id)', function() {
