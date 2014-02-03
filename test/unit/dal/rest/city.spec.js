@@ -3,16 +3,16 @@
 describe('У объекта app.dal.rest.city', function() {
     var $rootScope,
         $q,
-        CityApi,
+        cityApi,
         Api;
 
     beforeEach(function() {
         module('app.dal.rest.city');
 
-        inject(function(_$rootScope_, _$q_, _CityApi_, _Api_) {
+        inject(function(_$rootScope_, _$q_, _cityApi_, _Api_) {
             $rootScope = _$rootScope_;
             $q = _$q_;
-            CityApi = _CityApi_;
+            cityApi = _cityApi_;
             Api = _Api_;
         });
     });
@@ -30,7 +30,7 @@ describe('У объекта app.dal.rest.city', function() {
                 city: expected
             }));
 
-            CityApi.get(1).then(function(respond) {
+            cityApi.get(1).then(function(respond) {
                 actual = respond;
             });
 
@@ -51,7 +51,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.get(1).then(null, function(respond) {
+            cityApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -74,7 +74,7 @@ describe('У объекта app.dal.rest.city', function() {
                 }
             }));
 
-            CityApi.get(1).then(null, function(respond) {
+            cityApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -91,7 +91,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.get(1).then(null, function(respond) {
+            cityApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -112,7 +112,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.get(1).then(null, function(respond) {
+            cityApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -141,7 +141,7 @@ describe('У объекта app.dal.rest.city', function() {
                 cities: expected
             }));
 
-            CityApi.query().then(function(respond) {
+            cityApi.query().then(function(respond) {
                 actual = respond;
             });
 
@@ -162,7 +162,7 @@ describe('У объекта app.dal.rest.city', function() {
                 cities: expected
             }));
 
-            CityApi.query().then(null, function(respond) {
+            cityApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -182,7 +182,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.query().then(null, function(respond) {
+            cityApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -199,7 +199,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.query().then(null, function(respond) {
+            cityApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -220,7 +220,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.query().then(null, function(respond) {
+            cityApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -246,7 +246,7 @@ describe('У объекта app.dal.rest.city', function() {
                 city: expected
             }));
 
-            CityApi.create(data).then(function(respond) {
+            cityApi.create(data).then(function(respond) {
                 actual = respond;
             });
 
@@ -270,7 +270,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.create(data).then(null, function(respond) {
+            cityApi.create(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -290,7 +290,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.create(data).then(null, function(respond) {
+            cityApi.create(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -314,7 +314,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.create(data).then(null, function(respond) {
+            cityApi.create(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -341,7 +341,7 @@ describe('У объекта app.dal.rest.city', function() {
                 city: expected
             }));
 
-            CityApi.update(data).then(function(respond) {
+            cityApi.update(data).then(function(respond) {
                 actual = respond;
             });
 
@@ -366,7 +366,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.update(data).then(null, function(respond) {
+            cityApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -393,7 +393,7 @@ describe('У объекта app.dal.rest.city', function() {
                 }
             }));
 
-            CityApi.update(data).then(null, function(respond) {
+            cityApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -414,7 +414,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.update(data).then(null, function(respond) {
+            cityApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -439,7 +439,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.update(data).then(null, function(respond) {
+            cityApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -460,7 +460,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.remove(id).then(function(respond) {
+            cityApi.remove(id).then(function(respond) {
                 actual = respond;
             });
 
@@ -479,7 +479,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.remove(id).then(null, function(respond) {
+            cityApi.remove(id).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -501,7 +501,7 @@ describe('У объекта app.dal.rest.city', function() {
                 expected
             ));
 
-            CityApi.remove(id).then(null, function(respond) {
+            cityApi.remove(id).then(null, function(respond) {
                 actual = respond;
             });
 

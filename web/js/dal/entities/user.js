@@ -2,12 +2,12 @@
 
 angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal.rest.user', 'app.dal.entities.city'])
 
-.factory('users', function(Collection, UserApi) {
+.factory('users', function(Collection, userApi) {
 
     var collection;
 
     collection = new Collection;
-    collection.setRestApiProvider(UserApi);
+    collection.setRestApiProvider(userApi);
 
     return collection;
 })

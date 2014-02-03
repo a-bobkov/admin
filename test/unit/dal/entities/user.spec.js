@@ -5,7 +5,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         $q,
         users,
         User,
-        UserApi,
+        userApi,
         UserOptions,
         Api;
 
@@ -13,12 +13,12 @@ describe('Сервис users из модуля app.dal.entities.user', function(
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_, _UserOptions_, _Api_)  {
+        inject(function(_$rootScope_, _$q_, _users_, _User_, _userApi_, _UserOptions_, _Api_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             users = _users_;
             User = _User_;
-            UserApi = _UserApi_;
+            userApi = _userApi_;
             UserOptions = _UserOptions_;
             Api = _Api_;
         });
@@ -68,7 +68,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
     describe('должен знать провайдера REST API, для чего', function() {
 
         it('должен иметь заданный на этапе инициализации провайдер REST API', function() {
-            expect(users.getRestApiProvider()).toBe(UserApi);
+            expect(users.getRestApiProvider()).toBe(userApi);
         });
 
         it('должен запоминать провайдера', function() {
@@ -112,7 +112,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('запрашивать данные коллекции с сервера один раз', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -130,14 +130,14 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
             $rootScope.$digest();
 
-            expect(UserApi.query).toHaveBeenCalled();
-            expect(UserApi.query.calls.length).toEqual(1);
+            expect(userApi.query).toHaveBeenCalled();
+            expect(userApi.query.calls.length).toEqual(1);
         });
 
         it('иметь возможность принудительно повторно запрашивать данные', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -154,14 +154,14 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
             $rootScope.$digest();
 
-            expect(UserApi.query).toHaveBeenCalled();
-            expect(UserApi.query.calls.length).toEqual(2);
+            expect(userApi.query).toHaveBeenCalled();
+            expect(userApi.query.calls.length).toEqual(2);
         });
 
         it('создавать коллекцию из полученных данных используя конструктор элементов коллекции', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -181,7 +181,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('проверять наличие идентификатора у элементов коллекции', function() {
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     {name: 'Без идентификатора'}
@@ -197,7 +197,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('возвращать массив объектов', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -222,7 +222,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('возвращать объект коллекции по id', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -242,7 +242,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('возвращать индекс объекта коллекции по id', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -265,7 +265,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('возвращать объект с сервера, обновляя данный элемент коллекции', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -281,7 +281,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             var user = users.getById(3);
             expect(user.ext).toBeUndefined();
 
-            spyOn(UserApi, 'get').andReturn($q.when(
+            spyOn(userApi, 'get').andReturn($q.when(
                 { id: 3, name: 'Третий', ext: 'Ещё свойство' }
             ));
 
@@ -296,7 +296,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('выдавать ошибку, если требуемый элемент не найден в коллекции', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -310,7 +310,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
             $rootScope.$digest();
 
-            spyOn(UserApi, 'get').andReturn($q.when(
+            spyOn(userApi, 'get').andReturn($q.when(
                 { id: 5, name: 'Пропущенный'}
             ));
 
@@ -330,7 +330,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                     ext: 'Extra'
                 };
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -338,7 +338,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            spyOn(UserApi, 'update').andReturn($q.when(expected));
+            spyOn(userApi, 'update').andReturn($q.when(expected));
 
             users.load().then(function(respond) {
                 actual = respond;
@@ -352,7 +352,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 actual = respond;
             });
             $rootScope.$digest();
-            expect(UserApi.update).toHaveBeenCalled()
+            expect(userApi.update).toHaveBeenCalled()
             expect(actual).toEqualData(expected);
         });
 
@@ -363,7 +363,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                     ext: 'Extra'
                 };
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -371,7 +371,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            spyOn(UserApi, 'create').andReturn($q.when(expected));
+            spyOn(userApi, 'create').andReturn($q.when(expected));
 
             users.load().then(function(respond) {
                 actual = respond;
@@ -392,7 +392,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -400,7 +400,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            spyOn(UserApi, 'remove').andReturn($q.when(null));
+            spyOn(userApi, 'remove').andReturn($q.when(null));
 
             users.load().then(function(respond) {
                 actual = respond;
@@ -412,8 +412,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 actual = respond;
             });
             $rootScope.$digest();
-            expect(UserApi.remove).toHaveBeenCalled()
-            expect(UserApi.remove).toHaveBeenCalledWith(2);
+            expect(userApi.remove).toHaveBeenCalled()
+            expect(userApi.remove).toHaveBeenCalledWith(2);
 
             users.getAll().then(function(respond) {
                 actual = respond;
@@ -425,7 +425,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         it('выдавать ошибку при удалении элемента, если элемент не найден в коллекции', function() {
             var actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -451,7 +451,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             var expected = "Сообщение об ошибке",
                 actual;
 
-            spyOn(UserApi, 'query').andReturn($q.when(
+            spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -459,7 +459,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            spyOn(UserApi, 'remove').andReturn($q.reject(
+            spyOn(userApi, 'remove').andReturn($q.reject(
                 expected
             ));
 
@@ -483,24 +483,24 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         $q,
         users,
         User,
-        UserApi,
+        userApi,
         UserOptions,
         Api,
-        CityApi,
+        cityApi,
         cities;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_, _UserOptions_, _Api_, _CityApi_, _cities_)  {
+        inject(function(_$rootScope_, _$q_, _users_, _User_, _userApi_, _UserOptions_, _Api_, _cityApi_, _cities_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             users = _users_;
             User = _User_;
-            UserApi = _UserApi_;
+            userApi = _userApi_;
             UserOptions = _UserOptions_;
             Api = _Api_;
-            CityApi = _CityApi_;
+            cityApi = _cityApi_;
             cities = _cities_;
         });
     });
@@ -549,7 +549,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
     it('создавать пользователей со ссылками на города', function() {
         var actual;
 
-        spyOn(CityApi, 'query').andReturn($q.when(
+        spyOn(cityApi, 'query').andReturn($q.when(
             [
                 { id: 1, name: 'Первый город' },
                 { id: 2, name: 'Второй город' },

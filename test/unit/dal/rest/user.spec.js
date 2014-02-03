@@ -3,16 +3,16 @@
 describe('У объекта app.dal.rest.user', function() {
     var $rootScope,
         $q,
-        UserApi,
+        userApi,
         Api;
 
     beforeEach(function() {
         module('app.dal.rest.user');
 
-        inject(function(_$rootScope_, _$q_, _UserApi_, _Api_) {
+        inject(function(_$rootScope_, _$q_, _userApi_, _Api_) {
             $rootScope = _$rootScope_;
             $q = _$q_;
-            UserApi = _UserApi_;
+            userApi = _userApi_;
             Api = _Api_;
         });
     });
@@ -30,7 +30,7 @@ describe('У объекта app.dal.rest.user', function() {
                 user: expected
             }));
 
-            UserApi.get(1).then(function(respond) {
+            userApi.get(1).then(function(respond) {
                 actual = respond;
             });
 
@@ -51,7 +51,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.get(1).then(null, function(respond) {
+            userApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -74,7 +74,7 @@ describe('У объекта app.dal.rest.user', function() {
                 }
             }));
 
-            UserApi.get(1).then(null, function(respond) {
+            userApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -91,7 +91,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.get(1).then(null, function(respond) {
+            userApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -112,7 +112,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.get(1).then(null, function(respond) {
+            userApi.get(1).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -141,7 +141,7 @@ describe('У объекта app.dal.rest.user', function() {
                 users: expected
             }));
 
-            UserApi.query().then(function(respond) {
+            userApi.query().then(function(respond) {
                 actual = respond;
             });
 
@@ -162,7 +162,7 @@ describe('У объекта app.dal.rest.user', function() {
                 users: expected
             }));
 
-            UserApi.query().then(null, function(respond) {
+            userApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -182,7 +182,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.query().then(null, function(respond) {
+            userApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -199,7 +199,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.query().then(null, function(respond) {
+            userApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -220,7 +220,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.query().then(null, function(respond) {
+            userApi.query().then(null, function(respond) {
                 actual = respond;
             });
 
@@ -246,7 +246,7 @@ describe('У объекта app.dal.rest.user', function() {
                 user: expected
             }));
 
-            UserApi.create(data).then(function(respond) {
+            userApi.create(data).then(function(respond) {
                 actual = respond;
             });
 
@@ -270,7 +270,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.create(data).then(null, function(respond) {
+            userApi.create(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -290,7 +290,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.create(data).then(null, function(respond) {
+            userApi.create(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -314,7 +314,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.create(data).then(null, function(respond) {
+            userApi.create(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -341,7 +341,7 @@ describe('У объекта app.dal.rest.user', function() {
                 user: expected
             }));
 
-            UserApi.update(data).then(function(respond) {
+            userApi.update(data).then(function(respond) {
                 actual = respond;
             });
 
@@ -366,7 +366,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.update(data).then(null, function(respond) {
+            userApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -393,7 +393,7 @@ describe('У объекта app.dal.rest.user', function() {
                 }
             }));
 
-            UserApi.update(data).then(null, function(respond) {
+            userApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -414,7 +414,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.update(data).then(null, function(respond) {
+            userApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -439,7 +439,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.update(data).then(null, function(respond) {
+            userApi.update(data).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -460,7 +460,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.remove(id).then(function(respond) {
+            userApi.remove(id).then(function(respond) {
                 actual = respond;
             });
 
@@ -479,7 +479,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.remove(id).then(null, function(respond) {
+            userApi.remove(id).then(null, function(respond) {
                 actual = respond;
             });
 
@@ -501,7 +501,7 @@ describe('У объекта app.dal.rest.user', function() {
                 expected
             ));
 
-            UserApi.remove(id).then(null, function(respond) {
+            userApi.remove(id).then(null, function(respond) {
                 actual = respond;
             });
 

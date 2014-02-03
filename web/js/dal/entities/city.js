@@ -2,12 +2,12 @@
 
 angular.module('app.dal.entities.city', ['app.dal.entities.collection', 'app.dal.rest.city'])
 
-.factory('cities', function(Collection, CityApi) {
+.factory('cities', function(Collection, cityApi) {
 
     var collection;
 
     collection = new Collection;
-    collection.setRestApiProvider(CityApi);
+    collection.setRestApiProvider(cityApi);
 
     return collection;
 })
