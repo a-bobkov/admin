@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.entities.collection', [])
+angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
 
 .factory('Collection', function($q) {
     /**
@@ -32,9 +32,89 @@ angular.module('app.dal.entities.collection', [])
     };
 
     /**
-     * @param -
-     * @returns {Promise}
+     * @param {Object}
+     * @returns {Object} OR {String}
      */
+    Collection.prototype.addElem = function(elem) {
+        var errorMessage = '';
+
+        if (typeof elem.id === 'undefined') {
+            errorMessage = errorMessage + '\nНет параметра id в элементе: ' + angular.toJson(elem);
+        } else {
+            newElem = this.getById(elem.id);
+            if (!newElem) {     // элемент ранее не создавался
+                newElem = this.getItemConstructor({id: elem.id});
+            }
+            for (var key in elem) {
+                var attr = elem[key],
+                    refElem = attr;
+
+                if (typeof attr === 'object') {
+                    if (typeof attr.id === 'undefined') {
+                        errorMessage = errorMessage + '\nНет ссылочного id в элементе с id: ' + elem.id + ', параметре: ' + key;
+                    } else {
+                        if (key === 'city') { // здесь нужно сделать проверки на все справочники
+                            refElem = cities.getById (attr.id);
+                            if (!refElem) {
+                                refElem = new cities.getItemConstructor({id: attr.id})
+                            }
+                        } else {
+                            errorMessage = errorMessage + '\nНеизвестный ссылочный параметр' + key + ' в элементе с id: ' + elem.id;
+                        }
+                    }
+                }
+                newElem[key] = refElem;
+            }
+        }
+
+        if (errorMessage) {
+            return (errorMessage);
+        }
+
+        return data;
+    };
+
+    /**
+     * @param {Array}
+     * @returns {Object} OR {String}
+     */
+    Collection.prototype.addArray = function(section) {
+        var errorMessage = '';
+
+        if ({}.toString.call(section) !== '[object Array]') {
+            errorMessage = errorMessage + '\nОтсутствует массив';
+            errorMessage = errorMessage + this.addElem(section);
+        } else {
+            for (var i=0; i < section.length; i++) {
+                errorMessage = errorMessage + this.addElem(section[i]);
+            }
+        }
+
+        if (errorMessage) {
+            return ('\nОшибки в секции: ' + errorMessage);  // Вставить здесь название справочника this
+        }
+
+        return data;
+    }
+
+    Collection.prototype.responseHandlerOptions = function(response) {
+        var data = response,
+            errorMessage = '';
+
+        for (var key in data) {
+            if (key === "cities") {     // здесь должны проверяться все секции, которые могут встретиться 
+                errorMessage = errorMessage + cities.addArray(data[key]);
+            } else {
+                errorMessage = errorMessage + '\nНеизвестная секция: ' + key;
+            }
+        }
+
+        if (errorMessage) {
+            return $q.reject('Ответ сервера содержит ошибки:' + errorMessage);
+        }
+
+        return data;
+    };
 
     Collection.prototype.load = function() {
         var ItemConstructor = this.getItemConstructor(),
@@ -50,7 +130,6 @@ angular.module('app.dal.entities.collection', [])
             self.collection = _.collect(response, createItem);
             return self.collection;
         });
-
     };
 
     /**

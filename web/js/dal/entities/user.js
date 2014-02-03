@@ -35,7 +35,6 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
         // здесь обработка имеющихся серверных и клиентских справочников
         //this.tag_id = UserOptions.getbyId('manager',this.tag_id)
 
-
         // this.status = optionsStatus.getStatusById(this.status);
         // this.tag_id = optionsTag.getTagById(this.tag_id);
         // this.phone_from = optionsHour.getHourById(this.phone_from);
@@ -80,69 +79,12 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     users.setItemConstructor(User);
 })
 
-.service('UserOptions', function($q, Api) {
-    var responseHandler = function(response) {
-        var data = response,
-            errorMessage = '';
-
-        for (var key in data) {
-            if (key.search(/(\w+)List$/)) {
-                errorMessage = errorMessage + '\nОтвет сервера содержит неправильное название секции: ' + key + ' (должно быть "(\\w+)List)"';
-            }
-            var section = data[key];
-            if ({}.toString.call(section) !== '[object Array]') {
-                errorMessage = errorMessage + '\nОтвет сервера не содержит массив в секции: ' + key;
-            } else {
-                for (var i=0; i < section.length; i++) {
-                    var elem = section[i];
-                    if (typeof elem.id === 'undefined') {
-                        errorMessage = errorMessage + '\nОтвет сервера не содержит параметр id в секции: ' + key + ', элементе: ' + angular.toJson(elem);
-                    } else {
-                        for (var key2 in elem) {
-                            var attr = elem[key2];
-                            if (typeof attr === "object") {
-                                if (typeof attr.id === 'undefined') {
-                                    errorMessage = errorMessage + '\nОтвет сервера не содержит ссылочный id в секции: ' + key + ', элементе с id: ' + elem.id + ', параметре: ' + key2;
-                                } else {
-                                    var refSection = data[key2+'List'];
-                                    var refElem = _.find(refSection, {id: attr.id})
-                                    if (!refElem) {
-                                        errorMessage = errorMessage + '\nОтвет сервера не содержит ссылочный элемент для секции: ' + key + ', элемента с id: ' + elem.id + ', параметра: ' + key2;
-                                    } else {
-                                        elem[key2] = refElem;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (errorMessage) {
-            return $q.reject(errorMessage);
-        }
-
-        return data;
-    };
-
+.service('UserOptions', function($q, Api, users) {
     /**
      * @param -
      * @returns {Promise}
      */
     this.getOptions = function() {
-        return Api.get('/api2/combined/users/').then(responseHandler);
+        return Api.get('/api2/combined/users/').then(users.responseHandlerOptions);
     };
-
-    this.getById = function(optionName, id) {
-        var section = this.data[optionName+'List'];
-        if (section) {
-            for (var i=0; i<section.length; i++) {
-                if (section[i].id == id) {
-                    return section[i];
-                }
-            }
-        return id;
-        }
-    }
 });

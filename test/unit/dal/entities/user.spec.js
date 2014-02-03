@@ -642,27 +642,27 @@ describe('Сервис опций User из модуля app.dal.entities.user �
         var actual,
             url = '/api2/combined/users/',
             expected = {
-                roleList: [
+                roles: [
                     {id: 1, name: 'Роль один'},
                     {id: 2, name: 'Роль два'}
                 ],
-                managerList: [
+                managers: [
                     {id: 3, name: 'Менеджер один'},
                     {id: 4, name: 'Менеджер два'}
                 ],
-                cityList: [
+                cities: [
                     {id: 5, name: 'Город один'},
                     {id: 6, name: 'Город два'}
                 ],
-                marketList: [
+                markets: [
                     {id: 7, name: 'Рынок один', city: {id: 6}},
                     {id: 8, name: 'Рынок два', city: {id: 5}}
                 ],
-                metroList: [
+                metros: [
                     {id: 9, name: 'Метро один', city: {id: 5}},
                     {id: 10, name: 'Метро два', city: {id: 6}}
                 ],
-                siteList: [
+                sites: [
                     {id: 11, name: 'Сайт один'},
                     {id: 12, name: 'Сайт два'}
                 ]
@@ -692,23 +692,23 @@ describe('Сервис опций User из модуля app.dal.entities.user �
             expected = {
                 roles:
                     {id: 1, name: 'Роль один'},
-                managerList: [
+                managers: [
                     {name: 'Менеджер один'},
                     {id: 4, name: 'Менеджер два'}
                 ],
-                cityList: [
+                cities: [
                     {id: 5, name: 'Город один'},
                     {id: 6, name: 'Город два'}
                 ],
-                marketList: [
+                markets: [
                     {id: 7, name: 'Рынок один', city: {id: 5}},
                     {id: 8, name: 'Рынок два', city: {ident: 6}}
                 ],
-                metroList: [
+                metros: [
                     {id: 9, name: 'Метро один', city: {id: 55}},
                     {id: 10, name: 'Метро два', city: {id: 6}}
                 ],
-                siteList: [
+                sites: [
                     {id: 11, name: 'Сайт один'},
                     {id: 12, name: 'Сайт два'}
                 ]
