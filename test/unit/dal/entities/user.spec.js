@@ -577,16 +577,16 @@ describe('Сервис-конструктор User из модуля app.dal.ent
 
     it('десериализовать пользователя', function() {
         var expected = {
-            id: 1, 
+            id: 1,
             name: 'Первый',
             obj: 2
         }
 
         var user = new User ({
-            id: 1, 
+            id: 1,
             name: 'Первый',
             obj: {
-                id: 2, 
+                id: 2,
                 name: 'Вложенный'
             }
         });
@@ -597,22 +597,22 @@ describe('Сервис-конструктор User из модуля app.dal.ent
     it('сериализовать пользователя', function() {
         var actual,
             expected = {
-            id: 1, 
+            id: 1,
             name: 'Первый',
             obj: 2
         }
 
         var user = new User ({
-            id: 1, 
+            id: 1,
             name: 'Первый',
             obj: {
-                id: 2, 
+                id: 2,
                 name: 'Вложенный'
             }
         });
 
         user.obj = {
-            id: 2, 
+            id: 2,
             name: 'Вложенный'
         }
 
