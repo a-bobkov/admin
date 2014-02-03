@@ -105,7 +105,6 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
     });
 
-
     describe('хранит коллекцию объектов, для чего умеет', function() {
         beforeEach(function() {
         });
@@ -476,7 +475,6 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
             expect(actual).toBe(expected);
         });
-
     });
 });
 
@@ -487,12 +485,14 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         User,
         UserApi,
         UserOptions,
-        Api;
+        Api,
+        CityApi,
+        cities;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_, _UserOptions_, _Api_)  {
+        inject(function(_$rootScope_, _$q_, _users_, _User_, _UserApi_, _UserOptions_, _Api_, _CityApi_, _cities_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             users = _users_;
@@ -500,6 +500,8 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             UserApi = _UserApi_;
             UserOptions = _UserOptions_;
             Api = _Api_;
+            CityApi = _CityApi_;
+            cities = _cities_;
         });
     });
 
@@ -544,6 +546,34 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         $rootScope.$digest();
     });
 
+    it('создавать пользователей со ссылками на города', function() {
+        var actual;
+
+        spyOn(CityApi, 'query').andReturn($q.when(
+            [
+                { id: 1, name: 'Первый город' },
+                { id: 2, name: 'Второй город' },
+                { id: 3, name: 'Третий город' }
+            ]
+        ));
+
+        cities.getAll().then(function(respond) {
+            actual = respond;
+        });
+        $rootScope.$digest();
+
+        var city = cities.getById (1);
+
+        var user = new User ({
+            id: 11,
+            name: 'Один пользователь',
+            city_id: {
+                id: 1
+            }
+        });
+
+        expect(user.city_id).toBe(city);
+    });
 
     it('десериализовать пользователя', function() {
         var expected = {
