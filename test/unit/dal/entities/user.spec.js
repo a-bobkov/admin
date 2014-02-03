@@ -1,6 +1,6 @@
 'use strict';
 
-xdescribe('Сервис users из модуля app.dal.entities.user', function() {
+describe('Сервис users из модуля app.dal.entities.user', function() {
     var $rootScope,
         $q,
         users,

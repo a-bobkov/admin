@@ -165,13 +165,6 @@ angular.module('app.dal.entities.user', ['app.dal.rest.user'])
 
 .factory('User', function(users, UserOptions, $rootScope) {
     var User = function (data) {
-        if (!UserOptions.data) {
-            UserOptions.getOptions().then(function(respond) {
-                UserOptions.data = respond;
-            });
-            $rootScope.$digest();
-        }
-
         this.deserialize(data);
     };
 
