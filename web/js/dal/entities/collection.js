@@ -32,23 +32,24 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
     };
 
     /**
-     * @param {Object}
+     * @param {Object}, {Array}, {Object}
      * @returns {Object}
      */
-    Collection.prototype.addItem = function(itemData, errorMessages) {
+    Collection.prototype.addItem = function(itemData, errorMessages, obj) {
         var item;
+        obj = obj || this;
 
         if (typeof itemData.id === 'undefined') {
-            errorMessage.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
+            errorMessages.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
         } else {
-            item = this.getById(itemData.id);
+            item = obj.getById(itemData.id);
             if (typeof item !== "object") {     // элемент ранее не создавался
-                var ItemConstructor = this.getItemConstructor();
+                var ItemConstructor = obj.getItemConstructor();
                 item = new ItemConstructor();
-                if (!this.collection) {
-                    this.collection = [];
+                if (!obj.collection) {
+                    obj.collection = [];
                 }
-                this.collection.push (item);
+                obj.collection.push (item);
             }
             item.fillData(itemData, errorMessages);
         }
@@ -56,43 +57,40 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
     };
 
     /**
-     * @param {Array}
+     * @param {Array}, {Array}, {Object}
      * @returns {Array}
      */
-    Collection.prototype.addArray = function(section, errorMessages) {
+    Collection.prototype.addArray = function(itemsData, errorMessages, obj) {
         var newArray = [];
+        errorMessages = errorMessages || [];
+        obj = obj || this;
 
-        if ({}.toString.call(section) !== '[object Array]') {
+        if ({}.toString.call(itemsData) !== '[object Array]') {
             errorMessages.push('Отсутствует массив');
         } else {
-            for (var i=0; i < section.length; i++) {
-                newArray [i] = this.addItem(section[i], errorMessages);
+            for (var i=0; i < itemsData.length; i++) {
+                newArray [i] = obj.addItem(itemsData[i], errorMessages, obj);
             }
         }
         return newArray;
     };
 
-    Collection.prototype.load = function() {
-        var ItemConstructor = this.getItemConstructor(),
-            createItem = function(i){
-                if (typeof i.id ===  'undefined') {
-                    throw new Error('Элемент коллекции ' + JSON.stringify(i) + ' не имеет параметра id.');
-                }
-                return (new ItemConstructor()).deserialize(i);
+    /**
+     * @param {Array}
+     * @returns {Promise}
+     */
+    Collection.prototype.load = function(errorMessages) {
+        var self = this,
+            createItems = function(itemsData){
+                return self.addArray(itemsData, errorMessages, self);
             };
-
-        var self = this;
-        return this.getRestApiProvider().query().then(function (response) {
-            self.collection = _.collect(response, createItem);
-            return self.collection;
-        });
+        return this.getRestApiProvider().query().then(createItems);
     };
 
     /**
      * @param -
      * @returns {Promise}
      */
-
     Collection.prototype.getAll = function() {
         if (!this.collection) {
             var self = this;
@@ -257,6 +255,15 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
 
         return itemData;
     };
+
+    Item.prototype.remove = function () {
+        if (typeof this.id !== 'undefined') {
+            var message = users.remove(this.id);
+            if (message) {
+                // здесь должна быть визуализация диалогового окна с полученным собщением и кнопкой "Осознал"
+            }
+        }
+    }
 
     return Item;
 });

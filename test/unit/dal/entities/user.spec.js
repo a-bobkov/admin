@@ -182,6 +182,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('проверять наличие идентификатора у элементов коллекции', function() {
+            var actual;
+
             spyOn(userApi, 'query').andReturn($q.when(
                 [
                     { id: 1, name: 'Первый' },
@@ -189,10 +191,14 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            expect( function () {
-                users.load();
-                $rootScope.$digest();
-             }).toThrow('Элемент коллекции {"name":"Без идентификатора"} не имеет параметра id.');
+            var errorMessages = [];
+            users.load(errorMessages).then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            expect(errorMessages).toEqualData(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
         });
 
         it('возвращать массив объектов', function() {
@@ -565,15 +571,15 @@ describe('Сервис-конструктор User из модуля app.dal.ent
 
         var city = cities.getById (1);
 
-        var user = new User ({
+        var user = (new User).fillData({
             id: 11,
             name: 'Один пользователь',
-            city_id: {
+            city: {
                 id: 1
             }
         });
 
-        expect(user.city_id).toBe(city);
+        expect(user.city).toBe(city);
     });
 
     it('десериализовать пользователя', function() {
@@ -583,7 +589,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             obj: 2
         }
 
-        var user = new User ({
+        var user = (new User).deserialize({
             id: 1,
             name: 'Первый',
             obj: {
@@ -603,7 +609,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             obj: 2
         }
 
-        var user = new User ({
+        var user = (new User).deserialize({
             id: 1,
             name: 'Первый',
             obj: {
