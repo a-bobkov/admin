@@ -28,30 +28,31 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         var actual,
             url = '/api2/combined/users/',
             expected = {
-                roleList: [
-                    {id: 1, name: 'Роль один'},
-                    {id: 2, name: 'Роль два'}
-                ],
-                managerList: [
-                    {id: 3, name: 'Менеджер один'},
-                    {id: 4, name: 'Менеджер два'}
-                ],
-                cityList: [
+                // roleList: [
+                //     {id: 1, name: 'Роль один'},
+                //     {id: 2, name: 'Роль два'}
+                // ],
+                // managerList: [
+                //     {id: 3, name: 'Менеджер один'},
+                //     {id: 4, name: 'Менеджер два'}
+                // ],
+                cities: [
                     {id: 5, name: 'Город один'},
                     {id: 6, name: 'Город два'}
                 ],
-                marketList: [
+                markets: [
                     {id: 7, name: 'Рынок один', city: {id: 6}},
                     {id: 8, name: 'Рынок два', city: {id: 5}}
-                ],
-                metroList: [
-                    {id: 9, name: 'Метро один', city: {id: 5}},
-                    {id: 10, name: 'Метро два', city: {id: 6}}
-                ],
-                siteList: [
-                    {id: 11, name: 'Сайт один'},
-                    {id: 12, name: 'Сайт два'}
                 ]
+                // ,
+                // metroList: [
+                //     {id: 9, name: 'Метро один', city: {id: 5}},
+                //     {id: 10, name: 'Метро два', city: {id: 6}}
+                // ],
+                // siteList: [
+                //     {id: 11, name: 'Сайт один'},
+                //     {id: 12, name: 'Сайт два'}
+                // ]
             };
 
         spyOn(Api, 'get').andReturn($q.when(
@@ -642,14 +643,14 @@ describe('Сервис опций User из модуля app.dal.entities.user �
         var actual,
             url = '/api2/combined/users/',
             expected = {
-                roles: [
-                    {id: 1, name: 'Роль один'},
-                    {id: 2, name: 'Роль два'}
-                ],
-                managers: [
-                    {id: 3, name: 'Менеджер один'},
-                    {id: 4, name: 'Менеджер два'}
-                ],
+                // roles: [
+                //     {id: 1, name: 'Роль один'},
+                //     {id: 2, name: 'Роль два'}
+                // ],
+                // managers: [
+                //     {id: 3, name: 'Менеджер один'},
+                //     {id: 4, name: 'Менеджер два'}
+                // ],
                 cities: [
                     {id: 5, name: 'Город один'},
                     {id: 6, name: 'Город два'}
@@ -657,15 +658,16 @@ describe('Сервис опций User из модуля app.dal.entities.user �
                 markets: [
                     {id: 7, name: 'Рынок один', city: {id: 6}},
                     {id: 8, name: 'Рынок два', city: {id: 5}}
-                ],
-                metros: [
-                    {id: 9, name: 'Метро один', city: {id: 5}},
-                    {id: 10, name: 'Метро два', city: {id: 6}}
-                ],
-                sites: [
-                    {id: 11, name: 'Сайт один'},
-                    {id: 12, name: 'Сайт два'}
                 ]
+                // ,
+                // metros: [
+                //     {id: 9, name: 'Метро один', city: {id: 5}},
+                //     {id: 10, name: 'Метро два', city: {id: 6}}
+                // ],
+                // sites: [
+                //     {id: 11, name: 'Сайт один'},
+                //     {id: 12, name: 'Сайт два'}
+                // ]
             };
 
         spyOn(Api, 'get').andReturn($q.when(
@@ -679,23 +681,20 @@ describe('Сервис опций User из модуля app.dal.entities.user �
         $rootScope.$digest();
 
         expect(Api.get).toHaveBeenCalledWith(url);
-        expect(actual).toEqualData(expected);
-        expect(actual.marketList[0].city).toBe(actual.cityList[1]);
-        expect(actual.marketList[1].city).toBe(actual.cityList[0]);
-        expect(actual.metroList[0].city).toBe(actual.cityList[0]);
-        expect(actual.metroList[1].city).toBe(actual.cityList[1]);
+        expect(actual.markets[0].city).toBe(actual.cities[1]);
+        expect(actual.markets[1].city).toBe(actual.cities[0]);
     });
 
     it('проверять корректность ответа при загрузке опций с сервера и выдавать полный список ошибок', function() {
         var actual,
             url = '/api2/combined/users/',
             expected = {
-                roles:
-                    {id: 1, name: 'Роль один'},
-                managers: [
-                    {name: 'Менеджер один'},
-                    {id: 4, name: 'Менеджер два'}
-                ],
+                // roles:
+                //     {id: 1, name: 'Роль один'},
+                // managers: [
+                //     {name: 'Менеджер один'},
+                //     {id: 4, name: 'Менеджер два'}
+                // ],
                 cities: [
                     {id: 5, name: 'Город один'},
                     {id: 6, name: 'Город два'}
@@ -703,15 +702,16 @@ describe('Сервис опций User из модуля app.dal.entities.user �
                 markets: [
                     {id: 7, name: 'Рынок один', city: {id: 5}},
                     {id: 8, name: 'Рынок два', city: {ident: 6}}
-                ],
-                metros: [
-                    {id: 9, name: 'Метро один', city: {id: 55}},
-                    {id: 10, name: 'Метро два', city: {id: 6}}
-                ],
-                sites: [
-                    {id: 11, name: 'Сайт один'},
-                    {id: 12, name: 'Сайт два'}
                 ]
+                // ],
+                // metros: [
+                //     {id: 9, name: 'Метро один', city: {id: 55}},
+                //     {id: 10, name: 'Метро два', city: {id: 6}}
+                // ],
+                // sites: [
+                //     {id: 11, name: 'Сайт один'},
+                //     {id: 12, name: 'Сайт два'}
+                // ]
             };
 
         spyOn(Api, 'get').andReturn($q.when(
@@ -724,11 +724,8 @@ describe('Сервис опций User из модуля app.dal.entities.user �
 
         $rootScope.$digest();
 
-        expect(actual).toEqual('\nОтвет сервера содержит неправильное название секции: roles (должно быть "(\\w+)List)"'
-            + '\nОтвет сервера не содержит массив в секции: roles'
-            + '\nОтвет сервера не содержит параметр id в секции: managerList, элементе: {"name":"Менеджер один"}'
-            + '\nОтвет сервера не содержит ссылочный id в секции: marketList, элементе с id: 8, параметре: city'
-            + '\nОтвет сервера не содержит ссылочный элемент для секции: metroList, элемента с id: 9, параметра: city'
+        expect(actual).toEqual('Ответ сервера содержит ошибки:\n'
+            + 'Нет ссылочного id в элементе с id: 8, параметре: city'
         );
     });
 });

@@ -33,88 +33,43 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
 
     /**
      * @param {Object}
-     * @returns {Object} OR {String}
+     * @returns {Object}
      */
-    Collection.prototype.addElem = function(elem) {
-        var errorMessage = '',
-            newElem;
+    Collection.prototype.addItem = function(itemData, errorMessages) {
+        var item;
 
-        if (typeof elem.id === 'undefined') {
-            errorMessage = errorMessage + '\nНет параметра id в элементе: ' + angular.toJson(elem);
+        if (typeof itemData.id === 'undefined') {
+            errorMessage.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
         } else {
-            newElem = this.getById(elem.id);
-            if (!newElem) {     // элемент ранее не создавался
-                newElem = this.getItemConstructor({id: elem.id});
-            }
-            for (var key in elem) {
-                var attr = elem[key],
-                    refElem = attr;
-
-                if (typeof attr === 'object') {
-                    if (typeof attr.id === 'undefined') {
-                        errorMessage = errorMessage + '\nНет ссылочного id в элементе с id: ' + elem.id + ', параметре: ' + key;
-                    } else {
-                        if (key === 'city') { // здесь нужно сделать проверки на все справочники
-                            refElem = cities.getById (attr.id);
-                            if (!refElem) {
-                                refElem = new cities.getItemConstructor({id: attr.id})
-                            }
-                        } else {
-                            errorMessage = errorMessage + '\nНеизвестный ссылочный параметр' + key + ' в элементе с id: ' + elem.id;
-                        }
-                    }
+            item = this.getById(itemData.id);
+            if (typeof item !== "object") {     // элемент ранее не создавался
+                var ItemConstructor = this.getItemConstructor();
+                item = new ItemConstructor();
+                if (!this.collection) {
+                    this.collection = [];
                 }
-                newElem[key] = refElem;
+                this.collection.push (item);
             }
+            item.fillData(itemData, errorMessages);
         }
-
-        if (errorMessage) {
-            return (errorMessage);
-        }
-
-        return data;
+        return item;
     };
 
     /**
      * @param {Array}
-     * @returns {Object} OR {String}
+     * @returns {Array}
      */
-    Collection.prototype.addArray = function(section) {
-        var errorMessage = '';
+    Collection.prototype.addArray = function(section, errorMessages) {
+        var newArray = [];
 
         if ({}.toString.call(section) !== '[object Array]') {
-            errorMessage = errorMessage + '\nОтсутствует массив';
-            errorMessage = errorMessage + this.addElem(section);
+            errorMessages.push('Отсутствует массив');
         } else {
             for (var i=0; i < section.length; i++) {
-                errorMessage = errorMessage + this.addElem(section[i]);
+                newArray [i] = this.addItem(section[i], errorMessages);
             }
         }
-
-        if (errorMessage) {
-            return ('\nОшибки в секции: ' + errorMessage);  // Вставить здесь название справочника this
-        }
-
-        return data;
-    };
-
-    Collection.prototype.responseHandlerOptions = function(response) {
-        var data = response,
-            errorMessage = '';
-
-        for (var key in data) {
-            if (key === "cities") {     // здесь должны проверяться все секции, которые могут встретиться
-                errorMessage = errorMessage + cities.addArray(data[key]);
-            } else {
-                errorMessage = errorMessage + '\nНеизвестная секция: ' + key;
-            }
-        }
-
-        if (errorMessage) {
-            return $q.reject('Ответ сервера содержит ошибки:' + errorMessage);
-        }
-
-        return data;
+        return newArray;
     };
 
     Collection.prototype.load = function() {
@@ -152,7 +107,6 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
      * @param {Number} id
      * @returns {Item} OR {Number}
      */
-
     Collection.prototype.getById = function(id) {
         var item = _.find(this.collection, {id: id});
         if (item) {
@@ -166,7 +120,6 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
      * @param {Number} id
      * @returns {Number}
      */
-
     Collection.prototype.findIndex = function(id) {
         return _.findIndex(this.collection, {id: id});
     };
@@ -175,7 +128,6 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
      * @param {Number} id
      * @returns {Promise}
      */
-
     Collection.prototype.get = function(id) {
         var collection = this.collection,
             idx = this.findIndex(id);
@@ -193,7 +145,6 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
      * @param {User} id
      * @returns {Promise}
      */
-
     Collection.prototype.save = function(user) {
 
         if (user.id) {      // пользователь должен быть в коллекции
@@ -238,9 +189,39 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
     return Collection;
 })
 
-.factory('Item', function() {
+.factory('Item', function(cities) {
 
-    var Item = function () {
+    var Item = function () {};
+
+    /**
+     * @param {Object}
+     * @returns {Object}
+     */
+    Item.prototype.fillData = function(itemData, errorMessages) {
+        for (var key in itemData) {
+            var attr = itemData[key],
+                refElem = attr;
+
+            if (typeof attr === 'object') {
+                if (typeof attr.id === 'undefined') {
+                    errorMessages.push ('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
+                } else {
+                    switch (key) {  // здесь нужно сделать проверки на все справочники, на которые бывает ссылка
+                    case 'city':
+                        refElem = cities.getById (attr.id);
+                        if (typeof refElem !== "object") {
+                            var ItemConstructor = cities.getItemConstructor();
+                            refElem = (new ItemConstructor()).deserialize({id: attr.id});  // создаем пустышку
+                        }
+                        break;
+                    default:
+                        errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
+                    }
+                }
+            }
+            this[key] = refElem;
+        }
+        return this;
     };
 
     Item.prototype.deserialize = function(itemData) {

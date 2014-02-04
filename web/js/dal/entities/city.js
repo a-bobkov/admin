@@ -13,18 +13,9 @@ angular.module('app.dal.entities.city', ['app.dal.entities.collection', 'app.dal
 })
 
 .factory('City', function(cities, Item) {
-    var City = function (data) {};
+    var City = function () {};
 
     angular.extend(City.prototype, Item.prototype);
-
-    City.prototype.remove = function () {
-        if (typeof this.id !== 'undefined') {
-            var message = cities.remove(this.id);
-            if (message) {
-                // здесь должна быть визуализация диалогового окна с полученным собщением и кнопкой "Осознал"
-            }
-        }
-    };
 
     return City;
 })
