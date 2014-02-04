@@ -24,7 +24,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     users.setItemConstructor(User);
 })
 
-.service('UserOptions', function($q, Api, cities, markets) {
+.service('UserOptions', function($q, Api, cities, groups, managers, markets, metros, sites) {
     /**
      * @param -
      * @returns {Promise}
@@ -34,15 +34,31 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
             errorMessages = [];
 
         for (var key in response) {
-            switch (key) {       // здесь должны проверяться все секции, которые могут встретиться
+            var collection;
+            switch (key) {       // здесь должны проверяться все секции, которые могут встретиться при массовой загрузке
               case "cities":
-                dataProcessed[key] = cities.addArray(response[key], errorMessages);
+                collection = cities;
+                break;
+              case "groups":
+                collection = groups;
+                break;
+              case "managers":
+                collection = managers;
                 break;
               case "markets":
-                dataProcessed[key] = markets.addArray(response[key], errorMessages);
+                collection = markets;
+                break;
+              case "metros":
+                collection = metros;
+                break;
+              case "sites":
+                collection = sites;
                 break;
               default:
                 errorMessages.push ('Неизвестная секция: ' + key);
+            }
+            if (collection) {
+                dataProcessed[key] = collection.addArray(response[key], errorMessages);
             }
         }
 

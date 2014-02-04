@@ -28,14 +28,14 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         var actual,
             url = '/api2/combined/users/',
             expected = {
-                // roleList: [
-                //     {id: 1, name: 'Роль один'},
-                //     {id: 2, name: 'Роль два'}
-                // ],
-                // managerList: [
-                //     {id: 3, name: 'Менеджер один'},
-                //     {id: 4, name: 'Менеджер два'}
-                // ],
+                groups: [
+                    {id: 1, name: 'Роль один'},
+                    {id: 2, name: 'Роль два'}
+                ],
+                managers: [
+                    {id: 3, name: 'Менеджер один'},
+                    {id: 4, name: 'Менеджер два'}
+                ],
                 cities: [
                     {id: 5, name: 'Город один'},
                     {id: 6, name: 'Город два'}
@@ -43,16 +43,15 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 markets: [
                     {id: 7, name: 'Рынок один', city: {id: 6}},
                     {id: 8, name: 'Рынок два', city: {id: 5}}
+                ],
+                metros: [
+                    {id: 9, name: 'Метро один', city: {id: 5}},
+                    {id: 10, name: 'Метро два', city: {id: 6}}
+                ],
+                sites: [
+                    {id: 11, name: 'Сайт один'},
+                    {id: 12, name: 'Сайт два'}
                 ]
-                // ,
-                // metroList: [
-                //     {id: 9, name: 'Метро один', city: {id: 5}},
-                //     {id: 10, name: 'Метро два', city: {id: 6}}
-                // ],
-                // siteList: [
-                //     {id: 11, name: 'Сайт один'},
-                //     {id: 12, name: 'Сайт два'}
-                // ]
             };
 
         spyOn(Api, 'get').andReturn($q.when(
@@ -488,27 +487,31 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 describe('Сервис-конструктор User из модуля app.dal.entities.user умеет', function() {
     var $rootScope,
         $q,
-        users,
-        User,
-        userApi,
-        UserOptions,
         Api,
-        cityApi,
-        cities;
+        User,
+        UserOptions,
+        groups,
+        managers,
+        cities,
+        markets,
+        metros,
+        sites;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _users_, _User_, _userApi_, _UserOptions_, _Api_, _cityApi_, _cities_)  {
+        inject(function(_$rootScope_, _$q_, _Api_, _User_, _UserOptions_, _groups_, _managers_, _cities_, _markets_, _metros_, _sites_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
-            users = _users_;
-            User = _User_;
-            userApi = _userApi_;
-            UserOptions = _UserOptions_;
             Api = _Api_;
-            cityApi = _cityApi_;
+            User = _User_;
+            UserOptions = _UserOptions_;
+            groups = _groups_;
+            managers = _managers_;
             cities = _cities_;
+            markets = _markets_;
+            metros = _metros_;
+            sites = _sites_;
         });
     });
 
@@ -516,27 +519,27 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         var actual,
             url = '/api2/combined/users/',
             expected = {
-                roleList: [
+                groups: [
                     {id: 1, name: 'Роль один'},
                     {id: 2, name: 'Роль два'}
                 ],
-                managerList: [
+                managers: [
                     {id: 3, name: 'Менеджер один'},
                     {id: 4, name: 'Менеджер два'}
                 ],
-                cityList: [
+                cities: [
                     {id: 5, name: 'Город один'},
                     {id: 6, name: 'Город два'}
                 ],
-                marketList: [
+                markets: [
                     {id: 7, name: 'Рынок один', city: {id: 6}},
                     {id: 8, name: 'Рынок два', city: {id: 5}}
                 ],
-                metroList: [
+                metros: [
                     {id: 9, name: 'Метро один', city: {id: 5}},
                     {id: 10, name: 'Метро два', city: {id: 6}}
                 ],
-                siteList: [
+                sites: [
                     {id: 11, name: 'Сайт один'},
                     {id: 12, name: 'Сайт два'}
                 ]
@@ -553,33 +556,31 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         $rootScope.$digest();
     });
 
-    it('создавать пользователей со ссылками на города', function() {
-        var actual;
-
-        spyOn(cityApi, 'query').andReturn($q.when(
-            [
-                { id: 1, name: 'Первый город' },
-                { id: 2, name: 'Второй город' },
-                { id: 3, name: 'Третий город' }
-            ]
-        ));
-
-        cities.getAll().then(function(respond) {
-            actual = respond;
-        });
-        $rootScope.$digest();
-
-        var city = cities.getById (1);
+    it('создавать пользователей со ссылками на элементы', function() {
+        var group = groups.getById (1);
+        var manager = managers.getById (3);
+        var city = cities.getById (5);
+        var market = markets.getById (7);
+        var metro = metros.getById (9);
+        var site = sites.getById (11);
 
         var user = (new User).fillData({
             id: 11,
             name: 'Один пользователь',
-            city: {
-                id: 1
-            }
+            group: { id: 1},
+            manager: { id: 3},
+            city: { id: 5},
+            market: { id: 7},
+            metro: { id: 9},
+            site: { id: 11},
         });
 
+        expect(user.group).toBe(group);
+        expect(user.manager).toBe(manager);
         expect(user.city).toBe(city);
+        expect(user.market).toBe(market);
+        expect(user.metro).toBe(metro);
+        expect(user.site).toBe(site);
     });
 
     it('десериализовать пользователя', function() {

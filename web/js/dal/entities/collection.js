@@ -1,6 +1,14 @@
 'use strict';
 
-angular.module('app.dal.entities.collection', ['app.dal.entities.city', 'app.dal.entities.dealer'])
+angular.module('app.dal.entities.collection', [
+    'app.dal.entities.city',
+    'app.dal.entities.dealer',
+    'app.dal.entities.group',
+    'app.dal.entities.manager',
+    'app.dal.entities.market',
+    'app.dal.entities.metro',
+    'app.dal.entities.site'
+])
 
 .factory('Collection', function($q) {
     /**
@@ -187,7 +195,7 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city', 'app.dal
     return Collection;
 })
 
-.factory('Item', function(cities, dealers) {
+.factory('Item', function(cities, dealers, groups, managers, markets, metros, sites) {
 
     var Item = function () {};
 
@@ -204,25 +212,39 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city', 'app.dal
                 if (typeof attr.id === 'undefined') {
                     errorMessages.push ('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
                 } else {
-                    switch (key) {  // здесь нужно сделать проверки на все справочники, на которые бывает ссылка
+                    var collection;
+                    switch (key) {  // здесь должны проверяться все справочники, на которые бывают ссылки
                     case 'city':
-                        refElem = cities.getById (attr.id);
-                        if (typeof refElem !== "object") {
-                            var ItemConstructor = cities.getItemConstructor();
-                            refElem = new ItemConstructor();
-                        }
-                        refElem.fillData(attr);
+                        collection = cities;
                         break;
                     case 'dealer':
-                        refElem = dealers.getById (attr.id);
-                        if (typeof refElem !== "object") {
-                            var ItemConstructor = dealers.getItemConstructor();
-                            refElem = new ItemConstructor();
-                        }
-                        refElem.fillData(attr);
+                        collection = dealers;
+                        break;
+                    case 'group':
+                        collection = groups;
+                        break;
+                    case 'manager':
+                        collection = managers;
+                        break;
+                    case 'market':
+                        collection = markets;
+                        break;
+                    case 'metro':
+                        collection = metros;
+                        break;
+                    case 'site':
+                        collection = sites;
                         break;
                     default:
                         errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
+                    }
+                    if (collection) {
+                        refElem = collection.getById (attr.id);
+                        if (typeof refElem !== "object") {
+                            var ItemConstructor = collection.getItemConstructor();
+                            refElem = new ItemConstructor();
+                        }
+                        refElem.fillData(attr);
                     }
                 }
             }
