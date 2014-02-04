@@ -469,17 +469,20 @@ describe('Сервис-конструктор City из модуля app.dal.ent
     beforeEach(function() {
     });
 
-    it('десериализовать пользователя', function() {
+    it('десериализовать город', function() {
         var expected = {
             id: 1,
             name: 'Первый',
-            obj: 2
+            city: {
+                id: 2,
+                name: 'Вложенный'
+            }
         }
 
-        var city = (new City ()).deserialize({
+        var city = (new City ()).fillData({
             id: 1,
             name: 'Первый',
-            obj: {
+            city: {
                 id: 2,
                 name: 'Вложенный'
             }
@@ -488,24 +491,24 @@ describe('Сервис-конструктор City из модуля app.dal.ent
         expect(city).toEqualData(expected);
     });
 
-    it('сериализовать пользователя', function() {
+    it('сериализовать город', function() {
         var actual,
             expected = {
             id: 1,
             name: 'Первый',
-            obj: 2
+            city: 2
         }
 
-        var city = (new City ()).deserialize({
+        var city = (new City).fillData({
             id: 1,
             name: 'Первый',
-            obj: {
+            city: {
                 id: 2,
                 name: 'Вложенный'
             }
         });
 
-        city.obj = {
+        city.city = {
             id: 2,
             name: 'Вложенный'
         }

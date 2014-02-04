@@ -134,35 +134,35 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
             return $q.reject("В коллекции не найден требуемый элемент: " + id);
         } else {
             return this.getRestApiProvider().get(id).then(function(response){
-                return collection[idx].deserialize(response);
+                return collection[idx].fillData(response);
             });
         }
     };
 
     /**
-     * @param {User} id
+     * @param {Item} id
      * @returns {Promise}
      */
-    Collection.prototype.save = function(user) {
+    Collection.prototype.save = function(item) {
 
-        if (user.id) {      // пользователь должен быть в коллекции
+        if (item.id) {      // элемент должен быть в коллекции
             var collection = this.collection,
-                idx = this.findIndex(user.id);
+                idx = this.findIndex(item.id);
 
             if (-1 === idx) {
-                return $q.reject("В коллекции не найден требуемый элемент: " + user.id);
+                return $q.reject("В коллекции не найден требуемый элемент: " + item.id);
             } else {
-                return this.getRestApiProvider().update(user.serialize()).then(function(response){
-                    return collection[idx].deserialize(response);
+                return this.getRestApiProvider().update(item.serialize()).then(function(response){
+                    return collection[idx].fillData(response);
                 });
             }
 
         } else {
             var collection = this.collection;
-            return this.getRestApiProvider().create(user.serialize()).then(function(response){
-                user.deserialize(response);
-                collection.push(user);
-                return user;
+            return this.getRestApiProvider().create(item.serialize()).then(function(response){
+                item.fillData(response);
+                collection.push(item);
+                return item;
             });
         }
     };
@@ -209,8 +209,9 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
                         refElem = cities.getById (attr.id);
                         if (typeof refElem !== "object") {
                             var ItemConstructor = cities.getItemConstructor();
-                            refElem = (new ItemConstructor()).deserialize({id: attr.id});  // создаем пустышку
+                            refElem = new ItemConstructor();
                         }
+                        refElem.fillData(attr);
                         break;
                     default:
                         errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
@@ -219,24 +220,6 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
             }
             this[key] = refElem;
         }
-        return this;
-    };
-
-    Item.prototype.deserialize = function(itemData) {
-        var key;
-
-        for (key in itemData) {
-            if (typeof itemData[key] === "object") {
-                this[key] = itemData[key].id;
-                // для ссылочной целостности, здесь должен быть либо:
-                // 1. если в объекте - только id, то поиск ранее созданного объекта и сохранение ссылки на него
-                //    если объекта еще нет, то можно здесь создать пустой, а когда он будет создаваться - наполнить
-                // 2. иначе - вызов конструктора объекта (data[key]) и сохранение ссылки на него
-            } else {
-                this[key] = itemData[key];
-            }
-        }
-
         return this;
     };
 

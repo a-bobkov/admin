@@ -586,13 +586,16 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         var expected = {
             id: 1,
             name: 'Первый',
-            obj: 2
+            city: {
+                id: 2,
+                name: 'Вложенный'
+            }
         }
 
-        var user = (new User).deserialize({
+        var user = (new User).fillData({
             id: 1,
             name: 'Первый',
-            obj: {
+            city: {
                 id: 2,
                 name: 'Вложенный'
             }
@@ -606,22 +609,17 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             expected = {
             id: 1,
             name: 'Первый',
-            obj: 2
+            city: 2
         }
 
-        var user = (new User).deserialize({
+        var user = (new User).fillData({
             id: 1,
             name: 'Первый',
-            obj: {
+            city: {
                 id: 2,
                 name: 'Вложенный'
             }
         });
-
-        user.obj = {
-            id: 2,
-            name: 'Вложенный'
-        }
 
         actual = user.serialize();
         expect(actual).toEqualData(expected);
