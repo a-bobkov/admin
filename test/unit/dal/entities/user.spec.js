@@ -604,7 +604,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         expect(user).toEqualData(expected);
     });
 
-    it('сериализовать пользователя', function() {
+    it('сериализовать пользователя без вложения элементов по ссылкам', function() {
         var actual,
             expected = {
             id: 1,
@@ -616,6 +616,30 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             id: 1,
             name: 'Первый',
             city: {
+                id: 2,
+                name: 'Вложенный'
+            }
+        });
+
+        actual = user.serialize();
+        expect(actual).toEqualData(expected);
+    });
+
+    it('сериализовать пользователя с вложением дилера по ссылке', function() {
+        var actual,
+            expected = {
+            id: 1,
+            name: 'Первый',
+            dealer: {
+                id: 2,
+                name: 'Вложенный'
+            }
+        }
+
+        var user = (new User).fillData({
+            id: 1,
+            name: 'Первый',
+            dealer: {
                 id: 2,
                 name: 'Вложенный'
             }

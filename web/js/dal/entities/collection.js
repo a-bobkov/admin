@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
+angular.module('app.dal.entities.collection', ['app.dal.entities.city', 'app.dal.entities.dealer'])
 
 .factory('Collection', function($q) {
     /**
@@ -187,7 +187,7 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
     return Collection;
 })
 
-.factory('Item', function(cities) {
+.factory('Item', function(cities, dealers) {
 
     var Item = function () {};
 
@@ -213,6 +213,14 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
                         }
                         refElem.fillData(attr);
                         break;
+                    case 'dealer':
+                        refElem = dealers.getById (attr.id);
+                        if (typeof refElem !== "object") {
+                            var ItemConstructor = dealers.getItemConstructor();
+                            refElem = new ItemConstructor();
+                        }
+                        refElem.fillData(attr);
+                        break;
                     default:
                         errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                     }
@@ -229,8 +237,11 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
 
         for (key in this) {
             if (typeof this[key] === "object") {
-                itemData[key] = this[key].id;
-                //data[key] = this[key].serialize();        // исключение! для дилера здесь должно быть так
+                if (key === "dealer") {
+                    itemData[key] = this[key].serialize();
+                } else {
+                    itemData[key] = this[key].id;
+                }
             } else {
                 itemData[key] = this[key];
             }
