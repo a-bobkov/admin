@@ -470,7 +470,7 @@ describe('Сервис-конструктор City из модуля app.dal.ent
             obj: 2
         }
 
-        var city = new City ({
+        var city = (new City ()).deserialize({
             id: 1,
             name: 'Первый',
             obj: {
@@ -490,7 +490,7 @@ describe('Сервис-конструктор City из модуля app.dal.ent
             obj: 2
         }
 
-        var city = new City ({
+        var city = (new City ()).deserialize({
             id: 1,
             name: 'Первый',
             obj: {

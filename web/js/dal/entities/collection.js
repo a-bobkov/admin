@@ -36,7 +36,8 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
      * @returns {Object} OR {String}
      */
     Collection.prototype.addElem = function(elem) {
-        var errorMessage = '';
+        var errorMessage = '',
+            newElem;
 
         if (typeof elem.id === 'undefined') {
             errorMessage = errorMessage + '\nНет параметра id в элементе: ' + angular.toJson(elem);
@@ -95,14 +96,14 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
         }
 
         return data;
-    }
+    };
 
     Collection.prototype.responseHandlerOptions = function(response) {
         var data = response,
             errorMessage = '';
 
         for (var key in data) {
-            if (key === "cities") {     // здесь должны проверяться все секции, которые могут встретиться 
+            if (key === "cities") {     // здесь должны проверяться все секции, которые могут встретиться
                 errorMessage = errorMessage + cities.addArray(data[key]);
             } else {
                 errorMessage = errorMessage + '\nНеизвестная секция: ' + key;
@@ -122,7 +123,7 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
                 if (typeof i.id ===  'undefined') {
                     throw new Error('Элемент коллекции ' + JSON.stringify(i) + ' не имеет параметра id.');
                 }
-                return new ItemConstructor(i);
+                return (new ItemConstructor()).deserialize(i);
             };
 
         var self = this;
@@ -158,7 +159,7 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
             return item;
         } else {
             return id;
-        } 
+        }
     };
 
     /**
@@ -235,4 +236,46 @@ angular.module('app.dal.entities.collection', ['app.dal.entities.city'])
     };
 
     return Collection;
+})
+
+.factory('Item', function() {
+
+    var Item = function () {
+    };
+
+    Item.prototype.deserialize = function(itemData) {
+        var key;
+
+        for (key in itemData) {
+            if (typeof itemData[key] === "object") {
+                this[key] = itemData[key].id;
+                // для ссылочной целостности, здесь должен быть либо:
+                // 1. если в объекте - только id, то поиск ранее созданного объекта и сохранение ссылки на него
+                //    если объекта еще нет, то можно здесь создать пустой, а когда он будет создаваться - наполнить
+                // 2. иначе - вызов конструктора объекта (data[key]) и сохранение ссылки на него
+            } else {
+                this[key] = itemData[key];
+            }
+        }
+
+        return this;
+    };
+
+    Item.prototype.serialize = function() {
+        var key,
+            itemData = {};
+
+        for (key in this) {
+            if (typeof this[key] === "object") {
+                itemData[key] = this[key].id;
+                //data[key] = this[key].serialize();        // исключение! для дилера здесь должно быть так
+            } else {
+                itemData[key] = this[key];
+            }
+        }
+
+        return itemData;
+    };
+
+    return Item;
 });
