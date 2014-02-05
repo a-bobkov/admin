@@ -23,3 +23,10 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
 .run(function(sites, Site) {
     sites.setItemConstructor(Site);
 });
+
+
+angular.module('app.dal.rest.site', ['app.dal.rest.api'])
+
+.factory('siteApi', function(RestApi) {
+   return new RestApi('sites', 'site');
+});

@@ -23,3 +23,10 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
 .run(function(metros, Metro) {
     metros.setItemConstructor(Metro);
 });
+
+
+angular.module('app.dal.rest.metro', ['app.dal.rest.api'])
+
+.factory('metroApi', function(RestApi) {
+   return new RestApi('metros', 'metro');
+});

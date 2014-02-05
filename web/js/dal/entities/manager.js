@@ -23,3 +23,10 @@ angular.module('app.dal.entities.manager', ['app.dal.entities.collection', 'app.
 .run(function(managers, Manager) {
     managers.setItemConstructor(Manager);
 });
+
+
+angular.module('app.dal.rest.manager', ['app.dal.rest.api'])
+
+.factory('managerApi', function(RestApi) {
+   return new RestApi('managers', 'manager');
+});

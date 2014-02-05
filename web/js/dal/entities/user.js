@@ -73,3 +73,10 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
         return Api.get('/api2/combined/users/').then(this.responseHandlerOptions);
     };
 });
+
+
+angular.module('app.dal.rest.user', ['app.dal.rest.api'])
+
+.factory('userApi', function(RestApi) {
+    return new RestApi('users', 'user');
+});
