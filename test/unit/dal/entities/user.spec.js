@@ -241,7 +241,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-            var user = users.getById(3);
+            var user = users.get(3);
             expect(user instanceof User).toBeTruthy();
         });
 
@@ -261,7 +261,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-            var user = users.getById(3);
+            var user = users.get(3);
             expect(user instanceof User).toBeTruthy();
         });
     });
@@ -284,14 +284,14 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-            var user = users.getById(3);
+            var user = users.get(3);
             expect(user.ext).toBeUndefined();
 
             spyOn(userApi, 'get').andReturn($q.when(
                 { id: 3, name: 'Третий', ext: 'Ещё свойство' }
             ));
 
-            users.get(3).then(function(respond) {
+            users.getUser(3).then(function(respond) {
                 user = respond;
             });
             $rootScope.$digest();
@@ -320,7 +320,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 { id: 5, name: 'Пропущенный'}
             ));
 
-            users.get(5).then(null, function(respond) {
+            users.getUser(5).then(null, function(respond) {
                 actual = respond;
             });
             $rootScope.$digest();
@@ -351,7 +351,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
             $rootScope.$digest();
 
-            var user = users.getById(2);
+            var user = users.get(2);
             user.name = 'Другой';
 
             users.save(user).then(function(respond) {
@@ -557,12 +557,12 @@ describe('Сервис-конструктор User из модуля app.dal.ent
     });
 
     it('создавать пользователей со ссылками на элементы', function() {
-        var group = groups.getById (1);
-        var manager = managers.getById (3);
-        var city = cities.getById (5);
-        var market = markets.getById (7);
-        var metro = metros.getById (9);
-        var site = sites.getById (11);
+        var group = groups.get (1);
+        var manager = managers.get (3);
+        var city = cities.get (5);
+        var market = markets.get (7);
+        var metro = metros.get (9);
+        var site = sites.get (11);
 
         var user = (new User).fillData({
             id: 11,

@@ -50,7 +50,7 @@ angular.module('app.dal.entities.collection', [
         if (typeof itemData.id === 'undefined') {
             errorMessages.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
         } else {
-            item = obj.getById(itemData.id);
+            item = obj.get(itemData.id);
             if (typeof item !== "object") {     // элемент ранее не создавался
                 var ItemConstructor = obj.getItemConstructor();
                 item = new ItemConstructor();
@@ -113,7 +113,7 @@ angular.module('app.dal.entities.collection', [
      * @param {Number} id
      * @returns {Item} OR {Number}
      */
-    Collection.prototype.getById = function(id) {
+    Collection.prototype.get = function(id) {
         var item = _.find(this.collection, {id: id});
         if (item) {
             return item;
@@ -124,17 +124,9 @@ angular.module('app.dal.entities.collection', [
 
     /**
      * @param {Number} id
-     * @returns {Number}
-     */
-    Collection.prototype.findIndex = function(id) {
-        return _.findIndex(this.collection, {id: id});
-    };
-
-    /**
-     * @param {Number} id
      * @returns {Promise}
      */
-    Collection.prototype.get = function(id) {
+    Collection.prototype.getUser = function(id) {   // этот метод надо сделать методом users.get (перекрытие)
         var collection = this.collection,
             idx = this.findIndex(id);
 
@@ -145,6 +137,14 @@ angular.module('app.dal.entities.collection', [
                 return collection[idx].fillData(response);
             });
         }
+    };
+
+    /**
+     * @param {Number} id
+     * @returns {Number}
+     */
+    Collection.prototype.findIndex = function(id) {
+        return _.findIndex(this.collection, {id: id});
     };
 
     /**
@@ -239,7 +239,7 @@ angular.module('app.dal.entities.collection', [
                         errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                     }
                     if (collection) {
-                        refElem = collection.getById (attr.id);
+                        refElem = collection.get (attr.id);
                         if (typeof refElem !== "object") {
                             var ItemConstructor = collection.getItemConstructor();
                             refElem = new ItemConstructor();
@@ -259,7 +259,7 @@ angular.module('app.dal.entities.collection', [
 
         for (key in this) {
             if (typeof this[key] === "object") {
-                if (key === "dealer") {
+                if (key === "dealer") {               // этот случай надо сделать перекрытием данного метода на User
                     itemData[key] = this[key].serialize();
                 } else {
                     itemData[key] = this[key].id;

@@ -201,7 +201,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
 
             $rootScope.$digest();
-            var city = cities.getById(3);
+            var city = cities.get(3);
             expect(city instanceof City).toBeTruthy();
         });
 
@@ -221,72 +221,35 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
 
             $rootScope.$digest();
-            var city = cities.getById(3);
+            var city = cities.get(3);
             expect(city instanceof City).toBeTruthy();
         });
+
+        it('возвращать id, если требуемый элемент не найден в коллекции', function() {
+            var actual;
+
+            spyOn(cityApi, 'query').andReturn($q.when(
+                [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ]
+            ));
+
+            cities.load().then(function(respond) {
+                actual = respond;
+            });
+
+            $rootScope.$digest();
+
+            var city = cities.get(5);
+
+            expect(city).toEqual(5);
+        });
+
     });
 
     describe('должен управлять коллекцией объектов, для чего уметь', function() {
-
-        it('возвращать объект с сервера, обновляя данный элемент коллекции', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-            var city = cities.getById(3);
-            expect(city.ext).toBeUndefined();
-
-            spyOn(cityApi, 'get').andReturn($q.when(
-                { id: 3, name: 'Третий', ext: 'Ещё свойство' }
-            ));
-
-            cities.get(3).then(function(respond) {
-                city = respond;
-            });
-            $rootScope.$digest();
-
-            expect(city.ext).toEqual('Ещё свойство');
-        });
-
-        it('выдавать ошибку, если требуемый элемент не найден в коллекции', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            spyOn(cityApi, 'get').andReturn($q.when(
-                { id: 5, name: 'Пропущенный'}
-            ));
-
-            cities.get(5).then(null, function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            expect(actual).toEqual('В коллекции не найден требуемый элемент: 5');
-        });
 
         it('обновлять элемент в коллекции после получения подтверждения от сервера', function() {
             var actual,
@@ -311,7 +274,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
             $rootScope.$digest();
 
-            var city = cities.getById(2);
+            var city = cities.get(2);
             city.name = 'Другой';
 
             cities.save(city).then(function(respond) {

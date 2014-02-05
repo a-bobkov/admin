@@ -29,7 +29,7 @@ describe('http-mock', function() {
 
         $httpBackend.whenGET(regexGet).respond(function(method, url, data) {
             var id = parseInt(url.replace(regexGet,'$1'));
-            var user = users.getById(id);
+            var user = users.get(id);
             if (typeof user === 'object') {
                 return [200, {
                     status: 'success',
@@ -55,7 +55,7 @@ describe('http-mock', function() {
                 name: 'Пользователь один'
             }
 
-            users.get(1).then(function(respond) {
+            users.getUser(1).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond){
                 actualError = respond;
@@ -70,7 +70,7 @@ describe('http-mock', function() {
             actualError,
             expected = 'В коллекции не найден требуемый элемент: 5';
 
-            users.get(5).then(function(respond) {
+            users.getUser(5).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond){
                 actualError = respond;
