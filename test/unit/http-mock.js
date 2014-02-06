@@ -55,7 +55,7 @@ describe('http-mock', function() {
                 name: 'Пользователь один'
             }
 
-            users.getUser(1).then(function(respond) {
+            users.get(1).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond){
                 actualError = respond;
@@ -70,7 +70,7 @@ describe('http-mock', function() {
             actualError,
             expected = 'В коллекции не найден элемент с id: 5';
 
-            users.getUser(5).then(function(respond) {
+            users.get(5).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond){
                 actualError = respond;

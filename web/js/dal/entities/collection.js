@@ -145,19 +145,6 @@ angular.module('app.dal.entities.collection', [
     };
 
     /**
-     * @param {Number} id
-     * @returns {Promise}
-     */
-    Collection.prototype.getUser = function(id) {   // этот метод надо сделать методом users.get (перекрытие)
-        var self = this;
-        return Collection.prototype.get.call(this, id).then(function (item) {
-            return self.getRestApiProvider().get(id).then(function(itemData){
-                return item._fillData(itemData);
-            });
-        })
-    };
-
-    /**
      * @param {Item} id
      * @returns {Promise}
      */

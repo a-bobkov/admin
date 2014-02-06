@@ -229,7 +229,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('возвращать объект коллекции по id', function() {
-            var actual;
+            var actualSuccess,
+                actualError;
 
             spyOn(userApi, 'query').andReturn($q.when(
                 [
@@ -239,12 +240,22 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
+            spyOn(userApi, 'get').andReturn($q.when(
+                    {
+                        id: 3,
+                        name: 'Третий',
+                        ext: 'Экстра' 
+                    }
+            ));
+
             users.get(3).then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-            expect(actual instanceof User).toBeTruthy();
+            expect(actualSuccess instanceof User).toBeTruthy();
         });
 
         it('возвращать индекс объекта коллекции по id', function() {
@@ -293,7 +304,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 { id: 3, name: 'Третий', ext: 'Ещё свойство' }
             ));
 
-            users.getUser(3).then(function(respond) {
+            users.get(3).then(function(respond) {
                 user = respond;
             });
             $rootScope.$digest();
@@ -313,7 +324,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            users.getUser(5).then(null, function(respond) {
+            users.get(5).then(null, function(respond) {
                 actualError = respond;
             });
 

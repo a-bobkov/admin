@@ -9,6 +9,19 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     collection = new Collection;
     collection.setRestApiProvider(userApi);
 
+    /**
+     * @param {Number} id
+     * @returns {Promise}
+     */
+    collection.get = function(id) {
+        var self = this;
+        return Collection.prototype.get.call(this, id).then(function (item) {
+            return self.getRestApiProvider().get(id).then(function(itemData){
+                return item._fillData(itemData);
+            });
+        })
+    };
+
     return collection;
 })
 
