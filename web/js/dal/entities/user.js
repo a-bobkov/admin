@@ -4,6 +4,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     'app.dal.entities.city',
     'app.dal.entities.dealer',
     'app.dal.entities.group',
+    'app.dal.entities.status',
     'app.dal.entities.manager',
     'app.dal.entities.market',
     'app.dal.entities.metro',
