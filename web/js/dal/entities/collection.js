@@ -1,20 +1,18 @@
 'use strict';
 
-angular.module('app.dal.entities.collection', [
-    'app.dal.entities.city',
-    'app.dal.entities.dealer',
-    'app.dal.entities.group',
-    'app.dal.entities.manager',
-    'app.dal.entities.market',
-    'app.dal.entities.metro',
-    'app.dal.entities.site'
-])
+angular.module('app.dal.entities.collection', [])
 
 .factory('Collection', function($q) {
     /**
      * Реализация базовой функциональности для работы с коллекциями объектов
      */
     var Collection = function () {};
+
+    Collection.prototype.children = {};
+
+    Collection.prototype.registerChild = function(entityName) {
+        Collection.prototype.children[entityName] = this;
+    };
 
     Collection.prototype.setItemConstructor = function(ItemConstructor) {
         this.ItemConstructor = ItemConstructor;
@@ -192,7 +190,7 @@ angular.module('app.dal.entities.collection', [
     return Collection;
 })
 
-.factory('Item', function(cities, dealers, groups, managers, markets, metros, sites) {
+.factory('Item', function(Collection) {
 
     var Item = function () {};
 
@@ -210,34 +208,11 @@ angular.module('app.dal.entities.collection', [
                 if (typeof attr.id === 'undefined') {
                     errorMessages.push ('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
                 } else {
-                    var collection;
-                    switch (key) {  // здесь должны проверяться все справочники, на которые бывают ссылки
-                    case 'city':
-                        collection = cities;
-                        break;
-                    case 'dealer':
-                        collection = dealers;
-                        break;
-                    case 'group':
-                        collection = groups;
-                        break;
-                    case 'manager':
-                        collection = managers;
-                        break;
-                    case 'market':
-                        collection = markets;
-                        break;
-                    case 'metro':
-                        collection = metros;
-                        break;
-                    case 'site':
-                        collection = sites;
-                        break;
-                    default:
-                        errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
-                    }
+                    var collection = Collection.prototype.children[key];
                     if (collection) {
                         refElem = collection._addItem(attr, errorMessages);
+                    } else {
+                        errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                     }
                 }
             }

@@ -8,6 +8,7 @@ angular.module('app.dal.entities.city', ['app.dal.entities.collection', 'app.dal
 
     collection = new Collection;
     collection.setRestApiProvider(cityApi);
+    collection.registerChild ('city');
 
     return collection;
 })

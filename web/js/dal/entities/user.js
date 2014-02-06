@@ -1,6 +1,14 @@
 'use strict';
 
-angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal.rest.user', 'app.dal.entities.city', 'app.dal.entities.market'])
+angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal.rest.user', 
+    'app.dal.entities.city',
+    'app.dal.entities.dealer',
+    'app.dal.entities.group',
+    'app.dal.entities.manager',
+    'app.dal.entities.market',
+    'app.dal.entities.metro',
+    'app.dal.entities.site'
+])
 
 .factory('users', function(Collection, userApi) {
 
@@ -8,6 +16,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 
     collection = new Collection;
     collection.setRestApiProvider(userApi);
+    collection.registerChild ('user');
 
     /**
      * @param {Number} id
