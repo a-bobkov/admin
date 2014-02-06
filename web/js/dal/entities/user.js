@@ -58,7 +58,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
                 errorMessages.push ('Неизвестная секция: ' + key);
             }
             if (collection) {
-                dataProcessed[key] = collection.addArray(response[key], errorMessages);
+                dataProcessed[key] = collection._addArray(response[key], errorMessages);
             }
         }
 

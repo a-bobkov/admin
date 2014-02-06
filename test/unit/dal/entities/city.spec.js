@@ -201,7 +201,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
 
             $rootScope.$digest();
-            var city = cities.get(3);
+            var city = cities._findItem(3);
             expect(city instanceof City).toBeTruthy();
         });
 
@@ -221,8 +221,8 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
 
             $rootScope.$digest();
-            var city = cities.get(3);
-            expect(city instanceof City).toBeTruthy();
+            var idx = cities._findIndex(3);
+            expect(cities.collection[idx]).toBe(cities._findItem(3));
         });
 
         it('возвращать undefined, если требуемый элемент не найден в коллекции', function() {
@@ -236,54 +236,17 @@ describe('Сервис cities из модуля app.dal.entities.city', function
                 ]
             ));
 
-            cities.load().then(function(respond) {
+            cities.get(5).then(function(respond) {
                 actual = respond;
             });
 
             $rootScope.$digest();
-
-            var city = cities.get(5);
-
-            expect(city).toEqual(undefined);
+            expect(actual).toEqual(undefined);
         });
 
     });
 
     describe('должен управлять коллекцией объектов, для чего уметь', function() {
-
-        it('обновлять элемент в коллекции после получения подтверждения от сервера', function() {
-            var actual,
-                expected = {
-                    id: 2,
-                    name: 'Другой',
-                    ext: 'Extra'
-                };
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(cityApi, 'update').andReturn($q.when(expected));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            var city = cities.get(2);
-            city.name = 'Другой';
-
-            cities.save(city).then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-            expect(cityApi.update).toHaveBeenCalled()
-            expect(actual).toEqualData(expected);
-        });
 
         it('создавать элемент в коллекции после получения подтверждения от сервера', function() {
             var actual,
@@ -442,7 +405,7 @@ describe('Сервис-конструктор City из модуля app.dal.ent
             }
         }
 
-        var city = (new City ()).fillData({
+        var city = (new City ())._fillData({
             id: 1,
             name: 'Первый',
             city: {
@@ -462,7 +425,7 @@ describe('Сервис-конструктор City из модуля app.dal.ent
             city: 2
         }
 
-        var city = (new City).fillData({
+        var city = (new City)._fillData({
             id: 1,
             name: 'Первый',
             city: {
@@ -476,7 +439,7 @@ describe('Сервис-конструктор City из модуля app.dal.ent
             name: 'Вложенный'
         }
 
-        actual = city.serialize();
+        actual = city._serialize();
         expect(actual).toEqualData(expected);
     });
 });

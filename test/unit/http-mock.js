@@ -23,18 +23,18 @@ describe('http-mock', function() {
                 {id: 2, name: 'Пользователь два'}
             ];
         
-        users.addArray(usersArray);
+        users._addArray(usersArray);
 
         var regexGet = /^\/users\/(?:([^\/]+))$/;
 
         $httpBackend.whenGET(regexGet).respond(function(method, url, data) {
             var id = parseInt(url.replace(regexGet,'$1'));
-            var user = users.get(id);
+            var user = users._findItem(id);
             if (typeof user === 'object') {
                 return [200, {
                     status: 'success',
                     data: {
-                        user: user.serialize()
+                        user: user._serialize()
                     }
                 }];
             } else {

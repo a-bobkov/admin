@@ -40,8 +40,18 @@ angular.module('app.dal.entities.collection', [
     };
 
     /**
+     * @param {Number} id
+     * @returns {Item} OR undefined
+     * метод для разбора ответа от сервера, вызывается синхронно
+     */
+    Collection.prototype._findItem = function(id) {
+        return _.find(this.collection, {id: id});
+    };
+
+    /**
      * @param {Object}, {Array}, {Object}
      * @returns {Object}
+     * метод для разбора ответа от сервера, вызывается синхронно
      */
     Collection.prototype._addItem = function(itemData, errorMessages) {
         var item;
@@ -49,14 +59,14 @@ angular.module('app.dal.entities.collection', [
         if (typeof itemData.id === 'undefined') {
             errorMessages.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
         } else {
-            item = this.get(itemData.id);
+            item = this._findItem(itemData.id);
             if (!item) {
                 var ItemConstructor = this.getItemConstructor();
                 item = new ItemConstructor();
                 this.collection = this.collection || [];
                 this.collection.push (item);
             }
-            item.fillData(itemData, errorMessages);
+            item._fillData(itemData, errorMessages);
         }
         return item;
     };
@@ -64,8 +74,9 @@ angular.module('app.dal.entities.collection', [
     /**
      * @param {Array}, {Array}, {Object}
      * @returns {Array}
+     * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Collection.prototype.addArray = function(itemsData, errorMessages) {
+    Collection.prototype._addArray = function(itemsData, errorMessages) {
         var newArray = [];
         errorMessages = errorMessages || [];
 
@@ -80,13 +91,21 @@ angular.module('app.dal.entities.collection', [
     };
 
     /**
+     * @param {Number} id
+     * @returns {Number}
+     */
+    Collection.prototype._findIndex = function(id) {
+        return _.findIndex(this.collection, {id: id});
+    };
+
+    /**
      * @param {Array}
      * @returns {Promise}
      */
     Collection.prototype.load = function(errorMessages) {
         var self = this,
             createItems = function(itemsData){
-                return self.addArray.call(self, itemsData, errorMessages);
+                return self._addArray.call(self, itemsData, errorMessages);
             };
         return this.getRestApiProvider().query().then(createItems);
     };
@@ -107,10 +126,12 @@ angular.module('app.dal.entities.collection', [
 
     /**
      * @param {Number} id
-     * @returns {Item} OR undefined
+     * @returns {Promise} = Item OR undefined
      */
     Collection.prototype.get = function(id) {
-        return _.find(this.collection, {id: id});
+        return this.getAll().then(function (response) {
+            return _.find(response, {id: id});
+        })
     };
 
     /**
@@ -119,23 +140,15 @@ angular.module('app.dal.entities.collection', [
      */
     Collection.prototype.getUser = function(id) {   // этот метод надо сделать методом users.get (перекрытие)
         var collection = this.collection,
-            idx = this.findIndex(id);
+            idx = this._findIndex(id);
 
         if (-1 === idx) {
             return $q.reject("В коллекции не найден требуемый элемент: " + id);
         } else {
             return this.getRestApiProvider().get(id).then(function(response){
-                return collection[idx].fillData(response);
+                return collection[idx]._fillData(response);
             });
         }
-    };
-
-    /**
-     * @param {Number} id
-     * @returns {Number}
-     */
-    Collection.prototype.findIndex = function(id) {
-        return _.findIndex(this.collection, {id: id});
     };
 
     /**
@@ -146,20 +159,20 @@ angular.module('app.dal.entities.collection', [
 
         if (item.id) {      // элемент должен быть в коллекции
             var collection = this.collection,
-                idx = this.findIndex(item.id);
+                idx = this._findIndex(item.id);
 
             if (-1 === idx) {
                 return $q.reject("В коллекции не найден требуемый элемент: " + item.id);
             } else {
-                return this.getRestApiProvider().update(item.serialize()).then(function(response){
-                    return collection[idx].fillData(response);
+                return this.getRestApiProvider().update(item._serialize()).then(function(response){
+                    return collection[idx]._fillData(response);
                 });
             }
 
         } else {
             var collection = this.collection;
-            return this.getRestApiProvider().create(item.serialize()).then(function(response){
-                item.fillData(response);
+            return this.getRestApiProvider().create(item._serialize()).then(function(response){
+                item._fillData(response);
                 collection.push(item);
                 return item;
             });
@@ -172,7 +185,7 @@ angular.module('app.dal.entities.collection', [
      */
     Collection.prototype.remove = function(id) {
         var collection = this.collection,
-            idx = this.findIndex(id);
+            idx = this._findIndex(id);
 
         if (-1 === idx) {
             return $q.reject("В коллекции не найден требуемый элемент: " + id);
@@ -193,8 +206,9 @@ angular.module('app.dal.entities.collection', [
     /**
      * @param {Object}
      * @returns {Object}
+     * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Item.prototype.fillData = function(itemData, errorMessages) {
+    Item.prototype._fillData = function(itemData, errorMessages) {
         for (var key in itemData) {
             var attr = itemData[key],
                 refElem = attr;
@@ -230,12 +244,7 @@ angular.module('app.dal.entities.collection', [
                         errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                     }
                     if (collection) {
-                        refElem = collection.get(attr.id);
-                        if (!refElem) {
-                            var ItemConstructor = collection.getItemConstructor();
-                            refElem = new ItemConstructor();
-                        }
-                        refElem.fillData(attr);
+                        refElem = collection._addItem(attr, errorMessages);
                     }
                 }
             }
@@ -244,14 +253,19 @@ angular.module('app.dal.entities.collection', [
         return this;
     };
 
-    Item.prototype.serialize = function() {
+    /**
+     * @param {Object}
+     * @returns {Object}
+     * метод для подготовки запроса на сервер, вызывается синхронно
+     */
+    Item.prototype._serialize = function() {
         var key,
             itemData = {};
 
         for (key in this) {
             if (typeof this[key] === "object") {
                 if (key === "dealer") {               // todo: перекрытием данного метода на User
-                    itemData[key] = this[key].serialize();
+                    itemData[key] = this[key]._serialize();
                 } else {
                     itemData[key] = this[key].id;
                 }
@@ -262,15 +276,6 @@ angular.module('app.dal.entities.collection', [
 
         return itemData;
     };
-
-    Item.prototype.remove = function () {
-        if (typeof this.id !== 'undefined') {
-            var message = users.remove(this.id);
-            if (message) {
-                // здесь должна быть визуализация диалогового окна с полученным собщением и кнопкой "Осознал"
-            }
-        }
-    }
 
     return Item;
 });

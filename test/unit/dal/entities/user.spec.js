@@ -236,13 +236,12 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            users.load().then(function(respond) {
+            users.get(3).then(function(respond) {
                 actual = respond;
             });
 
             $rootScope.$digest();
-            var user = users.get(3);
-            expect(user instanceof User).toBeTruthy();
+            expect(actual instanceof User).toBeTruthy();
         });
 
         it('возвращать индекс объекта коллекции по id', function() {
@@ -261,8 +260,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-            var user = users.get(3);
-            expect(user instanceof User).toBeTruthy();
+            var idx = users._findIndex(3);
+            expect(users.collection[idx]).toBe(users._findItem(3));
         });
     });
 
@@ -328,7 +327,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             expect(actual).toEqual('В коллекции не найден требуемый элемент: 5');
         });
 
-        it('обновлять элемент в коллекции после получения подтверждения от сервера', function() {
+        it('обновлять сохраняемый элемент в коллекции после получения подтверждения от сервера', function() {
             var actual,
                 expected = {
                     id: 2,
@@ -351,12 +350,12 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
             $rootScope.$digest();
 
-            var user = users.get(2);
-            user.name = 'Другой';
+            var user = users._findItem(2);
 
             users.save(user).then(function(respond) {
                 actual = respond;
             });
+
             $rootScope.$digest();
             expect(userApi.update).toHaveBeenCalled()
             expect(actual).toEqualData(expected);
@@ -557,14 +556,14 @@ describe('Сервис-конструктор User из модуля app.dal.ent
     });
 
     it('создавать пользователей со ссылками на элементы', function() {
-        var group = groups.get (1);
-        var manager = managers.get (3);
-        var city = cities.get (5);
-        var market = markets.get (7);
-        var metro = metros.get (9);
-        var site = sites.get (11);
+        var group = groups._findItem (1);
+        var manager = managers._findItem (3);
+        var city = cities._findItem (5);
+        var market = markets._findItem (7);
+        var metro = metros._findItem (9);
+        var site = sites._findItem (11);
 
-        var user = (new User).fillData({
+        var user = (new User)._fillData({
             id: 11,
             name: 'Один пользователь',
             group: { id: 1},
@@ -593,7 +592,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             }
         }
 
-        var user = (new User).fillData({
+        var user = (new User)._fillData({
             id: 1,
             name: 'Первый',
             city: {
@@ -613,7 +612,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             city: 2
         }
 
-        var user = (new User).fillData({
+        var user = (new User)._fillData({
             id: 1,
             name: 'Первый',
             city: {
@@ -622,7 +621,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             }
         });
 
-        actual = user.serialize();
+        actual = user._serialize();
         expect(actual).toEqualData(expected);
     });
 
@@ -637,7 +636,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             }
         }
 
-        var user = (new User).fillData({
+        var user = (new User)._fillData({
             id: 1,
             name: 'Первый',
             dealer: {
@@ -646,7 +645,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             }
         });
 
-        actual = user.serialize();
+        actual = user._serialize();
         expect(actual).toEqualData(expected);
     });
 });
