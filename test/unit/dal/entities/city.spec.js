@@ -225,7 +225,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(city instanceof City).toBeTruthy();
         });
 
-        it('возвращать id, если требуемый элемент не найден в коллекции', function() {
+        it('возвращать undefined, если требуемый элемент не найден в коллекции', function() {
             var actual;
 
             spyOn(cityApi, 'query').andReturn($q.when(
@@ -244,7 +244,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
 
             var city = cities.get(5);
 
-            expect(city).toEqual(5);
+            expect(city).toEqual(undefined);
         });
 
     });

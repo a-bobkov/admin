@@ -51,7 +51,7 @@ angular.module('app.dal.entities.collection', [
             errorMessages.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
         } else {
             item = obj.get(itemData.id);
-            if (typeof item !== "object") {     // элемент ранее не создавался
+            if (!item) {
                 var ItemConstructor = obj.getItemConstructor();
                 item = new ItemConstructor();
                 if (!obj.collection) {
@@ -111,15 +111,10 @@ angular.module('app.dal.entities.collection', [
 
     /**
      * @param {Number} id
-     * @returns {Item} OR {Number}
+     * @returns {Item} OR undefined
      */
     Collection.prototype.get = function(id) {
-        var item = _.find(this.collection, {id: id});
-        if (item) {
-            return item;
-        } else {
-            return id;
-        }
+        return _.find(this.collection, {id: id});
     };
 
     /**
@@ -239,8 +234,8 @@ angular.module('app.dal.entities.collection', [
                         errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                     }
                     if (collection) {
-                        refElem = collection.get (attr.id);
-                        if (typeof refElem !== "object") {
+                        refElem = collection.get(attr.id);
+                        if (!refElem) {
                             var ItemConstructor = collection.getItemConstructor();
                             refElem = new ItemConstructor();
                         }
@@ -259,7 +254,7 @@ angular.module('app.dal.entities.collection', [
 
         for (key in this) {
             if (typeof this[key] === "object") {
-                if (key === "dealer") {               // этот случай надо сделать перекрытием данного метода на User
+                if (key === "dealer") {               // todo: перекрытием данного метода на User
                     itemData[key] = this[key].serialize();
                 } else {
                     itemData[key] = this[key].id;
