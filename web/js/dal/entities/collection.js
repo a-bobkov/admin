@@ -43,21 +43,18 @@ angular.module('app.dal.entities.collection', [
      * @param {Object}, {Array}, {Object}
      * @returns {Object}
      */
-    Collection.prototype.addItem = function(itemData, errorMessages, obj) {
+    Collection.prototype._addItem = function(itemData, errorMessages) {
         var item;
-        obj = obj || this;
 
         if (typeof itemData.id === 'undefined') {
             errorMessages.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
         } else {
-            item = obj.get(itemData.id);
+            item = this.get(itemData.id);
             if (!item) {
-                var ItemConstructor = obj.getItemConstructor();
+                var ItemConstructor = this.getItemConstructor();
                 item = new ItemConstructor();
-                if (!obj.collection) {
-                    obj.collection = [];
-                }
-                obj.collection.push (item);
+                this.collection = this.collection || [];
+                this.collection.push (item);
             }
             item.fillData(itemData, errorMessages);
         }
@@ -68,16 +65,15 @@ angular.module('app.dal.entities.collection', [
      * @param {Array}, {Array}, {Object}
      * @returns {Array}
      */
-    Collection.prototype.addArray = function(itemsData, errorMessages, obj) {
+    Collection.prototype.addArray = function(itemsData, errorMessages) {
         var newArray = [];
         errorMessages = errorMessages || [];
-        obj = obj || this;
 
         if ({}.toString.call(itemsData) !== '[object Array]') {
             errorMessages.push('Отсутствует массив');
         } else {
             for (var i=0; i < itemsData.length; i++) {
-                newArray [i] = obj.addItem(itemsData[i], errorMessages, obj);
+                newArray [i] = this._addItem(itemsData[i], errorMessages);
             }
         }
         return newArray;
@@ -90,7 +86,7 @@ angular.module('app.dal.entities.collection', [
     Collection.prototype.load = function(errorMessages) {
         var self = this,
             createItems = function(itemsData){
-                return self.addArray(itemsData, errorMessages, self);
+                return self.addArray.call(self, itemsData, errorMessages);
             };
         return this.getRestApiProvider().query().then(createItems);
     };
