@@ -1,6 +1,10 @@
 'use strict';
 
-angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal.rest.site'])
+angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal.rest.api'])
+
+.factory('siteApi', function(RestApi) {
+   return new RestApi('sites', 'site');
+})
 
 .factory('sites', function(Collection, siteApi) {
 
@@ -23,11 +27,4 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
 
 .run(function(sites, Site) {
     sites.setItemConstructor(Site);
-});
-
-
-angular.module('app.dal.rest.site', ['app.dal.rest.api'])
-
-.factory('siteApi', function(RestApi) {
-   return new RestApi('sites', 'site');
 });

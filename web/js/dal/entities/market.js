@@ -1,6 +1,10 @@
 'use strict';
 
-angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.dal.rest.market'])
+angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.dal.rest.api'])
+
+.factory('marketApi', function(RestApi) {
+   return new RestApi('markets', 'market');
+})
 
 .factory('markets', function(Collection, marketApi) {
 
@@ -23,11 +27,4 @@ angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.d
 
 .run(function(markets, Market) {
     markets.setItemConstructor(Market);
-});
-
-
-angular.module('app.dal.rest.market', ['app.dal.rest.api'])
-
-.factory('marketApi', function(RestApi) {
-   return new RestApi('markets', 'market');
 });

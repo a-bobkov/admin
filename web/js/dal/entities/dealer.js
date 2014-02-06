@@ -1,6 +1,10 @@
 'use strict';
 
-angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.dal.rest.dealer'])
+angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.dal.rest.api'])
+
+.factory('dealerApi', function(RestApi) {
+   return new RestApi('dealers', 'dealer');
+})
 
 .factory('dealers', function(Collection, dealerApi) {
 
@@ -23,11 +27,4 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
 
 .run(function(dealers, Dealer) {
     dealers.setItemConstructor(Dealer);
-});
-
-
-angular.module('app.dal.rest.dealer', ['app.dal.rest.api'])
-
-.factory('dealerApi', function(RestApi) {
-   return new RestApi('dealers', 'dealer');
 });

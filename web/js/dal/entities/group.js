@@ -1,6 +1,10 @@
 'use strict';
 
-angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.dal.rest.group'])
+angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.dal.static.api'])
+
+.factory('groupApi', function(StaticApi) {
+    return new StaticApi();
+})
 
 .factory('groups', function(Collection, groupApi) {
 
@@ -23,11 +27,4 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.da
 
 .run(function(groups, Group) {
     groups.setItemConstructor(Group);
-});
-
-
-angular.module('app.dal.rest.group', ['app.dal.static.api'])
-
-.factory('groupApi', function(StaticApi) {
-    return new StaticApi();
 });
