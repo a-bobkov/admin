@@ -32,7 +32,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
 
                 if (typeof data === 'undefined') {
                     errorMessage = 'Ответ сервера не содержит секции ' + sectionName;
-                } else if (sectionName === collectionName && ({}.toString.call(data)) !== '[object Array]') {
+                } else if (sectionName === collectionName && !angular.isArray(data)) {
                     errorMessage = 'Ответ сервера не содержит массив в секции ' + sectionName;
                 } else if (id && id !== data.id) {
                     errorMessage = 'Ответ сервера не содержит данных требуемого элемента ' + id;

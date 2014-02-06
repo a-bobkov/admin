@@ -215,7 +215,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             ));
             this.addMatchers({
                 toBeArray: function () {
-                    return Object.prototype.toString.call( this.actual ) === '[object Array]';
+                    return angular.isArray(this.actual);
                 }
             });
 

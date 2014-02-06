@@ -175,7 +175,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             ));
             this.addMatchers({
                 toBeArray: function () {
-                    return Object.prototype.toString.call( this.actual ) === '[object Array]';
+                    return angular.isArray(this.actual);
                 }
             });
 

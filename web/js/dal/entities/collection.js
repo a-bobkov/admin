@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 angular.module('app.dal.entities.collection', [])
 
@@ -47,7 +47,7 @@ angular.module('app.dal.entities.collection', [])
     };
 
     /**
-     * @param {Object}, {Array}, {Object}
+     * @param {Object}, {Array}
      * @returns {Object}
      * метод для разбора ответа от сервера, вызывается синхронно
      */
@@ -70,14 +70,14 @@ angular.module('app.dal.entities.collection', [])
     };
 
     /**
-     * @param {Array}, {Array}, {Object}
+     * @param {Array}, {Array}
      * @returns {Array}
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     Collection.prototype._addArray = function(itemsData, errorMessages) {
         var newArray = [];
 
-        if ({}.toString.call(itemsData) !== '[object Array]') {
+        if (!angular.isArray(itemsData)) {
             errorMessages.push('Отсутствует массив');
         } else {
             for (var i=0; i < itemsData.length; i++) {
