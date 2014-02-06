@@ -13,11 +13,11 @@ angular.module('app.dal.static.api', [])
          * @returns {Promise}
          */
         this.get = function(id){
-            var group = _.find(data, {id: id});
-            if (angular.isUndefined(group)) {
+            var item = _.find(data, {id: id});
+            if (angular.isUndefined(item)) {
                 return $q.reject('404');
             }
-            return $q.when(group);
+            return $q.when(item);
         };
 
         /**
@@ -33,10 +33,10 @@ angular.module('app.dal.static.api', [])
          * @returns {Promise}
          */
         this.create = function(data){
-            var newGroup = angular.extend(data);
-            newGroup.id = _.last(data).id + 1;
-            data.push(newGroup);
-            return $q.when(newGroup);
+            var newItem = angular.extend(data);
+            newItem.id = _.last(data).id + 1;
+            data.push(newItem);
+            return $q.when(newItem);
         };
 
         /**
@@ -44,12 +44,12 @@ angular.module('app.dal.static.api', [])
          * @returns {Promise}
          */
         this.update = function(data){
-            var group = _.find(data, {id: data.id});
-            if (angular.isUndefined(group)) {
+            var item = _.find(data, {id: data.id});
+            if (angular.isUndefined(item)) {
                 return $q.reject('404');
             }
-            angular.extend(group, data);
-            return $q.when(group);
+            angular.extend(item, data);
+            return $q.when(item);
         };
 
         /**
