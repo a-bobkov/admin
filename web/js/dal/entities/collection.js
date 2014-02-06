@@ -139,7 +139,7 @@ angular.module('app.dal.entities.collection', [
             if (item) {
                 return item;
             } else {
-                $q.reject("Не найден элемент с id: " + id);
+                return $q.reject("В коллекции не найден элемент с id: " + id);
             }
         })
     };
@@ -149,16 +149,12 @@ angular.module('app.dal.entities.collection', [
      * @returns {Promise}
      */
     Collection.prototype.getUser = function(id) {   // этот метод надо сделать методом users.get (перекрытие)
-        var collection = this.collection,
-            idx = this._findIndex(id);
-
-        if (-1 === idx) {
-            return $q.reject("В коллекции не найден требуемый элемент: " + id);
-        } else {
-            return this.getRestApiProvider().get(id).then(function(response){
-                return collection[idx]._fillData(response);
+        var self = this;
+        return Collection.prototype.get.call(this, id).then(function (item) {
+            return self.getRestApiProvider().get(id).then(function(itemData){
+                return item._fillData(itemData);
             });
-        }
+        })
     };
 
     /**

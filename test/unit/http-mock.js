@@ -68,7 +68,7 @@ describe('http-mock', function() {
         it('возвращать ошибку, если пользователь не найден', function() {
         var actualSuccess,
             actualError,
-            expected = 'В коллекции не найден требуемый элемент: 5';
+            expected = 'В коллекции не найден элемент с id: 5';
 
             users.getUser(5).then(function(respond) {
                 actualSuccess = respond;

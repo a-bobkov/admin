@@ -302,7 +302,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('выдавать ошибку, если требуемый элемент не найден в коллекции', function() {
-            var actual;
+            var actualSuccess,
+                actualError;
 
             spyOn(userApi, 'query').andReturn($q.when(
                 [
@@ -312,22 +313,12 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 ]
             ));
 
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            spyOn(userApi, 'get').andReturn($q.when(
-                { id: 5, name: 'Пропущенный'}
-            ));
-
             users.getUser(5).then(null, function(respond) {
-                actual = respond;
+                actualError = respond;
             });
-            $rootScope.$digest();
 
-            expect(actual).toEqual('В коллекции не найден требуемый элемент: 5');
+            $rootScope.$digest();
+            expect(actualError).toEqual('В коллекции не найден элемент с id: 5');
         });
 
         it('обновлять сохраняемый элемент в коллекции после получения подтверждения от сервера', function() {
