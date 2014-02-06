@@ -141,7 +141,8 @@ describe('Сервис cities из модуля app.dal.entities.city', function
         });
 
         it('проверять наличие идентификатора у элементов коллекции', function() {
-            var actual;
+            var actualSuccess,
+                actualError;
 
             spyOn(cityApi, 'query').andReturn($q.when(
                 [
@@ -151,13 +152,15 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             ));
 
             var errorMessages = [];
-            cities.load(errorMessages).then(function(respond) {
-                actual = respond;
+            cities.load().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
 
-            expect(errorMessages).toEqualData(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+            expect(actualError).toEqualData(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
         });
 
         it('возвращать массив объектов', function() {

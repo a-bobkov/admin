@@ -78,7 +78,6 @@ angular.module('app.dal.entities.collection', [
      */
     Collection.prototype._addArray = function(itemsData, errorMessages) {
         var newArray = [];
-        errorMessages = errorMessages || [];
 
         if ({}.toString.call(itemsData) !== '[object Array]') {
             errorMessages.push('Отсутствует массив');
@@ -102,12 +101,18 @@ angular.module('app.dal.entities.collection', [
      * @param {Array}
      * @returns {Promise}
      */
-    Collection.prototype.load = function(errorMessages) {
-        var self = this,
-            createItems = function(itemsData){
-                return self._addArray.call(self, itemsData, errorMessages);
-            };
-        return this.getRestApiProvider().query().then(createItems);
+    Collection.prototype.load = function() {
+        var self = this;
+
+        return this.getRestApiProvider().query().then(function(itemsData){
+            var errorMessages = [];
+            var newArray = self._addArray.call(self, itemsData, errorMessages);
+            if (errorMessages.length) {
+                return $q.reject(errorMessages);
+            } else {
+                return newArray;
+            }
+        });
     };
 
     /**
@@ -126,11 +131,16 @@ angular.module('app.dal.entities.collection', [
 
     /**
      * @param {Number} id
-     * @returns {Promise} = Item OR undefined
+     * @returns {Promise}
      */
     Collection.prototype.get = function(id) {
         return this.getAll().then(function (response) {
-            return _.find(response, {id: id});
+            var item = _.find(response, {id: id});
+            if (item) {
+                return item;
+            } else {
+                $q.reject("Не найден элемент с id: " + id);
+            }
         })
     };
 
