@@ -454,7 +454,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
 
             $rootScope.$digest();
 
-            expect(actual).toBe('В коллекции не найден требуемый элемент: 5');
+            expect(actual).toBe('В коллекции не найден элемент с id: 5');
         });
 
         it('Удаление элемента: выдавать ошибку, если сервер вернул строку с ошибкой', function() {

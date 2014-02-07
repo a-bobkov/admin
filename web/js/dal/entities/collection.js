@@ -147,24 +147,17 @@ angular.module('app.dal.entities.collection', [])
      * @returns {Promise}
      */
     Collection.prototype.save = function(item) {
-
+        var self = this;
         if (item.id) {      // элемент должен быть в коллекции
-            var collection = this.collection,
-                idx = this._findIndex(item.id);
-
-            if (-1 === idx) {
-                return $q.reject("В коллекции не найден требуемый элемент: " + item.id);
-            } else {
-                return this.getRestApiProvider().update(item._serialize()).then(function(response){
-                    return collection[idx]._fillData(response);
+            return Collection.prototype.get.call(this, item.id).then(function (item) {
+                return self.getRestApiProvider().update(item._serialize()).then(function(itemData){
+                    return item._fillData(itemData);
                 });
-            }
-
+            })
         } else {
-            var collection = this.collection;
-            return this.getRestApiProvider().create(item._serialize()).then(function(response){
-                item._fillData(response);
-                collection.push(item);
+            return this.getRestApiProvider().create(item._serialize()).then(function(itemData){
+                item._fillData(itemData);
+                self.collection.push(item);
                 return item;
             });
         }
@@ -175,23 +168,18 @@ angular.module('app.dal.entities.collection', [])
      * @returns {Promise}
      */
     Collection.prototype.remove = function(id) {
-        var collection = this.collection,
-            idx = this._findIndex(id);
-
-        if (-1 === idx) {
-            return $q.reject("В коллекции не найден требуемый элемент: " + id);
-        } else {
-            return this.getRestApiProvider().remove(id).then(function(response){
-                collection.splice(idx, 1);
+        var self = this;
+        return Collection.prototype.get.call(this, id).then(function (item) {
+            return self.getRestApiProvider().remove(id).then(function(itemData){
+                self.collection.splice(self._findIndex(id), 1);
             });
-        }
+        })
     };
 
     return Collection;
 })
 
 .factory('Item', function(Collection) {
-
     var Item = function () {};
 
     /**
@@ -203,7 +191,6 @@ angular.module('app.dal.entities.collection', [])
         for (var key in itemData) {
             var attr = itemData[key],
                 refElem = attr;
-
             if (typeof attr === 'object') {
                 if (typeof attr.id === 'undefined') {
                     errorMessages.push ('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
