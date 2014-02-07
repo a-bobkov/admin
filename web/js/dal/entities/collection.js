@@ -83,7 +83,7 @@ angular.module('app.dal.entities.collection', [])
         if (!angular.isArray(itemsData)) {
             errorMessages.push('Отсутствует массив');
         } else {
-            for (var i=0; i < itemsData.length; i++) {
+            for (var i = 0, length = itemsData.length; i < length; i++) {
                 newArray[i] = this._addItem(itemsData[i], errorMessages);
             }
         }
