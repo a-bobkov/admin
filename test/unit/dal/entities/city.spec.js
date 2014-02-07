@@ -317,31 +317,6 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(actual.length).toEqual(2);
         });
 
-        it('выдавать ошибку при удалении элемента, если элемент не найден в коллекции', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            cities.remove(5).then(null, function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBe('В коллекции не найден элемент с id: 5');
-        });
-
         it('Удаление элемента: выдавать ошибку, если сервер вернул строку с ошибкой', function() {
             var expected = "Сообщение об ошибке",
                 actual;

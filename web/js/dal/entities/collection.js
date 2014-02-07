@@ -151,11 +151,9 @@ angular.module('app.dal.entities.collection', [])
     Collection.prototype.save = function(item) {
         var self = this;
         if (item.id) {      // элемент должен быть в коллекции
-            return Collection.prototype.get.call(this, item.id).then(function (item) {
-                return self.getRestApiProvider().update(item._serialize()).then(function(itemData){
-                    return item._fillData(itemData);
-                });
-            })
+            return this.getRestApiProvider().update(item._serialize()).then(function(itemData){
+                return item._fillData(itemData);
+            });
         } else {
             return this.getRestApiProvider().create(item._serialize()).then(function(itemData){
                 item._fillData(itemData);
@@ -171,11 +169,9 @@ angular.module('app.dal.entities.collection', [])
      */
     Collection.prototype.remove = function(id) {
         var self = this;
-        return Collection.prototype.get.call(this, id).then(function (item) {
-            return self.getRestApiProvider().remove(id).then(function(itemData){
-                self.collection.splice(self._findIndex(id), 1);
-            });
-        })
+        return this.getRestApiProvider().remove(id).then(function(itemData){
+            self.collection.splice(self._findIndex(id), 1);
+        });
     };
 
     return Collection;
