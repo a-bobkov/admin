@@ -4,14 +4,16 @@
 
 describe('http-mock', function() {
     var $httpBackend,
+        $http,
         $rootScope,
         users;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$httpBackend_, _$rootScope_, _users_) {
+        inject(function(_$httpBackend_, _$http_, _$rootScope_, _users_) {
             $httpBackend = _$httpBackend_;
+            $http = _$http_;
             $rootScope = _$rootScope_;
             users = _users_;
         });
@@ -76,8 +78,11 @@ describe('http-mock', function() {
                 actualError = respond;
             });
 
-//            $httpBackend.flush();
-            $rootScope.$digest();
+            if ($http.pendingRequests.length) {       // если вызов дошел до $http
+                $httpBackend.flush();
+            } else {
+                $rootScope.$digest();
+            }
 
             expect(actualError).toEqualData(expected);
         });
