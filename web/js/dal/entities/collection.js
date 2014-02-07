@@ -40,6 +40,7 @@ angular.module('app.dal.entities.collection', [])
     /**
      * @param {Number} id
      * @returns {Item} OR undefined
+     * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     Collection.prototype._findItem = function(id) {
@@ -49,6 +50,7 @@ angular.module('app.dal.entities.collection', [])
     /**
      * @param {Object}, {Array}
      * @returns {Object}
+     * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     Collection.prototype._addItem = function(itemData, errorMessages) {
@@ -62,7 +64,7 @@ angular.module('app.dal.entities.collection', [])
                 var ItemConstructor = this.getItemConstructor();
                 item = new ItemConstructor();
                 this.collection = this.collection || [];
-                this.collection.push (item);
+                this.collection.push(item);
             }
             item._fillData(itemData, errorMessages);
         }
@@ -72,6 +74,7 @@ angular.module('app.dal.entities.collection', [])
     /**
      * @param {Array}, {Array}
      * @returns {Array}
+     * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     Collection.prototype._addArray = function(itemsData, errorMessages) {
@@ -81,7 +84,7 @@ angular.module('app.dal.entities.collection', [])
             errorMessages.push('Отсутствует массив');
         } else {
             for (var i=0; i < itemsData.length; i++) {
-                newArray [i] = this._addItem(itemsData[i], errorMessages);
+                newArray[i] = this._addItem(itemsData[i], errorMessages);
             }
         }
         return newArray;
@@ -101,7 +104,6 @@ angular.module('app.dal.entities.collection', [])
      */
     Collection.prototype.load = function() {
         var self = this;
-
         return this.getRestApiProvider().query().then(function(itemsData){
             var errorMessages = [];
             var newArray = self._addArray.call(self, itemsData, errorMessages);
@@ -185,6 +187,7 @@ angular.module('app.dal.entities.collection', [])
     /**
      * @param {Object}
      * @returns {Object}
+     * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     Item.prototype._fillData = function(itemData, errorMessages) {
@@ -211,6 +214,7 @@ angular.module('app.dal.entities.collection', [])
     /**
      * @param {Object}
      * @returns {Object}
+     * @description
      * метод для подготовки запроса на сервер, вызывается синхронно
      */
     Item.prototype._serialize = function() {
