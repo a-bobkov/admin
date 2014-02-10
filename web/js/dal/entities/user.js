@@ -31,7 +31,13 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
         var self = this;
         return Collection.prototype.get.call(this, id).then(function (item) {
             return self.getRestApiProvider().get(id).then(function(itemData){
-                return item._fillData(itemData);
+                var errorMessages = [];
+                item._fillData(itemData, errorMessages);
+                if (errorMessages.length) {
+                    $log.error(errorMessages);
+                    return $q.reject({response: item, errorMessage: errorMessages});
+                }
+                return item;
             });
         })
     };

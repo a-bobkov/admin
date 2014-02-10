@@ -2,14 +2,16 @@
 
 describe('У объекта app.dal.api', function() {
     var $httpBackend,
+        $log,
         Api
     ;
 
     beforeEach(function() {
         module('app.dal.api');
 
-        inject(function(_$httpBackend_, _Api_) {
+        inject(function(_$httpBackend_, _$log_, _Api_) {
             $httpBackend = _$httpBackend_;
+            $log = _$log_;
             Api = _Api_;
         });
     });
@@ -59,61 +61,80 @@ describe('У объекта app.dal.api', function() {
 
         it('должен возвращать сообщение об ошибке при отсутствии параметра status в ответе', function(){
             var url = '/test/url',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectGET(url)
                 .respond({});
 
-            Api.get(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.get(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не соответствует формату JSend');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не соответствует формату JSend');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не соответствует формату JSend');
         });
 
         it('должен возвращать сообщение об ошибке при неверном значении status в ответе', function(){
             var url = '/test/url',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectGET(url)
                 .respond({ status: 123 });
 
-            Api.get(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.get(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил некорректный статус ответа: 123');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил некорректный статус ответа: 123');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил некорректный статус ответа: 123');
         });
 
         it('должен возвращать сообщение об ошибке если status="error"', function(){
             var url = '/test/url',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectGET(url)
                 .respond({
                     status: 'error',
-                    message: 'На сервере ошибка'
+                    message: 'Сбой базы данных'
                 });
 
-            Api.get(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.get(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил ошибку: На сервере ошибка');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил ошибку: Сбой базы данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил ошибку: Сбой базы данных');
         });
 
         it('должен возвращать сообщение об ошибке при отсутствии параметра data', function(){
             var url = '/test/url',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectGET(url)
@@ -121,13 +142,18 @@ describe('У объекта app.dal.api', function() {
                     status: 'success'
                 });
 
-            Api.get(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.get(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не содержит данных');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не содержит данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит данных');
         });
     });
 
@@ -198,19 +224,25 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPOST(url, data)
                 .respond({});
 
-            Api.post(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.post(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не соответствует формату JSend');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не соответствует формату JSend');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не соответствует формату JSend');
         });
 
         it('должен возвращать сообщение об ошибке при неверном значении status в ответе', function(){
@@ -219,19 +251,25 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPOST(url, data)
                 .respond({ status: 123 });
 
-            Api.post(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.post(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил некорректный статус ответа: 123');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил некорректный статус ответа: 123');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил некорректный статус ответа: 123');
         });
 
         it('должен возвращать сообщение об ошибке если status="error"', function(){
@@ -240,22 +278,28 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPOST(url, data)
                 .respond({
                     status: 'error',
-                    message: 'На сервере ошибка'
+                    message: 'Сбой базы данных'
                 });
 
-            Api.post(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.post(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил ошибку: На сервере ошибка');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил ошибку: Сбой базы данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил ошибку: Сбой базы данных');
         });
 
         it('должен возвращать сообщение об ошибке при отсутствии параметра data', function(){
@@ -264,7 +308,8 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPOST(url, data)
@@ -272,13 +317,18 @@ describe('У объекта app.dal.api', function() {
                     status: 'success'
                 });
 
-            Api.post(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.post(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не содержит данных');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не содержит данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит данных');
         });
     });
 
@@ -313,19 +363,25 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPUT(url, data)
                 .respond({});
 
-            Api.put(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.put(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не соответствует формату JSend');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не соответствует формату JSend');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не соответствует формату JSend');
         });
 
         it('должен возвращать сообщение об ошибке при неверном значении status в ответе', function(){
@@ -335,19 +391,25 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPUT(url, data)
                 .respond({ status: 123 });
 
-            Api.put(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.put(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил некорректный статус ответа: 123');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил некорректный статус ответа: 123');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил некорректный статус ответа: 123');
         });
 
         it('должен возвращать сообщение об ошибке если status="error"', function(){
@@ -357,22 +419,28 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPUT(url, data)
                 .respond({
                     status: 'error',
-                    message: 'На сервере ошибка'
+                    message: 'Сбой базы данных'
                 });
 
-            Api.put(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.put(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил ошибку: На сервере ошибка');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил ошибку: Сбой базы данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил ошибку: Сбой базы данных');
         });
 
         it('должен возвращать сообщение об ошибке при отсутствии параметра data', function(){
@@ -382,7 +450,8 @@ describe('У объекта app.dal.api', function() {
                     one: 'data',
                     two: 'other data'
                 },
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectPUT(url, data)
@@ -390,13 +459,18 @@ describe('У объекта app.dal.api', function() {
                     status: 'success'
                 });
 
-            Api.put(url, data).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.put(url, data).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не содержит данных');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не содержит данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит данных');
         });
 
         it('должен возвращать отправленные данные', function(){
@@ -458,61 +532,80 @@ describe('У объекта app.dal.api', function() {
 
         it('должен возвращать сообщение об ошибке при отсутствии параметра status в ответе', function(){
             var url = '/api2/users/1',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectDELETE(url)
                 .respond({});
 
-            Api.remove(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.remove(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не соответствует формату JSend');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не соответствует формату JSend');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не соответствует формату JSend');
         });
 
         it('должен возвращать сообщение об ошибке при неверном значении status в ответе', function(){
             var url = '/api2/users/1',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectDELETE(url)
                 .respond({ status: 123 });
 
-            Api.remove(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.remove(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил некорректный статус ответа: 123');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил некорректный статус ответа: 123');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил некорректный статус ответа: 123');
         });
 
         it('должен возвращать сообщение об ошибке если status="error"', function(){
             var url = '/api2/users/1',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectDELETE(url)
                 .respond({
                     status: 'error',
-                    message: 'На сервере ошибка'
+                    message: 'Сбой базы данных'
                 });
 
-            Api.remove(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.remove(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Сервер возвратил ошибку: На сервере ошибка');
+            expect($log.error).toHaveBeenCalledWith('Сервер возвратил ошибку: Сбой базы данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Сервер возвратил ошибку: Сбой базы данных');
         });
 
         it('должен возвращать сообщение об ошибке при отсутствии параметра data', function(){
             var url = '/api2/users/1',
-                message;
+                actualSuccess,
+                actualError;
 
             $httpBackend
                 .expectDELETE(url)
@@ -520,13 +613,18 @@ describe('У объекта app.dal.api', function() {
                     status: 'success'
                 });
 
-            Api.remove(url).then(null, function(response) {
-                message = response;
+            spyOn($log, 'error').andReturn(null);
+
+            Api.remove(url).then(function(response) {
+                actualSuccess = response;
+            }, function(response) {
+                actualError = response;
             });
 
             $httpBackend.flush();
-
-            expect(message).toBe('Ответ сервера не содержит данных');
+            expect($log.error).toHaveBeenCalledWith('Ответ сервера не содержит данных');
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит данных');
         });
 
         it('должен принимать null в качестве данных', function(){

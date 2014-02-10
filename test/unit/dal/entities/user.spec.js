@@ -3,6 +3,7 @@
 describe('Сервис users из модуля app.dal.entities.user', function() {
     var $rootScope,
         $q,
+        $log,
         users,
         User,
         userApi,
@@ -13,9 +14,10 @@ describe('Сервис users из модуля app.dal.entities.user', function(
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _users_, _User_, _userApi_, _UserOptions_, _Api_)  {
+        inject(function(_$rootScope_, _$q_, _$log_, _users_, _User_, _userApi_, _UserOptions_, _Api_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
+            $log = _$log_;
             users = _users_;
             User = _User_;
             userApi = _userApi_;
@@ -181,17 +183,17 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
 
         it('проверять наличие идентификатора у элементов коллекции', function() {
-            var actualSuccess,
-                actualError;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
+            var data = [
                     { id: 1, name: 'Первый' },
                     {name: 'Без идентификатора'}
-                ]
-            ));
+                ],
+                actualSuccess,
+                actualError;
 
-            var errorMessages = [];
+            spyOn(userApi, 'query').andReturn($q.when(data));
+
+            spyOn($log, 'error').andReturn(null);
+
             users.load().then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
@@ -199,8 +201,9 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-
-            expect(actualError).toEqualData(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+            expect($log.error).toHaveBeenCalledWith(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toEqual(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
         });
 
         it('возвращать массив объектов', function() {
@@ -282,54 +285,58 @@ describe('Сервис users из модуля app.dal.entities.user', function(
     describe('должен управлять коллекцией объектов, для чего уметь', function() {
 
         it('возвращать объект с сервера, обновляя данный элемент коллекции', function() {
-            var actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
+            var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
                     { id: 3, name: 'Третий' }
-                ]
-            ));
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(userApi, 'query').andReturn($q.when(data));
 
             users.load().then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-            var user = users.get(3);
-            expect(user.ext).toBeUndefined();
+            expect(actualSuccess).toEqualData(data);
 
             spyOn(userApi, 'get').andReturn($q.when(
                 { id: 3, name: 'Третий', ext: 'Ещё свойство' }
             ));
 
             users.get(3).then(function(respond) {
-                user = respond;
-            });
-            $rootScope.$digest();
-
-            expect(user.ext).toEqual('Ещё свойство');
-        });
-
-        it('выдавать ошибку, если требуемый элемент не найден в коллекции', function() {
-            var actualSuccess,
-                actualError;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            users.get(5).then(null, function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
                 actualError = respond;
             });
 
             $rootScope.$digest();
-            expect(actualError).toEqual('В коллекции не найден элемент с id: 5');
+            expect(actualSuccess.ext).toEqual('Ещё свойство');
+        });
+
+        it('выдавать ошибку, если требуемый элемент не найден в коллекции', function() {
+            var data = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(userApi, 'query').andReturn($q.when(data));
+
+            users.get(5).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+
+            $rootScope.$digest();
+            expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 5');
         });
 
         it('обновлять сохраняемый элемент в коллекции после получения подтверждения от сервера', function() {

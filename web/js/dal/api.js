@@ -8,7 +8,7 @@ angular.module('app.dal.api', [])
         apiUrl: ''
     };
 
-    this.$get = function($http, $q, $rootScope) {
+    this.$get = function($http, $q, $log) {
 
         var Api = {};
 
@@ -37,7 +37,8 @@ angular.module('app.dal.api', [])
             }
 
             if (errorMessage) {
-                return $q.reject(errorMessage);
+                $log.error(errorMessage);
+                return $q.reject({response: response, errorMessage: errorMessage});
             }
 
             return response.data.data;

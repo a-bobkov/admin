@@ -2,7 +2,7 @@
 
 angular.module('app.dal.rest.api', ['app.dal.api'])
 
-.factory('RestApi', function($q, Api) {
+.factory('RestApi', function($q, Api, $log) {
 
     /**
      *
@@ -15,15 +15,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
         var url = '/' + collectionName + '/';
 
         this.getErrorHandler = function() {
-            return function(response) {
-                if (typeof response === 'string') {
-                    return $q.reject(response);                     // пришла строка с ошибкой из api.responseHandler
-                } else {
-                    return $q.reject(response.data.error_code);     // пришел объект с ошибкой из api.errorHandler
-                }
-            };
         }
-
 
         this.getResponseHandler = function (sectionName, id) {
             return function(response) {
@@ -39,7 +31,8 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
                 }
 
                 if (errorMessage) {
-                    return $q.reject(errorMessage);
+                    $log.error(errorMessage);
+                    return $q.reject({response: response, errorMessage: errorMessage});
                 }
 
                 return data;

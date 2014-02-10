@@ -48,19 +48,21 @@ describe('У объекта app.dal.rest.api', function() {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
             spyOn(Api, 'get').andReturn($q.when(
                 expected
             ));
 
-            cityApi.get(1).then(null, function(respond) {
-                actual = respond;
+            cityApi.get(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe('Ответ сервера не содержит секции city');
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит секции city');
         });
 
         it('должен возвращать сообщение об ошибке при получении данных о другом городе', function(){
@@ -68,7 +70,8 @@ describe('У объекта app.dal.rest.api', function() {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
             spyOn(Api, 'get').andReturn($q.when({
                 city: {
@@ -77,159 +80,122 @@ describe('У объекта app.dal.rest.api', function() {
                 }
             }));
 
-            cityApi.get(1).then(null, function(respond) {
-                actual = respond;
+            cityApi.get(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe('Ответ сервера не содержит данных требуемого элемента 1');
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит данных требуемого элемента 1');
         });
 
-        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
-            var expected = "Сообщение об ошибке",
-                actual;
-
-            spyOn(Api, 'get').andReturn($q.reject(
-                expected
-            ));
-
-            cityApi.get(1).then(null, function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBe(expected);
-        });
-
-        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
-            var expected = {
-                    data: {
-                        error_code: 500
-                    }
+        it('должен возвращать объект, полученный от Api', function(){
+            var data = {
+                    response: "Ответ сервера",
+                    errorMessage: "Ошибка, выявленная Api"
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
-            spyOn(Api, 'get').andReturn($q.reject(
-                expected
-            ));
+            spyOn(Api, 'get').andReturn($q.reject(data));
 
-            cityApi.get(1).then(null, function(respond) {
-                actual = respond;
+            cityApi.get(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe(500);
+            expect(actualError).toBe(data);
         });
     });
 
     describe('Метод query()', function() {
 
         it('должен вызывать Api и возвращать полученные данные без секции cities', function() {
-            var expected = [
-                    {
-                        id: 1,
-                        name: 'название города'
-                    },
-                    {
-                        id: 3,
-                        name: 'название другого города'
-                    }
+            var data = [
+                    { id: 1, name: 'название города' },
+                    { id: 3, name: 'название другого города' }
                 ],
-                actual;
+                actualSuccess,
+                actualError;
 
             spyOn(Api, 'get').andReturn($q.when({
-                cities: expected
+                cities: data
             }));
 
             cityApi.query().then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
             expect(Api.get).toHaveBeenCalledWith("/cities/", {});
-            expect(actual).toBe(expected);
+            expect(actualSuccess).toBe(data);
         });
 
         it('должен возвращать сообщение об ошибке, если полученные данные - не массив', function(){
-            var expected = {
+            var data = {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
             spyOn(Api, 'get').andReturn($q.when({
-                cities: expected
+                cities: data
             }));
 
-            cityApi.query().then(null, function(respond) {
-                actual = respond;
+            cityApi.query().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe('Ответ сервера не содержит массив в секции cities');
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит массив в секции cities');
         });
 
         it('должен возвращать сообщение об ошибке при отсутствии секции cities', function(){
-            var expected = {
+            var data = {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
-            spyOn(Api, 'get').andReturn($q.when(
-                expected
-            ));
+            spyOn(Api, 'get').andReturn($q.when(data));
 
-            cityApi.query().then(null, function(respond) {
-                actual = respond;
+            cityApi.query().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe('Ответ сервера не содержит секции cities');
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит секции cities');
         });
 
-        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
-            var expected = "Сообщение об ошибке",
-                actual;
-
-            spyOn(Api, 'get').andReturn($q.reject(
-                expected
-            ));
-
-            cityApi.query().then(null, function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBe(expected);
-        });
-
-        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
-            var expected = {
-                    data: {
-                        error_code: 500
-                    }
+        it('должен возвращать объект, полученный от Api', function(){
+            var data = {
+                    response: "Ответ сервера",
+                    errorMessage: "Ошибка, выявленная Api"
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
-            spyOn(Api, 'get').andReturn($q.reject(
-                expected
-            ));
+            spyOn(Api, 'get').andReturn($q.reject(data));
 
-            cityApi.query().then(null, function(respond) {
-                actual = respond;
+            cityApi.query().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe(500);
+            expect(actualError).toBe(data);
         });
     });
 
@@ -243,20 +209,22 @@ describe('У объекта app.dal.rest.api', function() {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
             spyOn(Api, 'post').andReturn($q.when({
                 city: expected
             }));
 
             cityApi.create(data).then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
             expect(Api.post).toHaveBeenCalledWith("/cities/", data);
-            expect(actual).toBe(expected);
+            expect(actualSuccess).toBe(expected);
         });
 
         it('должен возвращать сообщение об ошибке при отсутствии секции city', function(){
@@ -267,63 +235,39 @@ describe('У объекта app.dal.rest.api', function() {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
-            spyOn(Api, 'post').andReturn($q.when(
-                expected
-            ));
+            spyOn(Api, 'post').andReturn($q.when(expected));
 
-            cityApi.create(data).then(null, function(respond) {
-                actual = respond;
+            cityApi.create(data).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe('Ответ сервера не содержит секции city');
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит секции city');
         });
 
-        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
+        it('должен возвращать объект, полученный от Api', function(){
             var data = {
-                    name: 'название города'
+                    response: "Ответ сервера",
+                    errorMessage: "Ошибка, выявленная Api"
                 },
-                expected = "Сообщение об ошибке",
-                actual;
+                actualSuccess,
+                actualError;
 
-            spyOn(Api, 'post').andReturn($q.reject(
-                expected
-            ));
+            spyOn(Api, 'post').andReturn($q.reject(data));
 
-            cityApi.create(data).then(null, function(respond) {
-                actual = respond;
+            cityApi.create(data).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe(expected);
-        });
-
-        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
-            var data = {
-                    name: 'название города'
-                },
-                expected = {
-                    data: {
-                        error_code: 500
-                    }
-                },
-                actual;
-
-            spyOn(Api, 'post').andReturn($q.reject(
-                expected
-            ));
-
-            cityApi.create(data).then(null, function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBe(500);
+            expect(actualError).toBe(data);
         });
     });
 
@@ -363,22 +307,24 @@ describe('У объекта app.dal.rest.api', function() {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
             spyOn(Api, 'put').andReturn($q.when(
                 expected
             ));
 
-            cityApi.update(data).then(null, function(respond) {
-                actual = respond;
+            cityApi.update(data).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe('Ответ сервера не содержит секции city');
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит секции city');
         });
 
-        it('должен возвращать сообщение об ошибке при получении данных о другом пользователе', function(){
+        it('должен возвращать сообщение об ошибке при получении данных с другим id', function(){
             var data = {
                     id: 1,
                     name: 'название города'
@@ -387,7 +333,8 @@ describe('У объекта app.dal.rest.api', function() {
                     id: 1,
                     name: 'название города'
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
             spyOn(Api, 'put').andReturn($q.when({
                 city: {
@@ -396,59 +343,34 @@ describe('У объекта app.dal.rest.api', function() {
                 }
             }));
 
-            cityApi.update(data).then(null, function(respond) {
-                actual = respond;
+            cityApi.update(data).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe('Ответ сервера не содержит данных требуемого элемента 1');
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит данных требуемого элемента 1');
         });
 
-        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
+        it('должен возвращать объект, полученный от Api', function(){
             var data = {
-                    id: 1,
-                    name: 'название города'
+                    response: "Ответ сервера",
+                    errorMessage: "Ошибка, выявленная Api"
                 },
-                expected = "Сообщение об ошибке",
-                actual;
+                actualSuccess,
+                actualError;
 
-            spyOn(Api, 'put').andReturn($q.reject(
-                expected
-            ));
+            spyOn(Api, 'put').andReturn($q.reject(data));
 
-            cityApi.update(data).then(null, function(respond) {
-                actual = respond;
+            cityApi.update(data).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe(expected);
-        });
-
-        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
-            var data = {
-                    id: 1,
-                    name: 'название города'
-                },
-                expected = {
-                    data: {
-                        error_code: 500
-                    }
-                },
-                actual;
-
-            spyOn(Api, 'put').andReturn($q.reject(
-                expected
-            ));
-
-            cityApi.update(data).then(null, function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBe(500);
+            expect(actualError).toBe(data);
         });
     });
 
@@ -473,44 +395,24 @@ describe('У объекта app.dal.rest.api', function() {
             expect(actual).toBe(expected);
         });
 
-        it('должен возвращать строку с сообщением об ошибке, полученную от Api', function(){
-            var id = 1,
-                expected = "Сообщение об ошибке",
-                actual;
-
-            spyOn(Api, 'remove').andReturn($q.reject(
-                expected
-            ));
-
-            cityApi.remove(id).then(null, function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBe(expected);
-        });
-
-        it('должен возвращать код ошибки из объекта, полученного от Api', function(){
-            var id = 1,
-                expected = {
-                    data: {
-                        error_code: 500
-                    }
+        it('должен возвращать объект, полученный от Api', function(){
+            var data = {
+                    response: "Ответ сервера",
+                    errorMessage: "Ошибка, выявленная Api"
                 },
-                actual;
+                actualSuccess,
+                actualError;
 
-            spyOn(Api, 'remove').andReturn($q.reject(
-                expected
-            ));
+            spyOn(Api, 'remove').andReturn($q.reject(data));
 
-            cityApi.remove(id).then(null, function(respond) {
-                actual = respond;
+            cityApi.remove(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
 
             $rootScope.$digest();
-
-            expect(actual).toBe(500);
+            expect(actualError).toBe(data);
         });
     });
 });

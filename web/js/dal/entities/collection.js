@@ -2,7 +2,7 @@
 
 angular.module('app.dal.entities.collection', [])
 
-.factory('Collection', function($q) {
+.factory('Collection', function($q, $log) {
     /**
      * Реализация базовой функциональности для работы с коллекциями объектов
      */
@@ -108,7 +108,8 @@ angular.module('app.dal.entities.collection', [])
             var errorMessages = [];
             var newArray = self._addArray.call(self, itemsData, errorMessages);
             if (errorMessages.length) {
-                return $q.reject(errorMessages);
+                $log.error(errorMessages);
+                return $q.reject({response: itemsData, errorMessage: errorMessages});
             } else {
                 return newArray;
             }
@@ -136,11 +137,12 @@ angular.module('app.dal.entities.collection', [])
     Collection.prototype.get = function(id) {
         return this.getAll().then(function (response) {
             var item = _.find(response, {id: id});
-            if (item) {
-                return item;
-            } else {
-                return $q.reject("В коллекции не найден элемент с id: " + id);
+            if (!item) {
+                var errorMessage = "В коллекции не найден элемент с id: " + id;
+                $log.error(errorMessage);
+                return $q.reject({response: response, errorMessage: errorMessage});
             }
+            return item;
         })
     };
 
@@ -152,12 +154,23 @@ angular.module('app.dal.entities.collection', [])
         var self = this;
         if (item.id) {      // элемент должен быть в коллекции
             return this.getRestApiProvider().update(item._serialize()).then(function(itemData){
-                return item._fillData(itemData);
+                var errorMessages = [];
+                item._fillData(itemData, errorMessages);
+                if (errorMessages.length) {
+                    $log.error(errorMessages);
+                    return $q.reject({response: item, errorMessage: errorMessages});
+                }
+                return item;
             });
         } else {
             return this.getRestApiProvider().create(item._serialize()).then(function(itemData){
-                item._fillData(itemData);
+                var errorMessages = [];
+                item._fillData(itemData, errorMessages);
                 self.collection.push(item);
+                if (errorMessages.length) {
+                    $log.error(errorMessages);
+                    return $q.reject({response: item, errorMessage: errorMessages});
+                }
                 return item;
             });
         }

@@ -69,8 +69,7 @@ describe('http-mock', function() {
 
         it('возвращать ошибку, если пользователь не найден', function() {
         var actualSuccess,
-            actualError,
-            expected = 'В коллекции не найден элемент с id: 5';
+            actualError;
 
             users.get(5).then(function(respond) {
                 actualSuccess = respond;
@@ -84,7 +83,7 @@ describe('http-mock', function() {
                 $rootScope.$digest();
             }
 
-            expect(actualError).toEqualData(expected);
+            expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 5');
         });
     });
 });

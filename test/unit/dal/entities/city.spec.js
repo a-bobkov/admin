@@ -3,6 +3,7 @@
 describe('Сервис cities из модуля app.dal.entities.city', function() {
     var $rootScope,
         $q,
+        $log,
         cities,
         City,
         cityApi,
@@ -12,9 +13,10 @@ describe('Сервис cities из модуля app.dal.entities.city', function
     beforeEach(function() {
         module('app.dal.entities.city');
 
-        inject(function(_$rootScope_, _$q_, _cities_, _City_, _cityApi_, _Api_)  {
+        inject(function(_$rootScope_, _$q_, _$log_, _cities_, _City_, _cityApi_, _Api_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
+            $log = _$log_;
             cities = _cities_;
             City = _City_;
             cityApi = _cityApi_;
@@ -141,17 +143,17 @@ describe('Сервис cities из модуля app.dal.entities.city', function
         });
 
         it('проверять наличие идентификатора у элементов коллекции', function() {
-            var actualSuccess,
-                actualError;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
+            var data = [
                     { id: 1, name: 'Первый' },
                     {name: 'Без идентификатора'}
-                ]
-            ));
+                ],
+                actualSuccess,
+                actualError;
 
-            var errorMessages = [];
+            spyOn(cityApi, 'query').andReturn($q.when(data));
+
+            spyOn($log, 'error').andReturn(null);
+
             cities.load().then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
@@ -159,8 +161,9 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
 
             $rootScope.$digest();
-
-            expect(actualError).toEqualData(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+            expect($log.error).toHaveBeenCalledWith(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+            expect(actualSuccess).toBeUndefined;
+            expect(actualError.errorMessage).toEqual(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
         });
 
         it('возвращать массив объектов', function() {
@@ -244,7 +247,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
 
             $rootScope.$digest();
-            expect(actual).toEqual(undefined);
+            expect(actual).toBeUndefined();
         });
 
     });
