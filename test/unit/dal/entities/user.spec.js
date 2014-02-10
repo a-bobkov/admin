@@ -7,21 +7,19 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         users,
         User,
         userApi,
-        UserOptions,
         Api;
 
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _$log_, _users_, _User_, _userApi_, _UserOptions_, _Api_)  {
+        inject(function(_$rootScope_, _$q_, _$log_, _users_, _User_, _userApi_, _Api_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             $log = _$log_;
             users = _users_;
             User = _User_;
             userApi = _userApi_;
-            UserOptions = _UserOptions_;
             Api = _Api_;
         });
     });
@@ -60,7 +58,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             expected
         ));
 
-        UserOptions.getOptions().then(function(respond) {
+        users.getOptions().then(function(respond) {
             actual = respond;
         });
 
@@ -475,7 +473,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         $q,
         Api,
         User,
-        UserOptions,
+        users,
         groups,
         managers,
         cities,
@@ -486,12 +484,12 @@ describe('Сервис-конструктор User из модуля app.dal.ent
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _Api_, _User_, _UserOptions_, _groups_, _managers_, _cities_, _markets_, _metros_, _sites_)  {
+        inject(function(_$rootScope_, _$q_, _Api_, _User_, _users_, _groups_, _managers_, _cities_, _markets_, _metros_, _sites_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             Api = _Api_;
             User = _User_;
-            UserOptions = _UserOptions_;
+            users = _users_;
             groups = _groups_;
             managers = _managers_;
             cities = _cities_;
@@ -535,7 +533,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             expected
         ));
 
-        UserOptions.getOptions().then(function(respond) {
+        users.getOptions().then(function(respond) {
             actual = respond;
         });
 
@@ -637,20 +635,27 @@ describe('Сервис-конструктор User из модуля app.dal.ent
     });
 });
 
-describe('Сервис опций User из модуля app.dal.entities.user умеет', function() {
+describe('Сервис users из модуля app.dal.entities.user умеет', function() {
     var $rootScope,
         $q,
-        Api,
-        UserOptions;
+        $log,
+        users,
+        User,
+        userApi,
+        Api;
+
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$rootScope_, _$q_, _Api_, _UserOptions_)  {
+        inject(function(_$rootScope_, _$q_, _$log_, _users_, _User_, _userApi_, _Api_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
+            $log = _$log_;
+            users = _users_;
+            User = _User_;
+            userApi = _userApi_;
             Api = _Api_;
-            UserOptions = _UserOptions_;
         });
     });
 
@@ -689,7 +694,7 @@ describe('Сервис опций User из модуля app.dal.entities.user �
             expected
         ));
 
-        UserOptions.getOptions().then(function(respond) {
+        users.getOptions().then(function(respond) {
             actual = respond;
         });
 
@@ -732,7 +737,7 @@ describe('Сервис опций User из модуля app.dal.entities.user �
 
         spyOn(Api, 'get').andReturn($q.when(expected));
 
-        UserOptions.getOptions().then(function(respond) {
+        users.getOptions().then(function(respond) {
             actualSuccess = respond;
         }, function(respond) {
             actualError = respond;

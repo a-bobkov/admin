@@ -15,7 +15,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     return new RestApi('users', 'user');
 })
 
-.factory('users', function(Collection, userApi) {
+.factory('users', function(Collection, userApi, $q, $log, Api) {
 
     var collection;
 
@@ -46,6 +46,35 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
         })
     };
 
+    collection.getOptions = function() {
+        return Api.get('/api2/combined/users/').then(function(response) {
+            var dataProcessed = {},
+                errorMessages = [];
+
+            for (var key in response) {
+                try {
+                    var collection = Collection.prototype.children[key];
+                    if (!collection) {
+                        throw new CollectionError('Неизвестная секция: ' + key);
+                    }
+                    dataProcessed[key] = collection._addArray(response[key]);
+                } catch (error) {
+                    if (!(error instanceof CollectionError)) {
+                        throw error;
+                    }
+                    errorMessages.push(error.message);
+                }
+            }
+
+            if (errorMessages.length) {
+                $log.error(errorMessages);
+                return $q.reject({response: response, errorMessage: errorMessages});
+            }
+
+            return dataProcessed;
+        })
+    };
+
     return collection;
 })
 
@@ -60,40 +89,3 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 .run(function(users, User) {
     users.setItemConstructor(User);
 })
-
-.service('UserOptions', function($q, $log, Api, Collection) {
-    /**
-     * @param -
-     * @returns {Promise}
-     */
-    this.responseHandlerOptions = function(response) {
-        var dataProcessed = {},
-            errorMessages = [];
-
-        for (var key in response) {
-            try {
-                var collection = Collection.prototype.children[key];
-                if (!collection) {
-                    throw new CollectionError('Неизвестная секция: ' + key);
-                }
-                dataProcessed[key] = collection._addArray(response[key]);
-            } catch (error) {
-                if (!(error instanceof CollectionError)) {
-                    throw error;
-                }
-                errorMessages.push(error.message);
-            }
-        }
-
-        if (errorMessages.length) {
-            $log.error(errorMessages);
-            return $q.reject({response: response, errorMessage: errorMessages});
-        }
-
-        return dataProcessed;
-    };
-
-    this.getOptions = function() {
-        return Api.get('/api2/combined/users/').then(this.responseHandlerOptions);
-    };
-});
