@@ -31,8 +31,12 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
         var self = this;
         return Collection.prototype.get.call(this, id).then(function (item) {
             return self.getRestApiProvider().get(id).then(function(itemData){
-                var errorMessages = [];
-                item._fillData(itemData, errorMessages);
+                try {
+                    var errorMessages = [];
+                    item._fillData(itemData);
+                } catch (errorMessage) {
+                    errorMessages.push(errorMessage);
+                }
                 if (errorMessages.length) {
                     $log.error(errorMessages);
                     return $q.reject({response: item, errorMessage: errorMessages});
@@ -57,7 +61,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     users.setItemConstructor(User);
 })
 
-.service('UserOptions', function($q, Api, cities, groups, managers, markets, metros, sites) {
+.service('UserOptions', function($q, $log, Api, cities, groups, managers, markets, metros, sites) {
     /**
      * @param -
      * @returns {Promise}
@@ -91,12 +95,18 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
                 errorMessages.push ('Неизвестная секция: ' + key);
             }
             if (collection) {
-                dataProcessed[key] = collection._addArray(response[key], errorMessages);
+                try {
+                    var errorMessages = [];
+                    dataProcessed[key] = collection._addArray(response[key]);
+                } catch (errorMessage) {
+                    errorMessages.push(errorMessage.message);
+                }
             }
         }
 
-        if (errorMessages.length > 0) {
-            return $q.reject('Ответ сервера содержит ошибки:\n' + errorMessages);
+        if (errorMessages.length) {
+            $log.error(errorMessages);
+            return $q.reject({response: response, errorMessage: errorMessages});
         }
 
         return dataProcessed;

@@ -53,21 +53,20 @@ angular.module('app.dal.entities.collection', [])
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Collection.prototype._addItem = function(itemData, errorMessages) {
+    Collection.prototype._addItem = function(itemData) {
         var item;
 
         if (typeof itemData.id === 'undefined') {
-            errorMessages.push('Нет параметра id в элементе: ' + angular.toJson(itemData));
-        } else {
-            item = this._findItem(itemData.id);
-            if (!item) {
-                var ItemConstructor = this.getItemConstructor();
-                item = new ItemConstructor();
-                this.collection = this.collection || [];
-                this.collection.push(item);
-            }
-            item._fillData(itemData, errorMessages);
+            throw new Error('Нет параметра id в элементе: ' + angular.toJson(itemData));
         }
+        item = this._findItem(itemData.id);
+        if (!item) {
+            var ItemConstructor = this.getItemConstructor();
+            item = new ItemConstructor();
+            this.collection = this.collection || [];
+            this.collection.push(item);
+        }
+        item._fillData(itemData);
         return item;
     };
 
@@ -77,15 +76,14 @@ angular.module('app.dal.entities.collection', [])
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Collection.prototype._addArray = function(itemsData, errorMessages) {
+    Collection.prototype._addArray = function(itemsData) {
         var newArray = [];
 
         if (!angular.isArray(itemsData)) {
-            errorMessages.push('Отсутствует массив');
-        } else {
-            for (var i = 0, length = itemsData.length; i < length; i++) {
-                newArray[i] = this._addItem(itemsData[i], errorMessages);
-            }
+            throw new Error('Отсутствует массив');
+        }
+        for (var i = 0, length = itemsData.length; i < length; i++) {
+            newArray[i] = this._addItem(itemsData[i]);
         }
         return newArray;
     };
@@ -105,14 +103,17 @@ angular.module('app.dal.entities.collection', [])
     Collection.prototype.load = function() {
         var self = this;
         return this.getRestApiProvider().query().then(function(itemsData){
-            var errorMessages = [];
-            var newArray = self._addArray.call(self, itemsData, errorMessages);
+            try {
+                var errorMessages = [],
+                    newArray = self._addArray.call(self, itemsData);
+            } catch (errorMessage) {
+                errorMessages.push(errorMessage.message);
+            }
             if (errorMessages.length) {
                 $log.error(errorMessages);
                 return $q.reject({response: itemsData, errorMessage: errorMessages});
-            } else {
-                return newArray;
             }
+            return newArray;
         });
     };
 
@@ -154,8 +155,12 @@ angular.module('app.dal.entities.collection', [])
         var self = this;
         if (item.id) {      // элемент должен быть в коллекции
             return this.getRestApiProvider().update(item._serialize()).then(function(itemData){
-                var errorMessages = [];
-                item._fillData(itemData, errorMessages);
+                try {
+                    var errorMessages = [];
+                    item._fillData(itemData);
+                } catch (errorMessage) {
+                    errorMessages.push(errorMessage.message);
+                }
                 if (errorMessages.length) {
                     $log.error(errorMessages);
                     return $q.reject({response: item, errorMessage: errorMessages});
@@ -164,9 +169,13 @@ angular.module('app.dal.entities.collection', [])
             });
         } else {
             return this.getRestApiProvider().create(item._serialize()).then(function(itemData){
-                var errorMessages = [];
-                item._fillData(itemData, errorMessages);
-                self.collection.push(item);
+                try {
+                    var errorMessages = [];
+                    item._fillData(itemData);
+                    self.collection.push(item);
+                } catch (errorMessage) {
+                    errorMessages.push(errorMessage.message);
+                }
                 if (errorMessages.length) {
                     $log.error(errorMessages);
                     return $q.reject({response: item, errorMessage: errorMessages});
@@ -199,21 +208,19 @@ angular.module('app.dal.entities.collection', [])
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Item.prototype._fillData = function(itemData, errorMessages) {
+    Item.prototype._fillData = function(itemData) {
         for (var key in itemData) {
             var attr = itemData[key],
                 refElem = attr;
             if (typeof attr === 'object') {
                 if (typeof attr.id === 'undefined') {
-                    errorMessages.push ('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
-                } else {
-                    var collection = Collection.prototype.children[key];
-                    if (collection) {
-                        refElem = collection._addItem(attr, errorMessages);
-                    } else {
-                        errorMessages.push ('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
-                    }
+                    throw new Error('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
                 }
+                var collection = Collection.prototype.children[key];
+                if (!collection) {
+                    throw new Error('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
+                }
+                refElem = collection._addItem(attr);
             }
             this[key] = refElem;
         }

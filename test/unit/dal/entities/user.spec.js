@@ -701,8 +701,9 @@ describe('Сервис опций User из модуля app.dal.entities.user �
     });
 
     it('проверять корректность ответа при загрузке опций с сервера и выдавать полный список ошибок', function() {
-        var actual,
-            url = '/api2/combined/users/',
+        var url = '/api2/combined/users/',
+            actualSuccess,
+            actualError,
             expected = {
                 // roles:
                 //     {id: 1, name: 'Роль один'},
@@ -729,18 +730,15 @@ describe('Сервис опций User из модуля app.dal.entities.user �
                 // ]
             };
 
-        spyOn(Api, 'get').andReturn($q.when(
-            expected
-        ));
+        spyOn(Api, 'get').andReturn($q.when(expected));
 
-        UserOptions.getOptions().then(null, function(respond) {
-            actual = respond;
+        UserOptions.getOptions().then(function(respond) {
+            actualSuccess = respond;
+        }, function(respond) {
+            actualError = respond;
         });
 
         $rootScope.$digest();
-
-        expect(actual).toEqual('Ответ сервера содержит ошибки:\n'
-            + 'Нет ссылочного id в элементе с id: 8, параметре: city'
-        );
+        expect(actualError.errorMessage).toEqual(['Нет ссылочного id в элементе с id: 8, параметре: city']);
     });
 });
