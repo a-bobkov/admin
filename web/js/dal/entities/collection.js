@@ -212,6 +212,43 @@ angular.module('app.dal.entities.collection', [])
         });
     };
 
+    /**
+     * @param -
+     * @returns {Promise}
+     */
+    Collection.prototype.getOptions = function() {
+        var getOptions = this.getRestApiProvider().getOptions;
+        if (!getOptions) {
+            throw new CollectionError('Не определен метод REST API для загрузки зависимых справочников коллекции.');
+        }
+        return getOptions().then(function(optionsData){
+            var dataProcessed = {},
+                errorMessages = [];
+
+            for (var key in optionsData) {
+                try {
+                    var collection = Collection.prototype.children[key];
+                    if (!collection) {
+                        throw new CollectionError('Неизвестная секция: ' + key);
+                    }
+                    dataProcessed[key] = collection._addArray(optionsData[key]);
+                } catch (error) {
+                    if (!(error instanceof CollectionError)) {
+                        throw error;
+                    }
+                    errorMessages.push(error.message);
+                }
+            }
+
+            if (errorMessages.length) {
+                $log.error(errorMessages);
+                return $q.reject({response: optionsData, errorMessage: errorMessages});
+            }
+
+            return dataProcessed;
+        })
+    };
+
     return Collection;
 })
 

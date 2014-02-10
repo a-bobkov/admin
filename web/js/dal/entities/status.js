@@ -16,7 +16,7 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection', 'app.d
 
     collection = new Collection;
     collection.setRestApiProvider(statusApi);
-    collection.registerChild ('status');
+    collection.registerChild ('status', 'statuses');
 
     return collection;
 })

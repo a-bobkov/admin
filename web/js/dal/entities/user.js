@@ -11,8 +11,14 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     'app.dal.entities.site'
 ])
 
-.factory('userApi', function(RestApi) {
-    return new RestApi('users', 'user');
+.factory('userApi', function(RestApi, Api) {
+    var userApi = new RestApi('users', 'user');
+
+    userApi.getOptions = function() {
+        return Api.get('/api2/combined/users/');
+    }
+
+    return userApi;
 })
 
 .factory('users', function(Collection, userApi, $q, $log, Api) {
@@ -43,35 +49,6 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
                 }
                 return item;
             });
-        })
-    };
-
-    collection.getOptions = function() {
-        return Api.get('/api2/combined/users/').then(function(response) {
-            var dataProcessed = {},
-                errorMessages = [];
-
-            for (var key in response) {
-                try {
-                    var collection = Collection.prototype.children[key];
-                    if (!collection) {
-                        throw new CollectionError('Неизвестная секция: ' + key);
-                    }
-                    dataProcessed[key] = collection._addArray(response[key]);
-                } catch (error) {
-                    if (!(error instanceof CollectionError)) {
-                        throw error;
-                    }
-                    errorMessages.push(error.message);
-                }
-            }
-
-            if (errorMessages.length) {
-                $log.error(errorMessages);
-                return $q.reject({response: response, errorMessage: errorMessages});
-            }
-
-            return dataProcessed;
         })
     };
 
