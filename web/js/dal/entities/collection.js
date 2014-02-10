@@ -16,8 +16,9 @@ angular.module('app.dal.entities.collection', [])
 
     Collection.prototype.children = {};
 
-    Collection.prototype.registerChild = function(entityName) {
+    Collection.prototype.registerChild = function(entityName, collectionName) {
         Collection.prototype.children[entityName] = this;
+        Collection.prototype.children[collectionName] = this;
     };
 
     Collection.prototype.setItemConstructor = function(ItemConstructor) {

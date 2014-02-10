@@ -12,7 +12,7 @@ angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.d
 
     collection = new Collection;
     collection.setRestApiProvider(marketApi);
-    collection.registerChild ('market');
+    collection.registerChild ('market', 'markets');
 
     return collection;
 })

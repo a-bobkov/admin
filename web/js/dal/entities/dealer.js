@@ -12,7 +12,7 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
 
     collection = new Collection;
     collection.setRestApiProvider(dealerApi);
-    collection.registerChild ('dealer');
+    collection.registerChild ('dealer', 'dealers');
 
     return collection;
 })

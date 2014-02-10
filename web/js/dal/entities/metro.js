@@ -12,7 +12,7 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
 
     collection = new Collection;
     collection.setRestApiProvider(metroApi);
-    collection.registerChild ('metro');
+    collection.registerChild ('metro', 'metros');
 
     return collection;
 })

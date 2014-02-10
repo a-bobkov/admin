@@ -12,7 +12,7 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.da
 
     collection = new Collection;
     collection.setRestApiProvider(groupApi);
-    collection.registerChild ('group');
+    collection.registerChild ('group', 'groups');
 
     return collection;
 })
