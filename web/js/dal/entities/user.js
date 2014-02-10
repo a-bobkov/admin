@@ -96,10 +96,12 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
             }
             if (collection) {
                 try {
-                    var errorMessages = [];
                     dataProcessed[key] = collection._addArray(response[key]);
-                } catch (errorMessage) {
-                    errorMessages.push(errorMessage.message);
+                } catch (error) {
+                    if (!(error instanceof CollectionError)) {
+                        throw error;
+                    }
+                    errorMessages.push(error.message);
                 }
             }
         }

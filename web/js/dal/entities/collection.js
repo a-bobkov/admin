@@ -1,5 +1,11 @@
 ﻿'use strict';
 
+function CollectionError(message) {
+    this.message = message || "Неопределенная ошибка";
+}
+CollectionError.prototype = new Error();
+CollectionError.prototype.constructor = CollectionError;
+
 angular.module('app.dal.entities.collection', [])
 
 .factory('Collection', function($q, $log) {
@@ -20,7 +26,7 @@ angular.module('app.dal.entities.collection', [])
 
     Collection.prototype.getItemConstructor = function() {
         if (typeof this.ItemConstructor === 'undefined') {
-            throw new Error('Не задан конструктор для элементов коллекции.');
+            throw new CollectionError('Не задан конструктор для элементов коллекции.');
         }
         return this.ItemConstructor;
     };
@@ -32,7 +38,7 @@ angular.module('app.dal.entities.collection', [])
 
     Collection.prototype.getRestApiProvider = function() {
         if (typeof this.restApiProvider === 'undefined') {
-            throw new Error('Не задан провайдер REST API.');
+            throw new CollectionError('Не задан провайдер REST API.');
         }
         return this.restApiProvider;
     };
@@ -57,7 +63,7 @@ angular.module('app.dal.entities.collection', [])
         var item;
 
         if (typeof itemData.id === 'undefined') {
-            throw new Error('Нет параметра id в элементе: ' + angular.toJson(itemData));
+            throw new CollectionError('Нет параметра id в элементе: ' + angular.toJson(itemData));
         }
         item = this._findItem(itemData.id);
         if (!item) {
@@ -80,7 +86,7 @@ angular.module('app.dal.entities.collection', [])
         var newArray = [];
 
         if (!angular.isArray(itemsData)) {
-            throw new Error('Отсутствует массив');
+            throw new CollectionError('Отсутствует массив');
         }
         for (var i = 0, length = itemsData.length; i < length; i++) {
             newArray[i] = this._addItem(itemsData[i]);
@@ -106,8 +112,11 @@ angular.module('app.dal.entities.collection', [])
             try {
                 var errorMessages = [],
                     newArray = self._addArray.call(self, itemsData);
-            } catch (errorMessage) {
-                errorMessages.push(errorMessage.message);
+            } catch (error) {
+                if (!(error instanceof CollectionError)) {
+                    throw error;
+                }
+                errorMessages.push(error.message);
             }
             if (errorMessages.length) {
                 $log.error(errorMessages);
@@ -158,8 +167,11 @@ angular.module('app.dal.entities.collection', [])
                 try {
                     var errorMessages = [];
                     item._fillData(itemData);
-                } catch (errorMessage) {
-                    errorMessages.push(errorMessage.message);
+                } catch (error) {
+                    if (!(error instanceof CollectionError)) {
+                        throw error;
+                    }
+                    errorMessages.push(error.message);
                 }
                 if (errorMessages.length) {
                     $log.error(errorMessages);
@@ -173,8 +185,11 @@ angular.module('app.dal.entities.collection', [])
                     var errorMessages = [];
                     item._fillData(itemData);
                     self.collection.push(item);
-                } catch (errorMessage) {
-                    errorMessages.push(errorMessage.message);
+                } catch (error) {
+                    if (!(error instanceof CollectionError)) {
+                        throw error;
+                    }
+                    errorMessages.push(error.message);
                 }
                 if (errorMessages.length) {
                     $log.error(errorMessages);
@@ -214,11 +229,11 @@ angular.module('app.dal.entities.collection', [])
                 refElem = attr;
             if (typeof attr === 'object') {
                 if (typeof attr.id === 'undefined') {
-                    throw new Error('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
+                    throw new CollectionError('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
                 }
                 var collection = Collection.prototype.children[key];
                 if (!collection) {
-                    throw new Error('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
+                    throw new CollectionError('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                 }
                 refElem = collection._addItem(attr);
             }
