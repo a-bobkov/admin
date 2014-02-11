@@ -58,7 +58,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             expected
         ));
 
-        users.getOptions().then(function(respond) {
+        users.getDirectories().then(function(respond) {
             actual = respond;
         });
 
@@ -533,7 +533,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             expected
         ));
 
-        users.getOptions().then(function(respond) {
+        users.getDirectories().then(function(respond) {
             actual = respond;
         });
 
@@ -694,7 +694,7 @@ describe('Сервис users из модуля app.dal.entities.user умеет'
             expected
         ));
 
-        users.getOptions().then(function(respond) {
+        users.getDirectories().then(function(respond) {
             actual = respond;
         });
 
@@ -737,7 +737,7 @@ describe('Сервис users из модуля app.dal.entities.user умеет'
 
         spyOn(Api, 'get').andReturn($q.when(expected));
 
-        users.getOptions().then(function(respond) {
+        users.getDirectories().then(function(respond) {
             actualSuccess = respond;
         }, function(respond) {
             actualError = respond;

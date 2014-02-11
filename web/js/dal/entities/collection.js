@@ -216,12 +216,12 @@ angular.module('app.dal.entities.collection', [])
      * @param -
      * @returns {Promise}
      */
-    Collection.prototype.getOptions = function() {
-        var getOptions = this.getRestApiProvider().getOptions;
-        if (!getOptions) {
+    Collection.prototype.getDirectories = function() {
+        var getDirectories = this.getRestApiProvider().getDirectories;
+        if (!getDirectories) {
             throw new CollectionError('Не определен метод REST API для загрузки зависимых справочников коллекции.');
         }
-        return getOptions().then(function(optionsData){
+        return getDirectories().then(function(optionsData){
             var dataProcessed = {},
                 errorMessages = [];
 

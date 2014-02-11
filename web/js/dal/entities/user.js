@@ -14,7 +14,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 .factory('userApi', function(RestApi, Api) {
     var userApi = new RestApi('users', 'user');
 
-    userApi.getOptions = function() {
+    userApi.getDirectories = function() {
         return Api.get('/api2/combined/users/');
     }
 

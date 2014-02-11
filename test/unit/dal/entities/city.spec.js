@@ -349,7 +349,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
         });
 
         it('не пытаться загружать опции с сервера, а выбрасывать эксепшн', function() {
-            expect( function() { cities.getOptions(); } )
+            expect( function() { cities.getDirectories(); } )
                 .toThrow('Не определен метод REST API для загрузки зависимых справочников коллекции.');
         });
     });
