@@ -21,7 +21,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     return userApi;
 })
 
-.factory('users', function(Collection, userApi, $q, $log, Api) {
+.factory('users', function(Collection, userApi, $q, $log) {
 
     var collection;
 
@@ -40,8 +40,11 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
                 try {
                     var errorMessages = [];
                     item._fillData(itemData);
-                } catch (errorMessage) {
-                    errorMessages.push(errorMessage);
+                } catch (error) {
+                    if (!(error instanceof CollectionError)) {
+                        throw error;
+                    }
+                    errorMessages.push(error.message);
                 }
                 if (errorMessages.length) {
                     $log.error(errorMessages);
