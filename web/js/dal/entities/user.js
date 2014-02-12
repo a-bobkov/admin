@@ -58,7 +58,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     return collection;
 })
 
-.factory('User', function(Item, users) {
+.factory('User', function(Item) {
     var User = function () {};
 
     angular.extend(User.prototype, Item.prototype);

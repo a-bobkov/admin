@@ -180,7 +180,7 @@ angular.module('app.dal.entities.collection', [])
                 }
                 return item;
             });
-        } else {
+        } else {        // todo: сделать вызов _addItem
             return this.getRestApiProvider().create(item._serialize()).then(function(itemData){
                 try {
                     var errorMessages = [];
@@ -261,7 +261,7 @@ angular.module('app.dal.entities.collection', [])
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Item.prototype._fillData = function(itemData) {
+    Item.prototype._fillData = function(itemData) {     // todo: собирать ошибки в массив и кидать его один раз
         for (var key in itemData) {
             var attr = itemData[key],
                 refElem = attr;
