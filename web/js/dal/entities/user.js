@@ -23,17 +23,18 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 
 .factory('users', function(Collection, userApi, $q, $log) {
 
-    var collection;
+return (function() {
 
-    collection = new Collection;
-    collection.setRestApiProvider(userApi);
-    collection.registerChild ('user', 'users');
+    var Child = inherit(function() {    // инициализация экземпляра
+        this.setRestApiProvider(userApi);
+        this.registerChild('user', 'users');
+    }, Collection);
 
     /**
      * @param {Number} id
      * @returns {Promise}
      */
-    collection.get = function(id) {
+    Child.prototype.get = function(id) {
         var self = this;
         return Collection.prototype.get.call(this, id).then(function (item) {
             return self.getRestApiProvider().get(id).then(function(itemData){
@@ -53,9 +54,9 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
                 return item;
             });
         })
-    };
-
-    return collection;
+    };    
+    return new Child;
+}());
 })
 
 .factory('User', function(Item) {

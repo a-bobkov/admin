@@ -1,5 +1,10 @@
 ﻿'use strict';
 
+var inherit = function(child, parent) {
+    child.prototype = new parent;
+    return child;
+};
+
 function CollectionError(message) {
     this.message = message || "Неопределенная ошибка";
 }
@@ -12,13 +17,19 @@ angular.module('app.dal.entities.collection', [])
     /**
      * Реализация базовой функциональности для работы с коллекциями объектов
      */
-    var Collection = function () {};
+var Collection = (function() {
 
-    Collection.prototype.children = {};
+    var _children = {};
+
+    var Collection = function() {};
 
     Collection.prototype.registerChild = function(entityName, collectionName) {
-        Collection.prototype.children[entityName] = this;
-        Collection.prototype.children[collectionName] = this;
+        _children[entityName] = this;
+        _children[collectionName] = this;
+    };
+
+    Collection.prototype.getChild = function(name) {
+        return _children[name];
     };
 
     Collection.prototype.setItemConstructor = function(ItemConstructor) {
@@ -102,7 +113,7 @@ angular.module('app.dal.entities.collection', [])
     Collection.prototype._findIndex = function(id) {
         return _.findIndex(this.collection, {id: id});
     };
-
+    
     /**
      * @param {Array}
      * @returns {Promise}
@@ -227,7 +238,8 @@ angular.module('app.dal.entities.collection', [])
 
             for (var key in optionsData) {
                 try {
-                    var collection = Collection.prototype.children[key];
+                    var collection = Collection.prototype.getChild (key);
+
                     if (!collection) {
                         throw new CollectionError('Неизвестная секция: ' + key);
                     }
@@ -250,6 +262,10 @@ angular.module('app.dal.entities.collection', [])
     };
 
     return Collection;
+}());
+
+return Collection;
+
 })
 
 .factory('Item', function(Collection) {
@@ -269,7 +285,7 @@ angular.module('app.dal.entities.collection', [])
                 if (typeof attr.id === 'undefined') {
                     throw new CollectionError('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
                 }
-                var collection = Collection.prototype.children[key];
+                var collection = Collection.prototype.getChild (key);
                 if (!collection) {
                     throw new CollectionError('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                 }
