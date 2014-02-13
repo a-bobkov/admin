@@ -57,7 +57,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.query = function(params) {
-            return Api.get(url, params || {}).then(
+            return Api.get(url + 'partial').then(
                 this.getResponseHandler(collectionName),
                 this.getErrorHandler()
             );
