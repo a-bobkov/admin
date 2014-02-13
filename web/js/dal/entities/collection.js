@@ -74,7 +74,7 @@ var Collection = (function() {
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Collection.prototype._findItem = function(id) {
+    var _findItem = function(id) {
         return _.find(_getItems(this), {id: id});
     };
 
@@ -84,13 +84,13 @@ var Collection = (function() {
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Collection.prototype._addItem = function(itemData) {
+    var _addItem = function(itemData) {
         var item;
 
         if (typeof itemData.id === 'undefined') {
             throw new CollectionError('Нет параметра id в элементе: ' + angular.toJson(itemData));
         }
-        item = this._findItem(itemData.id);
+        item = _findItem.call(this, itemData.id);
         if (!item) {
             var ItemConstructor = this.getItemConstructor();
             item = new ItemConstructor();
@@ -100,20 +100,22 @@ var Collection = (function() {
         return item;
     };
 
+    Collection.prototype.addItem = _addItem;     // передача частного метода для дружественного Item
+
     /**
      * @param {Array}, {Array}
      * @returns {Array}
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Collection.prototype._addArray = function(itemsData) {
+    var _addArray = function(itemsData) {
         var newArray = [];
 
         if (!angular.isArray(itemsData)) {
             throw new CollectionError('Отсутствует массив');
         }
         for (var i = 0, length = itemsData.length; i < length; i++) {
-            newArray[i] = this._addItem(itemsData[i]);
+            newArray[i] = _addItem.call(this, itemsData[i]);
         }
         return newArray;
     };
@@ -122,7 +124,7 @@ var Collection = (function() {
      * @param {Number} id
      * @returns {Number}
      */
-    Collection.prototype._findIndex = function(id) {
+    var _findIndex = function(id) {
         return _.findIndex(_getItems(this), {id: id});
     };
     
@@ -135,7 +137,7 @@ var Collection = (function() {
         return this.getRestApiProvider().query().then(function(itemsData){
             try {
                 var errorMessages = [],
-                    newArray = self._addArray.call(self, itemsData);
+                    newArray = _addArray.call(self, itemsData);
             } catch (error) {
                 if (!(error instanceof CollectionError)) {
                     throw error;
@@ -231,7 +233,7 @@ var Collection = (function() {
     Collection.prototype.remove = function(id) {
         var self = this;
         return this.getRestApiProvider().remove(id).then(function(itemData){
-            _getItems(self).splice(self._findIndex(id), 1);
+            _getItems(self).splice(_findIndex.call(self, id), 1);
         });
     };
 
@@ -255,7 +257,7 @@ var Collection = (function() {
                     if (!collection) {
                         throw new CollectionError('Неизвестная секция: ' + key);
                     }
-                    dataProcessed[key] = collection._addArray(optionsData[key]);
+                    dataProcessed[key] = _addArray.call(collection, optionsData[key]);
                 } catch (error) {
                     if (!(error instanceof CollectionError)) {
                         throw error;
@@ -283,6 +285,9 @@ return Collection;
 .factory('Item', function(Collection) {
     var Item = function () {};
 
+    var _addItem = Collection.prototype.addItem;         // забираем нужную функцию
+    delete Collection.prototype.addItem;                 // и заметаем следы
+
     /**
      * @param {Object}
      * @returns {Object}
@@ -301,7 +306,7 @@ return Collection;
                 if (!collection) {
                     throw new CollectionError('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                 }
-                refElem = collection._addItem(attr);
+                refElem = _addItem.call(collection, attr);
             }
             this[key] = refElem;
         }

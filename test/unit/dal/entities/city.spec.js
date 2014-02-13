@@ -205,10 +205,14 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             cities.load().then(function(respond) {
                 actual = respond;
             });
-
             $rootScope.$digest();
-            var city = cities._findItem(3);
-            expect(city instanceof City).toBeTruthy();
+
+            cities.get(3).then(function(respond) {
+                actual = respond;
+            });
+            $rootScope.$digest();
+
+            expect(actual instanceof City).toBeTruthy();
         });
 
         it('возвращать undefined, если требуемый элемент не найден в коллекции', function() {

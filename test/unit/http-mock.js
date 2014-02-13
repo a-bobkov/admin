@@ -20,23 +20,35 @@ describe('http-mock', function() {
     });
 
     beforeEach(function() {
-        var usersArray = [
-                {id: 1, name: 'Пользователь один'},
-                {id: 2, name: 'Пользователь два'}
-            ];
-        
-        users._addArray(usersArray);
+        var ItemConstructor = users.getItemConstructor();
+        var usersArray = [];
+        var _addItem = function(itemData) {
+            var item = new ItemConstructor();
+            item._fillData(itemData);
+            usersArray.push(item);
+        }
+        _addItem({id: 1, name: 'Пользователь один'});
+        _addItem({id: 2, name: 'Пользователь два'});
+
+        var regexQuery = /^\/users\/partial$/;
+        $httpBackend.whenGET(regexQuery).respond(function(method, url, data) {
+            return [200, {
+                status: 'success',
+                data: {
+                    users: usersArray
+                }
+            }];
+        });
 
         var regexGet = /^\/users\/(?:([^\/]+))$/;
-
         $httpBackend.whenGET(regexGet).respond(function(method, url, data) {
             var id = parseInt(url.replace(regexGet,'$1'));
-            var user = users._findItem(id);
+            var user = _.find(usersArray, {id: id});
             if (typeof user === 'object') {
                 return [200, {
                     status: 'success',
                     data: {
-                        user: user._serialize()
+                        user: user
                     }
                 }];
             } else {
@@ -77,11 +89,8 @@ describe('http-mock', function() {
                 actualError = respond;
             });
 
-            if ($http.pendingRequests.length) {       // если вызов дошел до $http
-                $httpBackend.flush();
-            } else {
-                $rootScope.$digest();
-            }
+            $httpBackend.flush();
+            $rootScope.$digest();
 
             expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 5');
         });

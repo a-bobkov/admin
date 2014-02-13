@@ -334,13 +334,19 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             ));
 
             spyOn(userApi, 'update').andReturn($q.when(expected));
+            spyOn(userApi, 'get').andReturn($q.when(expected));
 
             users.load().then(function(respond) {
                 actual = respond;
             });
             $rootScope.$digest();
 
-            var user = users._findItem(2);
+            var user;
+            users.get(2).then(function(respond) {
+                user = respond;
+            });
+            $rootScope.$digest();
+            expect(user).toEqualData(expected);
 
             users.save(user).then(function(respond) {
                 actual = respond;
@@ -522,12 +528,31 @@ describe('Сервис-конструктор User из модуля app.dal.ent
     });
 
     it('создавать пользователей со ссылками на элементы', function() {
-        var group = groups._findItem (1);
-        var manager = managers._findItem (3);
-        var city = cities._findItem (5);
-        var market = markets._findItem (7);
-        var metro = metros._findItem (9);
-        var site = sites._findItem (11);
+        var group;
+        groups.get(1).then(function(respond) {
+            group = respond;
+        });
+        var manager;
+        managers.get(3).then(function(respond) {
+            manager = respond;
+        });
+        var city;
+        cities.get(5).then(function(respond) {
+            city = respond;
+        });
+        var market;
+        markets.get(7).then(function(respond) {
+            market = respond;
+        });
+        var metro;
+        metros.get(9).then(function(respond) {
+            metro = respond;
+        });
+        var site;
+        sites.get(11).then(function(respond) {
+            site = respond;
+        });
+        $rootScope.$digest();
 
         var user = (new User)._fillData({
             id: 11,
