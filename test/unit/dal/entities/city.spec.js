@@ -211,26 +211,6 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(city instanceof City).toBeTruthy();
         });
 
-        it('возвращать индекс объекта коллекции по id', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-            var idx = cities._findIndex(3);
-            expect(cities.collection[idx]).toBe(cities._findItem(3));
-        });
-
         it('возвращать undefined, если требуемый элемент не найден в коллекции', function() {
             var actual;
 
@@ -274,16 +254,17 @@ describe('Сервис cities из модуля app.dal.entities.city', function
                 actual = respond;
             });
             $rootScope.$digest();
-            expect(cities.collection.length).toEqual(3);
 
             var city = new City (expected);
-
             cities.save(city).then(function(respond) {
                 actual = respond;
             });
-
             $rootScope.$digest();
-            expect(cities.collection.length).toEqual(4);
+
+            cities.get(actual.id).then(function(respond) {
+                actual = respond;
+            });
+            expect(actual.name).toEqual('Другой');
         });
 
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {

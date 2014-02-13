@@ -258,26 +258,6 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             $rootScope.$digest();
             expect(actualSuccess instanceof User).toBeTruthy();
         });
-
-        it('возвращать индекс объекта коллекции по id', function() {
-            var actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-            var idx = users._findIndex(3);
-            expect(users.collection[idx]).toBe(users._findItem(3));
-        });
     });
 
     describe('должен управлять коллекцией объектов, для чего уметь', function() {
@@ -392,16 +372,17 @@ describe('Сервис users из модуля app.dal.entities.user', function(
                 actual = respond;
             });
             $rootScope.$digest();
-            expect(users.collection.length).toEqual(3);
 
             var user = new User (expected);
-
             users.save(user).then(function(respond) {
                 actual = respond;
             });
-
             $rootScope.$digest();
-            expect(users.collection.length).toEqual(4);
+
+            users.get(actual.id).then(function(respond) {
+                actual = respond;
+            });
+            expect(actual.name).toEqual('Другой');
         });
 
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {

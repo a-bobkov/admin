@@ -20,12 +20,25 @@ angular.module('app.dal.entities.collection', [])
 var Collection = (function() {
 
     var _children = {};
+    var _collection = [];
+
+    var _getItems = function(entity) {
+        for (var i = _collection.length; i--; ) {
+            if (_collection[i].entity === entity) {
+                return _collection[i].items;
+            }
+        }
+    };
 
     var Collection = function() {};
 
     Collection.prototype.registerChild = function(entityName, collectionName) {
         _children[entityName] = this;
         _children[collectionName] = this;
+        _collection.push({
+            entity: this,
+            items: []
+        });
     };
 
     Collection.prototype.getChild = function(name) {
@@ -62,7 +75,7 @@ var Collection = (function() {
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     Collection.prototype._findItem = function(id) {
-        return _.find(this.collection, {id: id});
+        return _.find(_getItems(this), {id: id});
     };
 
     /**
@@ -81,8 +94,7 @@ var Collection = (function() {
         if (!item) {
             var ItemConstructor = this.getItemConstructor();
             item = new ItemConstructor();
-            this.collection = this.collection || [];
-            this.collection.push(item);
+            _getItems(this).push(item);
         }
         item._fillData(itemData);
         return item;
@@ -111,7 +123,7 @@ var Collection = (function() {
      * @returns {Number}
      */
     Collection.prototype._findIndex = function(id) {
-        return _.findIndex(this.collection, {id: id});
+        return _.findIndex(_getItems(this), {id: id});
     };
     
     /**
@@ -143,13 +155,13 @@ var Collection = (function() {
      * @returns {Promise}
      */
     Collection.prototype.getAll = function() {
-        if (!this.collection) {
+        if (0 === _getItems(this).length) {
             var self = this;
             return this.load().then(function (response) {
-                return self.collection;
+                return _getItems(self);
             });
         }
-        return $q.when(this.collection);
+        return $q.when(_getItems(this));
     };
 
     /**
@@ -196,7 +208,7 @@ var Collection = (function() {
                 try {
                     var errorMessages = [];
                     item._fillData(itemData);
-                    self.collection.push(item);
+                    _getItems(self).push(item);
                 } catch (error) {
                     if (!(error instanceof CollectionError)) {
                         throw error;
@@ -219,7 +231,7 @@ var Collection = (function() {
     Collection.prototype.remove = function(id) {
         var self = this;
         return this.getRestApiProvider().remove(id).then(function(itemData){
-            self.collection.splice(self._findIndex(id), 1);
+            _getItems(self).splice(self._findIndex(id), 1);
         });
     };
 
