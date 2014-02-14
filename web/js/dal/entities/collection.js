@@ -30,7 +30,7 @@ var Collection = (function() {
         return collection;
     };
 
-    var _getItems = function(entity) {
+    var _getCollectionItems = function(entity) {
         return _findCollectionByEntity(entity).items;
     };
 
@@ -81,7 +81,7 @@ var Collection = (function() {
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     var _findItem = function(id) {
-        return _.find(_getItems(this), {id: id});
+        return _.find(_getCollectionItems(this), {id: id});
     };
 
     /**
@@ -91,19 +91,22 @@ var Collection = (function() {
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     var _addItem = function(itemData) {
-        var item;
+        var newItem;
+        var errorMessages = [];
 
         if (typeof itemData.id === 'undefined') {
-            throw new CollectionError('Нет параметра id в элементе: ' + angular.toJson(itemData));
+            errorMessages.push(new CollectionError('Нет параметра id в элементе: ' + angular.toJson(itemData)));
+        } else {
+            newItem = _findItem.call(this, itemData.id);
+            if (!newItem) {
+                var ItemConstructor = _getItemConstructor(this);
+                newItem = new ItemConstructor();
+                _getCollectionItems(this).push(newItem);
+            }
+            var respond = newItem._fillItem(itemData);
+            errorMessages = _.union(errorMessages, respond.errorMessages);
         }
-        item = _findItem.call(this, itemData.id);
-        if (!item) {
-            var ItemConstructor = _getItemConstructor(this);
-            item = new ItemConstructor();
-            _getItems(this).push(item);
-        }
-        item._fillData(itemData);
-        return item;
+        return {result: newItem, errorMessages: errorMessages};    // если нет id, то вернется result: undefined
     };
 
     Collection.prototype.addItem = _addItem;     // передача частного метода для дружественного Item
@@ -116,14 +119,17 @@ var Collection = (function() {
      */
     var _addArray = function(itemsData) {
         var newArray = [];
+        var errorMessages = [];
 
         if (!angular.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив');
+            errorMessages.push(new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData)));
         }
         for (var i = 0, length = itemsData.length; i < length; i++) {
-            newArray[i] = _addItem.call(this, itemsData[i]);
+            var respond = _addItem.call(this, itemsData[i]);
+            newArray[i] = respond.result;
+            errorMessages = _.union(errorMessages, respond.errorMessages)
         }
-        return newArray;
+        return {result: newArray, errorMessages: errorMessages};
     };
 
     /**
@@ -131,9 +137,22 @@ var Collection = (function() {
      * @returns {Number}
      */
     var _findIndex = function(id) {
-        return _.findIndex(_getItems(this), {id: id});
+        return _.findIndex(_getCollectionItems(this), {id: id});
     };
     
+    /**
+     * @param {}
+     * @returns {Promise}
+     */
+    Collection.prototype.setAll = function(itemsData) {
+        var respond = _addArray.call(this, itemsData);
+        var errorMessages = respond.errorMessages;
+        if (errorMessages.length) {
+            $log.error(errorMessages);
+        }
+        return respond.result;
+    };
+
     /**
      * @param {Array}
      * @returns {Promise}
@@ -141,20 +160,7 @@ var Collection = (function() {
     Collection.prototype.load = function() {
         var self = this;
         return this.getRestApiProvider().query().then(function(itemsData){
-            try {
-                var errorMessages = [],
-                    newArray = _addArray.call(self, itemsData);
-            } catch (error) {
-                if (!(error instanceof CollectionError)) {
-                    throw error;
-                }
-                errorMessages.push(error.message);
-            }
-            if (errorMessages.length) {
-                $log.error(errorMessages);
-                return $q.reject({response: itemsData, errorMessage: errorMessages});
-            }
-            return newArray;
+            return self.setAll(itemsData);
         });
     };
 
@@ -163,13 +169,13 @@ var Collection = (function() {
      * @returns {Promise}
      */
     Collection.prototype.getAll = function() {
-        if (0 === _getItems(this).length) {
+        if (0 === _getCollectionItems(this).length) {
             var self = this;
             return this.load().then(function (response) {
-                return _getItems(self);
+                return response;
             });
         }
-        return $q.when(_getItems(this));
+        return $q.when(_getCollectionItems(this));
     };
 
     /**
@@ -196,38 +202,24 @@ var Collection = (function() {
         var self = this;
         if (item.id) {      // элемент должен быть в коллекции
             return this.getRestApiProvider().update(item._serialize()).then(function(itemData){
-                try {
-                    var errorMessages = [];
-                    item._fillData(itemData);
-                } catch (error) {
-                    if (!(error instanceof CollectionError)) {
-                        throw error;
-                    }
-                    errorMessages.push(error.message);
-                }
+                var respond = item._fillItem(itemData);
+                var errorMessages = respond.errorMessages;
                 if (errorMessages.length) {
                     $log.error(errorMessages);
-                    return $q.reject({response: item, errorMessage: errorMessages});
+                    return $q.reject({response: respond.result, errorMessage: errorMessages});
                 }
-                return item;
+                return respond.result;
             });
         } else {        // todo: сделать вызов _addItem
             return this.getRestApiProvider().create(item._serialize()).then(function(itemData){
-                try {
-                    var errorMessages = [];
-                    item._fillData(itemData);
-                    _getItems(self).push(item);
-                } catch (error) {
-                    if (!(error instanceof CollectionError)) {
-                        throw error;
-                    }
-                    errorMessages.push(error.message);
-                }
+                var respond = item._fillItem(itemData);
+                var errorMessages = respond.errorMessages;
+                _getCollectionItems(self).push(respond.result);
                 if (errorMessages.length) {
                     $log.error(errorMessages);
-                    return $q.reject({response: item, errorMessage: errorMessages});
+                    return $q.reject({response: respond.result, errorMessage: errorMessages});
                 }
-                return item;
+                return respond.result;
             });
         }
     };
@@ -239,7 +231,7 @@ var Collection = (function() {
     Collection.prototype.remove = function(id) {
         var self = this;
         return this.getRestApiProvider().remove(id).then(function(itemData){
-            _getItems(self).splice(_findIndex.call(self, id), 1);
+            _getCollectionItems(self).splice(_findIndex.call(self, id), 1);
         });
     };
 
@@ -252,31 +244,25 @@ var Collection = (function() {
         if (!getDirectories) {
             throw new CollectionError('Не определен метод REST API для загрузки зависимых справочников коллекции.');
         }
-        return getDirectories().then(function(optionsData){
-            var dataProcessed = {},
+        return getDirectories().then(function(directoriesData){
+            var newDirectories = {},
                 errorMessages = [];
 
-            for (var key in optionsData) {
-                try {
-                    var collection = Collection.prototype.findEntityByName(key);
-                    if (!collection) {
-                        throw new CollectionError('Неизвестная секция: ' + key);
-                    }
-                    dataProcessed[key] = _addArray.call(collection, optionsData[key]);
-                } catch (error) {
-                    if (!(error instanceof CollectionError)) {
-                        throw error;
-                    }
-                    errorMessages.push(error.message);
+            for (var key in directoriesData) {
+                var collection = Collection.prototype.findEntityByName(key);
+                if (!collection) {
+                    errorMessages.push(new CollectionError('Неизвестная секция: ' + key));
+                    newDirectories[key] = undefined;
+                } else {
+                    var respond = _addArray.call(collection, directoriesData[key]);
+                    newDirectories[key] = respond.result;
+                    errorMessages = _.union(errorMessages, respond.errorMessages);
                 }
             }
-
             if (errorMessages.length) {
                 $log.error(errorMessages);
-                return $q.reject({response: optionsData, errorMessage: errorMessages});
             }
-
-            return dataProcessed;
+            return newDirectories;
         })
     };
 
@@ -299,23 +285,28 @@ return Collection;
      * @description
      * метод для разбора ответа от сервера, вызывается синхронно
      */
-    Item.prototype._fillData = function(itemData) {     // todo: собирать ошибки в массив и кидать его один раз
+    Item.prototype._fillItem = function(itemData) {
+        var errorMessages = [];
         for (var key in itemData) {
             var attr = itemData[key],
                 refElem = attr;
             if (typeof attr === 'object') {
                 if (typeof attr.id === 'undefined') {
-                    throw new CollectionError('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
+                    errorMessages.push(new CollectionError('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key));
+                } else {
+                    var collection = Collection.prototype.findEntityByName(key);
+                    if (!collection) {
+                        errorMessages.push(new CollectionError('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id));
+                    } else {
+                        var respond = _addItem.call(collection, attr);
+                        refElem = respond.result;
+                        errorMessages = _.union(errorMessages, respond.errorMessages);
+                    }
                 }
-                var collection = Collection.prototype.findEntityByName(key);
-                if (!collection) {
-                    throw new CollectionError('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
-                }
-                refElem = _addItem.call(collection, attr);
             }
             this[key] = refElem;
         }
-        return this;
+        return {result: this, errorMessages: errorMessages};
     };
 
     /**

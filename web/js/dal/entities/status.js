@@ -1,20 +1,17 @@
 'use strict';
 
-angular.module('app.dal.entities.status', ['app.dal.entities.collection', 'app.dal.static.api'])
+angular.module('app.dal.entities.status', ['app.dal.entities.collection'])
 
-.factory('statusApi', function(StaticApi) {
-    return new StaticApi([
-        { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
-        { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
-        { 'id': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }
-    ]);
-})
-
-.factory('statuses', function(Collection, Status, statusApi) {
+.factory('statuses', function(Collection, Status) {
     return (function() {
 
         var collection = inherit(function() {
-            this.registerCollection('status', 'statuses', Status, statusApi);
+            this.registerCollection('status', 'statuses', Status, undefined);
+            this.setAll([
+                { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
+                { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
+                { 'id': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }
+            ]);
         }, Collection);
 
         return new collection;

@@ -161,9 +161,8 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
 
             $rootScope.$digest();
-            expect($log.error).toHaveBeenCalledWith(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+            expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"name":"Без идентификатора"}'}]);
             expect(actualSuccess).toBeUndefined;
-            expect(actualError.errorMessage).toEqual(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
         });
 
         it('возвращать массив объектов', function() {
@@ -374,14 +373,14 @@ describe('Сервис-конструктор City из модуля app.dal.ent
             }
         }
 
-        var city = (new City ())._fillData({
+        var city = (new City ())._fillItem({
             id: 1,
             name: 'Первый',
             city: {
                 id: 2,
                 name: 'Вложенный'
             }
-        });
+        }).result;
 
         expect(city).toEqualData(expected);
     });
@@ -394,14 +393,14 @@ describe('Сервис-конструктор City из модуля app.dal.ent
             city: 2
         }
 
-        var city = (new City)._fillData({
+        var city = (new City)._fillItem({
             id: 1,
             name: 'Первый',
             city: {
                 id: 2,
                 name: 'Вложенный'
             }
-        });
+        }).result;
 
         city.city = {
             id: 2,

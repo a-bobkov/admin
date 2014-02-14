@@ -199,9 +199,8 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             });
 
             $rootScope.$digest();
-            expect($log.error).toHaveBeenCalledWith(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+            expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"name":"Без идентификатора"}'}]);
             expect(actualSuccess).toBeUndefined;
-            expect(actualError.errorMessage).toEqual(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
         });
 
         it('возвращать массив объектов', function() {
@@ -554,7 +553,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
         });
         $rootScope.$digest();
 
-        var user = (new User)._fillData({
+        var user = (new User)._fillItem({
             id: 11,
             name: 'Один пользователь',
             group: { id: 1},
@@ -563,7 +562,7 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             market: { id: 7},
             metro: { id: 9},
             site: { id: 11},
-        });
+        }).result;
 
         expect(user.group).toBe(group);
         expect(user.manager).toBe(manager);
@@ -583,14 +582,14 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             }
         }
 
-        var user = (new User)._fillData({
+        var user = (new User)._fillItem({
             id: 1,
             name: 'Первый',
             city: {
                 id: 2,
                 name: 'Вложенный'
             }
-        });
+        }).result;
 
         expect(user).toEqualData(expected);
     });
@@ -603,14 +602,14 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             city: 2
         }
 
-        var user = (new User)._fillData({
+        var user = (new User)._fillItem({
             id: 1,
             name: 'Первый',
             city: {
                 id: 2,
                 name: 'Вложенный'
             }
-        });
+        }).result;
 
         actual = user._serialize();
         expect(actual).toEqualData(expected);
@@ -627,14 +626,14 @@ describe('Сервис-конструктор User из модуля app.dal.ent
             }
         }
 
-        var user = (new User)._fillData({
+        var user = (new User)._fillItem({
             id: 1,
             name: 'Первый',
             dealer: {
                 id: 2,
                 name: 'Вложенный'
             }
-        });
+        }).result;
 
         actual = user._serialize();
         expect(actual).toEqualData(expected);
@@ -742,6 +741,7 @@ describe('Сервис users из модуля app.dal.entities.user умеет'
             };
 
         spyOn(Api, 'get').andReturn($q.when(expected));
+        spyOn($log, 'error').andReturn(null);
 
         users.getDirectories().then(function(respond) {
             actualSuccess = respond;
@@ -750,6 +750,6 @@ describe('Сервис users из модуля app.dal.entities.user умеет'
         });
 
         $rootScope.$digest();
-        expect(actualError.errorMessage).toEqual(['Нет ссылочного id в элементе с id: 8, параметре: city']);
+        expect($log.error).toHaveBeenCalledWith([{message: 'Нет ссылочного id в элементе с id: 8, параметре: city'}]);
     });
 });

@@ -37,20 +37,13 @@ return (function() {
         var self = this;
         return Collection.prototype.get.call(this, id).then(function (item) {
             return self.getRestApiProvider().get(id).then(function(itemData){
-                try {
-                    var errorMessages = [];
-                    item._fillData(itemData);
-                } catch (error) {
-                    if (!(error instanceof CollectionError)) {
-                        throw error;
-                    }
-                    errorMessages.push(error.message);
-                }
+                var respond = item._fillItem(itemData);
+                var errorMessages = respond.errorMessages;
                 if (errorMessages.length) {
                     $log.error(errorMessages);
-                    return $q.reject({response: item, errorMessage: errorMessages});
+                    return $q.reject({response: respond.result, errorMessage: errorMessages});
                 }
-                return item;
+                return respond.result;
             });
         })
     };    
