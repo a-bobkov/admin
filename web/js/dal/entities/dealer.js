@@ -6,18 +6,18 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
    return new RestApi('dealers', 'dealer');
 })
 
-.factory('dealers', function(Collection, dealerApi) {
+.factory('dealers', function(Collection, Dealer, dealerApi) {
 
     var collection;
 
     collection = new Collection;
     collection.setRestApiProvider(dealerApi);
-    collection.registerChild ('dealer', 'dealers');
+    collection.registerChild ('dealer', 'dealers', Dealer);
 
     return collection;
 })
 
-.factory('Dealer', function(dealers, Item) {
+.factory('Dealer', function(Item) {
     var Dealer = function () {};
 
     angular.extend(Dealer.prototype, Item.prototype);
@@ -26,5 +26,4 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
 })
 
 .run(function(dealers, Dealer) {
-    dealers.setItemConstructor(Dealer);
 });

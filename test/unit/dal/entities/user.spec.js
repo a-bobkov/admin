@@ -85,7 +85,7 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         })
     });
 
-    describe('должен знать функцию-конструктор для элементов коллекции, для чего', function() {
+    xdescribe('должен знать функцию-конструктор для элементов коллекции, для чего', function() {
 
         it('должен иметь заданный на этапе инициализации конструктор User', function() {
             expect(users.getItemConstructor()).toBe(User);

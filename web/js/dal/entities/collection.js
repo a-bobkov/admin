@@ -30,30 +30,32 @@ var Collection = (function() {
         }
     };
 
+    var _getItemConstructor = function(entity) {
+        for (var i = _collection.length; i--; ) {
+            if (_collection[i].entity === entity) {
+                var itemConstructor = _collection[i].itemConstructor;
+                if (typeof itemConstructor === 'undefined') {
+                    throw new CollectionError('Не задан конструктор для элементов коллекции.');
+                }
+                return itemConstructor;
+            }
+        }
+    };
+
     var Collection = function() {};
 
-    Collection.prototype.registerChild = function(entityName, collectionName) {
+    Collection.prototype.registerChild = function(entityName, collectionName, itemConstructor) {
         _children[entityName] = this;
         _children[collectionName] = this;
         _collection.push({
             entity: this,
+            itemConstructor: itemConstructor,
             items: []
         });
     };
 
     Collection.prototype.getChild = function(name) {
         return _children[name];
-    };
-
-    Collection.prototype.setItemConstructor = function(ItemConstructor) {
-        this.ItemConstructor = ItemConstructor;
-    };
-
-    Collection.prototype.getItemConstructor = function() {
-        if (typeof this.ItemConstructor === 'undefined') {
-            throw new CollectionError('Не задан конструктор для элементов коллекции.');
-        }
-        return this.ItemConstructor;
     };
 
     Collection.prototype.setRestApiProvider = function(restApiProvider) {
@@ -92,7 +94,7 @@ var Collection = (function() {
         }
         item = _findItem.call(this, itemData.id);
         if (!item) {
-            var ItemConstructor = this.getItemConstructor();
+            var ItemConstructor = _getItemConstructor(this);
             item = new ItemConstructor();
             _getItems(this).push(item);
         }

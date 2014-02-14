@@ -47,7 +47,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
         })
     });
 
-    describe('должен знать функцию-конструктор для элементов коллекции, для чего', function() {
+    xdescribe('должен знать функцию-конструктор для элементов коллекции, для чего', function() {
 
         it('должен иметь заданный на этапе инициализации конструктор', function() {
             expect(cities.getItemConstructor()).toBe(City);

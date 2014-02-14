@@ -10,18 +10,18 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection', 'app.d
     ]);
 })
 
-.factory('statuses', function(Collection, statusApi) {
+.factory('statuses', function(Collection, Status, statusApi) {
 
     var collection;
 
     collection = new Collection;
     collection.setRestApiProvider(statusApi);
-    collection.registerChild ('status', 'statuses');
+    collection.registerChild ('status', 'statuses', Status);
 
     return collection;
 })
 
-.factory('Status', function(statuses, Item) {
+.factory('Status', function(Item) {
     var Status = function () {};
 
     angular.extend(Status.prototype, Item.prototype);
@@ -30,5 +30,4 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection', 'app.d
 })
 
 .run(function(statuses, Status) {
-    statuses.setItemConstructor(Status);
 });

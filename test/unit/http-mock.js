@@ -20,12 +20,9 @@ describe('http-mock', function() {
     });
 
     beforeEach(function() {
-        var ItemConstructor = users.getItemConstructor();
         var usersArray = [];
         var _addItem = function(itemData) {
-            var item = new ItemConstructor();
-            item._fillData(itemData);
-            usersArray.push(item);
+            usersArray.push(itemData);
         }
         _addItem({id: 1, name: 'Пользователь один'});
         _addItem({id: 2, name: 'Пользователь два'});

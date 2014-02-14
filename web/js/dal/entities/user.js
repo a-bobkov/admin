@@ -21,13 +21,13 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     return userApi;
 })
 
-.factory('users', function(Collection, userApi, $q, $log) {
+.factory('users', function(Collection, User, userApi, $q, $log) {
 
 return (function() {
 
     var Child = inherit(function() {    // инициализация экземпляра
         this.setRestApiProvider(userApi);
-        this.registerChild('user', 'users');
+        this.registerChild('user', 'users', User);
     }, Collection);
 
     /**
@@ -68,5 +68,4 @@ return (function() {
 })
 
 .run(function(users, User) {
-    users.setItemConstructor(User);
-})
+});

@@ -6,18 +6,18 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
    return new RestApi('sites', 'site');
 })
 
-.factory('sites', function(Collection, siteApi) {
+.factory('sites', function(Collection, Site, siteApi) {
 
     var collection;
 
     collection = new Collection;
     collection.setRestApiProvider(siteApi);
-    collection.registerChild ('site', 'sites');
+    collection.registerChild ('site', 'sites', Site);
 
     return collection;
 })
 
-.factory('Site', function(sites, Item) {
+.factory('Site', function(Item) {
     var Site = function () {};
 
     angular.extend(Site.prototype, Item.prototype);
@@ -26,5 +26,4 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
 })
 
 .run(function(sites, Site) {
-    sites.setItemConstructor(Site);
 });

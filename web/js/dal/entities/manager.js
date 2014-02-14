@@ -6,18 +6,18 @@ angular.module('app.dal.entities.manager', ['app.dal.entities.collection', 'app.
    return new RestApi('managers', 'manager');
 })
 
-.factory('managers', function(Collection, managerApi) {
+.factory('managers', function(Collection, Manager, managerApi) {
 
     var collection;
 
     collection = new Collection;
     collection.setRestApiProvider(managerApi);
-    collection.registerChild ('manager', 'managers');
+    collection.registerChild ('manager', 'managers', Manager);
 
     return collection;
 })
 
-.factory('Manager', function(managers, Item) {
+.factory('Manager', function(Item) {
     var Manager = function () {};
 
     angular.extend(Manager.prototype, Item.prototype);
@@ -26,5 +26,4 @@ angular.module('app.dal.entities.manager', ['app.dal.entities.collection', 'app.
 })
 
 .run(function(managers, Manager) {
-    managers.setItemConstructor(Manager);
 });

@@ -6,18 +6,18 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
    return new RestApi('metros', 'metro');
 })
 
-.factory('metros', function(Collection, metroApi) {
+.factory('metros', function(Collection, Metro, metroApi) {
 
     var collection;
 
     collection = new Collection;
     collection.setRestApiProvider(metroApi);
-    collection.registerChild ('metro', 'metros');
+    collection.registerChild ('metro', 'metros', Metro);
 
     return collection;
 })
 
-.factory('Metro', function(metros, Item) {
+.factory('Metro', function(Item) {
     var Metro = function () {};
 
     angular.extend(Metro.prototype, Item.prototype);
@@ -26,5 +26,4 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
 })
 
 .run(function(metros, Metro) {
-    metros.setItemConstructor(Metro);
 });

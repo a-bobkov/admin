@@ -6,18 +6,18 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.da
     return new StaticApi();
 })
 
-.factory('groups', function(Collection, groupApi) {
+.factory('groups', function(Collection, Group, groupApi) {
 
     var collection;
 
     collection = new Collection;
     collection.setRestApiProvider(groupApi);
-    collection.registerChild ('group', 'groups');
+    collection.registerChild ('group', 'groups', Group);
 
     return collection;
 })
 
-.factory('Group', function(groups, Item) {
+.factory('Group', function(Item) {
     var Group = function () {};
 
     angular.extend(Group.prototype, Item.prototype);
@@ -26,5 +26,4 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.da
 })
 
 .run(function(groups, Group) {
-    groups.setItemConstructor(Group);
 });
