@@ -18,25 +18,24 @@ angular.module('app.dal.entities.collection', [])
      * Реализация базовой функциональности для работы с коллекциями объектов
      */
 var Collection = (function() {
-
-    var _children = {};
     var _collection = [];
 
-    var _findCollection = function(entity) {
-        for (var i = _collection.length; i--; ) {
-            if (_collection[i].entity === entity) {
-                return _collection[i];
-            }
+    var _findCollectionByEntity = function(entity) {
+        var collection = _.find(_collection, function(collection) {
+            return collection.entity === entity;
+        });
+        if (!collection) {
+            throw new CollectionError('Не зарегистрирована коллекция для объекта: '+ angular.toJson(entity));
         }
-        throw new CollectionError('Не зарегистрирована коллекция.');
+        return collection;
     };
 
     var _getItems = function(entity) {
-        return _findCollection(entity).items;
+        return _findCollectionByEntity(entity).items;
     };
 
     var _getItemConstructor = function(entity) {
-        var itemConstructor = _findCollection(entity).itemConstructor;
+        var itemConstructor = _findCollectionByEntity(entity).itemConstructor;
         if (typeof itemConstructor === 'undefined') {
             throw new CollectionError('Не задан конструктор элементов коллекции.');
         }
@@ -46,10 +45,10 @@ var Collection = (function() {
     var Collection = function() {};
 
     Collection.prototype.registerCollection = function(entityName, collectionName, itemConstructor, restApiProvider) {
-        _children[entityName] = this;
-        _children[collectionName] = this;
         _collection.push({
             entity: this,
+            entityName: entityName,
+            collectionName: collectionName,
             restApiProvider: restApiProvider,
         //todo: проверки на наличии необходимых методов query, create, update, remove
             itemConstructor: itemConstructor,
@@ -57,12 +56,18 @@ var Collection = (function() {
         });
     };
 
-    Collection.prototype.getChild = function(name) {
-        return _children[name];
+    Collection.prototype.findEntityByName = function(name) {
+        var collection = _.find(_collection, function(collection) {
+            return (collection.entityName === name) || (collection.collectionName === name);
+        });
+        if (!collection) {
+            throw new CollectionError('Не зарегистрирована коллекция с именем: '+ name);
+        }
+        return collection.entity;
     };
 
     Collection.prototype.getRestApiProvider = function() {
-        var restApiProvider = _findCollection(this).restApiProvider;
+        var restApiProvider = _findCollectionByEntity(this).restApiProvider;
         if (typeof restApiProvider === 'undefined') {
             throw new CollectionError('Не задан провайдер REST API для коллекции.');
         }
@@ -253,8 +258,7 @@ var Collection = (function() {
 
             for (var key in optionsData) {
                 try {
-                    var collection = Collection.prototype.getChild (key);
-
+                    var collection = Collection.prototype.findEntityByName(key);
                     if (!collection) {
                         throw new CollectionError('Неизвестная секция: ' + key);
                     }
@@ -303,7 +307,7 @@ return Collection;
                 if (typeof attr.id === 'undefined') {
                     throw new CollectionError('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key);
                 }
-                var collection = Collection.prototype.getChild (key);
+                var collection = Collection.prototype.findEntityByName(key);
                 if (!collection) {
                     throw new CollectionError('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id);
                 }
