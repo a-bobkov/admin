@@ -11,14 +11,14 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection', 'app.d
 })
 
 .factory('statuses', function(Collection, Status, statusApi) {
+    return (function() {
 
-    var collection;
+        var collection = inherit(function() {
+            this.registerCollection('status', 'statuses', Status, statusApi);
+        }, Collection);
 
-    collection = new Collection;
-    collection.setRestApiProvider(statusApi);
-    collection.registerChild ('status', 'statuses', Status);
-
-    return collection;
+        return new collection;
+    }());
 })
 
 .factory('Status', function(Item) {

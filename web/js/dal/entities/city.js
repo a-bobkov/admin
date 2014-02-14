@@ -7,15 +7,14 @@ angular.module('app.dal.entities.city', ['app.dal.entities.collection', 'app.dal
 })
 
 .factory('cities', function(Collection, City, cityApi) {
-return (function() {
+    return (function() {
 
-    var Child = inherit(function() {
-        this.setRestApiProvider(cityApi);
-        this.registerChild('city', 'cities', City);
-    }, Collection);
+        var collection = inherit(function() {
+            this.registerCollection('city', 'cities', City, cityApi);
+        }, Collection);
 
-    return new Child;
-}());
+        return new collection;
+    }());
 })
 
 .factory('City', function(Item) {

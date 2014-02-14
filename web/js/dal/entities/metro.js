@@ -7,14 +7,14 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
 })
 
 .factory('metros', function(Collection, Metro, metroApi) {
+    return (function() {
 
-    var collection;
+        var collection = inherit(function() {
+            this.registerCollection('metro', 'metros', Metro, metroApi);
+        }, Collection);
 
-    collection = new Collection;
-    collection.setRestApiProvider(metroApi);
-    collection.registerChild ('metro', 'metros', Metro);
-
-    return collection;
+        return new collection;
+    }());
 })
 
 .factory('Metro', function(Item) {

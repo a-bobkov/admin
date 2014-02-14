@@ -33,14 +33,14 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(cities.getRestApiProvider()).toBe(cityApi);
         });
 
-        it('должен запоминать провайдера', function() {
+        xit('должен запоминать провайдера', function() {
             var restApiProvider = function () {};
             cities.setRestApiProvider(restApiProvider);
 
             expect(cities.getRestApiProvider()).toBe(restApiProvider);
         });
 
-        it('должен выбрасывать эксепшин при попытке получить провайдера, если он не задан', function() {
+        xit('должен выбрасывать эксепшин при попытке получить провайдера, если он не задан', function() {
             delete cities.restApiProvider;
             expect( function() { cities.getRestApiProvider(); } )
                 .toThrow('Не задан провайдер REST API.');

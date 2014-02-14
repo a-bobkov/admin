@@ -7,14 +7,14 @@ angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.d
 })
 
 .factory('markets', function(Collection, Market, marketApi) {
+    return (function() {
 
-    var collection;
+        var collection = inherit(function() {
+            this.registerCollection('market', 'markets', Market, marketApi);
+        }, Collection);
 
-    collection = new Collection;
-    collection.setRestApiProvider(marketApi);
-    collection.registerChild ('market', 'markets', Market);
-
-    return collection;
+        return new collection;
+    }());
 })
 
 .factory('Market', function(Item) {

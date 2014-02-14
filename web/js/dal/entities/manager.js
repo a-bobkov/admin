@@ -7,14 +7,14 @@ angular.module('app.dal.entities.manager', ['app.dal.entities.collection', 'app.
 })
 
 .factory('managers', function(Collection, Manager, managerApi) {
+    return (function() {
 
-    var collection;
+        var collection = inherit(function() {
+            this.registerCollection('manager', 'managers', Manager, managerApi);
+        }, Collection);
 
-    collection = new Collection;
-    collection.setRestApiProvider(managerApi);
-    collection.registerChild ('manager', 'managers', Manager);
-
-    return collection;
+        return new collection;
+    }());
 })
 
 .factory('Manager', function(Item) {

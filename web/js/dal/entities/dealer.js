@@ -7,14 +7,14 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
 })
 
 .factory('dealers', function(Collection, Dealer, dealerApi) {
+    return (function() {
 
-    var collection;
+        var collection = inherit(function() {
+            this.registerCollection('dealer', 'dealers', Dealer, dealerApi);
+        }, Collection);
 
-    collection = new Collection;
-    collection.setRestApiProvider(dealerApi);
-    collection.registerChild ('dealer', 'dealers', Dealer);
-
-    return collection;
+        return new collection;
+    }());
 })
 
 .factory('Dealer', function(Item) {

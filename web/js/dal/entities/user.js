@@ -25,16 +25,15 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 
 return (function() {
 
-    var Child = inherit(function() {    // инициализация экземпляра
-        this.setRestApiProvider(userApi);
-        this.registerChild('user', 'users', User);
+    var collection = inherit(function() {
+        this.registerCollection('user', 'users', User, userApi);
     }, Collection);
 
     /**
      * @param {Number} id
      * @returns {Promise}
      */
-    Child.prototype.get = function(id) {
+    collection.prototype.get = function(id) {
         var self = this;
         return Collection.prototype.get.call(this, id).then(function (item) {
             return self.getRestApiProvider().get(id).then(function(itemData){
@@ -55,7 +54,7 @@ return (function() {
             });
         })
     };    
-    return new Child;
+    return new collection;
 }());
 })
 

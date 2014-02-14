@@ -7,14 +7,14 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.da
 })
 
 .factory('groups', function(Collection, Group, groupApi) {
+    return (function() {
 
-    var collection;
+        var collection = inherit(function() {
+            this.registerCollection('group', 'groups', Group, groupApi);
+        }, Collection);
 
-    collection = new Collection;
-    collection.setRestApiProvider(groupApi);
-    collection.registerChild ('group', 'groups', Group);
-
-    return collection;
+        return new collection;
+    }());
 })
 
 .factory('Group', function(Item) {

@@ -22,33 +22,36 @@ var Collection = (function() {
     var _children = {};
     var _collection = [];
 
-    var _getItems = function(entity) {
+    var _findCollection = function(entity) {
         for (var i = _collection.length; i--; ) {
             if (_collection[i].entity === entity) {
-                return _collection[i].items;
+                return _collection[i];
             }
         }
+        throw new CollectionError('Не зарегистрирована коллекция.');
+    };
+
+    var _getItems = function(entity) {
+        return _findCollection(entity).items;
     };
 
     var _getItemConstructor = function(entity) {
-        for (var i = _collection.length; i--; ) {
-            if (_collection[i].entity === entity) {
-                var itemConstructor = _collection[i].itemConstructor;
-                if (typeof itemConstructor === 'undefined') {
-                    throw new CollectionError('Не задан конструктор для элементов коллекции.');
-                }
-                return itemConstructor;
-            }
+        var itemConstructor = _findCollection(entity).itemConstructor;
+        if (typeof itemConstructor === 'undefined') {
+            throw new CollectionError('Не задан конструктор элементов коллекции.');
         }
+        return itemConstructor;
     };
 
     var Collection = function() {};
 
-    Collection.prototype.registerChild = function(entityName, collectionName, itemConstructor) {
+    Collection.prototype.registerCollection = function(entityName, collectionName, itemConstructor, restApiProvider) {
         _children[entityName] = this;
         _children[collectionName] = this;
         _collection.push({
             entity: this,
+            restApiProvider: restApiProvider,
+        //todo: проверки на наличии необходимых методов query, create, update, remove
             itemConstructor: itemConstructor,
             items: []
         });
@@ -58,16 +61,12 @@ var Collection = (function() {
         return _children[name];
     };
 
-    Collection.prototype.setRestApiProvider = function(restApiProvider) {
-        //todo: проверки на наличии необходимых методов query, create, update, remove
-        this.restApiProvider = restApiProvider;
-    };
-
     Collection.prototype.getRestApiProvider = function() {
-        if (typeof this.restApiProvider === 'undefined') {
-            throw new CollectionError('Не задан провайдер REST API.');
+        var restApiProvider = _findCollection(this).restApiProvider;
+        if (typeof restApiProvider === 'undefined') {
+            throw new CollectionError('Не задан провайдер REST API для коллекции.');
         }
-        return this.restApiProvider;
+        return restApiProvider;
     };
 
     /**
