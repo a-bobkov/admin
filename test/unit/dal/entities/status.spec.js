@@ -103,13 +103,13 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
     it('должен выбрасывать эксепшен при попытке получить провайдера', function() {
         expect(function() {
             statuses._getRestApiProvider();
-        }).toThrow('Не задан провайдер REST API для коллекции.');
+        }).toThrow('Не задан провайдер REST API для коллекции: statuses');
     });
 
     it('должен выбрасывать эксепшен при попытке получить данные с сервера', function() {
         expect(function() {
             statuses.load();
-        }).toThrow('Не задан провайдер REST API для коллекции.');
+        }).toThrow('Не задан провайдер REST API для коллекции: statuses');
     });
 
     it('должен выбрасывать эксепшен при попытке сохранить данные на сервер', function() {
@@ -117,7 +117,7 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
 
         expect(function() {
             statuses.save(status);
-        }).toThrow('Не задан провайдер REST API для коллекции.');
+        }).toThrow('Не задан провайдер REST API для коллекции: statuses');
     });
 
     it('должен выбрасывать эксепшен при попытке удалить данные на сервере', function() {
@@ -133,6 +133,6 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
 
         expect(function() {
             statuses.remove(status);
-        }).toThrow('Не задан провайдер REST API для коллекции.');
+        }).toThrow('Не задан провайдер REST API для коллекции: statuses');
     });
 });

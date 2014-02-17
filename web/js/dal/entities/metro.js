@@ -6,12 +6,10 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
    return new RestApi('metros', 'metro');
 })
 
-.factory('metros', function(Collection, Metro, metroApi) {
+.factory('metros', function(Collection) {
     return (function() {
 
-        var MetrosCollection = inheritCollection(function() {
-            this._registerCollection('metro', 'metros', Metro, metroApi);
-        }, Collection);
+        var MetrosCollection = inheritCollection(function() {}, Collection);
 
         return new MetrosCollection;
     }());
@@ -25,5 +23,6 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
     return Metro;
 })
 
-.run(function(metros, Metro) {
+.run(function(metros, Metro, metroApi) {
+    metros._registerCollection('metro', 'metros', Metro, metroApi);
 });

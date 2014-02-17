@@ -6,12 +6,10 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
    return new RestApi('sites', 'site');
 })
 
-.factory('sites', function(Collection, Site, siteApi) {
+.factory('sites', function(Collection) {
     return (function() {
 
-        var SitesCollection = inheritCollection(function() {
-            this._registerCollection('site', 'sites', Site, siteApi);
-        }, Collection);
+        var SitesCollection = inheritCollection(function() {}, Collection);
 
         return new SitesCollection;
     }());
@@ -25,5 +23,6 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
     return Site;
 })
 
-.run(function(sites, Site) {
+.run(function(sites, Site, siteApi) {
+    sites._registerCollection('site', 'sites', Site, siteApi);
 });

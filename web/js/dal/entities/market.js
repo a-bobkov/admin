@@ -6,12 +6,10 @@ angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.d
    return new RestApi('markets', 'market');
 })
 
-.factory('markets', function(Collection, Market, marketApi) {
+.factory('markets', function(Collection) {
     return (function() {
 
-        var MarketsCollection = inheritCollection(function() {
-            this._registerCollection('market', 'markets', Market, marketApi);
-        }, Collection);
+        var MarketsCollection = inheritCollection(function() {}, Collection);
 
         return new MarketsCollection;
     }());
@@ -25,5 +23,6 @@ angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.d
     return Market;
 })
 
-.run(function(markets, Market) {
+.run(function(markets, Market, marketApi) {
+    markets._registerCollection('market', 'markets', Market, marketApi);
 });

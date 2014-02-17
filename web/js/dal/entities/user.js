@@ -27,13 +27,11 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     return userApi;
 })
 
-.factory('users', function(Collection, User, userApi, $q, $log) {
+.factory('users', function(Collection, $q, $log) {
 
 return (function() {
 
-    var UsersCollection = inheritCollection(function() {
-        this._registerCollection('user', 'users', User, userApi);
-    }, Collection);
+    var UsersCollection = inheritCollection(function() {}, Collection);
 
     /**
      * @param {Number} id
@@ -65,5 +63,6 @@ return (function() {
     return User;
 })
 
-.run(function(users, User) {
+.run(function(users, User, userApi) {
+    users._registerCollection('user', 'users', User, userApi);
 });

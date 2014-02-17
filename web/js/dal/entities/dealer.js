@@ -6,12 +6,10 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
    return new RestApi('dealers', 'dealer');
 })
 
-.factory('dealers', function(Collection, Dealer, dealerApi) {
+.factory('dealers', function(Collection) {
     return (function() {
 
-        var DealersCollection = inheritCollection(function() {
-            this._registerCollection('dealer', 'dealers', Dealer, dealerApi);
-        }, Collection);
+        var DealersCollection = inheritCollection(function() {}, Collection);
 
         return new DealersCollection;
     }());
@@ -25,5 +23,6 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
     return Dealer;
 })
 
-.run(function(dealers, Dealer) {
+.run(function(dealers, Dealer, dealerApi) {
+    dealers._registerCollection('dealer', 'dealers', Dealer, dealerApi);
 });

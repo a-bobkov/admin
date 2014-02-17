@@ -6,12 +6,10 @@ angular.module('app.dal.entities.city', ['app.dal.entities.collection', 'app.dal
    return new RestApi('cities', 'city');
 })
 
-.factory('cities', function(Collection, City, cityApi) {
+.factory('cities', function(Collection) {
     return (function() {
 
-        var CitiesCollection = inheritCollection(function() {
-            this._registerCollection('city', 'cities', City, cityApi);
-        }, Collection);
+        var CitiesCollection = inheritCollection(function() {}, Collection);
 
         return new CitiesCollection;
     }());
@@ -25,5 +23,6 @@ angular.module('app.dal.entities.city', ['app.dal.entities.collection', 'app.dal
     return City;
 })
 
-.run(function(cities, City) {
+.run(function(cities, City, cityApi) {
+    cities._registerCollection('city', 'cities', City, cityApi);
 });

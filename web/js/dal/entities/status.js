@@ -2,17 +2,10 @@
 
 angular.module('app.dal.entities.status', ['app.dal.entities.collection'])
 
-.factory('statuses', function(Collection, Status) {
+.factory('statuses', function(Collection) {
     return (function() {
 
-        var StatusesCollection = inheritCollection(function() {
-            this._registerCollection('status', 'statuses', Status, undefined);
-            this._setAll([
-                { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
-                { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
-                { 'id': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }
-            ]);
-        }, Collection);
+        var StatusesCollection = inheritCollection(function() {}, Collection);
 
         return new StatusesCollection;
     }());
@@ -27,4 +20,10 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection'])
 })
 
 .run(function(statuses, Status) {
+    statuses._registerCollection('status', 'statuses', Status, undefined);
+    statuses._setAll([
+        { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
+        { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
+        { 'id': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }
+    ]);
 });

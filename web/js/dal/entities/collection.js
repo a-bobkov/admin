@@ -128,9 +128,10 @@ var Collection = (function() {
     };
 
     Collection.prototype._getRestApiProvider = function() {
-        var restApiProvider = findCollection(this).restApiProvider;
+        var collection = findCollection(this);
+        var restApiProvider = collection.restApiProvider;
         if (typeof restApiProvider === 'undefined') {
-            throw new CollectionError('Не задан провайдер REST API для коллекции.');
+            throw new CollectionError('Не задан провайдер REST API для коллекции: ' + collection.collectionName);
         }
         return restApiProvider;
     };
@@ -350,6 +351,7 @@ var inheritCollection = function(child, parent) {
 
 var CollectionError = function(message) {
     this.message = message || "Неопределенная ошибка";
+    //console.log(this.message);
 }
 CollectionError.prototype = new Error();
 CollectionError.prototype.constructor = CollectionError;

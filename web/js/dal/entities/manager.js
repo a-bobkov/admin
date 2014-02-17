@@ -6,12 +6,10 @@ angular.module('app.dal.entities.manager', ['app.dal.entities.collection', 'app.
    return new RestApi('managers', 'manager');
 })
 
-.factory('managers', function(Collection, Manager, managerApi) {
+.factory('managers', function(Collection) {
     return (function() {
 
-        var ManagersCollection = inheritCollection(function() {
-            this._registerCollection('manager', 'managers', Manager, managerApi);
-        }, Collection);
+        var ManagersCollection = inheritCollection(function() {}, Collection);
 
         return new ManagersCollection;
     }());
@@ -25,5 +23,6 @@ angular.module('app.dal.entities.manager', ['app.dal.entities.collection', 'app.
     return Manager;
 })
 
-.run(function(managers, Manager) {
+.run(function(managers, Manager, managerApi) {
+    managers._registerCollection('manager', 'managers', Manager, managerApi);
 });
