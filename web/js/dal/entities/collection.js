@@ -1,11 +1,5 @@
 ﻿'use strict';
 
-function CollectionError(message) {
-    this.message = message || "Неопределенная ошибка";
-}
-CollectionError.prototype = new Error();
-CollectionError.prototype.constructor = CollectionError;
-
 angular.module('app.dal.entities.collection', [])
 
 .factory('Collection', function($q, $log) {
@@ -353,3 +347,9 @@ var inheritCollection = function(child, parent) {
     child.prototype = new parent;
     return child;
 };
+
+var CollectionError = function(message) {
+    this.message = message || "Неопределенная ошибка";
+}
+CollectionError.prototype = new Error();
+CollectionError.prototype.constructor = CollectionError;
