@@ -5,7 +5,7 @@ angular.module('app.dal.api', [])
 .provider('Api', function(){
 
     var options = this.options = {
-        apiUrl: ''
+        apiUrl: '/api2'
     };
 
     this.$get = function($http, $q, $log) {

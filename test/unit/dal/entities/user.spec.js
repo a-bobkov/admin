@@ -666,7 +666,7 @@ describe('Сервис users из модуля app.dal.entities.user умеет'
 
     it('загружать опции с сервера', function() {
         var actual,
-            url = '/api2/combined/users/',
+            url = '/combined/users/',
             expected = {
                 // roles: [
                 //     {id: 1, name: 'Роль один'},

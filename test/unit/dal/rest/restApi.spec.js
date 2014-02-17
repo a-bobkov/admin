@@ -132,7 +132,7 @@ describe('У объекта app.dal.rest.api', function() {
             });
 
             $rootScope.$digest();
-            expect(Api.get).toHaveBeenCalledWith("/cities/partial");
+            expect(Api.get).toHaveBeenCalledWith("/cities/");
             expect(actualSuccess).toBe(data);
         });
 

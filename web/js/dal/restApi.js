@@ -14,7 +14,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
 
         var url = '/' + collectionName + '/';
 
-        var getResponseHandler = function (sectionName, id) {
+        this._getResponseHandler = function (sectionName, id) {
             return function(response) {
                 var errorMessage,
                     data = response[sectionName];
@@ -42,7 +42,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          */
         this.get = function(id) {
             return Api.get(url + id).then(
-                getResponseHandler.call(this, entityName, id)
+                this._getResponseHandler(entityName, id)
             );
         };
 
@@ -53,8 +53,8 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.query = function(params) {
-            return Api.get(url + 'partial').then(
-                getResponseHandler.call(this, collectionName)
+            return Api.get(url).then(
+                this._getResponseHandler(collectionName)
             );
         };
 
@@ -64,7 +64,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          */
         this.create = function(data) {
             return Api.post(url, data).then(
-                getResponseHandler.call(this, entityName)
+                this._getResponseHandler(entityName)
             );
         };
 
@@ -74,7 +74,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          */
         this.update = function(data) {
             return Api.put(url + data.id, data).then(
-                getResponseHandler.call(this, entityName, data.id)
+                this._getResponseHandler(entityName, data.id)
             );
         };
 

@@ -27,7 +27,7 @@ describe('http-mock', function() {
         _addItem({id: 1, name: 'Пользователь один'});
         _addItem({id: 2, name: 'Пользователь два'});
 
-        var regexQuery = /^\/users\/partial$/;
+        var regexQuery = /^\/api2\/users\/partial$/;
         $httpBackend.whenGET(regexQuery).respond(function(method, url, data) {
             return [200, {
                 status: 'success',
@@ -37,7 +37,7 @@ describe('http-mock', function() {
             }];
         });
 
-        var regexGet = /^\/users\/(?:([^\/]+))$/;
+        var regexGet = /^\/api2\/users\/(?:([^\/]+))$/;
         $httpBackend.whenGET(regexGet).respond(function(method, url, data) {
             var id = parseInt(url.replace(regexGet,'$1'));
             var user = _.find(usersArray, {id: id});

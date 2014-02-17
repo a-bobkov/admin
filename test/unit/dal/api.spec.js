@@ -26,7 +26,7 @@ describe('У объекта app.dal.api', function() {
                 actual;
 
             $httpBackend
-                .expectGET(url)
+                .expectGET('/api2' + url)
                 .respond({
                     status: 'success',
                     data: expected
@@ -49,7 +49,7 @@ describe('У объекта app.dal.api', function() {
             Api._setErrorHandler(errorHandler);
 
             $httpBackend
-                .expectGET(url)
+                .expectGET('/api2' + url)
                 .respond(404);
 
             Api.get(url);
@@ -65,7 +65,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectGET(url)
+                .expectGET('/api2' + url)
                 .respond({});
 
             spyOn($log, 'error').andReturn(null);
@@ -88,7 +88,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectGET(url)
+                .expectGET('/api2' + url)
                 .respond({ status: 123 });
 
             spyOn($log, 'error').andReturn(null);
@@ -111,7 +111,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectGET(url)
+                .expectGET('/api2' + url)
                 .respond({
                     status: 'error',
                     message: 'Сбой базы данных'
@@ -137,7 +137,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectGET(url)
+                .expectGET('/api2' + url)
                 .respond({
                     status: 'success'
                 });
@@ -175,7 +175,7 @@ describe('У объекта app.dal.api', function() {
             });
 
             $httpBackend
-                .expectPOST(url, data)
+                .expectPOST('/api2' + url, data)
                 .respond({
                     status: 'success',
                     data: {
@@ -208,7 +208,7 @@ describe('У объекта app.dal.api', function() {
             Api._setErrorHandler(errorHandler);
 
             $httpBackend
-                .expectPOST(url, data)
+                .expectPOST('/api2' + url, data)
                 .respond(404);
 
             Api.post(url, data);
@@ -228,7 +228,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPOST(url, data)
+                .expectPOST('/api2' + url, data)
                 .respond({});
 
             spyOn($log, 'error').andReturn(null);
@@ -255,7 +255,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPOST(url, data)
+                .expectPOST('/api2' + url, data)
                 .respond({ status: 123 });
 
             spyOn($log, 'error').andReturn(null);
@@ -282,7 +282,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPOST(url, data)
+                .expectPOST('/api2' + url, data)
                 .respond({
                     status: 'error',
                     message: 'Сбой базы данных'
@@ -312,7 +312,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPOST(url, data)
+                .expectPOST('/api2' + url, data)
                 .respond({
                     status: 'success'
                 });
@@ -346,7 +346,7 @@ describe('У объекта app.dal.api', function() {
             Api._setErrorHandler(errorHandler);
 
             $httpBackend
-                .expectPUT(url, data)
+                .expectPUT('/api2' + url, data)
                 .respond(404);
 
             Api.put(url, data);
@@ -367,7 +367,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPUT(url, data)
+                .expectPUT('/api2' + url, data)
                 .respond({});
 
             spyOn($log, 'error').andReturn(null);
@@ -395,7 +395,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPUT(url, data)
+                .expectPUT('/api2' + url, data)
                 .respond({ status: 123 });
 
             spyOn($log, 'error').andReturn(null);
@@ -423,7 +423,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPUT(url, data)
+                .expectPUT('/api2' + url, data)
                 .respond({
                     status: 'error',
                     message: 'Сбой базы данных'
@@ -454,7 +454,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectPUT(url, data)
+                .expectPUT('/api2' + url, data)
                 .respond({
                     status: 'success'
                 });
@@ -490,7 +490,7 @@ describe('У объекта app.dal.api', function() {
             });
 
             $httpBackend
-                .expectPUT(url, data)
+                .expectPUT('/api2' + url, data)
                 .respond({
                     status: 'success',
                     data: {
@@ -520,7 +520,7 @@ describe('У объекта app.dal.api', function() {
             Api._setErrorHandler(errorHandler);
 
             $httpBackend
-                .expectDELETE(url)
+                .expectDELETE('/api2' + url)
                 .respond(404);
 
             Api.remove(url);
@@ -536,7 +536,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectDELETE(url)
+                .expectDELETE('/api2' + url)
                 .respond({});
 
             spyOn($log, 'error').andReturn(null);
@@ -559,7 +559,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectDELETE(url)
+                .expectDELETE('/api2' + url)
                 .respond({ status: 123 });
 
             spyOn($log, 'error').andReturn(null);
@@ -582,7 +582,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectDELETE(url)
+                .expectDELETE('/api2' + url)
                 .respond({
                     status: 'error',
                     message: 'Сбой базы данных'
@@ -608,7 +608,7 @@ describe('У объекта app.dal.api', function() {
                 actualError;
 
             $httpBackend
-                .expectDELETE(url)
+                .expectDELETE('/api2' + url)
                 .respond({
                     status: 'success'
                 });
@@ -633,7 +633,7 @@ describe('У объекта app.dal.api', function() {
                 actual;
 
             $httpBackend
-                .expectDELETE(url)
+                .expectDELETE('/api2' + url)
                 .respond({
                     status: 'success',
                     data: expected
