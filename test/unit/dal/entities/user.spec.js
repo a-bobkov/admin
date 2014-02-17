@@ -356,40 +356,6 @@ describe('Сервис users из модуля app.dal.entities.user', function(
             expect(actual).toEqualData(expected);
         });
 
-        it('создавать элемент в коллекции после получения подтверждения от сервера', function() {
-            var actual,
-                expected = {
-                    name: 'Другой',
-                    ext: 'Extra'
-                };
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(userApi, 'create').andReturn($q.when(expected));
-
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            var user = new User (expected);
-            users.save(user).then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            users.get(actual.id).then(function(respond) {
-                actual = respond;
-            });
-            expect(actual.name).toEqual('Другой');
-        });
-
         it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
             var actual;
 

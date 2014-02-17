@@ -182,7 +182,7 @@ var Collection = (function() {
         return this.getAll().then(function (response) {
             var item = _.find(response, {id: id});
             if (!item) {
-                var errorMessage = "В коллекции не найден элемент с id: " + id;
+                var errorMessage = 'В коллекции не найден элемент с id: ' + id;
                 $log.error(errorMessage);
                 return $q.reject({response: response, errorMessage: errorMessage});
             }
@@ -194,11 +194,17 @@ var Collection = (function() {
      * @param {Item} id
      * @returns {Promise}
      */
-    Collection.prototype.save = function(item) {
+    Collection.prototype.save = function(itemData) {
         var self = this;
-        if (item.id) {      // элемент должен быть в коллекции
-            return this._getRestApiProvider().update(item._serialize()).then(function(itemData){
-                var respond = item._fillItem(itemData);
+        if (itemData.id) {      // требуется обновление элемента
+            var oldItem = findItem.call(self, itemData.id);
+            if (!oldItem) {
+                var errorMessage = 'При обновлении в коллекции не найден элемент с id: ' + itemData.id;
+                $log.error(errorMessage);
+                return $q.reject({errorMessage: errorMessage});
+            }
+            return self._getRestApiProvider().update(itemData._serialize()).then(function(itemData){
+                var respond = oldItem._fillItem(itemData);
                 var errorMessages = respond.errorMessages;
                 if (errorMessages.length) {
                     $log.error(errorMessages);
@@ -206,11 +212,10 @@ var Collection = (function() {
                 }
                 return respond.result;
             });
-        } else {        // todo: сделать вызов addItem
-            return this._getRestApiProvider().create(item._serialize()).then(function(itemData){
-                var respond = item._fillItem(itemData);
+        } else {
+            return self._getRestApiProvider().create(itemData._serialize()).then(function(itemData){
+                var respond = addItem.call(self, itemData);
                 var errorMessages = respond.errorMessages;
-                getCollectionItems(self).push(respond.result);
                 if (errorMessages.length) {
                     $log.error(errorMessages);
                     return $q.reject({response: respond.result, errorMessage: errorMessages});
@@ -226,9 +231,14 @@ var Collection = (function() {
      */
     Collection.prototype.remove = function(id) {
         var self = this;
-        return this._getRestApiProvider().remove(id).then(function(itemData){
-            getCollectionItems(self).splice(findIndex.call(self, id), 1);
-        });
+        if (findItem.call(self, id)) {
+            return self._getRestApiProvider().remove(id).then(function(){
+                return getCollectionItems(self).splice(findIndex.call(self, id), 1);
+            });
+        }
+        var errorMessage = 'При удалении в коллекции не найден элемент с id: ' + id;
+        $log.error(errorMessage);
+        return $q.reject({errorMessage: errorMessage});
     };
 
     /**

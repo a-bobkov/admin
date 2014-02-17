@@ -65,7 +65,20 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         // expect(actualError.errorMessage).toEqual(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
     });
 
-    it('значения должны быть созданы конструктором элементов коллекции', function() {
+    it('возвращать массив объектов', function() {
+        var actualSuccess,
+            actualError;
+
+        statuses.getAll().then(function(respond) {
+            actualSuccess = respond;
+        },function(respond) {
+            actualError = respond;
+        });
+        $rootScope.$digest();
+        expect(actualSuccess).toBeArray();
+    });
+
+    it('элементы массива должны быть созданы конструктором элементов коллекции', function() {
         var actualSuccess,
             actualError;
 
@@ -81,7 +94,7 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         });
     });
 
-    it('должен возвращать значение по id', function() {
+    it('должен возвращать элемент коллекции по id', function() {
         var expected = {
             'id': 'active',
             'nameMale': 'Активный',
@@ -100,7 +113,25 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         expect(actualSuccess).toEqualData(expected);
     });
 
-    it('должен выбрасывать эксепшен при попытке получить провайдера', function() {
+    it('должен возвращать ошибку, если требуемый элемент не найден в коллекции', function() {
+        var expected = {
+            'id': 'active',
+            'nameMale': 'Активный',
+            'namePlural': 'Активные'
+        },
+        actualSuccess,
+        actualError;
+
+        statuses.get('bla').then(function(respond) {
+            actualSuccess = respond;
+        },function(respond) {
+            actualError = respond;
+        });
+        $rootScope.$digest();
+        expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: bla');
+    });
+
+    it('должен выбрасывать эксепшен при попытке получить провайдера REST API', function() {
         expect(function() {
             statuses._getRestApiProvider();
         }).toThrow('Не задан провайдер REST API для коллекции: statuses');
@@ -124,15 +155,14 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         var actualSuccess,
             actualError;
 
-        statuses.get('active').then(function(respond) {
+        statuses.getAll().then(function(respond) {
             actualSuccess = respond;
         },function(respond) {
             actualError = respond;
         });
         $rootScope.$digest();
-
         expect(function() {
-            statuses.remove(status);
+            statuses.remove('active');
         }).toThrow('Не задан провайдер REST API для коллекции: statuses');
     });
 });

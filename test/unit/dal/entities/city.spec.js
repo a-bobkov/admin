@@ -27,68 +27,34 @@ describe('Сервис cities из модуля app.dal.entities.city', function
     beforeEach(function() {
     });
 
-    describe('должен знать провайдера REST API, для чего', function() {
+    describe('должен хранить коллекцию объектов, для чего:', function() {
 
         it('должен иметь заданный на этапе инициализации провайдер REST API', function() {
             expect(cities._getRestApiProvider()).toBe(cityApi);
         });
 
-        xit('должен запоминать провайдера', function() {
-            var restApiProvider = function () {};
-            cities.setRestApiProvider(restApiProvider);
-
-            expect(cities._getRestApiProvider()).toBe(restApiProvider);
-        });
-
-        xit('должен выбрасывать эксепшин при попытке получить провайдера, если он не задан', function() {
-            delete cities.restApiProvider;
-            expect( function() { cities._getRestApiProvider(); } )
-                .toThrow('Не задан провайдер REST API.');
-        })
-    });
-
-    xdescribe('должен знать функцию-конструктор для элементов коллекции, для чего', function() {
-
-        it('должен иметь заданный на этапе инициализации конструктор', function() {
-            expect(cities.getItemConstructor()).toBe(City);
-        });
-
-        it('должен выбрасывать эксепшин при попытке получить незaданный конструктор', function() {
-            delete cities.ItemConstructor;
-            expect( function() { cities.getItemConstructor(); } )
-                .toThrow('Не задан конструктор для элементов коллекции.');
-        });
-
-        it('должен уметь запоминать функцию-конструктор', function() {
-            var ItemConstructor = function ItemConstructor() {} ;
-
-            cities.setItemConstructor(ItemConstructor);
-            expect(cities.getItemConstructor()).toBe(ItemConstructor);
-        });
-    });
-
-    describe('хранит коллекцию объектов, для чего умеет', function() {
-        beforeEach(function() {
-        });
-
-        it('запрашивать данные коллекции с сервера один раз', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
+        it('должен запрашивать данные коллекции с сервера один раз', function() {
+            var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
                     { id: 3, name: 'Третий' }
-                ]
-            ));
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(data));
 
             cities.getAll().then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
             $rootScope.$digest();
 
             cities.getAll().then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
             $rootScope.$digest();
 
@@ -96,243 +62,385 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(cityApi.query.calls.length).toEqual(1);
         });
 
-        it('иметь возможность принудительно повторно запрашивать данные', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.getAll();
-            $rootScope.$digest();
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(cityApi.query).toHaveBeenCalled();
-            expect(cityApi.query.calls.length).toEqual(2);
-        });
-
-        it('создавать коллекцию из полученных данных, используя конструктор элементов коллекции', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            _.forEach(actual, function(item) {
-                expect(item.constructor).toBe(City);
-            });
-        });
-
-        it('проверять наличие идентификатора у элементов коллекции', function() {
+        it('не должен обращаться к серверу за одним элементом коллекции при запросе по id', function() {
             var data = [
                     { id: 1, name: 'Первый' },
-                    {name: 'Без идентификатора'}
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(data));
+            spyOn(cityApi, 'get').andReturn($q.when({ id: 1, name: 'Первый' }));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            cities.get(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            expect(cityApi.get).not.toHaveBeenCalled();
+        });
+
+        it('должен уметь принудительно повторно запрашивать данные', function() {
+            var data = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
                 ],
                 actualSuccess,
                 actualError;
 
             spyOn(cityApi, 'query').andReturn($q.when(data));
 
-            spyOn($log, 'error').andReturn(null);
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
 
             cities.load().then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
                 actualError = respond;
             });
-
             $rootScope.$digest();
-            expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"name":"Без идентификатора"}'}]);
-            expect(actualSuccess).toBeUndefined;
-        });
-
-        it('возвращать массив объектов', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-            this.addMatchers({
-                toBeArray: function () {
-                    return angular.isArray(this.actual);
-                }
-            });
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBeArray();
-        });
-
-        it('возвращать объект коллекции по id', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            cities.get(3).then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            expect(actual instanceof City).toBeTruthy();
-        });
-
-        it('возвращать undefined, если требуемый элемент не найден в коллекции', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            cities.get(5).then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-            expect(actual).toBeUndefined();
+            expect(cityApi.query).toHaveBeenCalled();
+            expect(cityApi.query.calls.length).toEqual(2);
         });
     });
 
-    describe('должен управлять коллекцией объектов, для чего уметь', function() {
+    describe('должен управлять коллекцией объектов, для чего должен', function() {
 
-        it('создавать элемент в коллекции после получения подтверждения от сервера', function() {
-            var actual,
-                expected = {
+        it('при сохранении без id - создавать элемент в коллекции из данных, полученных от сервера', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                newItem = {
+                    id: 4,
                     name: 'Другой',
                     ext: 'Extra'
-                };
+                },
+                actualSuccess,
+                actualError;
 
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(cityApi, 'create').andReturn($q.when(expected));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            var city = new City (expected);
-            cities.save(city).then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            cities.get(actual.id).then(function(respond) {
-                actual = respond;
-            });
-            expect(actual.name).toEqual('Другой');
-        });
-
-        it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
-            var actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(cityApi, 'remove').andReturn($q.when(null));
-
-            cities.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-            expect(actual.length).toEqual(3);
-
-            cities.remove(2).then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-            expect(cityApi.remove).toHaveBeenCalled()
-            expect(cityApi.remove).toHaveBeenCalledWith(2);
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'create').andReturn($q.when(newItem));
 
             cities.getAll().then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
             $rootScope.$digest();
-            expect(actual.length).toEqual(2);
+            expect(actualSuccess.length).toBe(3);
+
+            var city = new City ();
+            cities.save(city).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(cityApi.create).toHaveBeenCalled();
+            expect(actualSuccess).toEqualData(newItem);
+
+            cities.get(actualSuccess).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess).toEqualData(newItem);
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toBe(4);
         });
 
-        it('Удаление элемента: выдавать ошибку, если сервер вернул строку с ошибкой', function() {
-            var expected = "Сообщение об ошибке",
-                actual;
-
-            spyOn(cityApi, 'query').andReturn($q.when(
-                [
+        it('при сохранении без id - выдавать reject с ошибкой, выданной REST API, не изменяя коллекцию', function() {
+            var items = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
                     { id: 3, name: 'Третий' }
-                ]
-            ));
+                ],
+                errorMessage = "Сообщение REST API об ошибке",
+                actualSuccess,
+                actualError;
 
-            spyOn(cityApi, 'remove').andReturn($q.reject(
-                expected
-            ));
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'create').andReturn($q.reject(errorMessage));
 
-            cities.load().then(function(respond) {
-                actual = respond;
+            var newCity = new City;
+            cities.save(newCity).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
             $rootScope.$digest();
-
-            cities.remove(1).then(null, function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            expect(actual).toBe(expected);
+            expect(cityApi.create).toHaveBeenCalled();
+            expect(actualError).toBe(errorMessage);
         });
 
-        it('не пытаться загружать опции с сервера, а выбрасывать эксепшн', function() {
+        it('при сохранении с id - обновлять элемент в коллекции данными, полученными от сервера', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                newData = {
+                    id: 2,
+                    name: 'Другой',
+                    ext: 'Extra'
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'update').andReturn($q.when(newData));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toBe(3);
+
+            var city = new City;
+            city._fillItem(newData);
+            cities.save(city).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(cityApi.update).toHaveBeenCalled();
+            expect(actualSuccess).toEqualData(newData);
+
+            cities.get(2).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess).toEqualData(newData);
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toBe(3);
+        });
+
+        it('при сохранении с id - выдавать reject с ошибкой для элемента с отсутствующим в коллекции id', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            var newCity = new City;
+            newCity.id = 5;
+
+            cities.save(newCity).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualError.errorMessage).toBe("При обновлении в коллекции не найден элемент с id: 5");
+        });
+
+        it('при сохранении с id - выдавать reject с ошибкой, выданной REST API, не изменяя коллекцию', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                errorMessage = "Сообщение REST API об ошибке",
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'update').andReturn($q.reject(errorMessage));
+
+            cities.get(2).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            var oldCity = actualSuccess;
+            expect(oldCity).toEqualData({ id: 2, name: 'Второй' });
+
+            var newCity = new City;
+            angular.extend(newCity, oldCity);
+            newCity.name = 'Новое имя';
+            cities.save(newCity).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(cityApi.update).toHaveBeenCalled();
+            expect(actualError).toBe(errorMessage);
+            expect(oldCity).toEqualData({ id: 2, name: 'Второй' });
+        });
+
+        it('при удалении - удалять элемент из коллекции после получения подтверждения от сервера', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                newData = {
+                    id: 2,
+                    name: 'Другой',
+                    ext: 'Extra'
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'remove').andReturn($q.when(null));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toBe(3);
+
+            cities.remove(2).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(cityApi.remove).toHaveBeenCalled();
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toEqual(2);
+
+            cities.get(2).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 2');
+        });
+
+        it('при удалении - выдавать reject с ошибкой для элемента с отсутствующим в коллекции id', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            cities.remove(5).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualError.errorMessage).toBe("При удалении в коллекции не найден элемент с id: 5");
+        });
+
+        it('при удалении - выдавать reject с ошибкой, выданной REST API, не изменяя коллекцию', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                errorMessage = "Сообщение REST API об ошибке",
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'remove').andReturn($q.reject(errorMessage));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toBe(3);
+
+            cities.remove(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualError).toBe(errorMessage);
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toBe(3);
+
+            cities.get(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess).toEqualData({ id: 1, name: 'Первый' });
+        });
+
+        it('выбрасывать эксепшн при попытке загрузить зависимые справочники', function() {
             expect( function() { cities.getDirectories(); } )
                 .toThrow('Не определен метод REST API для загрузки зависимых справочников коллекции.');
         });

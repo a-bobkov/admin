@@ -7,6 +7,9 @@ beforeEach(function() {
                         notText + " to equal '" + angular.mock.dump(this.actual) + "'.";
             };
             return angular.equals(this.actual, expected);
+        },
+        toBeArray: function () {
+            return angular.isArray(this.actual);
         }
     });
 });
