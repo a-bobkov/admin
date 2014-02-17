@@ -5,7 +5,7 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection'])
 .factory('groups', function(Collection, Group) {
     return (function() {
 
-        var collection = inheritCollection(function() {
+        var GroupsCollection = inheritCollection(function() {
             this._registerCollection('group', 'groups', Group, undefined);
             this._setAll([
                 { 'id': 1, 'name': 'Катя'},
@@ -15,7 +15,7 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection'])
             ]);
         }, Collection);
 
-        return new collection;
+        return new GroupsCollection;
     }());
 })
 

@@ -5,7 +5,7 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection'])
 .factory('statuses', function(Collection, Status) {
     return (function() {
 
-        var collection = inheritCollection(function() {
+        var StatusesCollection = inheritCollection(function() {
             this._registerCollection('status', 'statuses', Status, undefined);
             this._setAll([
                 { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
@@ -14,7 +14,7 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection'])
             ]);
         }, Collection);
 
-        return new collection;
+        return new StatusesCollection;
     }());
 })
 

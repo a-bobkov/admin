@@ -31,7 +31,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 
 return (function() {
 
-    var collection = inheritCollection(function() {
+    var UsersCollection = inheritCollection(function() {
         this._registerCollection('user', 'users', User, userApi);
     }, Collection);
 
@@ -39,7 +39,7 @@ return (function() {
      * @param {Number} id
      * @returns {Promise}
      */
-    collection.prototype.get = function(id) {
+    UsersCollection.prototype.get = function(id) {
         var self = this;
         return Collection.prototype.get.call(this, id).then(function (item) {
             return self._getRestApiProvider().get(id).then(function(itemData){
@@ -53,7 +53,7 @@ return (function() {
             });
         })
     };    
-    return new collection;
+    return new UsersCollection;
 }());
 })
 

@@ -9,11 +9,11 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
 .factory('sites', function(Collection, Site, siteApi) {
     return (function() {
 
-        var collection = inheritCollection(function() {
+        var SitesCollection = inheritCollection(function() {
             this._registerCollection('site', 'sites', Site, siteApi);
         }, Collection);
 
-        return new collection;
+        return new SitesCollection;
     }());
 })
 

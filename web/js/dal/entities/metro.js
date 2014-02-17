@@ -9,11 +9,11 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
 .factory('metros', function(Collection, Metro, metroApi) {
     return (function() {
 
-        var collection = inheritCollection(function() {
+        var MetrosCollection = inheritCollection(function() {
             this._registerCollection('metro', 'metros', Metro, metroApi);
         }, Collection);
 
-        return new collection;
+        return new MetrosCollection;
     }());
 })
 
