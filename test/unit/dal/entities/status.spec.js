@@ -57,7 +57,7 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
 
         spyOn($log, 'error').andReturn(null);
 
-        actualSuccess = statuses.setAll(data);
+        actualSuccess = statuses._setAll(data);
 
         $rootScope.$digest();
         expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"idd":"blocked","nameMale":"Блокированный","namePlural":"Блокированные"}'}]);
@@ -102,7 +102,7 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
 
     it('должен выбрасывать эксепшен при попытке получить провайдера', function() {
         expect(function() {
-            statuses.getRestApiProvider();
+            statuses._getRestApiProvider();
         }).toThrow('Не задан провайдер REST API для коллекции.');
     });
 

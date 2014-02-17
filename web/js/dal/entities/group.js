@@ -10,7 +10,7 @@ angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.da
     return (function() {
 
         var collection = inherit(function() {
-            this.registerCollection('group', 'groups', Group, groupApi);
+            this._registerCollection('group', 'groups', Group, groupApi);
         }, Collection);
 
         return new collection;

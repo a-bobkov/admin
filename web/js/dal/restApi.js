@@ -14,10 +14,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
 
         var url = '/' + collectionName + '/';
 
-        this.getErrorHandler = function() {
-        }
-
-        this.getResponseHandler = function (sectionName, id) {
+        var getResponseHandler = function (sectionName, id) {
             return function(response) {
                 var errorMessage,
                     data = response[sectionName];
@@ -45,8 +42,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          */
         this.get = function(id) {
             return Api.get(url + id).then(
-                this.getResponseHandler(entityName, id),
-                this.getErrorHandler()
+                getResponseHandler.call(this, entityName, id)
             );
         };
 
@@ -58,8 +54,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          */
         this.query = function(params) {
             return Api.get(url + 'partial').then(
-                this.getResponseHandler(collectionName),
-                this.getErrorHandler()
+                getResponseHandler.call(this, collectionName)
             );
         };
 
@@ -69,8 +64,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          */
         this.create = function(data) {
             return Api.post(url, data).then(
-                this.getResponseHandler(entityName),
-                this.getErrorHandler()
+                getResponseHandler.call(this, entityName)
             );
         };
 
@@ -80,8 +74,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          */
         this.update = function(data) {
             return Api.put(url + data.id, data).then(
-                this.getResponseHandler(entityName, data.id),
-                this.getErrorHandler()
+                getResponseHandler.call(this, entityName, data.id)
             );
         };
 
@@ -90,7 +83,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.remove = function(id) {
-            return Api.remove(url + id).then(null, this.getErrorHandler());
+            return Api.remove(url + id);
         };
     };
 

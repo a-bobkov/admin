@@ -30,19 +30,19 @@ describe('Сервис cities из модуля app.dal.entities.city', function
     describe('должен знать провайдера REST API, для чего', function() {
 
         it('должен иметь заданный на этапе инициализации провайдер REST API', function() {
-            expect(cities.getRestApiProvider()).toBe(cityApi);
+            expect(cities._getRestApiProvider()).toBe(cityApi);
         });
 
         xit('должен запоминать провайдера', function() {
             var restApiProvider = function () {};
             cities.setRestApiProvider(restApiProvider);
 
-            expect(cities.getRestApiProvider()).toBe(restApiProvider);
+            expect(cities._getRestApiProvider()).toBe(restApiProvider);
         });
 
         xit('должен выбрасывать эксепшин при попытке получить провайдера, если он не задан', function() {
             delete cities.restApiProvider;
-            expect( function() { cities.getRestApiProvider(); } )
+            expect( function() { cities._getRestApiProvider(); } )
                 .toThrow('Не задан провайдер REST API.');
         })
     });

@@ -10,7 +10,7 @@ angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.d
     return (function() {
 
         var collection = inherit(function() {
-            this.registerCollection('market', 'markets', Market, marketApi);
+            this._registerCollection('market', 'markets', Market, marketApi);
         }, Collection);
 
         return new collection;

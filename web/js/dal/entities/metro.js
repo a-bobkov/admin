@@ -10,7 +10,7 @@ angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.da
     return (function() {
 
         var collection = inherit(function() {
-            this.registerCollection('metro', 'metros', Metro, metroApi);
+            this._registerCollection('metro', 'metros', Metro, metroApi);
         }, Collection);
 
         return new collection;

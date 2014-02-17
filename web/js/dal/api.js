@@ -44,7 +44,7 @@ angular.module('app.dal.api', [])
             return response.data.data;
         }
 
-        Api.setErrorHandler = function(handler) {
+        Api._setErrorHandler = function(handler) {
             errorHandler = handler;
         }
 

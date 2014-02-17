@@ -46,7 +46,7 @@ describe('У объекта app.dal.api', function() {
                 errorHandler;
 
             errorHandler = jasmine.createSpy('errorHandler');
-            Api.setErrorHandler(errorHandler);
+            Api._setErrorHandler(errorHandler);
 
             $httpBackend
                 .expectGET(url)
@@ -205,7 +205,7 @@ describe('У объекта app.dal.api', function() {
                 errorHandler;
 
             errorHandler = jasmine.createSpy('errorHandler');
-            Api.setErrorHandler(errorHandler);
+            Api._setErrorHandler(errorHandler);
 
             $httpBackend
                 .expectPOST(url, data)
@@ -343,7 +343,7 @@ describe('У объекта app.dal.api', function() {
                 errorHandler;
 
             errorHandler = jasmine.createSpy('errorHandler');
-            Api.setErrorHandler(errorHandler);
+            Api._setErrorHandler(errorHandler);
 
             $httpBackend
                 .expectPUT(url, data)
@@ -517,7 +517,7 @@ describe('У объекта app.dal.api', function() {
                 errorHandler;
 
             errorHandler = jasmine.createSpy('errorHandler');
-            Api.setErrorHandler(errorHandler);
+            Api._setErrorHandler(errorHandler);
 
             $httpBackend
                 .expectDELETE(url)

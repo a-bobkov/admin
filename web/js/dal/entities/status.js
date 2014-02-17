@@ -6,8 +6,8 @@ angular.module('app.dal.entities.status', ['app.dal.entities.collection'])
     return (function() {
 
         var collection = inherit(function() {
-            this.registerCollection('status', 'statuses', Status, undefined);
-            this.setAll([
+            this._registerCollection('status', 'statuses', Status, undefined);
+            this._setAll([
                 { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
                 { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
                 { 'id': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }

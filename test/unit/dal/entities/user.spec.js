@@ -68,19 +68,19 @@ describe('Сервис users из модуля app.dal.entities.user', function(
     describe('должен знать провайдера REST API, для чего', function() {
 
         it('должен иметь заданный на этапе инициализации провайдер REST API', function() {
-            expect(users.getRestApiProvider()).toBe(userApi);
+            expect(users._getRestApiProvider()).toBe(userApi);
         });
 
         xit('должен запоминать провайдера', function() {
             var restApiProvider = function () {};
             users.setRestApiProvider(restApiProvider);
 
-            expect(users.getRestApiProvider()).toBe(restApiProvider);
+            expect(users._getRestApiProvider()).toBe(restApiProvider);
         });
 
         xit('должен выбрасывать эксепшин при попытке получить провайдера, если он не задан', function() {
             delete users.restApiProvider;
-            expect( function() { users.getRestApiProvider(); } )
+            expect( function() { users._getRestApiProvider(); } )
                 .toThrow('Не задан провайдер REST API.');
         })
     });
