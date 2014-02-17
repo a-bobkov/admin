@@ -31,7 +31,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 
 return (function() {
 
-    var collection = inherit(function() {
+    var collection = inheritCollection(function() {
         this._registerCollection('user', 'users', User, userApi);
     }, Collection);
 

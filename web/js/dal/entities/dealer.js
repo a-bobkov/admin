@@ -9,7 +9,7 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
 .factory('dealers', function(Collection, Dealer, dealerApi) {
     return (function() {
 
-        var collection = inherit(function() {
+        var collection = inheritCollection(function() {
             this._registerCollection('dealer', 'dealers', Dealer, dealerApi);
         }, Collection);
 

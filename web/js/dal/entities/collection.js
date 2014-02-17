@@ -1,10 +1,5 @@
 ﻿'use strict';
 
-var inherit = function(child, parent) {
-    child.prototype = new parent;
-    return child;
-};
-
 function CollectionError(message) {
     this.message = message || "Неопределенная ошибка";
 }
@@ -353,3 +348,8 @@ return Collection;
 
     return Item;
 });
+
+var inheritCollection = function(child, parent) {
+    child.prototype = new parent;
+    return child;
+};

@@ -9,7 +9,7 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
 .factory('sites', function(Collection, Site, siteApi) {
     return (function() {
 
-        var collection = inherit(function() {
+        var collection = inheritCollection(function() {
             this._registerCollection('site', 'sites', Site, siteApi);
         }, Collection);
 
