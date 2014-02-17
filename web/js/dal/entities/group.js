@@ -1,16 +1,18 @@
 'use strict';
 
-angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.dal.static.api'])
+angular.module('app.dal.entities.group', ['app.dal.entities.collection'])
 
-.factory('groupApi', function(StaticApi) {
-    return new StaticApi();
-})
-
-.factory('groups', function(Collection, Group, groupApi) {
+.factory('groups', function(Collection, Group) {
     return (function() {
 
         var collection = inherit(function() {
-            this._registerCollection('group', 'groups', Group, groupApi);
+            this._registerCollection('group', 'groups', Group, undefined);
+            this._setAll([
+                { 'id': 1, 'name': 'Катя'},
+                { 'id': 2, 'name': 'Инна'},
+                { 'id': 4, 'name': 'Потеряшки'},
+                { 'id': 0, 'name': 'Без тэга'}
+            ]);
         }, Collection);
 
         return new collection;
