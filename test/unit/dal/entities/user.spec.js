@@ -150,7 +150,7 @@ describe('Сервисы users и userApi', function() {
             });
 
             $rootScope.$digest();
-            expect(Api.get).toHaveBeenCalledWith('/combined/users/');
+            expect(Api.get).toHaveBeenCalledWith('/combined/users');
             expect(actualSuccess).toBe(directoriesData);
         });
     });
