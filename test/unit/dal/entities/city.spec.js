@@ -1,30 +1,25 @@
 'use strict';
 
-describe('Сервис cities из модуля app.dal.entities.city', function() {
+describe('Сервис cities должен', function() {
     var $rootScope,
         $q,
         $log,
         cities,
         City,
-        cityApi,
-        Api;
+        cityApi;
 
 
     beforeEach(function() {
         module('app.dal.entities.city');
 
-        inject(function(_$rootScope_, _$q_, _$log_, _cities_, _City_, _cityApi_, _Api_)  {
+        inject(function(_$rootScope_, _$q_, _$log_, _cities_, _City_, _cityApi_)  {
             $rootScope = _$rootScope_;
             $q = _$q_;
             $log = _$log_;
             cities = _cities_;
             City = _City_;
             cityApi = _cityApi_;
-            Api = _Api_;
         });
-    });
-
-    beforeEach(function() {
     });
 
     describe('хранить коллекцию объектов, для чего:', function() {
@@ -195,7 +190,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
         });
     });
 
-    describe('управлять коллекцией объектов, для чего', function() {
+    describe('управлять коллекцией объектов, для чего:', function() {
 
         it('при сохранении без id - создавать элемент в коллекции из данных, полученных от сервера', function() {
             var items = [
@@ -255,7 +250,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(actualSuccess.length).toBe(4);
         });
 
-        it('при сохранении без id - передавать на сервер объект без ссылок на другие объекты', function() {
+        it('при сохранении без id - передавать $http объект без ссылок на другие объекты', function() {
             var items = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -292,11 +287,11 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(actualSuccess.length).toBe(3);
 
             var city2 = actualSuccess[1];
-            var city = new City();
-            city._fillItem(newItemData);
-            expect(city.city).toBe(city2);
+            var newCity = new City();
+            newCity._fillItem(newItemData);
+            expect(newCity.city).toBe(city2);
 
-            cities.save(city).then(function(respond) {
+            cities.save(newCity).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
                 actualError = respond;
@@ -383,7 +378,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(actualSuccess.length).toBe(3);
         });
 
-        it('при сохранении c id - передавать на сервер объект без ссылок на другие объекты', function() {
+        it('при сохранении c id - передавать $http объект без ссылок на другие объекты', function() {
             var items = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },

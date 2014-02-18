@@ -19,9 +19,6 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         });
     });
 
-    beforeEach(function() {
-    });
-
     it('должен инициализироваться начальными значениями', function() {
         var expected = [
             { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },

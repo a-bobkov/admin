@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Сервис users из модуля app.dal.entities.user', function() {
+describe('Сервисы users и userApi', function() {
     var $rootScope,
         $q,
         $log,
@@ -24,698 +24,364 @@ describe('Сервис users из модуля app.dal.entities.user', function(
         });
     });
 
-    beforeEach(function() {
-        var actual,
-            url = '/api2/combined/users/',
-            expected = {
-                groups: [
-                    {id: 1, name: 'Роль один'},
-                    {id: 2, name: 'Роль два'}
-                ],
-                managers: [
-                    {id: 3, name: 'Менеджер один'},
-                    {id: 4, name: 'Менеджер два'}
-                ],
-                cities: [
-                    {id: 5, name: 'Город один'},
-                    {id: 6, name: 'Город два'}
-                ],
-                markets: [
-                    {id: 7, name: 'Рынок один', city: {id: 6}},
-                    {id: 8, name: 'Рынок два', city: {id: 5}}
-                ],
-                metros: [
-                    {id: 9, name: 'Метро один', city: {id: 5}},
-                    {id: 10, name: 'Метро два', city: {id: 6}}
-                ],
-                sites: [
-                    {id: 11, name: 'Сайт один'},
-                    {id: 12, name: 'Сайт два'}
-                ]
-            };
+    describe('Сервис userApi должен', function() {
 
-        spyOn(Api, 'get').andReturn($q.when(
-            expected
-        ));
-
-        users.getDirectories().then(function(respond) {
-            actual = respond;
-        });
-
-        $rootScope.$digest();
-    });
-
-    describe('должен знать провайдера REST API, для чего', function() {
-
-        it('должен иметь заданный на этапе инициализации провайдер REST API', function() {
-            expect(users._getRestApiProvider()).toBe(userApi);
-        });
-
-        xit('должен запоминать провайдера', function() {
-            var restApiProvider = function () {};
-            users.setRestApiProvider(restApiProvider);
-
-            expect(users._getRestApiProvider()).toBe(restApiProvider);
-        });
-
-        xit('должен выбрасывать эксепшин при попытке получить провайдера, если он не задан', function() {
-            delete users.restApiProvider;
-            expect( function() { users._getRestApiProvider(); } )
-                .toThrow('Не задан провайдер REST API.');
-        })
-    });
-
-    xdescribe('должен знать функцию-конструктор для элементов коллекции, для чего', function() {
-
-        it('должен иметь заданный на этапе инициализации конструктор User', function() {
-            expect(users.getItemConstructor()).toBe(User);
-        });
-
-        it('должен выбрасывать эксепшин при попытке получить незaданный конструктор', function() {
-            delete users.ItemConstructor;
-            expect( function() { users.getItemConstructor(); } )
-                .toThrow('Не задан конструктор для элементов коллекции.');
-        });
-
-        it('должен уметь запоминать функцию-конструктор', function() {
-            var ItemConstructor = function ItemConstructor() {} ;
-
-            users.setItemConstructor(ItemConstructor);
-            expect(users.getItemConstructor()).toBe(ItemConstructor);
-        });
-    });
-
-    describe('хранит коллекцию объектов, для чего умеет', function() {
-        beforeEach(function() {
-        });
-
-        it('запрашивать данные коллекции с сервера один раз', function() {
-            var actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            users.getAll().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            users.getAll().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            expect(userApi.query).toHaveBeenCalled();
-            expect(userApi.query.calls.length).toEqual(1);
-        });
-
-        it('иметь возможность принудительно повторно запрашивать данные', function() {
-            var actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            users.getAll();
-            $rootScope.$digest();
-
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(userApi.query).toHaveBeenCalled();
-            expect(userApi.query.calls.length).toEqual(2);
-        });
-
-        it('создавать коллекцию из полученных данных используя конструктор элементов коллекции', function() {
-            var actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            _.forEach(actual, function(item) {
-                expect(item.constructor).toBe(User);
-            });
-        });
-
-        it('проверять наличие идентификатора у элементов коллекции', function() {
-            var data = [
-                    { id: 1, name: 'Первый' },
-                    {name: 'Без идентификатора'}
+        it('query() - вызывать Api и возвращать полученные данные без секции users', function() {
+            var dataUsers = [
+                    { id: 1, name: 'имя пользователя' },
+                    { id: 3, name: 'имя другого пользователя' }
                 ],
                 actualSuccess,
                 actualError;
 
-            spyOn(userApi, 'query').andReturn($q.when(data));
+            spyOn(Api, 'get').andReturn($q.when({
+                users: dataUsers
+            }));
 
+            userApi.query().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+
+            $rootScope.$digest();
+            expect(Api.get).toHaveBeenCalledWith("/users/partial");
+            expect(actualSuccess).toBe(dataUsers);
+        });
+
+        it('query() - возвращать сообщение об ошибке, если полученные данные - не массив', function(){
+            var data = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(Api, 'get').andReturn($q.when({
+                users: data
+            }));
+
+            userApi.query().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+
+            $rootScope.$digest();
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит массив в секции users');
+        });
+
+        it('query() - возвращать сообщение об ошибке при отсутствии секции users', function(){
+            var data = {
+                    id: 1,
+                    name: 'имя пользователя'
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(Api, 'get').andReturn($q.when(data));
+
+            userApi.query().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+
+            $rootScope.$digest();
+            expect(actualError.errorMessage).toBe('Ответ сервера не содержит секции users');
+        });
+
+        it('query() - возвращать объект, полученный от Api', function(){
+            var data = {
+                    response: "Ответ сервера",
+                    errorMessage: "Ошибка, выявленная Api"
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(Api, 'get').andReturn($q.reject(data));
+
+            userApi.query().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+
+            $rootScope.$digest();
+            expect(actualError).toBe(data);
+        });
+
+        it('getDirectories() - вызывать Api и возвращать полученные данные', function() {
+            var directoriesData = {
+                    groups: [
+                        {id: 1, name: 'Роль один'},
+                        {id: 2, name: 'Роль два'}
+                    ],
+                    managers: [
+                        {id: 3, name: 'Менеджер один'},
+                        {id: 4, name: 'Менеджер два'}
+                    ],
+                    cities: [
+                        {id: 5, name: 'Город один'},
+                        {id: 6, name: 'Город два'}
+                    ],
+                    markets: [
+                        {id: 7, name: 'Рынок один', city: {id: 6}},
+                        {id: 8, name: 'Рынок два', city: {id: 5}}
+                    ],
+                    metros: [
+                        {id: 9, name: 'Метро один', city: {id: 5}},
+                        {id: 10, name: 'Метро два', city: {id: 6}}
+                    ],
+                    sites: [
+                        {id: 11, name: 'Сайт один'},
+                        {id: 12, name: 'Сайт два'}
+                    ]
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(Api, 'get').andReturn($q.when(directoriesData));
+
+            userApi.getDirectories().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+
+            $rootScope.$digest();
+            expect(Api.get).toHaveBeenCalledWith('/combined/users/');
+            expect(actualSuccess).toBe(directoriesData);
+        });
+    });
+
+    describe('Сервис users должен', function() {
+
+        it('каждый раз обращаться к серверу за элементом коллекции при запросе по id', function() {
+            var usersData = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                userData = { id: 1, name: 'Первый', ext: 'Атрибут' },
+                actualSuccess,
+                actualError;
+
+            spyOn(userApi, 'query').andReturn($q.when(usersData));
+            spyOn(userApi, 'get').andReturn($q.when(userData));
+
+            users.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            users.get(1).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(userApi.get).toHaveBeenCalled();
+        });
+
+        it('загружать опции с сервера', function() {
+            var directoriesData = {
+                    groups: [
+                        {id: 1, name: 'Роль один'},
+                        {id: 2, name: 'Роль два'}
+                    ],
+                    managers: [
+                        {id: 3, name: 'Менеджер один'},
+                        {id: 4, name: 'Менеджер два'}
+                    ],
+                    cities: [
+                        {id: 5, name: 'Город один'},
+                        {id: 6, name: 'Город два'}
+                    ],
+                    markets: [
+                        {id: 7, name: 'Рынок один', city: {id: 6}},
+                        {id: 8, name: 'Рынок два', city: {id: 5}}
+                    ],
+                    metros: [
+                        {id: 9, name: 'Метро один', city: {id: 5}},
+                        {id: 10, name: 'Метро два', city: {id: 6}}
+                    ],
+                    sites: [
+                        {id: 11, name: 'Сайт один'},
+                        {id: 12, name: 'Сайт два'}
+                    ]
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
+
+            users.getDirectories().then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+            $rootScope.$digest();
+
+            expect(userApi.getDirectories).toHaveBeenCalledWith();
+            expect(actualSuccess.markets[0].city).toBe(actualSuccess.cities[1]);
+            expect(actualSuccess.markets[1].city).toBe(actualSuccess.cities[0]);
+            expect(actualSuccess.metros[0].city).toBe(actualSuccess.cities[0]);
+            expect(actualSuccess.metros[1].city).toBe(actualSuccess.cities[1]);
+        });
+
+        it('загружать опции с сервера после пользователей', function() {
+            var directoriesData = {
+                    groups: [
+                        {id: 1, name: 'Роль один'},
+                        {id: 2, name: 'Роль два'}
+                    ],
+                    managers: [
+                        {id: 3, name: 'Менеджер один'},
+                        {id: 4, name: 'Менеджер два'}
+                    ],
+                    cities: [
+                        {id: 5, name: 'Город один'},
+                        {id: 6, name: 'Город два'}
+                    ],
+                    markets: [
+                        {id: 7, name: 'Рынок один', city: {id: 6}},
+                        {id: 8, name: 'Рынок два', city: {id: 5}}
+                    ],
+                    metros: [
+                        {id: 9, name: 'Метро один', city: {id: 5}},
+                        {id: 10, name: 'Метро два', city: {id: 6}}
+                    ],
+                    sites: [
+                        {id: 11, name: 'Сайт один'},
+                        {id: 12, name: 'Сайт два'}
+                    ]
+                },
+                usersData = [
+                    { id: 1, name: 'имя пользователя', city: {id: 5}, market: {id: 8} }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(userApi, 'query').andReturn($q.when(usersData));
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
+
+            users.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            var user = actualSuccess[0];
+
+            users.getDirectories().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            expect(user.city).toBe(actualSuccess.cities[0]);
+            expect(user.market).toBe(actualSuccess.markets[1]);
+        });
+
+        it('проверять корректность ответа при загрузке опций с сервера и выдавать полный список ошибок', function() {
+            var directoriesData = {
+                    groups:
+                        {id: 1, name: 'Роль один'},
+                    managers: [
+                        {name: 'Менеджер один'},
+                        {id: 4, name: 'Менеджер два'}
+                    ],
+                    cities: [
+                        {id: 5, name: 'Город один'},
+                        {id: 6, name: 'Город два'}
+                    ],
+                    markets: [
+                        {id: 7, name: 'Рынок один', city: {id: 5}},
+                        {id: 8, name: 'Рынок два', city: {ident: 6}}
+                    ],
+                    metros: [
+                        {id: 9, name: 'Метро один', city: {id: 55}},
+                        {id: 10, name: 'Метро два', city: {id: 6}}
+                    ],
+                    roles: [
+                        {id: 11, name: 'Сайт один'},
+                        {id: 12, name: 'Сайт два'}
+                    ]
+                },
+                actualSuccess,
+                actualError;
+
+
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
             spyOn($log, 'error').andReturn(null);
 
-            users.load().then(function(respond) {
+            users.getDirectories().then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
                 actualError = respond;
             });
 
             $rootScope.$digest();
-            expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"name":"Без идентификатора"}'}]);
-            expect(actualSuccess).toBeUndefined;
+            expect($log.error).toHaveBeenCalledWith([ 
+                { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}' }, 
+                { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}' }, 
+                { message: 'Нет ссылочного id в элементе с id: 8, параметре: city' },
+                { message: 'Неизвестная секция: roles' } 
+            ]);
         });
 
-        it('возвращать массив объектов', function() {
-            var actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-            this.addMatchers({
-                toBeArray: function () {
-                    return angular.isArray(this.actual);
-                }
-            });
-
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-
-            expect(actual).toBeArray();
-        });
-
-        it('возвращать объект коллекции по id', function() {
-            var actualSuccess,
-                actualError;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(userApi, 'get').andReturn($q.when(
-                    {
-                        id: 3,
-                        name: 'Третий',
-                        ext: 'Экстра' 
-                    }
-            ));
-
-            users.get(3).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-
-            $rootScope.$digest();
-            expect(actualSuccess instanceof User).toBeTruthy();
-        });
-    });
-
-    describe('должен управлять коллекцией объектов, для чего уметь', function() {
-
-        it('возвращать объект с сервера, обновляя данный элемент коллекции', function() {
-            var data = [
+        it('при сохранении без id - передавать в $http объект без ссылок на другие объекты, кроме dealer', function() {
+            var userData = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
                     { id: 3, name: 'Третий' }
                 ],
-                actualSuccess,
-                actualError;
-
-            spyOn(userApi, 'query').andReturn($q.when(data));
-
-            users.load().then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-
-            $rootScope.$digest();
-            expect(actualSuccess).toEqualData(data);
-
-            spyOn(userApi, 'get').andReturn($q.when(
-                { id: 3, name: 'Третий', ext: 'Ещё свойство' }
-            ));
-
-            users.get(3).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-
-            $rootScope.$digest();
-            expect(actualSuccess.ext).toEqual('Ещё свойство');
-        });
-
-        it('выдавать ошибку, если требуемый элемент не найден в коллекции', function() {
-            var data = [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ],
-                actualSuccess,
-                actualError;
-
-            spyOn(userApi, 'query').andReturn($q.when(data));
-
-            users.get(5).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-
-            $rootScope.$digest();
-            expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 5');
-        });
-
-        it('обновлять сохраняемый элемент в коллекции после получения подтверждения от сервера', function() {
-            var actual,
-                expected = {
-                    id: 2,
+                newUserData = {
                     name: 'Другой',
-                    ext: 'Extra'
-                };
+                    ext: 'Extra',
+                    city: {id: 2},
+                    dealer: {id: 3, name: 'Дилер'}
+                },
+                newUser = {
+                    id: 4,
+                    name: 'Другой',
+                    ext: 'Extra',
+                    city: {id: 2},
+                    dealer: {id: 3}
+                },
+                newUserSerialized = {
+                    name: 'Другой',
+                    ext: 'Extra',
+                    city: 2,
+                    dealer: {id: 3, name: 'Дилер'}
+                },
+                actualSuccess,
+                actualError;
 
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(userApi, 'update').andReturn($q.when(expected));
-            spyOn(userApi, 'get').andReturn($q.when(expected));
-
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-
-            var user;
-            users.get(2).then(function(respond) {
-                user = respond;
-            });
-            $rootScope.$digest();
-            expect(user).toEqualData(expected);
-
-            users.save(user).then(function(respond) {
-                actual = respond;
-            });
-
-            $rootScope.$digest();
-            expect(userApi.update).toHaveBeenCalled()
-            expect(actual).toEqualData(expected);
-        });
-
-        it('удалять элемент из коллекции после получения подтверждения от сервера', function() {
-            var actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(userApi, 'remove').andReturn($q.when(null));
-
-            users.load().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-            expect(actual.length).toEqual(3);
-
-            users.remove(2).then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-            expect(userApi.remove).toHaveBeenCalled()
-            expect(userApi.remove).toHaveBeenCalledWith(2);
+            spyOn(userApi, 'query').andReturn($q.when(userData));
+            spyOn(userApi, 'create').andReturn($q.when(newUser));
 
             users.getAll().then(function(respond) {
-                actual = respond;
-            });
-            $rootScope.$digest();
-            expect(actual.length).toEqual(2);
-        });
-
-        it('Удаление элемента: выдавать ошибку, если сервер вернул строку с ошибкой', function() {
-            var expected = "Сообщение об ошибке",
-                actual;
-
-            spyOn(userApi, 'query').andReturn($q.when(
-                [
-                    { id: 1, name: 'Первый' },
-                    { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий' }
-                ]
-            ));
-
-            spyOn(userApi, 'remove').andReturn($q.reject(
-                expected
-            ));
-
-            users.load().then(function(respond) {
-                actual = respond;
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
             $rootScope.$digest();
 
-            users.remove(1).then(null, function(respond) {
-                actual = respond;
+            var newItem = new User();
+            newItem._fillItem(newUserData);
+            users.save(newItem).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
             });
             $rootScope.$digest();
-
-            expect(actual).toBe(expected);
+            expect(userApi.create).toHaveBeenCalled();
+            expect(userApi.create).toHaveBeenCalledWith(newUserSerialized);
         });
-    });
-});
-
-describe('Сервис-конструктор User из модуля app.dal.entities.user умеет', function() {
-    var $rootScope,
-        $q,
-        Api,
-        User,
-        users,
-        groups,
-        managers,
-        cities,
-        markets,
-        metros,
-        sites;
-
-    beforeEach(function() {
-        module('app.dal.entities.user');
-
-        inject(function(_$rootScope_, _$q_, _Api_, _User_, _users_, _groups_, _managers_, _cities_, _markets_, _metros_, _sites_)  {
-            $rootScope = _$rootScope_;
-            $q = _$q_;
-            Api = _Api_;
-            User = _User_;
-            users = _users_;
-            groups = _groups_;
-            managers = _managers_;
-            cities = _cities_;
-            markets = _markets_;
-            metros = _metros_;
-            sites = _sites_;
-        });
-    });
-
-    beforeEach(function() {
-        var actual,
-            url = '/api2/combined/users/',
-            expected = {
-                groups: [
-                    {id: 1, name: 'Роль один'},
-                    {id: 2, name: 'Роль два'}
-                ],
-                managers: [
-                    {id: 3, name: 'Менеджер один'},
-                    {id: 4, name: 'Менеджер два'}
-                ],
-                cities: [
-                    {id: 5, name: 'Город один'},
-                    {id: 6, name: 'Город два'}
-                ],
-                markets: [
-                    {id: 7, name: 'Рынок один', city: {id: 6}},
-                    {id: 8, name: 'Рынок два', city: {id: 5}}
-                ],
-                metros: [
-                    {id: 9, name: 'Метро один', city: {id: 5}},
-                    {id: 10, name: 'Метро два', city: {id: 6}}
-                ],
-                sites: [
-                    {id: 11, name: 'Сайт один'},
-                    {id: 12, name: 'Сайт два'}
-                ]
-            };
-
-        spyOn(Api, 'get').andReturn($q.when(
-            expected
-        ));
-
-        users.getDirectories().then(function(respond) {
-            actual = respond;
-        });
-
-        $rootScope.$digest();
-    });
-
-    it('создавать пользователей со ссылками на элементы', function() {
-        var group;
-        groups.get(1).then(function(respond) {
-            group = respond;
-        });
-        var manager;
-        managers.get(3).then(function(respond) {
-            manager = respond;
-        });
-        var city;
-        cities.get(5).then(function(respond) {
-            city = respond;
-        });
-        var market;
-        markets.get(7).then(function(respond) {
-            market = respond;
-        });
-        var metro;
-        metros.get(9).then(function(respond) {
-            metro = respond;
-        });
-        var site;
-        sites.get(11).then(function(respond) {
-            site = respond;
-        });
-        $rootScope.$digest();
-
-        var user = (new User)._fillItem({
-            id: 11,
-            name: 'Один пользователь',
-            group: { id: 1},
-            manager: { id: 3},
-            city: { id: 5},
-            market: { id: 7},
-            metro: { id: 9},
-            site: { id: 11},
-        }).result;
-
-        expect(user.group).toBe(group);
-        expect(user.manager).toBe(manager);
-        expect(user.city).toBe(city);
-        expect(user.market).toBe(market);
-        expect(user.metro).toBe(metro);
-        expect(user.site).toBe(site);
-    });
-
-    it('десериализовать пользователя', function() {
-        var expected = {
-            id: 1,
-            name: 'Первый',
-            city: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }
-
-        var user = (new User)._fillItem({
-            id: 1,
-            name: 'Первый',
-            city: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }).result;
-
-        expect(user).toEqualData(expected);
-    });
-
-    it('сериализовать пользователя без вложения элементов по ссылкам', function() {
-        var actual,
-            expected = {
-            id: 1,
-            name: 'Первый',
-            city: 2
-        }
-
-        var user = (new User)._fillItem({
-            id: 1,
-            name: 'Первый',
-            city: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }).result;
-
-        actual = user._serialize();
-        expect(actual).toEqualData(expected);
-    });
-
-    it('сериализовать пользователя с вложением дилера по ссылке', function() {
-        var actual,
-            expected = {
-            id: 1,
-            name: 'Первый',
-            dealer: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }
-
-        var user = (new User)._fillItem({
-            id: 1,
-            name: 'Первый',
-            dealer: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }).result;
-
-        actual = user._serialize();
-        expect(actual).toEqualData(expected);
-    });
-});
-
-describe('Сервис users из модуля app.dal.entities.user умеет', function() {
-    var $rootScope,
-        $q,
-        $log,
-        users,
-        User,
-        userApi,
-        Api;
-
-
-    beforeEach(function() {
-        module('app.dal.entities.user');
-
-        inject(function(_$rootScope_, _$q_, _$log_, _users_, _User_, _userApi_, _Api_)  {
-            $rootScope = _$rootScope_;
-            $q = _$q_;
-            $log = _$log_;
-            users = _users_;
-            User = _User_;
-            userApi = _userApi_;
-            Api = _Api_;
-        });
-    });
-
-    it('загружать опции с сервера', function() {
-        var actual,
-            url = '/combined/users/',
-            expected = {
-                // roles: [
-                //     {id: 1, name: 'Роль один'},
-                //     {id: 2, name: 'Роль два'}
-                // ],
-                // managers: [
-                //     {id: 3, name: 'Менеджер один'},
-                //     {id: 4, name: 'Менеджер два'}
-                // ],
-                cities: [
-                    {id: 5, name: 'Город один'},
-                    {id: 6, name: 'Город два'}
-                ],
-                markets: [
-                    {id: 7, name: 'Рынок один', city: {id: 6}},
-                    {id: 8, name: 'Рынок два', city: {id: 5}}
-                ]
-                // ,
-                // metros: [
-                //     {id: 9, name: 'Метро один', city: {id: 5}},
-                //     {id: 10, name: 'Метро два', city: {id: 6}}
-                // ],
-                // sites: [
-                //     {id: 11, name: 'Сайт один'},
-                //     {id: 12, name: 'Сайт два'}
-                // ]
-            };
-
-        spyOn(Api, 'get').andReturn($q.when(
-            expected
-        ));
-
-        users.getDirectories().then(function(respond) {
-            actual = respond;
-        });
-
-        $rootScope.$digest();
-
-        expect(Api.get).toHaveBeenCalledWith(url);
-        expect(actual.markets[0].city).toBe(actual.cities[1]);
-        expect(actual.markets[1].city).toBe(actual.cities[0]);
-    });
-
-    it('проверять корректность ответа при загрузке опций с сервера и выдавать полный список ошибок', function() {
-        var url = '/api2/combined/users/',
-            actualSuccess,
-            actualError,
-            expected = {
-                // roles:
-                //     {id: 1, name: 'Роль один'},
-                // managers: [
-                //     {name: 'Менеджер один'},
-                //     {id: 4, name: 'Менеджер два'}
-                // ],
-                cities: [
-                    {id: 5, name: 'Город один'},
-                    {id: 6, name: 'Город два'}
-                ],
-                markets: [
-                    {id: 7, name: 'Рынок один', city: {id: 5}},
-                    {id: 8, name: 'Рынок два', city: {ident: 6}}
-                ]
-                // ],
-                // metros: [
-                //     {id: 9, name: 'Метро один', city: {id: 55}},
-                //     {id: 10, name: 'Метро два', city: {id: 6}}
-                // ],
-                // sites: [
-                //     {id: 11, name: 'Сайт один'},
-                //     {id: 12, name: 'Сайт два'}
-                // ]
-            };
-
-        spyOn(Api, 'get').andReturn($q.when(expected));
-        spyOn($log, 'error').andReturn(null);
-
-        users.getDirectories().then(function(respond) {
-            actualSuccess = respond;
-        }, function(respond) {
-            actualError = respond;
-        });
-
-        $rootScope.$digest();
-        expect($log.error).toHaveBeenCalledWith([{message: 'Нет ссылочного id в элементе с id: 8, параметре: city'}]);
     });
 });
