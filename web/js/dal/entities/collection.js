@@ -24,7 +24,7 @@ var Collection = (function() {
             return (collection.entityName === name) || (collection.collectionName === name);
         });
         if (!collection) {
-            throw new CollectionError('Не зарегистрирована коллекция с именем: '+ name);
+            return undefined;
         }
         return collection.entity;
     };
@@ -313,7 +313,7 @@ return Collection;
                 } else {
                     var collection = findEntity(key);
                     if (!collection) {
-                        errorMessages.push(new CollectionError('Неизвестный ссылочный параметр' + key + ' в элементе с id: ' + itemData.id));
+                        errorMessages.push(new CollectionError('Неизвестный ссылочный параметр ' + key + ' в элементе с id: ' + itemData.id));
                     } else {
                         var respond = addItem.call(collection, attr);
                         refElem = respond.result;
@@ -333,21 +333,19 @@ return Collection;
      * метод для подготовки запроса на сервер, вызывается синхронно
      */
     Item.prototype._serialize = function() {
-        var key,
-            itemData = {};
+        var itemData = {};
 
-        for (key in this) {
-            if (typeof this[key] === "object") {
+        angular.forEach(this, function(value, key){
+            if (typeof value === "object") {
                 if (key === "dealer") {               // todo: перекрытием данного метода на User
-                    itemData[key] = this[key]._serialize();
+                    itemData[key] = value._serialize();
                 } else {
-                    itemData[key] = this[key].id;
+                    itemData[key] = value.id;
                 }
             } else {
-                itemData[key] = this[key];
+                itemData[key] = value;
             }
-        }
-
+        });
         return itemData;
     };
 

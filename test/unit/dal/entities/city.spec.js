@@ -27,13 +27,13 @@ describe('Сервис cities из модуля app.dal.entities.city', function
     beforeEach(function() {
     });
 
-    describe('должен хранить коллекцию объектов, для чего:', function() {
+    describe('хранить коллекцию объектов, для чего:', function() {
 
-        it('должен иметь заданный на этапе инициализации провайдер REST API', function() {
+        it('иметь заданный на этапе инициализации провайдер REST API', function() {
             expect(cities._getRestApiProvider()).toBe(cityApi);
         });
 
-        it('должен запрашивать данные коллекции с сервера один раз', function() {
+        it('запрашивать данные коллекции с сервера один раз', function() {
             var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -62,7 +62,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(cityApi.query.calls.length).toEqual(1);
         });
 
-        it('не должен обращаться к серверу за одним элементом коллекции при запросе по id', function() {
+        it('не обращаться к серверу за одним элементом коллекции при запросе по id', function() {
             var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -91,7 +91,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(cityApi.get).not.toHaveBeenCalled();
         });
 
-        it('должен уметь принудительно повторно запрашивать данные', function() {
+        it('уметь принудительно повторно запрашивать данные', function() {
             var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -118,9 +118,84 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(cityApi.query).toHaveBeenCalled();
             expect(cityApi.query.calls.length).toEqual(2);
         });
+
+        it('при загрузке разрешать ссылки на справочники', function() {
+            var data = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий', city: {id: 2} }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(data));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            var city2 = actualSuccess[1],
+                city3 = actualSuccess[2];
+            expect(city3.city).toBe(city2);
+        });
+
+        it('при загрузке выдавать в лог ошибки при невозможности разрешить ссылки', function() {
+            var data = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий', market: {id: 2} },
+                    { id: 4, name: 'Четвертый', city: {ident: 2} }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(data));
+            spyOn($log, 'error').andReturn(null);
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect($log.error).toHaveBeenCalledWith([
+                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3'},
+                {message: 'Нет ссылочного id в элементе с id: 4, параметре: city'}
+            ]);
+        });
+
+        it('при загрузке создавать недостающие элементы справочников по ссылкам', function() {
+            var data = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий', city: {id: 22} }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(data));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            cities.get(22).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess instanceof City).toBeTruthy();
+        });
     });
 
-    describe('должен управлять коллекцией объектов, для чего должен', function() {
+    describe('управлять коллекцией объектов, для чего', function() {
 
         it('при сохранении без id - создавать элемент в коллекции из данных, полученных от сервера', function() {
             var items = [
@@ -128,6 +203,10 @@ describe('Сервис cities из модуля app.dal.entities.city', function
                     { id: 2, name: 'Второй' },
                     { id: 3, name: 'Третий' }
                 ],
+                newItemData = {
+                    name: 'Другой',
+                    ext: 'Extra'
+                },
                 newItem = {
                     id: 4,
                     name: 'Другой',
@@ -148,6 +227,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect(actualSuccess.length).toBe(3);
 
             var city = new City ();
+            city._fillItem(newItemData);
             cities.save(city).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
@@ -155,6 +235,7 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
             $rootScope.$digest();
             expect(cityApi.create).toHaveBeenCalled();
+            expect(cityApi.create).toHaveBeenCalledWith(newItemData);
             expect(actualSuccess).toEqualData(newItem);
 
             cities.get(actualSuccess).then(function(respond) {
@@ -172,6 +253,57 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
             $rootScope.$digest();
             expect(actualSuccess.length).toBe(4);
+        });
+
+        it('при сохранении без id - передавать на сервер объект без ссылок на другие объекты', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                newItemData = {
+                    name: 'Другой',
+                    ext: 'Extra',
+                    city: {id: 2}
+                },
+                newItem = {
+                    id: 4,
+                    name: 'Другой',
+                    ext: 'Extra',
+                    city: {id: 2}
+                },
+                newItemSerialized = {
+                    name: 'Другой',
+                    ext: 'Extra',
+                    city: 2
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'create').andReturn($q.when(newItem));
+
+            cities.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(actualSuccess.length).toBe(3);
+
+            var city2 = actualSuccess[1];
+            var city = new City();
+            city._fillItem(newItemData);
+            expect(city.city).toBe(city2);
+
+            cities.save(city).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(cityApi.create).toHaveBeenCalled();
+            expect(cityApi.create).toHaveBeenCalledWith(newItemSerialized);
         });
 
         it('при сохранении без id - выдавать reject с ошибкой, выданной REST API, не изменяя коллекцию', function() {
@@ -249,6 +381,42 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             });
             $rootScope.$digest();
             expect(actualSuccess.length).toBe(3);
+        });
+
+        it('при сохранении c id - передавать на сервер объект без ссылок на другие объекты', function() {
+            var items = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
+                    { id: 3, name: 'Третий' }
+                ],
+                savedItemData = {
+                    id: 2, 
+                    name: 'Второй',
+                    refCity: {city: 2}
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(items));
+            spyOn(cityApi, 'update').andReturn($q.when(savedItemData));
+
+            cities.get(2).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            var city = actualSuccess;
+            city.refCity = city;
+
+            cities.save(city).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(cityApi.update).toHaveBeenCalled();
+            expect(cityApi.update).toHaveBeenCalledWith({id: 2, name: 'Второй', refCity: 2 });
         });
 
         it('при сохранении с id - выдавать reject с ошибкой для элемента с отсутствующим в коллекции id', function() {
@@ -444,78 +612,5 @@ describe('Сервис cities из модуля app.dal.entities.city', function
             expect( function() { cities.getDirectories(); } )
                 .toThrow('Не определен метод REST API для загрузки зависимых справочников коллекции.');
         });
-    });
-});
-
-describe('Сервис-конструктор City из модуля app.dal.entities.city умеет', function() {
-    var $rootScope,
-        $q,
-        cities,
-        City,
-        cityApi,
-        Api;
-
-    beforeEach(function() {
-        module('app.dal.entities.city');
-
-        inject(function(_$rootScope_, _$q_, _cities_, _City_, _cityApi_, _Api_)  {
-            $rootScope = _$rootScope_;
-            $q = _$q_;
-            cities = _cities_;
-            City = _City_;
-            cityApi = _cityApi_;
-            Api = _Api_;
-        });
-    });
-
-    beforeEach(function() {
-    });
-
-    it('десериализовать город', function() {
-        var expected = {
-            id: 1,
-            name: 'Первый',
-            city: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }
-
-        var city = (new City ())._fillItem({
-            id: 1,
-            name: 'Первый',
-            city: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }).result;
-
-        expect(city).toEqualData(expected);
-    });
-
-    it('сериализовать город', function() {
-        var actual,
-            expected = {
-            id: 1,
-            name: 'Первый',
-            city: 2
-        }
-
-        var city = (new City)._fillItem({
-            id: 1,
-            name: 'Первый',
-            city: {
-                id: 2,
-                name: 'Вложенный'
-            }
-        }).result;
-
-        city.city = {
-            id: 2,
-            name: 'Вложенный'
-        }
-
-        actual = city._serialize();
-        expect(actual).toEqualData(expected);
     });
 });

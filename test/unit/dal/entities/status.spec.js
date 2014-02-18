@@ -91,6 +91,7 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         $rootScope.$digest();
         _.forEach(actualSuccess, function(item) {
             expect(item.constructor).toBe(Status);
+            expect(item instanceof Status).toBeTruthy();
         });
     });
 

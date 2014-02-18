@@ -163,10 +163,15 @@ describe('У объекта app.dal.api', function() {
                 data,
                 expected,
                 actual;
+            var city = {
+                id:5,
+                name: 'Городок'
+            }
 
             data = {
                 one: 'data',
-                two: 'other data'
+                two: 'other data',
+                city: city
             };
 
             expected = angular.extend(data, {
