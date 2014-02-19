@@ -20,7 +20,11 @@
     <script src="js/lib/angular/i18n/angular-locale_ru-ru.js"></script>
     <script src="js/lib/lodash/lodash.min.js"></script>
 
-
+    <script type="text/javascript">
+        window.onload = function() {
+            document.getElementById("content_frame").style.display = "block";
+        };
+    </script>
 </head>
 <body>
 <div class="container" id="container">
@@ -52,6 +56,9 @@
     </div>
 </div>
 
+<div ng-app="RootApp-mocked" id="content_frame" class="span-24 last hide">
+    <div ng-view></div>
+</div>
 
 <noscript>
     <div class="span-24">
