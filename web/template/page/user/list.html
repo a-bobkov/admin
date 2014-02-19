@@ -1,0 +1,39 @@
+    <h1>Список пользователей</h1>
+
+    <div class="span-6">
+        <h3>Количество записей: {{users.length}}</h3>
+    </div>
+
+    <div class="append-bottom">
+        <form action="/user/new" method="get">
+            <input type="submit" value="Добавить пользователя"/>
+        </form>
+    </div>
+
+    <div class="span-16">
+        <table class="list">
+            <thead>
+                <tr>
+                    <th class="active">
+                        <a href="/user?sort=id&amp;sort_type=desc">Код</a> <span>&#160;&#8595;</span>
+                    </th>
+                    <th><a href="/user?sort=email&amp;sort_type=asc">Email</a></th>
+                    <th><a href="/user?sort=last_login&amp;sort_type=asc">Был на сайте</a></th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat='user in pagedUsers' ng-click="clickLine(user.id)">
+                    <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.id}}</a></td>
+                    <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.email}}</a></td>
+                    <td class="date">{{user.last_login | date:'mediumDate'}}</td>
+                    <td>
+                        <ul class="actions">
+                            <li class="edit"><a href='#/users/{{user.id}}/edit'>изменить</a></li>
+                            <li class="switch"><a href='#/users/{{user.id}}/switch'>войти</a></li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>

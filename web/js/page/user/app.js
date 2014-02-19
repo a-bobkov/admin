@@ -3,5 +3,5 @@ angular.module('RootApp', ['UsersApp'])
 
 .config(function(ApiProvider){  // $dialogProvider,
 //    $dialogProvider.options({modalFade: true});
-    ApiProvider.options.apiUrl = 'http://maxposter.ru/api2';
+    ApiProvider.options.apiUrl = '/api2';
 });
