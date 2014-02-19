@@ -1,0 +1,3 @@
+.pagination A:hover, .pagination A.bigger:hover, .pagination A.smaller:hover{
+    cursor: pointer;
+}

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user'])
+angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pagination'])
 
 .config(['$routeProvider', function($routeProvider) {
     $routeProvider
@@ -174,12 +174,12 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user'])
     }
 
     var filteredUsers = [];
-    var itemsPerPage = 25;
+    $scope.itemsPerPage = 6;
     $scope.pagedUsers = [];
 
     var pageUsers = function () {
-        var begin = (($scope.currentPage - 1) * itemsPerPage),
-            end = begin + itemsPerPage;
+        var begin = (($scope.currentPage - 1) * $scope.itemsPerPage),
+            end = begin + $scope.itemsPerPage;
         $scope.pagedUsers = filteredUsers.slice(begin, end);
     };
 
