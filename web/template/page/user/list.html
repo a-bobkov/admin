@@ -1,7 +1,7 @@
     <h1>Список пользователей</h1>
 
     <div class="span-6">
-        <h3>Количество записей: {{users.length}}</h3>
+        <h3>Количество записей: {{totalItems}}</h3>
     </div>
 
     <div class="append-bottom">
@@ -23,10 +23,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat='user in pagedUsers' ng-click="clickLine(user.id)">
+                <tr ng-repeat='user in pagedUsers' ng-click='clickLine(user.id)' ng-class-odd="'odd'" ng-class-even="'even'">
                     <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.id}}</a></td>
                     <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.email}}</a></td>
-                    <td class="date">{{user.last_login | date:'mediumDate'}}</td>
+                    <td class="date">{{user.last_login | date:'shortDate'}}</td>
                     <td>
                         <ul class="actions">
                             <li class="edit"><a href='#/users/{{user.id}}/edit'>изменить</a></li>
@@ -36,4 +36,58 @@
                 </tr>
             </tbody>
         </table>
+        <div class="append-bottom">
+            <form action="user/new" method="get">
+                <input type="submit" value="Добавить пользователя"/>
+            </form>
+        </div>
     </div>
+    <fieldset class="span-8 last">
+        <legend>Фильтр</legend>
+        <table>
+            <tfoot>
+                <tr>
+                    <td>
+                        <ul class="actions">
+                            <li class="list">
+                                <a ng-click='setPatternsDefault()'>Сбросить</a>
+                            </li>
+                        </ul>
+                    </td>
+                    <td><input type="submit" value="Фильтровать"/></td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                    <th><label for="sf_guard_user_filters_id">Код</label></th>
+                    <td>
+                        <input maxlength="4" type="text" ng-model='patterns.id' id="sf_guard_user_filters_id"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="sf_guard_user_filters_email">Email</label></th>
+                    <td>
+                        <input type="text" ng-model='patterns.email' id="sf_guard_user_filters_email"/>
+                        <br/>
+                        <input type="checkbox" ng-model='patterns.emailEmpty' id="sf_guard_user_filters_email_is_empty"/>
+                        <label for="sf_guard_user_filters_email_is_empty">не задан</label>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="sf_guard_user_filters_status">Статус</label></th>
+                    <td>
+                        <select ng-model="patterns.status" multiple ng-options='opt.namePlural for opt in optionsStatus' id="sf_guard_user_filters_status">
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="sf_guard_user_filters_tag_id">Тэг</label></th>
+                    <td>
+                        <select ng-model='patterns.tag' ng-options='opt.name for opt in optionsTag' id='sf_guard_user_filters_tag_id' >
+		                    <option value='' selected="selected"></option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </fieldset>

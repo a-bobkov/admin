@@ -8,8 +8,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user'])
         templateUrl: 'template/page/user/list.html',
         controller: 'UserListCtrl',
         resolve: {
-            data: function(UsersList_Loader) {
-                return UsersList_Loader.load();
+            data: function(UserList_Loader) {
+                return UserList_Loader.load();
             }
         }
     })
@@ -35,11 +35,35 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user'])
     });
 }])
 
-.factory('UsersList_Loader', function($q, users) {
+.factory('UserList_Loader', function($q, users, statuses) {
     var data = {};
     var Loader = {};
     Loader.load = function() {
-        return users.getAll();
+        return $q.all({
+            statuses: statuses.getAll(),
+            directories: users.getDirectories()
+        }).then(function(respond){
+            data.statuses = angular.extend(respond.statuses);
+            angular.extend(data, respond.directories);
+            return users.getAll().then(function(respond) {
+                data.users = angular.extend(respond);
+                // console.log(angular.toJson(data));
+                return data;
+            });
+        });
+
+        // return users.getDirectories().then(function(respond) {
+        //     angular.extend(data, respond);
+        //     console.log(angular.toJson(data));
+        //     return users.getAll().then(function(respond) {
+        //         data.users = angular.extend(respond);
+        //         console.log(angular.toJson(data));
+        //         return data;
+        //     });
+        // });
+        // return users.getDirectories().then(function() {
+        //     return users.getAll();
+        // });
     };
     return Loader;
 })
@@ -58,13 +82,10 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user'])
     // return Loader;
 })
 
-.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, data, statuses, managers) {
-    $scope.users = data;
-    $scope.pagedUsers = data;
-    // console.log($scope.users);
-//     $scope.users = data.users.list;
-//     $scope.optionsStatus = optionsStatus;
-//     $scope.optionsTag = optionsTag;
+.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, data) {
+    var users = data.users;
+    $scope.optionsStatus = data.statuses;
+    $scope.optionsTag = data.managers;
 
 //     $scope.clickExtra = function () {
 //         if ($scope.showExtraControls == false) {
@@ -96,64 +117,86 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user'])
 //         }
 //     };
 
-//     $scope.filterStatus = function(itemToFilter) {
-//         if ($scope.patterns.status.length > 0) {
-//             if ($scope.patterns.status.indexOf(itemToFilter.status)!=-1) {
-//                 return true;
-//             } else {
-//                 return false;
-//             }
-//         } else {
-//             return true;
-//         }
-//     };
+    var filterId = function(itemToFilter) {
+        return (!$scope.patterns.id) 
+            || String(itemToFilter.id).indexOf($scope.patterns.id) !== -1;
+    };
 
-//     $scope.filterTag = function(itemToFilter) {
-//         if ($scope.patterns.tag == null) {
-//             return true;
-//         } else {
-//             return (itemToFilter.tag_id == $scope.patterns.tag);
-//         }
-//     };
+    var filterEmail = function(itemToFilter) {
+        if ($scope.patterns.emailEmpty) {
+            return !itemToFilter.email;
+        } else if (!$scope.patterns.email) {
+            return true;
+        } else {
+            return itemToFilter.email.indexOf($scope.patterns.email) !== -1;
+        }
+    };
 
-//     // по мотивам: http://stackoverflow.com/questions/12940974/maintain-model-of-scope-when-changing-between-views-in-angularjs
-//     if ($rootScope.savedUserListPatterns) {
-//         $scope.patterns = $rootScope.savedUserListPatterns;
-//     } else {
-//         $scope.patterns = {
-//             id: '',
-//             email: '',
-//             status: [optionsStatus.getStatusById("active")],
-//             tag: null, idNameMail: ''
-//         };
-//     }
+    var filterStatus = function(itemToFilter) {
+        if ($scope.patterns.status.length > 0) {
+            if ($scope.patterns.status.indexOf(itemToFilter.status) !== -1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    };
 
-//     $scope.filteredUsers = [];
-//     $scope.itemsPerPage = 5;
-//     $scope.pagedUsers = [];
+    var filterTag = function(itemToFilter) {
+        return ($scope.patterns.tag == null)
+            || (itemToFilter.dealer && itemToFilter.dealer.manager === $scope.patterns.tag);
+    };
 
-//     $scope.onPatternChainge = function () {
-//         $scope.filteredUsers = $filter('filter')($scope.users,$scope.filterIdNameMail);
-// //        $scope.filteredUsers = $filter('filter')($scope.users,{id: $scope.patterns.id, email: $scope.patterns.email});
-//         $scope.filteredUsers = $filter('filter')($scope.filteredUsers,$scope.filterStatus);
-//         $scope.filteredUsers = $filter('filter')($scope.filteredUsers,$scope.filterTag);
-//         $scope.totalItems = $scope.filteredUsers.length;
-//         if ($scope.currentPage != 1) {
-//             $scope.currentPage = 1;
-//         } else {
-//             $scope.pageUsers();
-//         };
-//         $rootScope.savedUserListPatterns = $scope.patterns;
-//     };
+    var filterPatterns = function(itemToFilter) {
+        return filterId(itemToFilter)
+            && filterEmail(itemToFilter)
+            && filterStatus(itemToFilter)
+            && filterTag(itemToFilter);
+    };
 
-//     $scope.pageUsers = function () {
-//         var begin = (($scope.currentPage - 1) * $scope.itemsPerPage),
-//             end = begin + $scope.itemsPerPage;
-//         $scope.pagedUsers = $scope.filteredUsers.slice(begin, end);
-//     };
+    $scope.setPatternsDefault = function() {
+        $scope.patterns = {
+            id: '',
+            email: '',
+            emailEmpty: null,
+            status: [_.find($scope.optionsStatus, {id: 'active'})],
+            tag: null
+            //, idNameMail: ''
+        };
+    }
+    // по мотивам: http://stackoverflow.com/questions/12940974/maintain-model-of-scope-when-changing-between-views-in-angularjs
+    if ($rootScope.savedUserListPatterns) {
+        $scope.patterns = $rootScope.savedUserListPatterns;
+    } else {
+        $scope.setPatternsDefault();
+    }
 
-//     $scope.$watch('patterns', $scope.onPatternChainge,true);
-//     $scope.$watch('currentPage', $scope.pageUsers);
+    var filteredUsers = [];
+    var itemsPerPage = 25;
+    $scope.pagedUsers = [];
+
+    var pageUsers = function () {
+        var begin = (($scope.currentPage - 1) * itemsPerPage),
+            end = begin + itemsPerPage;
+        $scope.pagedUsers = filteredUsers.slice(begin, end);
+    };
+
+    $scope.onPatternChainge = function () {
+        // $scope.filteredUsers = $filter('filter')(users,$scope.filterIdNameMail);
+        filteredUsers = $filter('filter')(users, filterPatterns);
+        $scope.totalItems = filteredUsers.length;
+        if ($scope.currentPage != 1) {
+            $scope.currentPage = 1;
+        } else {
+            pageUsers();
+        };
+        $rootScope.savedUserListPatterns = $scope.patterns;
+    };
+
+    $scope.$watch('patterns', $scope.onPatternChainge,true);
+    $scope.$watch('currentPage', pageUsers);
 })
 
 .controller('UserCtrl', function($scope, $routeParams, data, User, optionsStatus, optionsTag, optionsHour) {
