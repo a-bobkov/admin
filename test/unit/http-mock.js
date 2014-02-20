@@ -186,6 +186,117 @@ describe('http-mock', function() {
                 }
             }];
         });
+
+        var regexPut = /^\/api2\/users\/(?:([^\/]+))$/;
+        $httpBackend.whenPUT(regexPut).respond(function(method, url, data) {
+            var id = parseInt(url.replace(regexPut,'$1'));
+            var user = _.find(usersData, {id: id});
+            if (user) {
+                user._fillItem(angular.fromJson(data));
+                return [200, {
+                    status: 'success',
+                    data: {
+                        user: user
+                    }
+                }];
+            } else {
+                return [404, {
+                    status: 'error',
+                    message: 'Пользователь не найден'
+                }];
+            }
+        });
+
+        var regexDelete = /^\/api2\/users\/(?:([^\/]+))$/;
+        $httpBackend.whenDELETE(regexDelete).respond(function(method, url, data) {
+            var id = parseInt(url.replace(regexDelete,'$1'));
+            var userIdx = _.findIndex(usersData, {id: id});
+            if (userIdx !== -1) {
+                usersData.splice(userIdx, 1);
+                return [200, {
+                    status: 'success',
+                    data: null
+                }];
+            } else {
+                return [404, {
+                    status: 'error',
+                    message: 'Пользователь не найден'
+                }];
+            }
+        });
+    });
+
+
+    describe('Метод remove()', function() {
+        it('удалять данные пользователя', function() {
+            var data = {
+                    email: 'new@maxposter.ru',
+                    last_login: '2013-12-01',
+                    status: {id: 'active'},
+                    group: {id: 1},
+                    dealer: {
+                        company_name: 'Новая компания',
+                        city: {id: 5},
+                        market: {id: 8},
+                        metro: {id: 10},
+                        adress: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123',
+                        dealer_email: 'demo@demo.ru',
+                        site: 'http://www.w3schools.com',
+                        contact_name: 'Аверин Константин Петрович',
+                        phone: '+7-812-232-4123',
+                        phone_from: '10',
+                        phone_to: '20',
+                        phone2: '+7-812-232-4124',
+                        phone2_from: '11',
+                        phone2_to: '21',
+                        phone3: '+7-812-232-4125',
+                        phone3_from: '7',
+                        phone3_to: '15',
+                        company_info: 'Здесь может быть произвольный текст...',
+                        manager: {id: 3}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            users.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+            var usersArr = actualSuccess;
+            expect(usersArr.length).toBe(15);
+
+            var user = new User();
+            user._fillItem(data);
+
+            users.save(user).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+            var savedUser = actualSuccess;
+            users.getAll().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            var usersArr = actualSuccess;
+            expect(usersArr.length).toBe(16);
+
+            users.remove(savedUser.id).then(function(respond) {
+                actualSuccess = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+            expect(usersArr.length).toBe(15);
+        });
     });
 
     describe('Метод post()', function() {
@@ -252,6 +363,65 @@ describe('http-mock', function() {
         });
     });
 
+    describe('Метод put()', function() {
+        it('сохранять данные измененного пользователя', function() {
+        var data = {
+                    email: 'new@maxposter.ru',
+                    last_login: '2013-12-01',
+                    status: {id: 'active'},
+                    group: {id: 1},
+                    dealer: {
+                        company_name: 'Новая компания',
+                        city: {id: 5},
+                        market: {id: 8},
+                        metro: {id: 10},
+                        adress: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123',
+                        dealer_email: 'demo@demo.ru',
+                        site: 'http://www.w3schools.com',
+                        contact_name: 'Аверин Константин Петрович',
+                        phone: '+7-812-232-4123',
+                        phone_from: '10',
+                        phone_to: '20',
+                        phone2: '+7-812-232-4124',
+                        phone2_from: '11',
+                        phone2_to: '21',
+                        phone3: '+7-812-232-4125',
+                        phone3_from: '7',
+                        phone3_to: '15',
+                        company_info: 'Здесь может быть произвольный текст...',
+                        manager: {id: 3}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var user = new User();
+            user._fillItem(data);
+
+            users.save(user).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var savedUser = actualSuccess;
+            savedUser.dealer.company_name = 'Самая новая компания';
+
+            users.save(savedUser).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+            var savedUser2 = actualSuccess;
+            expect(savedUser2.dealer.company_name).toBe('Самая новая компания');
+        });
+    });
+
     describe('Метод get()', function() {
         it('возвращать данные пользователя', function() {
         var actualSuccess,
@@ -309,4 +479,3 @@ describe('http-mock', function() {
         });
     });
 });
-
