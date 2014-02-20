@@ -166,11 +166,41 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             //, idNameMail: ''
         };
     }
+
     // по мотивам: http://stackoverflow.com/questions/12940974/maintain-model-of-scope-when-changing-between-views-in-angularjs
     if ($rootScope.savedUserListPatterns) {
         $scope.patterns = $rootScope.savedUserListPatterns;
     } else {
         $scope.setPatternsDefault();
+    }
+
+    $scope.sortingMark = function(column) {
+        if (column === $scope.sorting.column) {
+            return ($scope.sorting.reverse) ? ' ↑': ' ↓';
+        }
+        return '\u00A0\u00A0\u00A0';
+    }
+
+    $scope.clickHeader = function(column) {
+        if (column === $scope.sorting.column) {
+            $scope.sorting.reverse = !$scope.sorting.reverse;
+        } else {
+            $scope.sorting.column = column;
+            $scope.sorting.reverse = false;
+        }
+    }
+
+    $scope.setSortingDefault = function() {
+        $scope.sorting = {
+            column: 'id',
+            reverse: false
+        };
+    }
+
+    if ($rootScope.savedUserListSorting) {
+        $scope.sorting = $rootScope.savedUserListSorting;
+    } else {
+        $scope.setSortingDefault();
     }
 
     var filteredUsers = [];
