@@ -4,20 +4,25 @@ describe('http-mock', function() {
     var $httpBackend,
         $http,
         $rootScope,
-        users;
+        users,
+        User;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$httpBackend_, _$http_, _$rootScope_, _users_) {
+        inject(function(_$httpBackend_, _$http_, _$rootScope_, _users_, _User_) {
             $httpBackend = _$httpBackend_;
             $http = _$http_;
             $rootScope = _$rootScope_;
             users = _users_;
+            User = _User_;
         });
     });
 
-    beforeEach(function() {       // мини-сервер http для комплексных тестов
+    beforeEach(function() {
+        /**
+         * мини-сервер http для комплексных тестов
+         */
         var usersData = [
                 {
                     id: 5,
@@ -159,6 +164,92 @@ describe('http-mock', function() {
             }];
         });
 
+        var regexPost = /^\/api2\/users\/$/;
+        $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
+            var user = new User;
+            user._fillItem(angular.fromJson(data));
+            user.id = 1 + _.max(usersData, function(item) {
+                return item.id;
+            }).id;
+            if (user.group.id == 1) {      // каждый раз создаем нового дилера
+                user.dealer = user.dealer || {};
+                user.dealer.id = 1 + _.max(usersData, function(item) {
+                    return !item.dealer || item.dealer.id;
+                }).id;
+            }
+            // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
+            usersData.push(user);
+            return [200, {
+                status: 'success',
+                data: {
+                    user: user
+                }
+            }];
+        });
+    });
+
+    describe('Метод post()', function() {
+        it('сохранять данные нового пользователя', function() {
+        var data = {
+                    email: 'new@maxposter.ru',
+                    last_login: '2013-12-01',
+                    status: {id: 'active'},
+                    group: {id: 1},
+                    dealer: {
+                        company_name: 'Новая компания',
+                        city: {id: 5},
+                        market: {id: 8},
+                        metro: {id: 10},
+                        adress: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123',
+                        dealer_email: 'demo@demo.ru',
+                        site: 'http://www.w3schools.com',
+                        contact_name: 'Аверин Константин Петрович',
+                        phone: '+7-812-232-4123',
+                        phone_from: '10',
+                        phone_to: '20',
+                        phone2: '+7-812-232-4124',
+                        phone2_from: '11',
+                        phone2_to: '21',
+                        phone3: '+7-812-232-4125',
+                        phone3_from: '7',
+                        phone3_to: '15',
+                        company_info: 'Здесь может быть произвольный текст...',
+                        manager: {id: 3}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var user = new User();
+            user._fillItem(data);
+
+            users.save(user).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+            });
+
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var savedUser = actualSuccess;
+
+            users.get(savedUser.id).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+            });
+
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            expect(savedUser.id).toBeDefined();
+            expect(savedUser.dealer.id).toBeDefined();
+            delete savedUser.id;
+            delete savedUser.dealer.id;
+            expect(savedUser).toEqualData(user);
+        });
     });
 
     describe('Метод get()', function() {

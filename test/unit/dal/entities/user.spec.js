@@ -329,12 +329,11 @@ describe('Сервисы users и userApi', function() {
             expect($log.error).toHaveBeenCalledWith([ 
                 { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}' }, 
                 { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}' }, 
-                { message: 'Нет ссылочного id в элементе с id: 8, параметре: city' },
                 { message: 'Неизвестная секция: roles' } 
             ]);
         });
 
-        it('при сохранении без id - передавать в $http объект без ссылок на другие объекты, кроме dealer', function() {
+        it('при сохранении без id - передавать в $http объект со ссылками в форме (id: ??), кроме dealer', function() {
             var userData = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -356,7 +355,7 @@ describe('Сервисы users и userApi', function() {
                 newUserSerialized = {
                     name: 'Другой',
                     ext: 'Extra',
-                    city: 2,
+                    city: {id: 2},
                     dealer: {id: 3, name: 'Дилер'}
                 },
                 actualSuccess,

@@ -157,8 +157,7 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             expect($log.error).toHaveBeenCalledWith([
-                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3'},
-                {message: 'Нет ссылочного id в элементе с id: 4, параметре: city'}
+                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3'}
             ]);
         });
 
@@ -250,7 +249,7 @@ describe('Сервис cities должен', function() {
             expect(actualSuccess.length).toBe(4);
         });
 
-        it('при сохранении без id - передавать $http объект без ссылок на другие объекты', function() {
+        it('при сохранении без id - передавать $http объект со ссылками в форме {id: ??}', function() {
             var items = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -266,11 +265,6 @@ describe('Сервис cities должен', function() {
                     name: 'Другой',
                     ext: 'Extra',
                     city: {id: 2}
-                },
-                newItemSerialized = {
-                    name: 'Другой',
-                    ext: 'Extra',
-                    city: 2
                 },
                 actualSuccess,
                 actualError;
@@ -298,7 +292,7 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             expect(cityApi.create).toHaveBeenCalled();
-            expect(cityApi.create).toHaveBeenCalledWith(newItemSerialized);
+            expect(cityApi.create).toHaveBeenCalledWith(newItemData);
         });
 
         it('при сохранении без id - выдавать reject с ошибкой, выданной REST API, не изменяя коллекцию', function() {
@@ -378,7 +372,7 @@ describe('Сервис cities должен', function() {
             expect(actualSuccess.length).toBe(3);
         });
 
-        it('при сохранении c id - передавать $http объект без ссылок на другие объекты', function() {
+        it('при сохранении c id - передавать $http объект со ссылками в форме {id: ??}', function() {
             var items = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -387,7 +381,7 @@ describe('Сервис cities должен', function() {
                 savedItemData = {
                     id: 2, 
                     name: 'Второй',
-                    refCity: {city: 2}
+                    city: {id: 2}
                 },
                 actualSuccess,
                 actualError;
@@ -402,7 +396,7 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             var city = actualSuccess;
-            city.refCity = city;
+            city.city = city;
 
             cities.save(city).then(function(respond) {
                 actualSuccess = respond;
@@ -411,7 +405,7 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             expect(cityApi.update).toHaveBeenCalled();
-            expect(cityApi.update).toHaveBeenCalledWith({id: 2, name: 'Второй', refCity: 2 });
+            expect(cityApi.update).toHaveBeenCalledWith(savedItemData);
         });
 
         it('при сохранении с id - выдавать reject с ошибкой для элемента с отсутствующим в коллекции id', function() {

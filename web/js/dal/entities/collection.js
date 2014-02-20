@@ -114,6 +114,7 @@ var Collection = (function() {
 
     Collection.prototype._addItem = addItem;        // экспорт частных методов для Item
     Collection.prototype._findEntity = findEntity;
+    Collection.prototype._getItemConstructor = getItemConstructor;
 
     Collection.prototype._registerCollection = function(entityName, collectionName, itemConstructor, restApiProvider) {
         registeredCollections.push({
@@ -288,6 +289,8 @@ return Collection;
     delete Collection.prototype._addItem;                 // и заметаем следы
     var findEntity = Collection.prototype._findEntity;
     delete Collection.prototype._findEntity;
+    var getItemConstructor = Collection.prototype._getItemConstructor;
+    delete Collection.prototype._getItemConstructor;
 
     var Item = function () {};
 
@@ -308,17 +311,18 @@ return Collection;
             var attr = itemData[key],
                 refElem = attr;
             if (typeof attr === 'object') {
-                if (typeof attr.id === 'undefined') {
-                    errorMessages.push(new CollectionError('Нет ссылочного id в элементе с id: ' + itemData.id + ', параметре: ' + key));
+                var entity = findEntity(key);
+                if (!entity) {
+                    errorMessages.push(new CollectionError('Неизвестный ссылочный параметр ' + key + ' в элементе с id: ' + itemData.id));
                 } else {
-                    var collection = findEntity(key);
-                    if (!collection) {
-                        errorMessages.push(new CollectionError('Неизвестный ссылочный параметр ' + key + ' в элементе с id: ' + itemData.id));
+                    if (typeof attr.id === 'undefined') {   // создаем элемент без коллекции
+                        var newItem = new (getItemConstructor(entity));
+                        var respond = newItem._fillItem(attr);
                     } else {
-                        var respond = addItem.call(collection, attr);
-                        refElem = respond.result;
-                        errorMessages = _.union(errorMessages, respond.errorMessages);
+                        var respond = addItem.call(entity, attr);
                     }
+                    refElem = respond.result;
+                    errorMessages = _.union(errorMessages, respond.errorMessages);
                 }
             }
             this[key] = refElem;
@@ -340,7 +344,7 @@ return Collection;
                 if (key === "dealer") {               // todo: перекрытием данного метода на User
                     itemData[key] = value._serialize();
                 } else {
-                    itemData[key] = value.id;
+                    itemData[key] = {id: value.id};
                 }
             } else {
                 itemData[key] = value;
