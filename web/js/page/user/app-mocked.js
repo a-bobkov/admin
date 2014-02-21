@@ -4,6 +4,9 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
 
+    /**
+     * мини-сервер http для комплексных тестов
+     */
     var usersData = [
             {
                 id: 5,
@@ -41,7 +44,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
             {id: 2, email: 'a-bobkov@abb.com', last_login: '2011-03-11', status: {id: 'active'}, group: {id: 2}, site: {id: 11}},
             {id: 3, email: 'a-bobkov@abc.com', last_login: '2012-05-31', status: {id: 'inactive'}, group: {id: 1}, dealer: {
                 id: 3, company_name: 'Другая компания', manager: {id: 3}}},
-            {id: 4, email: 'a-bobkov@abd.com', last_login: '2011-12-12', status: {id: 'blocked'}, group: {id: 2}, site: {id: 12}},
+            {id: 4, email: 'a-bobkov@abd.com', last_login: '2011-12-12', status: {id: 'error'}, group: {id: 2}, site: {id: 12}},
             {id: 6, email: 'a-bobkov@abe.com', last_login: '2013-01-06', status: {id: 'active'}, group: {id: 1}, dealer: {
                 id: 6, company_name: 'Крутая компания', manager: {id: 4}}},
             {id: 7, email: 'a-bobkov@abf.com', last_login: '2000-01-12', status: {id: 'inactive'}, group: {id: 1}, dealer: {
@@ -57,7 +60,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
             {id: 13, email: 'a-bobkov@abl.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 1}, dealer: {
                 id: 13, company_name: 'Свет', manager: {id: 4}}},
             {id: 14, email: 'a-bobkov@abo.com', last_login: '2012-01-01', status: {id: 'blocked'}, group: {id: 2}, site: {id: 12}},
-            {id: 15, email: '', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 4}, site: {id: 11}}
+            {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 4}, site: {id: 11}}
         ],
         directoriesData = {
             groups: [
@@ -143,5 +146,66 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
             status: 'success',
             data: directoriesData
         }];
+    });
+
+    var regexPost = /^\/api2\/users\/$/;
+    $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
+        var user = new User;
+        user._fillItem(angular.fromJson(data));
+        user.id = 1 + _.max(usersData, function(item) {
+            return item.id;
+        }).id;
+        if (user.group.id == 1) {      // каждый раз создаем нового дилера
+            user.dealer = user.dealer || {};
+            user.dealer.id = 1 + _.max(usersData, function(item) {
+                return !item.dealer || item.dealer.id;
+            }).id;
+        }
+        // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
+        usersData.push(user);
+        return [200, {
+            status: 'success',
+            data: {
+                user: user
+            }
+        }];
+    });
+
+    var regexPut = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexPut).respond(function(method, url, data) {
+        var id = parseInt(url.replace(regexPut,'$1'));
+        var user = _.find(usersData, {id: id});
+        if (user) {
+            user._fillItem(angular.fromJson(data));
+            return [200, {
+                status: 'success',
+                data: {
+                    user: user
+                }
+            }];
+        } else {
+            return [404, {
+                status: 'error',
+                message: 'Пользователь не найден'
+            }];
+        }
+    });
+
+    var regexDelete = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexDelete).respond(function(method, url, data) {
+        var id = parseInt(url.replace(regexDelete,'$1'));
+        var userIdx = _.findIndex(usersData, {id: id});
+        if (userIdx !== -1) {
+            usersData.splice(userIdx, 1);
+            return [200, {
+                status: 'success',
+                data: null
+            }];
+        } else {
+            return [404, {
+                status: 'error',
+                message: 'Пользователь не найден'
+            }];
+        }
     });
 });
