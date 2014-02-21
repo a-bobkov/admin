@@ -338,96 +338,15 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         });
     };
 
-    $scope.deleteUser = function() {
-        if ($scope.userEdited.id) {
-            $scope.userEdited.remove();
-        }
-    };
-})
-
-.controller('UserDeleteModalCtrl', function ($scope, $modal, $location) {
-    $scope.openUserDeleteModal = function () {
-        var modalInstance = $modal.open({
-            templateUrl: 'UserDeleteModalContent.html',
-            controller: 'UserDeleteModalInstanceCtrl'
-        });
-
-        modalInstance.result.then(function () {
-          $scope.deleteUser();
-          $location.path('/userlist');
-        });
-    };
-})
-
-.controller('UserDeleteModalInstanceCtrl', function ($scope, $modalInstance) {
-    $scope.ok = function () {
-        $modalInstance.close();
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss();
-    };
-})
-
-// from https://github.com/andreev-artem/angular_experiments/tree/master/ui-checkbox
-.directive('uiCheckbox', function () {
-    return {
-        restrict: 'EA',
-        replace: true,
-        transclude: true,
-        template:
-            '<label class>' +
-                '<div ng-click="toggle()" class="icheckbox_flat-blue" ng-class="{\'checked\': value}" style="position: relative">' +
-                    '<input type="checkbox" name="checkboxes" checked="" style="position: absolute; opacity: 0;">' +
-                '</div>' +
-                '<span class="checkbox-label" ng-transclude></span>' +
-            '</label>',
-        require: 'ngModel',
-        scope: true,
-        link: function (scope, elem, attrs, ngModelCtrl) {
-            scope.value = false;
-
-            ngModelCtrl.$render = function () {
-                scope.value = ngModelCtrl.$viewValue;
-            };
-
-            scope.toggle = function () {
-                scope.value = !scope.value;
-                ngModelCtrl.$setViewValue(scope.value);
-            };
-        }
-    };
-})
-
-// from https://github.com/andreev-artem/angular_experiments/tree/master/ui-equal-to
-.directive('uiEqualTo', function(){
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: function (scope, elem, attrs, ctrl) {
-            function validateEqual(myValue, otherValue) {
-                if (myValue === otherValue) {
-                    ctrl.$setValidity('equal', true);
-                    return myValue;
-                } else {
-                    ctrl.$setValidity('equal', false);
-                    return myValue;
-                }
+    $scope.removeUser = function() {
+        if (confirm('Вы уверены?')) {
+            if ($scope.userEdited.id) {
+                users.remove($scope.userEdited.id).then(function() {
+                    $location.path('/userlist');
+                })
+            } else {
+                $location.path('/userlist');
             }
-
-            // при изменении значения в ссылочном поле (с точностью до хвостовых пробелов)
-            scope.$watch(attrs.uiEqualTo, function (otherModelValue) {
-                validateEqual(ctrl.$viewValue, otherModelValue);
-            });
-
-            // при изменении значения в поле (с точностью до хвостовых пробелов)
-            ctrl.$parsers.unshift(function (viewValue) {
-                return validateEqual(viewValue, scope.$eval(attrs.uiEqualTo));
-            });
-            // непонятно зачем - вроде работает и без этого
-            // ctrl.$formatters.unshift(function (modelValue) {
-            //     return validateEqual(modelValue, scope.$eval(attrs.uiEqualTo));
-            // });
         }
     };
 });

@@ -200,9 +200,7 @@
 
 <div class="span-10 prepend-top clear">
     <ul class="actions row">
-        <li class="delete">
-            <a onclick="if (confirm('Вы уверены?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'post'; f.action = this.href;var m = document.createElement('input'); m.setAttribute('type', 'hidden'); m.setAttribute('name', 'sf_method'); m.setAttribute('value', 'delete'); f.appendChild(m);f.submit(); };return false;" href="/user/5">Удалить</a>
-        </li>
+        <li class="delete"><a ng-click='removeUser()'>Удалить</a></li>
         <li class="list"><a href="#/userlist">Вернуться к списку</a></li>
         <li class="save"><input type="submit" value="Сохранить" ng-disabled='userInvalid()' ng-click='saveUser()'/></li>
     </ul>
