@@ -19,7 +19,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         resolve: {
             data: function(User_Loader, $location) {
                 var userId = parseInt($location.$$path.replace(/^\/users\/(?:([^\/]+))\/edit$/,'$1'));
-                return; //User_Loader.load(userId);
+                return User_Loader.load(userId);
             }
         }
     })
@@ -47,39 +47,30 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             angular.extend(data, respond.directories);
             return users.getAll().then(function(respond) {
                 data.users = angular.extend(respond);
-                // console.log(angular.toJson(data));
                 return data;
             });
         });
-
-        // return users.getDirectories().then(function(respond) {
-        //     angular.extend(data, respond);
-        //     console.log(angular.toJson(data));
-        //     return users.getAll().then(function(respond) {
-        //         data.users = angular.extend(respond);
-        //         console.log(angular.toJson(data));
-        //         return data;
-        //     });
-        // });
-        // return users.getDirectories().then(function() {
-        //     return users.getAll();
-        // });
     };
     return Loader;
 })
 
-.factory('User_Loader', function($q, User, $location) {
-    // var data = {};
-    // var Loader = {};
-    // Loader.load = function(userId) {
-    //     return $q.all({
-    //         user: User.get(userId)
-    //     }).then(function(values){
-    //             angular.extend(data, values);
-    //             return data;
-    //     });
-    // };
-    // return Loader;
+.factory('User_Loader', function($q, users, statuses) {
+    var data = {};
+    var Loader = {};
+    Loader.load = function(id) {
+        return $q.all({
+            statuses: statuses.getAll(),
+            directories: users.getDirectories()
+        }).then(function(respond){
+            data = respond.directories;
+            data.statuses = respond.statuses;
+            return users.get(id).then(function(respond) {
+                data.user = respond;
+                return data;
+            });
+        });
+    };
+    return Loader;
 })
 
 .controller('UserListCtrl', function($scope, $rootScope, $filter, $location, data) {
@@ -229,10 +220,9 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.$watch('currentPage', pageUsers);
 })
 
-.controller('UserCtrl', function($scope, $routeParams, data, User, optionsStatus, optionsTag, optionsHour) {
-    $scope.optionsStatus = optionsStatus;
-    $scope.optionsTag = optionsTag;
-    $scope.optionsHour = optionsHour;
+.controller('UserCtrl', function($scope, $routeParams, data, userHours, User) {
+    angular.extend($scope, data);
+    $scope.userHours = userHours;
 
     $scope.pwd = '';
     $scope.pwdConfirm = '';

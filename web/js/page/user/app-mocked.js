@@ -13,7 +13,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
                 email: 'demo@maxposter.ru',
                 last_login: '2013-12-01',
                 status: {id: 'active'},
-                group: {id: 1},
+                group: {id: 2},
                 dealer: {
                     id: 5,
                     company_name: 'Демокомпания',
@@ -26,50 +26,52 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
                     site: 'http://www.w3schools.com',
                     contact_name: 'Аверин Константин Петрович',
                     phone: '+7-812-232-4123',
-                    phone_from: '10',
-                    phone_to: '20',
+                    phone_from: 10,
+                    phone_to: 20,
                     phone2: '+7-812-232-4124',
-                    phone2_from: '11',
-                    phone2_to: '21',
+                    phone2_from: 11,
+                    phone2_to: 21,
                     phone3: '+7-812-232-4125',
-                    phone3_from: '7',
-                    phone3_to: '15',
+                    phone3_from: 7,
+                    phone3_to: 15,
                     company_info: 'Здесь может быть произвольный текст...',
-                    manager: {id: 3}
+                    manager: {id: 1}
                 },
                 site: {id: 11}
             },
             {id: 1, email: 'a-bobkov@ab.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 1}, dealer: {
-                id: 1, company_name: 'Ещё одна компания', manager: {id: 4}}},
+                id: 1, company_name: 'Ещё одна компания', manager: {id: 2}}},
             {id: 2, email: 'a-bobkov@abb.com', last_login: '2011-03-11', status: {id: 'active'}, group: {id: 2}, site: {id: 11}},
             {id: 3, email: 'a-bobkov@abc.com', last_login: '2012-05-31', status: {id: 'inactive'}, group: {id: 1}, dealer: {
-                id: 3, company_name: 'Другая компания', manager: {id: 3}}},
+                id: 3, company_name: 'Другая компания', manager: {id: 1}}},
             {id: 4, email: 'a-bobkov@abd.com', last_login: '2011-12-12', status: {id: 'error'}, group: {id: 2}, site: {id: 12}},
             {id: 6, email: 'a-bobkov@abe.com', last_login: '2013-01-06', status: {id: 'active'}, group: {id: 1}, dealer: {
-                id: 6, company_name: 'Крутая компания', manager: {id: 4}}},
+                id: 6, company_name: 'Крутая компания', manager: {id: 2}}},
             {id: 7, email: 'a-bobkov@abf.com', last_login: '2000-01-12', status: {id: 'inactive'}, group: {id: 1}, dealer: {
-                id: 7, company_name: 'Супер-салон', manager: {id: 4}}},
+                id: 7, company_name: 'Супер-салон', manager: {id: 2}}},
             {id: 8, email: 'a-bobkov@abg.com', last_login: '2000-08-07', status: {id: 'active'}, group: {id: 0}},
             {id: 9, email: 'a-bobkov@abh.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 1}, dealer: {
-                id: 9, company_name: 'Битые корыта', manager: {id: 3}}},
+                id: 9, company_name: 'Битые корыта', manager: {id: 1}}},
             {id: 10, email: 'a-bobkov@abi.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 1}, dealer: {
-                id: 10, company_name: 'Два в одном', manager: {id: 4}}},
+                id: 10, company_name: 'Два в одном', manager: {id: 2}}},
             {id: 11, email: 'a-bobkov@abj.com', last_login: '2012-01-01', status: {id: 'blocked'}, group: {id: 2}, site: {id: 11}},
             {id: 12, email: 'a-bobkov@abk.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 1}, dealer: {
-                id: 12, company_name: 'Авто-мото', manager: {id: 3}}},
+                id: 12, company_name: 'Авто-мото', manager: {id: 1}}},
             {id: 13, email: 'a-bobkov@abl.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 1}, dealer: {
-                id: 13, company_name: 'Свет', manager: {id: 4}}},
+                id: 13, company_name: 'Свет', manager: {id: 2}}},
             {id: 14, email: 'a-bobkov@abo.com', last_login: '2012-01-01', status: {id: 'blocked'}, group: {id: 2}, site: {id: 12}},
             {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 4}, site: {id: 11}}
         ],
         directoriesData = {
             groups: [
-                {id: 1, name: 'Автосалон'},
-                {id: 2, name: 'Автосайт'}
+                {id: 3, name: 'Автосайт'},
+                {id: 2, name: 'Автосалон'},
+                {id: 1, name: 'Администратор'}
             ],
             managers: [
-                {id: 3, name: 'Менеджер один'},
-                {id: 4, name: 'Менеджер два'}
+                { 'id': 1, 'name': 'Катя'},
+                { 'id': 2, 'name': 'Инна'},
+                { 'id': 4, 'name': 'Потеряшки'},
             ],
             cities: [
                 {id: 5, name: 'Город один'},

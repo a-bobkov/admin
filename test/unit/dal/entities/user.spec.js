@@ -183,7 +183,8 @@ describe('Сервисы users и userApi', function() {
                 actualError = respond;
             });
             $rootScope.$digest();
-            expect(userApi.get).toHaveBeenCalled();
+            expect(userApi.get).toHaveBeenCalledWith(1);
+            expect(actualSuccess).toEqualData(userData);
         });
 
         it('загружать опции с сервера', function() {
