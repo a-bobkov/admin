@@ -233,31 +233,50 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         makeUserNew();
     }
 
+    $scope.userInvalid = function() {
+        return $scope.company_nameErrorMessage()
+            || $scope.cityErrorMessage()
+            || $scope.phoneErrorMessage()
+            || $scope.phone2ErrorMessage()
+            || $scope.phone3ErrorMessage();
+    }
+
+    $scope.company_nameErrorMessage = function() {
+        if (!$scope.userEdited.dealer.company_name) {
+            return 'Не задано значение.';
+        }
+        return '';
+    }
+
+    $scope.cityErrorMessage = function() {
+        if (!$scope.userEdited.dealer.city) {
+            return 'Не задано значение.';
+        }
+        return '';
+    }
+
     $scope.phoneErrorMessage = function() {
-        if (($scope.userEdited.phone || $scope.userEdited.phone_from || $scope.userEdited.phone_to) &&
-        !($scope.userEdited.phone && $scope.userEdited.phone_from && $scope.userEdited.phone_to)) {
-            return "Необходимо заполнить все три поля";
-        } else {
-            return "";
+        if (($scope.userEdited.dealer.phone || $scope.userEdited.dealer.phone_from || $scope.userEdited.dealer.phone_to) &&
+        !($scope.userEdited.dealer.phone && $scope.userEdited.dealer.phone_from && $scope.userEdited.dealer.phone_to)) {
+            return 'Необходимо заполнить все три поля';
         }
+        return '';
     }
 
-    $scope.phoneErrorMessage2 = function() {
-        if (($scope.userEdited.phone2 || $scope.userEdited.phone2_from || $scope.userEdited.phone2_to) &&
-        !($scope.userEdited.phone2 && $scope.userEdited.phone2_from && $scope.userEdited.phone2_to)) {
-            return "Необходимо заполнить все три поля";
-        } else {
-            return "";
+    $scope.phone2ErrorMessage = function() {
+        if (($scope.userEdited.dealer.phone2 || $scope.userEdited.dealer.phone2_from || $scope.userEdited.dealer.phone2_to) &&
+        !($scope.userEdited.dealer.phone2 && $scope.userEdited.dealer.phone2_from && $scope.userEdited.dealer.phone2_to)) {
+            return 'Необходимо заполнить все три поля';
         }
+        return '';
     }
 
-    $scope.phoneErrorMessage3 = function() {
-        if (($scope.userEdited.phone3 || $scope.userEdited.phone3_from || $scope.userEdited.phone3_to) &&
-        !($scope.userEdited.phone3 && $scope.userEdited.phone3_from && $scope.userEdited.phone3_to)) {
-            return "Необходимо заполнить все три поля";
-        } else {
-            return "";
+    $scope.phone3ErrorMessage = function() {
+        if (($scope.userEdited.dealer.phone3 || $scope.userEdited.dealer.phone3_from || $scope.userEdited.dealer.phone3_to) &&
+        !($scope.userEdited.dealer.phone3 && $scope.userEdited.dealer.phone3_from && $scope.userEdited.dealer.phone3_to)) {
+            return 'Необходимо заполнить все три поля';
         }
+        return '';
     }
 
     function makeUserCopy() {
