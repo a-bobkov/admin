@@ -14,9 +14,7 @@
         <table class="list">
             <thead>
                 <tr>
-                	<th ng-repeat='column in 
-                		[{id: "id", name: "Код"}, {id: "email", name: "Email"}, {id: "last_login", name: "Был на сайте"}]'
-                		ng-class='{"active": sorting.column === column.id}'>
+					<th ng-repeat='column in sortableColumns' ng-class='{"active": sorting.column === column.id}'>
                 		<a ng-click='clickHeader(column.id)'>{{column.name}}</a><span>{{sortingMark(column.id)}}</span>
                     </th>
                     <th>Действия</th>

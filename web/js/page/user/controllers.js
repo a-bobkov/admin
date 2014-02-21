@@ -74,7 +74,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 })
 
 .controller('UserListCtrl', function($scope, $rootScope, $filter, $location, data) {
-    var users = data.users;
+    var allUsers = data.users;
     $scope.optionsStatus = data.statuses;
     $scope.optionsTag = data.managers;
 
@@ -181,6 +181,12 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         }
     }
 
+    $scope.sortableColumns = [
+        {id: "id", name: "Код"},
+        {id: "email", name: "Email"},
+        {id: "last_login", name: "Был на сайте"}
+    ];
+
     $scope.setSortingDefault = function() {
         $scope.sorting = {
             column: 'id',
@@ -206,7 +212,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     $scope.onPatternChainge = function () {
         // $scope.filteredUsers = $filter('filter')(users,$scope.filterIdNameMail);
-        filteredUsers = $filter('filter')(users, filterPatterns);
+        filteredUsers = $filter('filter')(allUsers, filterPatterns);
         $scope.totalItems = filteredUsers.length;
         if ($scope.currentPage != 1) {
             $scope.currentPage = 1;
@@ -216,11 +222,11 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $rootScope.savedUserListPatterns = $scope.patterns;
     };
 
-    $scope.$watch('patterns', $scope.onPatternChainge,true);
+    $scope.$watch('patterns', $scope.onPatternChainge, true);
     $scope.$watch('currentPage', pageUsers);
 })
 
-.controller('UserCtrl', function($scope, $routeParams, data, userHours, User) {
+.controller('UserCtrl', function($scope, $routeParams, data, userHours, users, User, Dealer) {
     angular.extend($scope, data);
     $scope.userHours = userHours;
 
@@ -234,46 +240,47 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     }
 
     $scope.userInvalid = function() {
-        return $scope.company_nameErrorMessage()
+        return ($scope.userEdited.group.id == 2) &&
+            ($scope.company_nameErrorMessage()
             || $scope.cityErrorMessage()
             || $scope.phoneErrorMessage()
             || $scope.phone2ErrorMessage()
-            || $scope.phone3ErrorMessage();
+            || $scope.phone3ErrorMessage());
     }
 
     $scope.company_nameErrorMessage = function() {
-        if (!$scope.userEdited.dealer.company_name) {
+        if (!$scope.dealerEdited.company_name) {
             return 'Не задано значение.';
         }
         return '';
     }
 
     $scope.cityErrorMessage = function() {
-        if (!$scope.userEdited.dealer.city) {
+        if (!$scope.dealerEdited.city) {
             return 'Не задано значение.';
         }
         return '';
     }
 
     $scope.phoneErrorMessage = function() {
-        if (($scope.userEdited.dealer.phone || $scope.userEdited.dealer.phone_from || $scope.userEdited.dealer.phone_to) &&
-        !($scope.userEdited.dealer.phone && $scope.userEdited.dealer.phone_from && $scope.userEdited.dealer.phone_to)) {
+        if (($scope.dealerEdited.phone || $scope.dealerEdited.phone_from || $scope.dealerEdited.phone_to) &&
+        !($scope.dealerEdited.phone && $scope.dealerEdited.phone_from && $scope.dealerEdited.phone_to)) {
             return 'Необходимо заполнить все три поля';
         }
         return '';
     }
 
     $scope.phone2ErrorMessage = function() {
-        if (($scope.userEdited.dealer.phone2 || $scope.userEdited.dealer.phone2_from || $scope.userEdited.dealer.phone2_to) &&
-        !($scope.userEdited.dealer.phone2 && $scope.userEdited.dealer.phone2_from && $scope.userEdited.dealer.phone2_to)) {
+        if (($scope.dealerEdited.phone2 || $scope.dealerEdited.phone2_from || $scope.dealerEdited.phone2_to) &&
+        !($scope.dealerEdited.phone2 && $scope.dealerEdited.phone2_from && $scope.dealerEdited.phone2_to)) {
             return 'Необходимо заполнить все три поля';
         }
         return '';
     }
 
     $scope.phone3ErrorMessage = function() {
-        if (($scope.userEdited.dealer.phone3 || $scope.userEdited.dealer.phone3_from || $scope.userEdited.dealer.phone3_to) &&
-        !($scope.userEdited.dealer.phone3 && $scope.userEdited.dealer.phone3_from && $scope.userEdited.dealer.phone3_to)) {
+        if (($scope.dealerEdited.phone3 || $scope.dealerEdited.phone3_from || $scope.dealerEdited.phone3_to) &&
+        !($scope.dealerEdited.phone3 && $scope.dealerEdited.phone3_from && $scope.dealerEdited.phone3_to)) {
             return 'Необходимо заполнить все три поля';
         }
         return '';
@@ -281,7 +288,13 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     function makeUserCopy() {
         $scope.actionName = "Редактирование";
-        $scope.userEdited = angular.extend(data.user);
+        $scope.userEdited = new User;
+        angular.extend($scope.userEdited, data.user);
+        $scope.dealerEdited = new Dealer;
+        $scope.userEdited.dealer = $scope.dealerEdited;
+        if (data.user.dealer) {
+            angular.extend($scope.dealerEdited, data.user.dealer);
+        }
     }
 
     function makeUserNew() {
@@ -292,13 +305,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         })
     }
 
-    $scope.updateUser = function() {
-        if ($scope.userEdited.id) {  // обновление
-            $scope.userEdited.save();
-        } else {    // создание
-            $scope.userEdited.create();
-            $scope.actionName = "Редактирование";
-        }
+    $scope.saveUser = function() {
+        users.save($scope.userEdited).then(makeUserCopy);
     };
 
     $scope.deleteUser = function() {

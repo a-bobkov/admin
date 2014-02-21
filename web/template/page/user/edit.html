@@ -49,7 +49,7 @@
         <tr>
             <th><label for="user_dealer_tag_id">Тэг</label></th>
             <td>
-                <select id="user_dealer_tag_id" ng-model='userEdited.dealer.manager' ng-options='opt.name for opt in managers'>
+                <select id="user_dealer_tag_id" ng-model='dealerEdited.manager' ng-options='opt.name for opt in managers'>
                     <option value=''></option>
                 </select>
             </td>
@@ -63,7 +63,7 @@
         <tr>
             <th><label for="user_dealer_company_name">Название компании</label><span>*</span></th>
             <td>
-                <input class="span-8 required" type="text" id="user_dealer_company_name" ng-model='userEdited.dealer.company_name'/>
+                <input class="span-8 required" type="text" id="user_dealer_company_name" ng-model='dealerEdited.company_name'/>
 				<ul class="error_list" ng-show='company_nameErrorMessage()'>
 				    <li>{{company_nameErrorMessage()}}</li>
 				</ul>
@@ -72,7 +72,7 @@
         <tr>
             <th><label for="user_dealer_city_id">Город</label><span>*</span></th>
             <td>
-                <select class="required" id="user_dealer_city_id" ng-model='userEdited.dealer.city' ng-options='opt.name for opt in cities'>
+                <select class="required" id="user_dealer_city_id" ng-model='dealerEdited.city' ng-options='opt.name for opt in cities'>
                     <option value=''></option>
                 </select>
 				<ul class="error_list" ng-show='cityErrorMessage()'>
@@ -83,7 +83,7 @@
 	    <tr>
 	        <th><label for="user_dealer_market_id">Рынок</label></th>
 	        <td>
-	            <select class="span-8" id="user_dealer_market_id" ng-model='userEdited.dealer.market' ng-options='opt.name for opt in markets'>
+	            <select class="span-8" id="user_dealer_market_id" ng-model='dealerEdited.market' ng-options='opt.name for opt in markets'>
 	                <option value=''></option>
 	            </select>
 	        </td>
@@ -91,32 +91,32 @@
 	    <tr>
 	        <th><label for="user_dealer_metro_id">Станция метро</label></th>
 	        <td>
-	            <select class="span-8" id="user_dealer_metro_id" ng-model='userEdited.dealer.metro' ng-options='opt.name for opt in metros'>
+	            <select class="span-8" id="user_dealer_metro_id" ng-model='dealerEdited.metro' ng-options='opt.name for opt in metros'>
 	                <option value=''></option>
 	            </select>
 	        </td>
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_adress">Адрес</label></th>
-	        <td><input class="span-18" type="text" id="user_dealer_adress" ng-model='userEdited.dealer.adress'/></td>
+	        <td><input class="span-18" type="text" id="user_dealer_adress" ng-model='dealerEdited.adress'/></td>
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_fax">Факс</label></th>
-	        <td><input type="text" id="user_dealer_fax" ng-model='userEdited.dealer.fax'/></td>
+	        <td><input type="text" id="user_dealer_fax" ng-model='dealerEdited.fax'/></td>
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_email">Email</label></th>
-	        <td><input class="span-8" type="text" id="user_dealer_email" ng-model='userEdited.dealer.dealer_email'/></td>
+	        <td><input class="span-8" type="text" id="user_dealer_email" ng-model='dealerEdited.dealer_email'/></td>
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_site">Сайт</label></th>
 	        <td>
 	            <div class="help">Например: http://www.mysite.ru (обязательно начиная с "http://")</div>
-	            <input class="span-8" type="text" id="user_dealer_site" ng-model='userEdited.dealer.site'/></td>
+	            <input class="span-8" type="text" id="user_dealer_site" ng-model='dealerEdited.site'/></td>
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_contact_name">Контакт</label></th>
-	        <td><input class="span-8" type="text" id="user_dealer_contact_name" ng-model='userEdited.dealer.contact_name'/>
+	        <td><input class="span-8" type="text" id="user_dealer_contact_name" ng-model='dealerEdited.contact_name'/>
 	        </td>
 	    </tr>
 	    <tr>
@@ -127,13 +127,13 @@
 	            <div class="help">
 	                Например: <span>+7(495)123-45-67 890</span> - московский телефон с добавочным номером 890.
 	            </div>
-	            <input type="text" id="user_dealer_phone" ng-model='userEdited.dealer.phone'/>
+	            <input type="text" id="user_dealer_phone" ng-model='dealerEdited.phone'/>
 	            звонить с
-	            <select id="user_dealer_phone_from" ng-model='userEdited.dealer.phone_from' ng-options='opt.id as opt.name for opt in userHours.data'>
+	            <select id="user_dealer_phone_from" ng-model='dealerEdited.phone_from' ng-options='opt.id as opt.name for opt in userHours.data'>
 	                <option value=''></option>
 	            </select>
 	            по
-	            <select id="user_dealer_phone_to" ng-model='userEdited.dealer.phone_to' ng-options='opt.id as opt.name for opt in userHours.data'>
+	            <select id="user_dealer_phone_to" ng-model='dealerEdited.phone_to' ng-options='opt.id as opt.name for opt in userHours.data'>
 	                <option value=''></option>
 	            </select>
 	            <br>
@@ -144,13 +144,13 @@
 	    </tr>
 	    <tr>
 	        <td>
-	            <input type="text" id="user_dealer_phone2" ng-model='userEdited.dealer.phone2'/>
+	            <input type="text" id="user_dealer_phone2" ng-model='dealerEdited.phone2'/>
 	            звонить с
-	            <select id="user_dealer_phone2_from" ng-model='userEdited.dealer.phone2_from' ng-options='opt.id as opt.name for opt in userHours.data'>
+	            <select id="user_dealer_phone2_from" ng-model='dealerEdited.phone2_from' ng-options='opt.id as opt.name for opt in userHours.data'>
 	                <option value=''></option>
 	            </select>
 	            по
-	            <select id="user_dealer_phone2_to" ng-model='userEdited.dealer.phone2_to' ng-options='opt.id as opt.name for opt in userHours.data'>
+	            <select id="user_dealer_phone2_to" ng-model='dealerEdited.phone2_to' ng-options='opt.id as opt.name for opt in userHours.data'>
 	                <option value=''></option>
 	            </select>
 	            <br/>
@@ -161,13 +161,13 @@
 	    </tr>
 	    <tr>
 	        <td>
-	            <input type="text" id="user_dealer_phone3" ng-model='userEdited.dealer.phone3'/>
+	            <input type="text" id="user_dealer_phone3" ng-model='dealerEdited.phone3'/>
 	            звонить с
-	            <select id="user_dealer_phone3_from" ng-model='userEdited.dealer.phone3_from' ng-options='opt.id as opt.name for opt in userHours.data'>
+	            <select id="user_dealer_phone3_from" ng-model='dealerEdited.phone3_from' ng-options='opt.id as opt.name for opt in userHours.data'>
 	                <option value=''></option>
 	            </select>
 	            по
-	            <select id="user_dealer_phone3_to" ng-model='userEdited.dealer.phone3_to' ng-options='opt.id as opt.name for opt in userHours.data'>
+	            <select id="user_dealer_phone3_to" ng-model='dealerEdited.phone3_to' ng-options='opt.id as opt.name for opt in userHours.data'>
 	                <option value=''></option>
 	            </select>
 				<ul class="error_list" ng-show='phone3ErrorMessage()'>
@@ -178,7 +178,7 @@
 	    <tr>
 	        <th><label for="user_dealer_company_info">Информация о компании</label></th>
 	        <td>
-	            <textarea rows="4" cols="30" class="span-18 hb" id="user_dealer_company_info" ng-model="userEdited.dealer.company_info"></textarea>
+	            <textarea rows="4" cols="30" class="span-18 hb" id="user_dealer_company_info" ng-model="dealerEdited.company_info"></textarea>
 	        </td>
 	    </tr>
 	</table>
@@ -203,7 +203,7 @@
         <li class="delete">
             <a onclick="if (confirm('Вы уверены?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'post'; f.action = this.href;var m = document.createElement('input'); m.setAttribute('type', 'hidden'); m.setAttribute('name', 'sf_method'); m.setAttribute('value', 'delete'); f.appendChild(m);f.submit(); };return false;" href="/user/5">Удалить</a>
         </li>
-        <li class="list"><a href="/user">Вернуться к списку</a></li>
+        <li class="list"><a href="#/userlist">Вернуться к списку</a></li>
         <li class="save"><input type="submit" value="Сохранить" ng-disabled='userInvalid()' ng-click='saveUser()'/></li>
     </ul>
 </div>
