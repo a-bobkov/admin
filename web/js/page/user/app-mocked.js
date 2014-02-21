@@ -72,6 +72,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
                 { 'id': 1, 'name': 'Катя'},
                 { 'id': 2, 'name': 'Инна'},
                 { 'id': 4, 'name': 'Потеряшки'},
+                { 'id': 0, 'name': ''}
             ],
             cities: [
                 {id: 5, name: 'Город один'},
@@ -157,8 +158,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
         user.id = 1 + _.max(usersData, function(item) {
             return item.id;
         }).id;
-        if (user.group.id == 1) {      // каждый раз создаем нового дилера
-            user.dealer = user.dealer || {};
+        if (!user.dealer.id) {
             user.dealer.id = 1 + _.max(usersData, function(item) {
                 return !item.dealer || item.dealer.id;
             }).id;

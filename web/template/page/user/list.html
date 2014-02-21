@@ -5,9 +5,7 @@
     </div>
 
     <div class="append-bottom">
-        <form action="/user/new" method="get">
-            <input type="submit" value="Добавить пользователя"/>
-        </form>
+        <input type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
     </div>
 
     <div class="span-16">
@@ -36,9 +34,7 @@
         </table>
         <div pagination total-items="totalItems" page="currentPage" items-per-page="itemsPerPage" boundary-links="true"></div>
         <div class="append-bottom">
-            <form action="user/new" method="get">
-                <input type="submit" value="Добавить пользователя"/>
-            </form>
+            <input type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
         </div>
     </div>
     <fieldset class="span-8 last">

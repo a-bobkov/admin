@@ -27,13 +27,31 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         templateUrl: 'template/page/user/edit.html',
         controller: 'UserCtrl',
         resolve: {
-            data: function() {}
+            data: function(Directories_Loader) {
+                return Directories_Loader.load();
+            }
         }
     })
     .otherwise({
         redirectTo: '/userlist'
     });
 }])
+
+.factory('Directories_Loader', function($q, users, statuses) {
+    var data = {};
+    var Loader = {};
+    Loader.load = function() {
+        return $q.all({
+            statuses: statuses.getAll(),
+            directories: users.getDirectories()
+        }).then(function(respond){
+            data.statuses = angular.extend(respond.statuses);
+            angular.extend(data, respond.directories);
+            return data;
+        });
+    };
+    return Loader;
+})
 
 .factory('UserList_Loader', function($q, users, statuses) {
     var data = {};
@@ -107,6 +125,10 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 //             return true;
 //         }
 //     };
+
+    $scope.clickNewUser = function() {
+        $location.path('/usernew');
+    }
 
     var filterId = function(itemToFilter) {
         return (!$scope.patterns.id) 
@@ -226,21 +248,21 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.$watch('currentPage', pageUsers);
 })
 
-.controller('UserCtrl', function($scope, $routeParams, data, userHours, users, User, Dealer) {
+.controller('UserCtrl', function($scope, $location, data, userHours, users, User, Dealer) {
     angular.extend($scope, data);
     $scope.userHours = userHours;
 
     $scope.pwd = '';
     $scope.pwdConfirm = '';
 
-    if ($routeParams.userId) {
+    if (data.user) {
         makeUserCopy();
     } else {
         makeUserNew();
     }
 
     $scope.userInvalid = function() {
-        return ($scope.userEdited.group.id == 2) &&
+        return ($scope.userEdited.group) && ($scope.userEdited.group.id == 2) &&
             ($scope.company_nameErrorMessage()
             || $scope.cityErrorMessage()
             || $scope.phoneErrorMessage()
@@ -299,14 +321,21 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     function makeUserNew() {
         $scope.actionName = "Создание";
-        $scope.userEdited = new User ({   // данные нового пользователя по умолчанию
-            'status': optionsStatus.getStatusById("inactive"),
-            'tag_id': optionsTag.getTagById(0)
-        })
+        $scope.userEdited = new User;      // данные нового пользователя по умолчанию
+        $scope.userEdited.status = _.find($scope.statuses, {id: 'inactive'});
+        $scope.userEdited.manager = _.find($scope.managers, {id: 0});
+        $scope.dealerEdited = new Dealer;
+        $scope.userEdited.dealer = $scope.dealerEdited;
     }
 
     $scope.saveUser = function() {
-        users.save($scope.userEdited).then(makeUserCopy);
+        users.save($scope.userEdited).then(function(user) {
+            if (data.user) {
+                makeUserCopy();
+            } else {
+                $location.path('/users/' + user.id + '/edit');
+            }
+        });
     };
 
     $scope.deleteUser = function() {
