@@ -332,6 +332,7 @@ describe('Сервисы users и userApi', function() {
             expect($log.error).toHaveBeenCalledWith([ 
                 { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}' }, 
                 { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}' }, 
+                { message: 'Нет параметра id в элементе: {"ident":6}' }, 
                 { message: 'Не найдена ссылка для элемента {"id":55}' }, 
                 { message: 'Неизвестная секция: roles' } 
             ]);

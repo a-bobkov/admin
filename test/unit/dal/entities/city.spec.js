@@ -157,7 +157,8 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             expect($log.error).toHaveBeenCalledWith([
-                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3'}
+                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3'},
+                {message: 'Нет параметра id в элементе: {"ident":2}'}
             ]);
         });
 

@@ -5,17 +5,19 @@ describe('http-mock', function() {
         $http,
         $rootScope,
         users,
-        User;
+        User,
+        Dealer;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$httpBackend_, _$http_, _$rootScope_, _users_, _User_) {
+        inject(function(_$httpBackend_, _$http_, _$rootScope_, _users_, _User_, _Dealer_) {
             $httpBackend = _$httpBackend_;
             $http = _$http_;
             $rootScope = _$rootScope_;
             users = _users_;
             User = _User_;
+            Dealer = _Dealer_;
         });
     });
 
@@ -169,16 +171,20 @@ describe('http-mock', function() {
 
     var regexPost = /^\/api2\/users\/$/;
     $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
+        var dataObj = angular.fromJson(data)
+
+        var dealer = new Dealer;
+        dealer._fillItem(dataObj.dealer);
+        dealer.id = 1 + _.max(usersData, function(item) {
+            return !item.dealer || item.dealer.id;
+        }).id;
+
         var user = new User;
-        user._fillItem(angular.fromJson(data));
+        user._fillItem(dataObj);
         user.id = 1 + _.max(usersData, function(item) {
             return item.id;
         }).id;
-        if (!user.dealer.id) {
-            user.dealer.id = 1 + _.max(usersData, function(item) {
-                return !item.dealer || item.dealer.id;
-            }).id;
-        }
+        user.dealer = dealer;
         // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
         usersData.push(user);
         return [200, {
@@ -278,8 +284,11 @@ describe('http-mock', function() {
             var usersArr = actualSuccess;
             expect(usersArr.length).toBe(15);
 
+            var dealer = new Dealer();
+            dealer._fillItem(data.dealer);
             var user = new User();
             user._fillItem(data);
+            user.dealer = dealer;
 
             users.save(user).then(function(respond) {
                 actualSuccess = respond;
@@ -340,8 +349,11 @@ describe('http-mock', function() {
                 actualSuccess,
                 actualError;
 
+            var dealer = new Dealer();
+            dealer._fillItem(data.dealer);
             var user = new User();
             user._fillItem(data);
+            user.dealer = dealer;
 
             users.save(user).then(function(respond) {
                 actualSuccess = respond;
@@ -404,8 +416,11 @@ describe('http-mock', function() {
                 actualSuccess,
                 actualError;
 
+            var dealer = new Dealer();
+            dealer._fillItem(data.dealer);
             var user = new User();
             user._fillItem(data);
+            user.dealer = dealer;
 
             users.save(user).then(function(respond) {
                 actualSuccess = respond;

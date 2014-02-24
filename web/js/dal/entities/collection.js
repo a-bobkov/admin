@@ -320,12 +320,7 @@ return Collection;
                 if (!entity) {
                     errorMessages.push(new CollectionError('Неизвестный ссылочный параметр ' + key + ' в элементе с id: ' + itemData.id));
                 } else {
-                    if (typeof attr.id === 'undefined') {   // создаем элемент без коллекции
-                        var newItem = new (getItemConstructor(entity));
-                        var respond = newItem._fillItem(attr);
-                    } else {
-                        var respond = addItem.call(entity, attr);
-                    }
+                    var respond = addItem.call(entity, attr);
                     refElem = respond.result;
                     errorMessages = _.union(errorMessages, respond.errorMessages);
                 }
