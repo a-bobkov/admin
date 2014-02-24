@@ -233,7 +233,7 @@ describe('Сервисы users и userApi', function() {
             expect(actualSuccess.metros[1].city).toBe(actualSuccess.cities[1]);
         });
 
-        it('загружать опции с сервера после пользователей', function() {
+        it('загружать пользователей после опций', function() {
             var directoriesData = {
                     groups: [
                         {id: 1, name: 'Роль один'},
@@ -269,6 +269,15 @@ describe('Сервисы users и userApi', function() {
             spyOn(userApi, 'query').andReturn($q.when(usersData));
             spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
 
+            users.getDirectories().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            var city = actualSuccess.cities[0];
+            var market = actualSuccess.markets[1];
+
             users.getAll().then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
@@ -277,15 +286,8 @@ describe('Сервисы users и userApi', function() {
             $rootScope.$digest();
             var user = actualSuccess[0];
 
-            users.getDirectories().then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $rootScope.$digest();
-
-            expect(user.city).toBe(actualSuccess.cities[0]);
-            expect(user.market).toBe(actualSuccess.markets[1]);
+            expect(user.city).toBe(city);
+            expect(user.market).toBe(market);
         });
 
         it('проверять корректность ответа при загрузке опций с сервера и выдавать полный список ошибок', function() {
@@ -330,11 +332,12 @@ describe('Сервисы users и userApi', function() {
             expect($log.error).toHaveBeenCalledWith([ 
                 { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}' }, 
                 { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}' }, 
+                { message: 'Не найдена ссылка для элемента {"id":55}' }, 
                 { message: 'Неизвестная секция: roles' } 
             ]);
         });
 
-        it('при сохранении без id - передавать в $http объект со ссылками в форме (id: ??), кроме dealer', function() {
+        it('при сохранении без id - передавать в $http объект со ссылками в форме {id: ??}, кроме dealer', function() {
             var userData = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -343,21 +346,15 @@ describe('Сервисы users и userApi', function() {
                 newUserData = {
                     name: 'Другой',
                     ext: 'Extra',
-                    city: {id: 2},
+                    user: {id: 2},
                     dealer: {id: 3, name: 'Дилер'}
                 },
                 newUser = {
                     id: 4,
                     name: 'Другой',
                     ext: 'Extra',
-                    city: {id: 2},
+                    user: {id: 2},
                     dealer: {id: 3}
-                },
-                newUserSerialized = {
-                    name: 'Другой',
-                    ext: 'Extra',
-                    city: {id: 2},
-                    dealer: {id: 3, name: 'Дилер'}
                 },
                 actualSuccess,
                 actualError;
@@ -381,7 +378,7 @@ describe('Сервисы users и userApi', function() {
             });
             $rootScope.$digest();
             expect(userApi.create).toHaveBeenCalled();
-            expect(userApi.create).toHaveBeenCalledWith(newUserSerialized);
+            expect(userApi.create).toHaveBeenCalledWith(newUserData);
         });
     });
 });

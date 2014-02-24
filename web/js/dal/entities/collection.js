@@ -63,6 +63,11 @@ var Collection = (function() {
 
         if (typeof itemData.id === 'undefined') {
             errorMessages.push(new CollectionError('Нет параметра id в элементе: ' + angular.toJson(itemData)));
+        } else if (Object.keys(itemData).length === 1) {    // ссылка
+            newItem = findItem.call(this, itemData.id);
+            if (!newItem) {
+                errorMessages.push(new CollectionError('Не найдена ссылка для элемента ' + angular.toJson(itemData)));
+            }
         } else {
             newItem = findItem.call(this, itemData.id);
             if (!newItem) {

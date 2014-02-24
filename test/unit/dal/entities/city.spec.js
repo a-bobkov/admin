@@ -161,7 +161,7 @@ describe('Сервис cities должен', function() {
             ]);
         });
 
-        it('при загрузке создавать недостающие элементы справочников по ссылкам', function() {
+        it('при загрузке не создавать недостающие элементы справочников по ссылкам, а выдавать ошибки', function() {
             var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -171,6 +171,7 @@ describe('Сервис cities должен', function() {
                 actualError;
 
             spyOn(cityApi, 'query').andReturn($q.when(data));
+            spyOn($log, 'error').andReturn(null);
 
             cities.getAll().then(function(respond) {
                 actualSuccess = respond;
@@ -185,7 +186,9 @@ describe('Сервис cities должен', function() {
                 actualError = respond;
             });
             $rootScope.$digest();
-            expect(actualSuccess instanceof City).toBeTruthy();
+            expect($log.error).toHaveBeenCalledWith([
+                {message : 'Не найдена ссылка для элемента {"id":22}'}
+            ]);
         });
     });
 
