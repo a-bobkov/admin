@@ -130,6 +130,19 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $location.path('/usernew');
     }
 
+    var filterComplex = function(itemToFilter) {
+        var arr = $scope.patterns.complex.split(' ');
+        for (var i = arr.length; i--; ) {
+            if ((arr[i] !== '')
+                && (String(itemToFilter.id).indexOf(arr[i]) === -1)
+                && ((!itemToFilter.email) || (itemToFilter.email.indexOf(arr[i]) === -1))
+                && ((!itemToFilter.dealer) || (!itemToFilter.dealer.company_name) || (itemToFilter.dealer.company_name.indexOf(arr[i]) === -1))) {
+                return false;
+            }
+        }
+        return true;
+    };
+
     var filterId = function(itemToFilter) {
         return (!$scope.patterns.id) 
             || String(itemToFilter.id).indexOf($scope.patterns.id) !== -1;
@@ -163,7 +176,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     };
 
     var filterPatterns = function(itemToFilter) {
-        return filterId(itemToFilter)
+        return filterComplex(itemToFilter)
+            && filterId(itemToFilter)
             && filterEmail(itemToFilter)
             && filterStatus(itemToFilter)
             && filterTag(itemToFilter);
@@ -171,6 +185,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     $scope.setPatternsDefault = function() {
         $scope.patterns = {
+            complex: '',
             id: '',
             email: '',
             emailEmpty: null,
