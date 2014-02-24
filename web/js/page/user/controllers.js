@@ -96,36 +96,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.optionsStatus = data.statuses;
     $scope.optionsTag = data.managers;
 
-//     $scope.clickExtra = function () {
-//         if ($scope.showExtraControls == false) {
-//             $scope.showExtraControls = true;
-//             $scope.textExtraButton = "<<";
-//         } else {
-//             $scope.showExtraControls = false;
-//             $scope.textExtraButton = ">>";
-//         }
-//     }
-
-//     $scope.clickExtra();
-
-//     $scope.clickLine = function(id) {
-//         $location.path('/users/'+id+'/edit');
-//     }
-
-//     $scope.filterIdNameMail = function(itemToFilter) {
-//         if ($scope.patterns.idNameMail.length > 0) {
-//             var filterInt = parseInt ($scope.patterns.idNameMail);
-//             if (filterInt > 0) {   // введено число - проверяем только по коду
-//                 return (itemToFilter.id == filterInt);
-//             } else {            // введено не число - проверяем по мэйлу и названию
-//                 return (itemToFilter.email && itemToFilter.email.toLowerCase().indexOf($scope.patterns.idNameMail.toLowerCase())!=-1) 
-//                 || (itemToFilter.company_name && itemToFilter.company_name.toLowerCase().indexOf($scope.patterns.idNameMail.toLowerCase())!=-1);
-//             }
-//         } else {
-//             return true;
-//         }
-//     };
-
     $scope.clickNewUser = function() {
         $location.path('/usernew');
     }
@@ -191,7 +161,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             emailEmpty: null,
             status: [_.find($scope.optionsStatus, {id: 'active'})],
             tag: null
-            //, idNameMail: ''
         };
     }
 
@@ -248,7 +217,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     };
 
     $scope.onPatternChainge = function () {
-        // $scope.filteredUsers = $filter('filter')(users,$scope.filterIdNameMail);
         filteredUsers = $filter('filter')(allUsers, filterPatterns);
         $scope.totalItems = filteredUsers.length;
         if ($scope.currentPage != 1) {
