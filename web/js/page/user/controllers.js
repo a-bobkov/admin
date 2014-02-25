@@ -96,6 +96,11 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.optionsStatus = data.statuses;
     $scope.optionsTag = data.managers;
 
+    if ($rootScope.savedUserListNotice) {
+        $scope.savedUserListNotice = $rootScope.savedUserListNotice;
+        delete $rootScope.savedUserListNotice;
+    }
+
     $scope.clickNewUser = function() {
         $location.path('/usernew');
     }
@@ -216,7 +221,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $scope.pagedUsers = filteredUsers.slice(begin, end);
     };
 
-    $scope.onPatternChainge = function () {
+    $scope.onPatternChange = function () {
         filteredUsers = $filter('filter')(allUsers, filterPatterns);
         $scope.totalItems = filteredUsers.length;
         if ($scope.currentPage != 1) {
@@ -227,11 +232,11 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $rootScope.savedUserListPatterns = $scope.patterns;
     };
 
-    $scope.$watch('patterns', $scope.onPatternChainge, true);
+    $scope.$watch('patterns', $scope.onPatternChange, true);
     $scope.$watch('currentPage', pageUsers);
 })
 
-.controller('UserCtrl', function($scope, $location, data, userHours, users, User, Dealer) {
+.controller('UserCtrl', function($scope, $rootScope, $location, data, userHours, users, User, Dealer) {
     angular.extend($scope, data);
     $scope.userHours = userHours;
 
@@ -313,11 +318,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     $scope.saveUser = function() {
         users.save($scope.userEdited).then(function(user) {
-            if (data.user) {
-                makeUserCopy();
-            } else {
-                $location.path('/users/' + user.id + '/edit');
-            }
+            $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
+            $location.path('/userlist');
         });
     };
 
@@ -325,6 +327,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         if (confirm('Вы уверены?')) {
             if ($scope.userEdited.id) {
                 users.remove($scope.userEdited.id).then(function() {
+                    $rootScope.savedUserListNotice = 'Удалён пользователь с идентификатором: ' + $scope.userEdited.id;
                     $location.path('/userlist');
                 })
             } else {

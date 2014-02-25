@@ -338,7 +338,6 @@ return Collection;
      */
     Item.prototype._serialize = function() {
         var itemData = {};
-
         angular.forEach(this, function(value, key){
             if (typeof value === "object") {
                 if (key === "dealer") {               // todo: перекрытием данного метода на User
