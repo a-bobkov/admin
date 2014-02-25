@@ -61,12 +61,9 @@
     <legend>Профиль автосалона</legend>
     <table>
         <tr>
-            <th><label for="user_dealer_company_name">Название компании</label><span>*</span></th>
+            <th><label for="user_dealer_company_name">Название компании</label></th>
             <td>
                 <input class="span-8 required" type="text" id="user_dealer_company_name" ng-model='dealerEdited.company_name'/>
-				<ul class="error_list" ng-show='company_nameErrorMessage()'>
-				    <li>{{company_nameErrorMessage()}}</li>
-				</ul>
            </td>
         </tr>
         <tr>

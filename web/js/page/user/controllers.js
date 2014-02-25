@@ -251,18 +251,10 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     $scope.userInvalid = function() {
         return ($scope.userEdited.group) && ($scope.userEdited.group.id == 2) &&
-            ($scope.company_nameErrorMessage()
-            || $scope.cityErrorMessage()
+            ($scope.cityErrorMessage()
             || $scope.phoneErrorMessage()
             || $scope.phone2ErrorMessage()
             || $scope.phone3ErrorMessage());
-    }
-
-    $scope.company_nameErrorMessage = function() {
-        if (!$scope.dealerEdited.company_name) {
-            return 'Не задано значение.';
-        }
-        return '';
     }
 
     $scope.cityErrorMessage = function() {
