@@ -6,7 +6,7 @@
         <tr>
             <th><label for="user_email">Email</label></th>
             <td>
-                <input class="span-6 required" type="text" id="user_email" ng-model="userEdited.email" maxlength="50"/>
+                <input class="span-6 required" type="email" id="user_email" ng-model="userEdited.email" maxlength="50"/>
             </td>
         </tr>
         <tr>
@@ -106,13 +106,13 @@
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_email">Email</label></th>
-	        <td><input class="span-8" type="text" id="user_dealer_email" ng-model='dealerEdited.dealer_email'/></td>
+	        <td><input class="span-8" type="email" id="user_dealer_email" ng-model='dealerEdited.dealer_email'/></td>
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_site">Сайт</label></th>
 	        <td>
 	            <div class="help">Например: http://www.mysite.ru (обязательно начиная с "http://")</div>
-	            <input class="span-8" type="text" id="user_dealer_site" ng-model='dealerEdited.site'/></td>
+	            <input class="span-8" type="url" id="user_dealer_site" ng-model='dealerEdited.site'/></td>
 	    </tr>
 	    <tr>
 	        <th><label for="user_dealer_contact_name">Контакт</label></th>

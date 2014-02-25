@@ -57,19 +57,19 @@
                 <tr>
                     <th><label for="sf_guard_user_filters_complex">Код, email, название</label></th>
                     <td>
-                        <input type="text" ng-model='patterns.complex' id="sf_guard_user_filters_complex"/>
+                        <input type="text" ng-model='patterns.complex' id="sf_guard_user_filters_complex"placeholder='слова через пробел'/>
                     </td>
                 </tr>
                 <tr>
                     <th><label for="sf_guard_user_filters_id">Код</label></th>
                     <td>
-                        <input maxlength="4" type="text" ng-model='patterns.id' id="sf_guard_user_filters_id"/>
+                        <input maxlength="4" type="text" ng-model='patterns.id' id="sf_guard_user_filters_id" placeholder='полный или часть'/>
                     </td>
                 </tr>
                 <tr>
                     <th><label for="sf_guard_user_filters_email">Email</label></th>
                     <td>
-                        <input type="text" ng-model='patterns.email' id="sf_guard_user_filters_email"/>
+                        <input type="text" ng-model='patterns.email' id="sf_guard_user_filters_email" placeholder='полный или часть'/>
                         <br/>
                         <input type="checkbox" ng-model='patterns.emailEmpty' id="sf_guard_user_filters_email_is_empty"/>
                         <label for="sf_guard_user_filters_email_is_empty">не задан</label>
