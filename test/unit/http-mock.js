@@ -256,7 +256,7 @@ describe('http-mock', function() {
             return [200, {
                 status: 'success',
                 data: {
-                    user: addPrefix(user)
+                    user: subPrefix(user)
                 }
             }];
         } else {

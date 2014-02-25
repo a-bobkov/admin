@@ -234,7 +234,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
             return [200, {
                 status: 'success',
                 data: {
-                    user: addPrefix(user)
+                    user: subPrefix(user)
                 }
             }];
         } else {
