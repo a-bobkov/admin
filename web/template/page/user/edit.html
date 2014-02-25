@@ -83,7 +83,7 @@
 	    <tr>
 	        <th><label for="user_dealer_market_id">Рынок</label></th>
 	        <td>
-	            <select class="span-8" id="user_dealer_market_id" ng-model='dealerEdited.market' ng-options='opt.name for opt in markets'>
+	            <select class="span-8" id="user_dealer_market_id" ng-model='dealerEdited.market' ng-options='opt.name for opt in markets| filter: matchCity(dealerEdited.city)' ng-disabled='!dealerEdited.city'>
 	                <option value=''></option>
 	            </select>
 	        </td>
@@ -91,7 +91,7 @@
 	    <tr>
 	        <th><label for="user_dealer_metro_id">Станция метро</label></th>
 	        <td>
-	            <select class="span-8" id="user_dealer_metro_id" ng-model='dealerEdited.metro' ng-options='opt.name for opt in metros'>
+	            <select class="span-8" id="user_dealer_metro_id" ng-model='dealerEdited.metro' ng-options='opt.name for opt in metros| filter: matchCity(dealerEdited.city)' ng-disabled='!dealerEdited.city'>
 	                <option value=''></option>
 	            </select>
 	        </td>

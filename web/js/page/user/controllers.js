@@ -323,6 +323,23 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         });
     };
 
+    $scope.matchCity = function(city) {
+        return function(item) {
+            return (!item || item.city === city);
+        }
+    };
+
+    $scope.onCityChange = function () {
+        if (!$scope.matchCity($scope.dealerEdited.city)($scope.dealerEdited.market)) {
+            $scope.dealerEdited.market = null;
+        }
+        if (!$scope.matchCity($scope.dealerEdited.city)($scope.dealerEdited.metro)) {
+            $scope.dealerEdited.metro = null;
+        }
+    };
+
+    $scope.$watch('dealerEdited.city', $scope.onCityChange);
+
     $scope.removeUser = function() {
         if (confirm('Вы уверены?')) {
             if ($scope.userEdited.id) {

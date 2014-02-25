@@ -291,30 +291,34 @@ describe('http-mock', function() {
         { 'id': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }
     ]);
     var directoriesData = {
-        groups: _groups._setAll(addPrefix([
+        _groups: _groups._setAll(addPrefix([
             {id: 3, name: 'Автосайт'},
             {id: 2, name: 'Автосалон'},
             {id: 1, name: 'Администратор'}
         ])),
-        managers: _managers._setAll(addPrefix([
+        _managers: _managers._setAll(addPrefix([
             {id: 1, name: 'Катя'},
             {id: 2, name: 'Инна'},
             {id: 4, name: 'Потеряшки'},
             {id: 0, name: ''}
         ])),
-        cities: _cities._setAll(addPrefix([
-            {id: 5, name: 'Город один'},
-            {id: 6, name: 'Город два'}
+        _cities: _cities._setAll(addPrefix([
+            {id: 5, name: 'Питер'},
+            {id: 6, name: 'Москва'}
         ])),
-        markets: _markets._setAll(addPrefix([
-            {id: 7, name: 'Рынок один', city: {id: 6}},
-            {id: 8, name: 'Рынок два', city: {id: 5}}
+        _markets: _markets._setAll(addPrefix([
+            {id: 6, name: 'Рынок один в москве', city: {id: 6}},
+            {id: 7, name: 'Рынок два в москве', city: {id: 6}},
+            {id: 8, name: 'Рынок один в питере', city: {id: 5}},
+            {id: 9, name: 'Рынок два в питере', city: {id: 5}}
         ])),
-        metros: _metros._setAll(addPrefix([
-            {id: 9, name: 'Метро один', city: {id: 5}},
-            {id: 10, name: 'Метро два', city: {id: 6}}
+        _metros: _metros._setAll(addPrefix([
+            {id: 8, name: 'Метро один в москве', city: {id: 6}},
+            {id: 9, name: 'Метро два в москве', city: {id: 6}},
+            {id: 10, name: 'Метро один в питере', city: {id: 5}},
+            {id: 11, name: 'Метро два в питере', city: {id: 5}}
         ])),
-        sites: _sites._setAll(addPrefix([
+        _sites: _sites._setAll(addPrefix([
             {id: 11, name: 'Сайт один'},
             {id: 12, name: 'Сайт два'}
         ]))
