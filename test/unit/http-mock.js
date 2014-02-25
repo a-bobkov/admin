@@ -211,19 +211,32 @@ describe('http-mock', function() {
     var regexPost = /^\/api2\/users\/$/;
     $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
         var dataObj = addPrefix(angular.fromJson(data));
+        var respond;
+        var errorMessages = [];
 
         var dealer = new _Dealer;
-        dealer._fillItem(dataObj._dealer);
+        respond = dealer._fillItem(dataObj._dealer);
+        errorMessages = _.union(errorMessages, respond.errorMessages);
         dealer.id = 1 + _.max(usersData, function(item) {
             return !item._dealer || item._dealer.id;
         }).id;
+        delete dataObj._dealer;
 
         var user = new _User;
-        user._fillItem(dataObj);
+        respond = user._fillItem(dataObj);
+        errorMessages = _.union(errorMessages, respond.errorMessages);
         user.id = 1 + _.max(usersData, function(item) {
             return item.id;
         }).id;
         user._dealer = dealer;
+
+        if (errorMessages.length) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при создании',
+                errors: errorMessages
+            }];
+        }
         // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
         usersData.push(user);
         return [200, {
@@ -240,17 +253,29 @@ describe('http-mock', function() {
         var userIdx = _.findIndex(usersData, {id: id});
         if (userIdx !== -1) {
             var dataObj = addPrefix(angular.fromJson(data));
+            var respond;
+            var errorMessages;
+            var dealer = new _Dealer;
+            respond = dealer._fillItem(dataObj._dealer);
+            errorMessages = _.union(errorMessages, respond.errorMessages);
+            if (!dealer.id) {
+                dealer.id = 1 + _.max(usersData, function(item) {
+                    return !item._dealer || item._dealer.id;
+                }).id;
+            }
+            delete dataObj._dealer;
+
             var user = new _User;
-            user._fillItem(dataObj);
-            if (!user._dealer) {
-                var dealer = new _Dealer;
-                dealer._fillItem(dataObj._dealer);
-                if (!dealer.id) {
-                    dealer.id = 1 + _.max(usersData, function(item) {
-                        return !item._dealer || item._dealer.id;
-                    }).id;
-                }
-                user._dealer = dealer;
+            respond = user._fillItem(dataObj);
+            errorMessages = _.union(errorMessages, respond.errorMessages);
+            user._dealer = dealer;
+
+            if (errorMessages.length) {
+                return [400, {
+                    status: 'error',
+                    message: 'Ошибка при обновлении',
+                    errors: errorMessages
+                }];
             }
             usersData[userIdx] = user;
             return [200, {
@@ -361,12 +386,12 @@ describe('http-mock', function() {
         {id: 2, email: 'a-bobkov@abb.com', last_login: '2011-03-11', status: {id: 'active'}, group: {id: 3}, site: {id: 11}},
         {id: 3, email: 'a-bobkov@abc.com', last_login: '2012-05-31', status: {id: 'inactive'}, group: {id: 2}, dealer: {
             id: 3, company_name: 'Другая компания', manager: {id: 1}}},
-        {id: 4, email: 'a-bobkov@abd.com', last_login: '2011-12-12', status: {id: 'error'}, group: {id: 3}, site: {id: 12}},
+        {id: 4, email: 'a-bobkov@abd.com', last_login: '2011-12-12', status: {id: 'blocked'}, group: {id: 3}, site: {id: 12}},
         {id: 6, email: 'a-bobkov@abe.com', last_login: '2013-01-06', status: {id: 'active'}, group: {id: 2}, dealer: {
             id: 6, company_name: 'Крутая компания', manager: {id: 2}}},
         {id: 7, email: 'a-bobkov@abf.com', last_login: '2000-01-12', status: {id: 'inactive'}, group: {id: 2}, dealer: {
             id: 7, company_name: 'Супер-салон', manager: {id: 2}}},
-        {id: 8, email: 'a-bobkov@abg.com', last_login: '2000-08-07', status: {id: 'active'}, group: {id: 0}},
+        {id: 8, email: 'a-bobkov@abg.com', last_login: '2000-08-07', status: {id: 'active'}, group: {id: 1}},
         {id: 9, email: 'a-bobkov@abh.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 2}, dealer: {
             id: 9, company_name: 'Битые корыта', manager: {id: 1}}},
         {id: 10, email: 'a-bobkov@abi.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 2}, dealer: {
@@ -384,7 +409,7 @@ describe('http-mock', function() {
 
     describe('Методы CRUD должны', function() {
 
-        it('удалять данные пользователя', function() {
+        it('remove - удалять данные пользователя', function() {
             var data = {
                     email: 'new@maxposter.ru',
                     last_login: '2013-12-01',
@@ -457,8 +482,8 @@ describe('http-mock', function() {
             expect(usersArr.length).toBe(15);
         });
 
-        it('сохранять данные нового пользователя', function() {
-        var data = {
+        it('post - сохранять данные нового пользователя', function() {
+            var data = {
                     email: 'new@maxposter.ru',
                     last_login: '2013-12-01',
                     status: {id: 'active'},
@@ -522,8 +547,64 @@ describe('http-mock', function() {
             expect(savedUser).toEqualData(user);
         });
 
-        it('сохранять данные измененного пользователя', function() {
-        var data = {
+        it('post - выдавать ошибки при попытке сохранения пользователя со ссылками на несуществующие в БД объекты', function() {
+            var data = {
+                    email: 'new@maxposter.ru',
+                    last_login: '2013-12-01',
+                    status: {id: 'active'},
+                    group: {id: 1},
+                    dealer: {
+                        company_name: 'Новая компания',
+                        city: {id: 5},
+                        market: {id: 8},
+                        metro: {id: 10},
+                        adress: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123',
+                        dealer_email: 'demo@demo.ru',
+                        site: 'http://www.w3schools.com',
+                        contact_name: 'Аверин Константин Петрович',
+                        phone: '+7-812-232-4123',
+                        phone_from: '10',
+                        phone_to: '20',
+                        phone2: '+7-812-232-4124',
+                        phone2_from: '11',
+                        phone2_to: '21',
+                        phone3: '+7-812-232-4125',
+                        phone3_from: '7',
+                        phone3_to: '15',
+                        company_info: 'Здесь может быть произвольный текст...',
+                        manager: {id: 3}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var dealer = new Dealer();
+            dealer._fillItem(data.dealer);
+            var user = new User();
+            user._fillItem(data);
+            user.dealer = dealer;
+
+            dealer.city = {id: 999};
+
+            users.save(user).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+            });
+
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            expect(actualError.data).toEqual({
+                status: 'error',
+                message : 'Ошибка при создании',
+                errors: [{message: 'Не найдена ссылка для элемента {"id":999}'}]
+            });
+        });
+
+        it('put - сохранять данные измененного пользователя', function() {
+            var data = {
                     email: 'new@maxposter.ru',
                     last_login: '2013-12-01',
                     status: {id: 'active'},
@@ -582,9 +663,74 @@ describe('http-mock', function() {
             expect(savedUser2.dealer.company_name).toBe('Самая новая компания');
         });
 
-        it('возвращать данные пользователя', function() {
-        var actualSuccess,
-            actualError;
+        it('put - выдавать ошибки при попытке сохранения пользователя со ссылками на несуществующие в БД объекты', function() {
+            var data = {
+                    email: 'new@maxposter.ru',
+                    last_login: '2013-12-01',
+                    status: {id: 'active'},
+                    group: {id: 1},
+                    dealer: {
+                        company_name: 'Новая компания',
+                        city: {id: 5},
+                        market: {id: 8},
+                        metro: {id: 10},
+                        adress: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123',
+                        dealer_email: 'demo@demo.ru',
+                        site: 'http://www.w3schools.com',
+                        contact_name: 'Аверин Константин Петрович',
+                        phone: '+7-812-232-4123',
+                        phone_from: '10',
+                        phone_to: '20',
+                        phone2: '+7-812-232-4124',
+                        phone2_from: '11',
+                        phone2_to: '21',
+                        phone3: '+7-812-232-4125',
+                        phone3_from: '7',
+                        phone3_to: '15',
+                        company_info: 'Здесь может быть произвольный текст...',
+                        manager: {id: 3}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var dealer = new Dealer();
+            dealer._fillItem(data.dealer);
+            var user = new User();
+            user._fillItem(data);
+            user.dealer = dealer;
+
+            users.save(user).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+                console.log(actualError.data.errors);
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+            var savedUser = actualSuccess;
+
+            savedUser.dealer.city = {id: 999};
+            users.save(savedUser).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+            });
+
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            expect(actualError.data).toEqual({
+                status: 'error',
+                message : 'Ошибка при обновлении',
+                errors: [{message: 'Не найдена ссылка для элемента {"id":999}'}]
+            });
+        });
+
+        it('get - возвращать данные пользователя', function() {
+            var actualSuccess,
+                actualError;
 
             users.getDirectories().then(function(respond) {
                 actualSuccess = respond;
@@ -604,9 +750,9 @@ describe('http-mock', function() {
             expect(actualSuccess.dealer.contact_name).toEqual('Аверин Константин Петрович');
         });
 
-        it('возвращать ошибку, если пользователь не найден', function() {
-        var actualSuccess,
-            actualError;
+        it('get - возвращать ошибку, если пользователь не найден', function() {
+            var actualSuccess,
+                actualError;
 
             users.get(999).then(function(respond) {
                 actualSuccess = respond;
@@ -620,9 +766,9 @@ describe('http-mock', function() {
             expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 999');
         });
 
-        it('загружать пользователей после опций', function() {
-        var actualSuccess,
-            actualError;
+        it('get - загружать пользователей после опций', function() {
+            var actualSuccess,
+                actualError;
 
             users.getDirectories().then(function(respond) {
                 actualSuccess = respond;

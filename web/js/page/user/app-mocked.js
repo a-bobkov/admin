@@ -1,6 +1,6 @@
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, Collection, Item) {
+.run(function($httpBackend, Collection, Item, User) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
 
@@ -76,7 +76,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
         return new Child;
     }());
     var _User = function () {};
-    angular.extend(_User.prototype, Item.prototype);
+    angular.extend(_User.prototype, User.prototype);
     _users._registerCollection('_user', '_users', _User, undefined);
 
     var addPrefix = function(dataObj) {
@@ -136,13 +136,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
                     group: this._group,
                     last_login: this.last_login
                 };
-            if ((this._group) && (this._group.id === 2)) {          // автосалон
+            if (this.isDealer()) {
                 obj.dealer = {
                     id: this._dealer.id,
                     company_name: this._dealer.company_name,
                     manager: this._dealer.manager
                 };
-            } else if ((this._group) && (this._group.id === 3)) {   // автосайт
+            } else if (this.isSite()) {
                 obj.site = {id: this._site.id};
             }
             return obj;
@@ -189,19 +189,32 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
     var regexPost = /^\/api2\/users\/$/;
     $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
         var dataObj = addPrefix(angular.fromJson(data));
+        var respond;
+        var errorMessages = [];
 
         var dealer = new _Dealer;
-        dealer._fillItem(dataObj._dealer);
+        respond = dealer._fillItem(dataObj._dealer);
+        errorMessages = _.union(errorMessages, respond.errorMessages);
         dealer.id = 1 + _.max(usersData, function(item) {
             return !item._dealer || item._dealer.id;
         }).id;
+        delete dataObj._dealer;
 
         var user = new _User;
-        user._fillItem(dataObj);
+        respond = user._fillItem(dataObj);
+        errorMessages = _.union(errorMessages, respond.errorMessages);
         user.id = 1 + _.max(usersData, function(item) {
             return item.id;
         }).id;
         user._dealer = dealer;
+
+        if (errorMessages.length) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при создании',
+                errors: errorMessages
+            }];
+        }
         // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
         usersData.push(user);
         return [200, {
@@ -218,17 +231,29 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
         var userIdx = _.findIndex(usersData, {id: id});
         if (userIdx !== -1) {
             var dataObj = addPrefix(angular.fromJson(data));
+            var respond;
+            var errorMessages;
+            var dealer = new _Dealer;
+            respond = dealer._fillItem(dataObj._dealer);
+            errorMessages = _.union(errorMessages, respond.errorMessages);
+            if (!dealer.id) {
+                dealer.id = 1 + _.max(usersData, function(item) {
+                    return !item._dealer || item._dealer.id;
+                }).id;
+            }
+            delete dataObj._dealer;
+
             var user = new _User;
-            user._fillItem(dataObj);
-            if (!user._dealer) {
-                var dealer = new _Dealer;
-                dealer._fillItem(dataObj._dealer);
-                if (!dealer.id) {
-                    dealer.id = 1 + _.max(usersData, function(item) {
-                        return !item._dealer || item._dealer.id;
-                    }).id;
-                }
-                user._dealer = dealer;
+            respond = user._fillItem(dataObj);
+            errorMessages = _.union(errorMessages, respond.errorMessages);
+            user._dealer = dealer;
+
+            if (errorMessages.length) {
+                return [400, {
+                    status: 'error',
+                    message: 'Ошибка при обновлении',
+                    errors: errorMessages
+                }];
             }
             usersData[userIdx] = user;
             return [200, {
