@@ -60,6 +60,14 @@ return (function() {
 
     angular.extend(User.prototype, Item.prototype);
 
+    User.prototype.isDealer = function() {
+        return (this.group && this.group.id == 2);
+    }
+
+    User.prototype.isSite = function() {
+        return (this.group && this.group.id == 3);
+    }
+
     return User;
 })
 

@@ -43,7 +43,7 @@
     </table>
 </fieldset>
 
-<fieldset class="span-24" ng-show='userEdited.group.id == 2'>
+<fieldset class="span-24" ng-show='userEdited.isDealer()'>
     <legend>Тэг автосалона</legend>
     <table>
         <tr>
@@ -57,7 +57,7 @@
     </table>
 </fieldset>
 
-<fieldset class="span-24" ng-show='userEdited.group.id == 2'>
+<fieldset class="span-24" ng-show='userEdited.isDealer()'>
     <legend>Профиль автосалона</legend>
     <table>
         <tr>
@@ -181,7 +181,7 @@
 	</table>
 </fieldset>
 
-<fieldset class="span-24" ng-show='userEdited.group.id == 3'>
+<fieldset class="span-24" ng-show='userEdited.isSite()'>
   	<legend>Профиль сайта</legend>
   		<table>
     		<tbody><tr>

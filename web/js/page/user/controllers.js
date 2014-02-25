@@ -250,7 +250,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     }
 
     $scope.userInvalid = function() {
-        return ($scope.userEdited.group) && ($scope.userEdited.group.id == 2) &&
+        return $scope.userEdited.isDealer() &&
             ($scope.cityErrorMessage()
             || $scope.phoneErrorMessage()
             || $scope.phone2ErrorMessage()

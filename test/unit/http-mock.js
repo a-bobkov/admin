@@ -98,7 +98,7 @@ describe('http-mock', function() {
         return new Child;
     }());
     var _User = function () {};
-    angular.extend(_User.prototype, Item.prototype);
+    angular.extend(_User.prototype, User.prototype);
     _users._registerCollection('_user', '_users', _User, undefined);
 
     var addPrefix = function(dataObj) {
@@ -158,13 +158,13 @@ describe('http-mock', function() {
                     group: this._group,
                     last_login: this.last_login
                 };
-            if ((this._group) && (this._group.id === 2)) {          // автосалон
+            if (this.isDealer()) {
                 obj.dealer = {
                     id: this._dealer.id,
                     company_name: this._dealer.company_name,
                     manager: this._dealer.manager
                 };
-            } else if ((this._group) && (this._group.id === 3)) {   // автосайт
+            } else if (this.isSite()) {
                 obj.site = {id: this._site.id};
             }
             return obj;
@@ -632,7 +632,7 @@ describe('http-mock', function() {
             $httpBackend.flush();
             $rootScope.$digest();
             var city = actualSuccess.cities[0];
-            var market = actualSuccess.markets[1];
+            var market = actualSuccess.markets[2];
 
             users.get(5).then(function(respond) {
                 actualSuccess = respond;
