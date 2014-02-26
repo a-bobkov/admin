@@ -1,7 +1,15 @@
+
+angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
+
+.run(function($httpBackend, Collection, Item) {
+    $httpBackend.whenGET(/template\/.*/).passThrough();
+    setHttpMock($httpBackend, Collection, Item);
+});
+
 /**
  * мини-сервер http для комплексных тестов
  */
-var setHttpMock = function($httpBackend, Collection, Item) {
+function setHttpMock($httpBackend, Collection, Item) {
     var _statuses = (function() {
         var Child = inheritCollection(function() {}, Collection);
         return new Child;
@@ -384,10 +392,3 @@ var setHttpMock = function($httpBackend, Collection, Item) {
         {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 3}, site: {id: 11}}
     ]));
 };
-
-angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
-
-.run(function($httpBackend, Collection, Item) {
-    $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, Collection, Item);
-});
