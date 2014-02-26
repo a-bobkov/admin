@@ -1,7 +1,7 @@
 /**
  * мини-сервер http для комплексных тестов
  */
-var setHttpMock = function($httpBackend, Collection, Item, User) {
+var setHttpMock = function($httpBackend, Collection, Item) {
     var _statuses = (function() {
         var Child = inheritCollection(function() {}, Collection);
         return new Child;
@@ -71,7 +71,13 @@ var setHttpMock = function($httpBackend, Collection, Item, User) {
         return new Child;
     }());
     var _User = function () {};
-    angular.extend(_User.prototype, User.prototype);
+    angular.extend(_User.prototype, Item.prototype);
+    _User.prototype.isDealer = function() {
+        return (this._group && this._group.id == 2);
+    }
+    _User.prototype.isSite = function() {
+        return (this._group && this._group.id == 3);
+    }
     _users._registerCollection('_user', '_users', _User, undefined);
 
     var addPrefix = function(dataObj) {
@@ -381,7 +387,7 @@ var setHttpMock = function($httpBackend, Collection, Item, User) {
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, Collection, Item, User) {
+.run(function($httpBackend, Collection, Item) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, Collection, Item, User);
+    setHttpMock($httpBackend, Collection, Item);
 });

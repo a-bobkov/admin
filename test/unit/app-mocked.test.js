@@ -24,7 +24,7 @@ describe('http-mock', function() {
             Dealer = _Dealer_;
         });
 
-        setHttpMock($httpBackend, Collection, Item, User);
+        setHttpMock($httpBackend, Collection, Item);
     });
 
     describe('Методы CRUD должны', function() {
@@ -325,7 +325,6 @@ describe('http-mock', function() {
                 actualSuccess = respond;
             }, function(respond){
                 actualError = respond;
-                console.log(actualError.data.errors);
             });
             $httpBackend.flush();
             $rootScope.$digest();
