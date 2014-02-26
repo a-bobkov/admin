@@ -61,21 +61,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="sf_guard_user_filters_id">Код</label></th>
-                    <td>
-                        <input maxlength="4" type="text" ng-model='patterns.id' id="sf_guard_user_filters_id" placeholder='полный или часть'/>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="sf_guard_user_filters_email">Email</label></th>
-                    <td>
-                        <input type="text" ng-model='patterns.email' id="sf_guard_user_filters_email" placeholder='полный или часть'/>
-                        <br/>
-                        <input type="checkbox" ng-model='patterns.emailEmpty' id="sf_guard_user_filters_email_is_empty"/>
-                        <label for="sf_guard_user_filters_email_is_empty">не задан</label>
-                    </td>
-                </tr>
-                <tr>
                     <th><label for="sf_guard_user_filters_status">Статус</label></th>
                     <td>
                         <select ng-model="patterns.status" multiple ng-options='opt.namePlural for opt in optionsStatus' id="sf_guard_user_filters_status">
