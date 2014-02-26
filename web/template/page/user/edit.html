@@ -140,8 +140,8 @@
 		        </td>
 		    </tr>
 		    <tr ng-repeat='phone in dealerEdited.phones'>
-		        <td>
-		            <input type="text" name="user_dealer_phone" ng-model='phone.phoneNumber' ui-three-fields='dealerEdited.phone_from'/>
+		        <td ng-form='phoneForm'>
+		            <input type="text" name="user_dealer_phone" ng-model='phone.phoneNumber' ui-phone-fields='phone'/>
 		            звонить с
 		            <select id="user_dealer_phone_from" ng-model='phone.phoneFrom' ng-options='opt.id as opt.name for opt in userHours.data'>
 		                <option value=''></option>
@@ -151,8 +151,8 @@
 		                <option value=''></option>
 		            </select>
 		            <br>
-					<ul class="error_list" ng-show='phoneErrorMessage()'>
-					    <li>{{phoneErrorMessage()}}</li>
+					<ul class="error_list" ng-show='phoneForm.user_dealer_phone.$invalid'>
+					    <li ng-show="phoneForm.user_dealer_phone.$error.consistent">Необходимо заполнить все три поля - "номер", "с" и "по".</li>
 					</ul>
 		        </td>
 		    </tr>
@@ -183,7 +183,7 @@
 	    <ul class="actions row">
 	        <li class="delete"><a ng-click='removeUser()'>Удалить</a></li>
 	        <li class="list"><a href="#/userlist">Вернуться к списку</a></li>
-	        <li class="save"><input type="submit" value="Сохранить" ng-disabled='formUser.$invalid || userInvalid()' ng-click='saveUser()'/></li>
+	        <li class="save"><input type="submit" value="Сохранить" ng-disabled='formUser.$invalid' ng-click='saveUser()'/></li>
 	    </ul>
 	</div>
 </form>

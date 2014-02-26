@@ -242,37 +242,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.userEdited.password = '';
     $scope.userPasswordConfirm = '';
 
-    $scope.userInvalid = function() {
-        return $scope.userEdited.isDealer() &&
-            ($scope.phoneErrorMessage()
-            || $scope.phone2ErrorMessage()
-            || $scope.phone3ErrorMessage());
-    }
-
-    $scope.phoneErrorMessage = function() {
-        if (($scope.dealerEdited.phone || $scope.dealerEdited.phone_from || $scope.dealerEdited.phone_to) &&
-        !($scope.dealerEdited.phone && $scope.dealerEdited.phone_from && $scope.dealerEdited.phone_to)) {
-            return 'Необходимо заполнить все три поля';
-        }
-        return '';
-    }
-
-    $scope.phone2ErrorMessage = function() {
-        if (($scope.dealerEdited.phone2 || $scope.dealerEdited.phone2_from || $scope.dealerEdited.phone2_to) &&
-        !($scope.dealerEdited.phone2 && $scope.dealerEdited.phone2_from && $scope.dealerEdited.phone2_to)) {
-            return 'Необходимо заполнить все три поля';
-        }
-        return '';
-    }
-
-    $scope.phone3ErrorMessage = function() {
-        if (($scope.dealerEdited.phone3 || $scope.dealerEdited.phone3_from || $scope.dealerEdited.phone3_to) &&
-        !($scope.dealerEdited.phone3 && $scope.dealerEdited.phone3_from && $scope.dealerEdited.phone3_to)) {
-            return 'Необходимо заполнить все три поля';
-        }
-        return '';
-    }
-
     function makeUserCopy() {
         $scope.actionName = "Редактирование";
         $scope.userEdited = new User;
@@ -360,6 +329,28 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             ctrl.$formatters.unshift(function (modelValue) {
                 return validateEqual(modelValue, scope.$eval(attrs.uiEqualTo));
             });
+        }
+    };
+})
+
+.directive('uiPhoneFields', function(){
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            function validatePhoneFields(newValue) {
+                if ((newValue.phoneNumber || newValue.phoneFrom || newValue.phoneTo) &&
+                !(newValue.phoneNumber && newValue.phoneFrom && newValue.phoneTo)) {
+                    ctrl.$setValidity('consistent', false);
+                } else {
+                    ctrl.$setValidity('consistent', true);
+                }
+                return newValue;
+            }
+
+            scope.$watch(attrs.uiPhoneFields, function (otherModelValue) {
+                validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
+            }, true);
         }
     };
 });
