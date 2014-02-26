@@ -234,28 +234,19 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     angular.extend($scope, data);
     $scope.userHours = userHours;
 
-    $scope.pwd = '';
-    $scope.pwdConfirm = '';
-
     if (data.user) {
         makeUserCopy();
     } else {
         makeUserNew();
     }
+    $scope.userEdited.password = '';
+    $scope.userPasswordConfirm = '';
 
     $scope.userInvalid = function() {
         return $scope.userEdited.isDealer() &&
-            ($scope.cityErrorMessage()
-            || $scope.phoneErrorMessage()
+            ($scope.phoneErrorMessage()
             || $scope.phone2ErrorMessage()
             || $scope.phone3ErrorMessage());
-    }
-
-    $scope.cityErrorMessage = function() {
-        if (!$scope.dealerEdited.city) {
-            return 'Не задано значение.';
-        }
-        return '';
     }
 
     $scope.phoneErrorMessage = function() {
@@ -336,6 +327,39 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             } else {
                 $location.path('/userlist');
             }
+        }
+    };
+})
+
+// from https://github.com/andreev-artem/angular_experiments/tree/master/ui-equal-to
+.directive('uiEqualTo', function(){
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            function validateEqual(myValue, otherValue) {
+                if (myValue === otherValue) {
+                    ctrl.$setValidity('equal', true);
+                    return myValue;
+                } else {
+                    ctrl.$setValidity('equal', false);
+                    return myValue;
+                }
+            }
+
+            // при изменении значения в ссылочном поле (с точностью до хвостовых пробелов)
+            scope.$watch(attrs.uiEqualTo, function (otherModelValue) {
+                validateEqual(ctrl.$viewValue, otherModelValue);
+            });
+
+            // при изменении значения в поле (с точностью до хвостовых пробелов)
+            ctrl.$parsers.unshift(function (viewValue) {
+                return validateEqual(viewValue, scope.$eval(attrs.uiEqualTo));
+            });
+            // непонятно зачем - вроде работает и без этого
+            ctrl.$formatters.unshift(function (modelValue) {
+                return validateEqual(modelValue, scope.$eval(attrs.uiEqualTo));
+            });
         }
     };
 });
