@@ -1,6 +1,6 @@
 'use strict';
 
-describe('http-mock', function() {
+describe('app-mocked', function() {
     var $httpBackend,
         $http,
         $rootScope,
@@ -79,12 +79,15 @@ describe('http-mock', function() {
 
             users.save(user).then(function(respond) {
                 actualSuccess = respond;
+                // console.log(actualSuccess);
             }, function(respond) {
                 actualError = respond;
+                // console.log(actualError.data.errors);
             });
             $httpBackend.flush();
             $rootScope.$digest();
             var savedUser = actualSuccess;
+
             users.getAll().then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {

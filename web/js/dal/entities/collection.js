@@ -144,7 +144,7 @@ var Collection = (function() {
 
     /**
      * @param {}
-     * @returns {Promise}
+     * @returns {Array}
      */
     Collection.prototype._setAll = function(itemsData) {
         var respond = addArray.call(this, itemsData);
@@ -339,7 +339,7 @@ return Collection;
     Item.prototype._serialize = function() {
         var itemData = {};
         angular.forEach(this, function(value, key){
-            if (typeof value === "object") {
+            if ((typeof value === "object") && (key !== 'phones')) {
                 if (key === "dealer") {               // todo: перекрытием данного метода на User
                     itemData[key] = value._serialize();
                 } else {
