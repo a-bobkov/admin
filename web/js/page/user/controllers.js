@@ -262,13 +262,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $scope.userEdited.dealer = $scope.dealerEdited;
     }
 
-    $scope.saveUser = function() {
-        users.save($scope.userEdited).then(function(user) {
-            $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
-            $location.path('/userlist');
-        });
-    };
-
     $scope.matchCity = function(city) {
         return function(item) {
             return (!item || item.city === city);
@@ -285,6 +278,13 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     };
 
     $scope.$watch('dealerEdited.city', $scope.onCityChange);
+
+    $scope.saveUser = function() {
+        users.save($scope.userEdited).then(function(user) {
+            $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
+            $location.path('/userlist');
+        });
+    };
 
     $scope.removeUser = function() {
         if (confirm('Вы уверены?')) {
@@ -338,6 +338,17 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         restrict: 'A',
         require: 'ngModel',
         link: function (scope, elem, attrs, ctrl) {
+            var regexpPhoneNumber = /\d/
+            // /^\+(?P<country>\d{1,3})[ ]{0,1}\((?P<city>(?P<city1>\d{3,3})(?:\-?(?P<city2>\d{1,2}))?)\)[ ]?(?P<phone>(?P<num1>\d{1,3})\-?(?P<num2>\d{2,3})(?:\-?(?P<num3>\d{1,3}))?)(?:[ ]\d{1,6})?$/
+
+            function validatePhoneNumber(newValue) {
+                if ((!newValue.phoneNumber) || (newValue.phoneNumber.match(regexpPhoneNumber))) {
+                    ctrl.$setValidity('number', true);
+                } else {
+                    ctrl.$setValidity('number', false);
+                }
+            }
+
             function validatePhoneFields(newValue) {
                 if ((newValue.phoneNumber || newValue.phoneFrom || newValue.phoneTo) &&
                 !(newValue.phoneNumber && newValue.phoneFrom && newValue.phoneTo)) {
@@ -350,6 +361,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
             scope.$watch(attrs.uiPhoneFields, function (otherModelValue) {
                 validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
+                validatePhoneNumber(scope.$eval(attrs.uiPhoneFields));
             }, true);
         }
     };
