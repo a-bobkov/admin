@@ -105,18 +105,32 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $location.path('/usernew');
     }
 
-    var filterComplex = function(itemToFilter) {
-        var arr = $scope.patterns.complex.split(' ');
+    var filterComma = function(item, pattern) {
+        var arr = pattern.split(',');
         for (var i = arr.length; i--; ) {
-            if ((arr[i] !== '')
-                && (String(itemToFilter.id).indexOf(arr[i]) === -1)
-                && ((!itemToFilter.email) || (itemToFilter.email.indexOf(arr[i]) === -1))
-                && ((!itemToFilter.dealer) || (!itemToFilter.dealer.company_name) || (itemToFilter.dealer.company_name.indexOf(arr[i]) === -1))) {
+            if (arr[i] && filterSpace(item, arr[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    var filterSpace = function(item, pattern) {
+        var arr = pattern.split(' ');
+        for (var i = arr.length; i--; ) {
+            if (arr[i]
+                && (String(item.id).indexOf(arr[i]) === -1)
+                && ((!item.email) || (item.email.toLowerCase().indexOf(arr[i]) === -1))
+                && ((!item.dealer) || (!item.dealer.company_name) || (item.dealer.company_name.toLowerCase().indexOf(arr[i]) === -1))) {
                 return false;
             }
         }
         return true;
     };
+
+    var filterComplex = function(itemToFilter) {
+        return (!$scope.patterns.complex || filterComma(itemToFilter, $scope.patterns.complex.toLowerCase()));
+    }
 
     var filterStatus = function(itemToFilter) {
         if ($scope.patterns.status.length > 0) {
