@@ -341,8 +341,16 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         link: function (scope, elem, attrs, ctrl) {
             var regexpPhoneNumber = /^\+7[ ]?\(\d{3,3}\)[ ]?\d{3,3}\-?\d{2,2}\-?\d{2,2}$/
 
+            function validatePhonePeriod(newValue) {
+                if (newValue.phoneFrom && newValue.phoneTo && (newValue.phoneFrom >= newValue.phoneTo)) {
+                    ctrl.$setValidity('period', false);
+                } else {
+                    ctrl.$setValidity('period', true);
+                }
+            }
+
             function validatePhoneNumber(newValue) {
-                if ((!newValue) || (newValue.match(regexpPhoneNumber))) {
+                if ((!newValue.phoneNumber) || (newValue.phoneNumber.match(regexpPhoneNumber))) {
                     ctrl.$setValidity('number', true);
                 } else {
                     ctrl.$setValidity('number', false);
@@ -356,15 +364,12 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
                 } else {
                     ctrl.$setValidity('consistent', true);
                 }
-                return newValue;
             }
-
-            scope.$watch(attrs.uiPhoneFields + '.phoneNumber', function (otherModelValue) {
-                validatePhoneNumber(scope.$eval(attrs.uiPhoneFields + '.phoneNumber'));
-            });
 
             scope.$watch(attrs.uiPhoneFields, function (otherModelValue) {
                 validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
+                validatePhoneNumber(scope.$eval(attrs.uiPhoneFields));
+                validatePhonePeriod(scope.$eval(attrs.uiPhoneFields));
             }, true);
         }
     };

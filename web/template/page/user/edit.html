@@ -152,8 +152,9 @@
 		            </select>
 		            <br>
 					<ul class="error_list" ng-show='phoneForm.user_dealer_phone.$invalid'>
-					    <li ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в правильном формате.</li>
 					    <li ng-show="phoneForm.user_dealer_phone.$error.consistent">Необходимо заполнить все три поля - "номер", "с" и "по".</li>
+					    <li ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в правильном формате.</li>
+					    <li ng-show="phoneForm.user_dealer_phone.$error.period">Необходимо указать время "с" меньше, чем время "по".</li>
 					</ul>
 		        </td>
 		    </tr>
