@@ -339,11 +339,10 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         restrict: 'A',
         require: 'ngModel',
         link: function (scope, elem, attrs, ctrl) {
-            var regexpPhoneNumber = /\d/
-            // /^\+(?P<country>\d{1,3})[ ]{0,1}\((?P<city>(?P<city1>\d{3,3})(?:\-?(?P<city2>\d{1,2}))?)\)[ ]?(?P<phone>(?P<num1>\d{1,3})\-?(?P<num2>\d{2,3})(?:\-?(?P<num3>\d{1,3}))?)(?:[ ]\d{1,6})?$/
+            var regexpPhoneNumber = /^\+7[ ]?\(\d{3,3}\)[ ]?\d{3,3}\-?\d{2,2}\-?\d{2,2}$/
 
             function validatePhoneNumber(newValue) {
-                if ((!newValue.phoneNumber) || (newValue.phoneNumber.match(regexpPhoneNumber))) {
+                if ((!newValue) || (newValue.match(regexpPhoneNumber))) {
                     ctrl.$setValidity('number', true);
                 } else {
                     ctrl.$setValidity('number', false);
@@ -360,9 +359,12 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
                 return newValue;
             }
 
+            scope.$watch(attrs.uiPhoneFields + '.phoneNumber', function (otherModelValue) {
+                validatePhoneNumber(scope.$eval(attrs.uiPhoneFields + '.phoneNumber'));
+            });
+
             scope.$watch(attrs.uiPhoneFields, function (otherModelValue) {
                 validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
-                validatePhoneNumber(scope.$eval(attrs.uiPhoneFields));
             }, true);
         }
     };
