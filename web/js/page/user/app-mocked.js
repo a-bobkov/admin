@@ -3,13 +3,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, Collection, Item) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, Collection, Item);
+    setHttpMock($httpBackend, Collection, Item, 100);
 });
 
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, Collection, Item) {
+function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
     var _statuses = (function() {
         var Child = inheritCollection(function() {}, Collection);
         return new Child;
@@ -336,8 +336,9 @@ function setHttpMock($httpBackend, Collection, Item) {
         ]))
     };
 
-    var multiply100 = function(arr) {
-        var arr100 = [];
+    var multiplyUsers = function(arr) {
+        multiplyUsersCoef = multiplyUsersCoef || 1;
+        var multiplyArray = [];
 
         var cloneArr = function(arr, num) {
             return angular.forEach(angular.copy(arr), function(value) {
@@ -346,16 +347,16 @@ function setHttpMock($httpBackend, Collection, Item) {
                 if (value._dealer) {
                     value._dealer.id = id;
                 }
-                arr100.push(value);
+                multiplyArray.push(value);
             });
         }
-        for (var i = 0; i < 100; i++) {
-            cloneArr(arr, i);
+        for (var i = 0; i < multiplyUsersCoef; i++) {
+            multiplyArray = _.union(multiplyArray, cloneArr(arr, i));
         }
-        return arr100;
+        return multiplyArray;
     }
 
-    var usersData = _users._setAll(multiply100(addPrefix([
+    var usersData = _users._setAll(multiplyUsers(addPrefix([
         {
             id: 5,
             email: 'demo@maxposter.ru',
