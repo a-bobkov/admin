@@ -82,7 +82,7 @@
 	        <tr>
 	            <th><label for="user_dealer_city_id">Город</label><span>*</span></th>
 	            <td>
-	                <select class="required" required name="user_dealer_city" ng-model='dealerEdited.city' ng-options='opt.name for opt in cities'>
+	                <select class="required" ng-required='userEdited.isDealer()' name="user_dealer_city" ng-model='dealerEdited.city' ng-options='opt.name for opt in cities'>
 	                    <option value=''></option>
 	                </select>
 					<ul class="error_list" ng-show='formUser.user_dealer_city.$invalid'>
