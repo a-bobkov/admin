@@ -231,9 +231,9 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.$watch('currentPage', pageUsers);
 })
 
-.controller('UserCtrl', function($scope, $rootScope, $location, data, userHours, users, User, Dealer) {
+.controller('UserCtrl', function($scope, $rootScope, $location, data, dealerPhoneHours, users, User, Dealer) {
     angular.extend($scope, data);
-    $scope.userHours = userHours;
+    $scope.dealerPhoneHours = dealerPhoneHours;
 
     if (data.user) {
         makeUserCopy();
