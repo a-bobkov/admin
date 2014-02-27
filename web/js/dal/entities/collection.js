@@ -315,7 +315,7 @@ return Collection;
         for (var key in itemData) {
             var attr = itemData[key],
                 refElem = attr;
-            if (typeof attr === 'object') {
+            if (angular.isObject(attr)) {
                 var entity = findEntity(key);
                 if (!entity) {
                     errorMessages.push(new CollectionError('Неизвестный ссылочный параметр ' + key + ' в элементе с id: ' + itemData.id));
@@ -339,7 +339,7 @@ return Collection;
     Item.prototype._serialize = function() {
         var itemData = {};
         angular.forEach(this, function(value, key){
-            if ((typeof value === "object") && (key !== 'phones')) {
+            if (angular.isObject(value) && (key !== 'phones')) {
                 if (key === "dealer") {               // todo: перекрытием данного метода на User
                     itemData[key] = value._serialize();
                 } else {

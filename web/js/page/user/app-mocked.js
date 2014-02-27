@@ -93,7 +93,7 @@ function setHttpMock($httpBackend, Collection, Item) {
         if (angular.isArray(dataObj)) {
             newData = [];
             angular.forEach (dataObj, function(value, idx) {
-                if (typeof value === 'object') {
+                if (angular.isObject(value)) {
                     newData[idx] = addPrefix(value);
                 } else {
                     newData[idx] = value;
@@ -102,7 +102,7 @@ function setHttpMock($httpBackend, Collection, Item) {
         } else {
             newData = {};
             angular.forEach (dataObj, function(value, key) {
-                if (typeof value === 'object') {
+                if (angular.isObject(value)) {
                     newData['_' + key] = addPrefix(value);
                 } else {
                     newData[key] = value;
@@ -117,7 +117,7 @@ function setHttpMock($httpBackend, Collection, Item) {
         if (angular.isArray(dataObj)) {
             newData = [];
             angular.forEach (dataObj, function(value, idx) {
-                if (typeof value === 'object') {
+                if (angular.isObject(value)) {
                     newData[idx] = subPrefix(value);
                 } else {
                     newData[idx] = value;
@@ -126,7 +126,7 @@ function setHttpMock($httpBackend, Collection, Item) {
         } else {
             newData = {};
             angular.forEach (dataObj, function(value, key) {
-                if ((typeof value === 'object') && (key.indexOf('_') === 0)) {
+                if ((angular.isObject(value)) && (key.indexOf('_') === 0)) {
                     newData[key.substring(1)] = subPrefix(value);
                 } else {
                     newData[key] = value;
@@ -172,7 +172,7 @@ function setHttpMock($httpBackend, Collection, Item) {
     $httpBackend.whenGET(regexGet).respond(function(method, url, data) {
         var id = parseInt(url.replace(regexGet,'$1'));
         var user = _.find(usersData, {id: id});
-        if (typeof user === 'object') {
+        if (user) {
             return [200, {
                 status: 'success',
                 data: {

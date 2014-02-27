@@ -110,7 +110,7 @@ describe('app-mocked', function() {
                     email: 'new@maxposter.ru',
                     last_login: '2013-12-01',
                     status: {id: 'active'},
-                    group: {id: 1},
+                    group: {id: 2},
                     dealer: {
                         company_name: 'Новая компания',
                         city: {id: 5},
@@ -131,14 +131,22 @@ describe('app-mocked', function() {
                         phone3_from: '7',
                         phone3_to: '15',
                         company_info: 'Здесь может быть произвольный текст...',
-                        manager: {id: 3}
+                        manager: {id: 4}
                     }
                 },
                 actualSuccess,
                 actualError;
 
+            users.getDirectories().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond){
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
             var dealer = new Dealer();
-            dealer._fillItem(data.dealer);
+            var respond = dealer._fillItem(data.dealer);
             var user = new User();
             user._fillItem(data);
             user.dealer = dealer;
@@ -167,7 +175,7 @@ describe('app-mocked', function() {
             expect(savedUser.dealer.id).toBeDefined();
             delete savedUser.id;
             delete savedUser.dealer.id;
-            expect(savedUser).toEqualData(user);
+            expect(savedUser._serialize()).toEqualData(data);
         });
 
         it('post - выдавать ошибки при попытке сохранения пользователя со ссылками на несуществующие в БД объекты', function() {

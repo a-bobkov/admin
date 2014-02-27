@@ -381,5 +381,156 @@ describe('Сервисы users и userApi', function() {
             expect(userApi.create).toHaveBeenCalled();
             expect(userApi.create).toHaveBeenCalledWith(newUserData);
         });
+
+        it('при сохранении без id - если это салон, то передавать в $http объект без параметра site', function() {
+            var directoriesData = {
+                    groups: [
+                        {id: 1, name: 'Роль один'},
+                        {id: 2, name: 'Салон'},
+                        {id: 3, name: 'Сайт'}
+                    ],
+                    managers: [
+                        {id: 3, name: 'Менеджер один'},
+                        {id: 4, name: 'Менеджер два'}
+                    ],
+                    cities: [
+                        {id: 5, name: 'Город один'},
+                        {id: 6, name: 'Город два'}
+                    ],
+                    markets: [
+                        {id: 7, name: 'Рынок один', city: {id: 6}},
+                        {id: 8, name: 'Рынок два', city: {id: 5}}
+                    ],
+                    metros: [
+                        {id: 9, name: 'Метро один', city: {id: 5}},
+                        {id: 10, name: 'Метро два', city: {id: 6}}
+                    ],
+                    sites: [
+                        {id: 11, name: 'Сайт один'},
+                        {id: 12, name: 'Сайт два'}
+                    ]
+                };
+
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
+
+            users.getDirectories().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            var newUserData = {
+                    name: 'Другой',
+                    ext: 'Extra',
+                    group: {id: 2},
+                    dealer: {id: 3, name: 'Дилер'},
+                    site: 'Site'
+                },
+                newUserSerialized = {
+                    name: 'Другой',
+                    ext: 'Extra',
+                    group: {id: 2},
+                    dealer: {id: 3, name: 'Дилер'},
+                },
+                newUser = {
+                    id: 1,
+                    name: 'Другой',
+                    ext: 'Extra',
+                    group: {id: 2},
+                    dealer: {id: 3, name: 'Дилер'},
+                },
+                actualSuccess,
+                actualError;
+
+            spyOn(userApi, 'create').andReturn($q.when(newUser));
+
+            var user = new User();
+            user._fillItem(newUserData);
+            users.save(user).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(userApi.create).toHaveBeenCalled();
+            expect(userApi.create).toHaveBeenCalledWith(newUserSerialized);
+        });
+
+        it('при сохранении без id - если это сайт, то передавать в $http объект без параметра dealer', function() {
+            var directoriesData = {
+                    groups: [
+                        {id: 1, name: 'Роль один'},
+                        {id: 2, name: 'Салон'},
+                        {id: 3, name: 'Сайт'}
+                    ],
+                    managers: [
+                        {id: 3, name: 'Менеджер один'},
+                        {id: 4, name: 'Менеджер два'}
+                    ],
+                    cities: [
+                        {id: 5, name: 'Город один'},
+                        {id: 6, name: 'Город два'}
+                    ],
+                    markets: [
+                        {id: 7, name: 'Рынок один', city: {id: 6}},
+                        {id: 8, name: 'Рынок два', city: {id: 5}}
+                    ],
+                    metros: [
+                        {id: 9, name: 'Метро один', city: {id: 5}},
+                        {id: 10, name: 'Метро два', city: {id: 6}}
+                    ],
+                    sites: [
+                        {id: 11, name: 'Сайт один'},
+                        {id: 12, name: 'Сайт два'}
+                    ]
+                };
+
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
+
+            users.getDirectories().then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+
+            var newUserData = {
+                    name: 'Другой',
+                    ext: 'Extra',
+                    group: {id: 3},
+                    dealer: {id: 3, name: 'Дилер'},
+                    site: {id: 11}
+                },
+                newUserSerialized = {
+                    name: 'Другой',
+                    ext: 'Extra',
+                    group: {id: 3},
+                    site: {id: 11}
+                },
+                newUser = {
+                    id: 1,
+                    name: 'Другой',
+                    ext: 'Extra',
+                    group: {id: 3},
+                    site: {id: 11}
+                },
+                actualSuccess,
+                actualError,
+                user;
+
+            spyOn(userApi, 'create').andReturn($q.when(newUser));
+
+            user = new User();
+            user._fillItem(newUserData);
+            users.save(user).then(function(respond) {
+                actualSuccess = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $rootScope.$digest();
+            expect(userApi.create).toHaveBeenCalled();
+            expect(userApi.create).toHaveBeenCalledWith(newUserSerialized);
+        });
     });
 });
