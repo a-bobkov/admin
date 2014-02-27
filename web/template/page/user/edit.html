@@ -1,6 +1,6 @@
 <h1>{{actionName}} пользователя</h1>
 
-<form name="formUser" novalidate>
+<form name="formUser" autocomplete="off" novalidate>
 	<fieldset class="span-24">
 	    <legend>Пользователь</legend>
 	    <table>
@@ -17,7 +17,7 @@
 	        <tr>
 	            <th><label for="user_password">Пароль</label></th>
 	            <td>
-	            	<input autocomplete="off" type="password" name="user_password" ng-model="userEdited.password" ng-required='!userEdited.id'/>
+	            	<input type="password" name="user_password" ng-model="userEdited.password" ng-required='!userEdited.id'/>
 					<ul class="error_list" ng-show='formUser.user_password.$invalid'>
 					    <li ng-show="formUser.user_password.$error.required">Необходимо ввести значение.</li>
 					</ul>
@@ -26,7 +26,7 @@
 	        <tr>
 	            <th><label for="user_password_confirm">Пароль (повторно)</label></th>
 	            <td>
-	                <input autocomplete="off" type="password" name="user_password_confirm" ng-model="userPasswordConfirm" ui-equal-to="userEdited.password"/>
+	                <input type="password" name="user_password_confirm" ng-model="userPasswordConfirm" ui-equal-to="userEdited.password"/>
 					<ul class="error_list" ng-show='formUser.user_password_confirm.$invalid'>
 					    <li ng-show="formUser.user_password_confirm.$error.equal">Значение должно совпадать с паролем.</li>
 					</ul>
