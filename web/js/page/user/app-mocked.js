@@ -336,7 +336,26 @@ function setHttpMock($httpBackend, Collection, Item) {
         ]))
     };
 
-    var usersData = _users._setAll(addPrefix([
+    var multiply100 = function(arr) {
+        var arr100 = [];
+
+        var cloneArr = function(arr, num) {
+            return angular.forEach(angular.copy(arr), function(value) {
+                var id = value.id + num * arr.length;
+                value.id = id;
+                if (value._dealer) {
+                    value._dealer.id = id;
+                }
+                arr100.push(value);
+            });
+        }
+        for (var i = 0; i < 100; i++) {
+            cloneArr(arr, i);
+        }
+        return arr100;
+    }
+
+    var usersData = _users._setAll(multiply100(addPrefix([
         {
             id: 5,
             email: 'demo@maxposter.ru',
@@ -390,5 +409,5 @@ function setHttpMock($httpBackend, Collection, Item) {
             id: 13, company_name: 'Свет', manager: {id: 2}}},
         {id: 14, email: 'a-bobkov@abo.com', last_login: '2012-01-01', status: {id: 'blocked'}, group: {id: 3}, site: {id: 12}},
         {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 3}, site: {id: 11}}
-    ]));
+    ])));
 };

@@ -69,7 +69,7 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
             var usersArr = actualSuccess;
-            expect(usersArr.length).toBe(15);
+            var len = usersArr.length;
 
             var dealer = new Dealer();
             dealer._fillItem(data.dealer);
@@ -95,14 +95,14 @@ describe('app-mocked', function() {
             });
             $rootScope.$digest();
             var usersArr = actualSuccess;
-            expect(usersArr.length).toBe(16);
+            expect(usersArr.length).toBe(len + 1);
 
             users.remove(savedUser.id).then(function(respond) {
                 actualSuccess = respond;
             });
             $httpBackend.flush();
             $rootScope.$digest();
-            expect(usersArr.length).toBe(15);
+            expect(usersArr.length).toBe(len);
         });
 
         it('post - сохранять данные нового пользователя', function() {
@@ -384,7 +384,7 @@ describe('app-mocked', function() {
             var actualSuccess,
                 actualError;
 
-            users.get(999).then(function(respond) {
+            users.get(9999).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond){
                 actualError = respond;
@@ -393,7 +393,7 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 999');
+            expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 9999');
         });
 
         it('get - загружать пользователей после опций', function() {

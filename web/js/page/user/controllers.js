@@ -206,7 +206,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     }
 
     var filteredUsers = [];
-    $scope.itemsPerPage = 6;
+    $scope.itemsPerPage = 25;
+    $scope.maxSize = 9;
     $scope.pagedUsers = [];
 
     var pageUsers = function () {
