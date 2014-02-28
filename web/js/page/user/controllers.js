@@ -93,6 +93,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         delete $rootScope.savedUserListNotice;
     }
 
+    var filteredUsers = [];
+
     $scope.clickNewUser = function() {
         $location.path('/usernew');
     }
@@ -120,13 +122,13 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         return true;
     };
 
-    var filterComplex = function(itemToFilter) {
-        return (!$scope.patterns.complex || filterComma(itemToFilter, $scope.patterns.complex.toLowerCase()));
+    var filterComplex = function(item) {
+        return (!$scope.patterns.complex || filterComma(item, $scope.patterns.complex.toLowerCase()));
     }
 
-    var filterStatus = function(itemToFilter) {
+    var filterStatus = function(item) {
         if ($scope.patterns.status.length > 0) {
-            if ($scope.patterns.status.indexOf(itemToFilter.status) !== -1) {
+            if ($scope.patterns.status.indexOf(item.status) !== -1) {
                 return true;
             } else {
                 return false;
@@ -136,15 +138,15 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         }
     };
 
-    var filterTag = function(itemToFilter) {
+    var filterTag = function(item) {
         return ($scope.patterns.tag == null)
-            || (itemToFilter.dealer && itemToFilter.dealer.manager === $scope.patterns.tag);
+            || (item.dealer && item.dealer.manager === $scope.patterns.tag);
     };
 
-    var filterPatterns = function(itemToFilter) {
-        return filterComplex(itemToFilter)
-            && filterStatus(itemToFilter)
-            && filterTag(itemToFilter);
+    var filterPatterns = function(item) {
+        return filterComplex(item)
+            && filterStatus(item)
+            && filterTag(item);
     };
 
     $scope.setPatternsDefault = function() {
@@ -155,12 +157,28 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         };
     }
 
+    $scope.onPatternChange = function () {
+        filteredUsers = $filter('filter')(allUsers, filterPatterns);
+        $rootScope.savedUserListPatterns = $scope.patterns;
+        onSortingChange();
+    };
+
+    $scope.$watch('patterns', $scope.onPatternChange, true);
+
     // по мотивам: http://stackoverflow.com/questions/12940974/maintain-model-of-scope-when-changing-between-views-in-angularjs
     if ($rootScope.savedUserListPatterns) {
         $scope.patterns = $rootScope.savedUserListPatterns;
     } else {
         $scope.setPatternsDefault();
     }
+
+    var sortedUsers = [];
+
+    $scope.sortableColumns = [
+        {id: "id", name: "Код"},
+        {id: "email", name: "Email"},
+        {id: "last_login", name: "Был на сайте"}
+    ];
 
     $scope.sortingMark = function(column) {
         if (column === $scope.sorting.column) {
@@ -169,22 +187,28 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         return '\u00A0\u00A0\u00A0';
     }
 
-    $scope.clickHeader = function(column) {
+    $scope.changeSorting = function(column) {
         if (column === $scope.sorting.column) {
             $scope.sorting.reverse = !$scope.sorting.reverse;
         } else {
             $scope.sorting.column = column;
             $scope.sorting.reverse = false;
         }
+        $rootScope.savedUserListSorting = $scope.sorting;
+        onSortingChange();
     }
 
-    $scope.sortableColumns = [
-        {id: "id", name: "Код"},
-        {id: "email", name: "Email"},
-        {id: "last_login", name: "Был на сайте"}
-    ];
+    var onSortingChange = function() {
+        sortedUsers = $filter('orderBy')(filteredUsers, $scope.sorting.column, $scope.sorting.reverse);
+        $scope.totalItems = filteredUsers.length;
+        if ($scope.currentPage != 1) {
+            $scope.currentPage = 1;
+        } else {
+            pageUsers();
+        };
+    }
 
-    $scope.setSortingDefault = function() {
+    var setSortingDefault = function() {
         $scope.sorting = {
             column: 'id',
             reverse: false
@@ -194,10 +218,9 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     if ($rootScope.savedUserListSorting) {
         $scope.sorting = $rootScope.savedUserListSorting;
     } else {
-        $scope.setSortingDefault();
+        setSortingDefault();
     }
 
-    var filteredUsers = [];
     $scope.itemsPerPage = 25;
     $scope.maxSize = 9;
     $scope.pagedUsers = [];
@@ -205,21 +228,9 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     var pageUsers = function () {
         var begin = (($scope.currentPage - 1) * $scope.itemsPerPage),
             end = begin + $scope.itemsPerPage;
-        $scope.pagedUsers = filteredUsers.slice(begin, end);
+        $scope.pagedUsers = sortedUsers.slice(begin, end);
     };
 
-    $scope.onPatternChange = function () {
-        filteredUsers = $filter('filter')(allUsers, filterPatterns);
-        $scope.totalItems = filteredUsers.length;
-        if ($scope.currentPage != 1) {
-            $scope.currentPage = 1;
-        } else {
-            pageUsers();
-        };
-        $rootScope.savedUserListPatterns = $scope.patterns;
-    };
-
-    $scope.$watch('patterns', $scope.onPatternChange, true);
     $scope.$watch('currentPage', pageUsers);
 })
 
