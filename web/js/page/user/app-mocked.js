@@ -201,21 +201,23 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
         var respond;
         var errorMessages = [];
 
-        var dealer = new _Dealer;
-        respond = dealer._fillItem(dataObj._dealer);
-        errorMessages = _.union(errorMessages, respond.errorMessages);
-        dealer.id = 1 + _.max(usersData, function(item) {
-            return !item._dealer || item._dealer.id;
-        }).id;
-        delete dataObj._dealer;
-
         var user = new _User;
+        if (dataObj._dealer) {
+            var dealer = new _Dealer;
+            respond = dealer._fillItem(dataObj._dealer);
+            errorMessages = _.union(errorMessages, respond.errorMessages);
+            dealer.id = 1 + _.max(usersData, function(item) {
+                return !item._dealer || item._dealer.id;
+            }).id;
+            delete dataObj._dealer;
+            user._dealer = dealer;
+        }
+
         respond = user._fillItem(dataObj);
         errorMessages = _.union(errorMessages, respond.errorMessages);
         user.id = 1 + _.max(usersData, function(item) {
             return item.id;
         }).id;
-        user._dealer = dealer;
 
         if (errorMessages.length) {
             return [400, {

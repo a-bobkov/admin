@@ -70,10 +70,11 @@ return (function() {
 
     User.prototype._serialize = function() {
         var itemData = Item.prototype._serialize.call(this);
-        if (this.isDealer()) {
-            delete itemData.site;
-        } else if (this.isSite()) {
+        if (!this.isDealer()) {
             delete itemData.dealer;
+        };
+        if (!this.isSite()) {
+            delete itemData.site;
         }
         return itemData;
     };

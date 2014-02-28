@@ -66,7 +66,7 @@ var Collection = (function() {
         } else if (Object.keys(itemData).length === 1) {    // ссылка
             newItem = findItem.call(this, itemData.id);
             if (!newItem) {
-                errorMessages.push(new CollectionError('Не найдена ссылка для элемента ' + angular.toJson(itemData)));
+                errorMessages.push(new CollectionError('Не найдена ссылка для элемента: ' + angular.toJson(itemData) + ' в коллекции: ' + findCollection(this).collectionName));
             }
         } else {
             newItem = findItem.call(this, itemData.id);
