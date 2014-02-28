@@ -338,26 +338,6 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
         ]))
     };
 
-    var multiplyUsers = function(arr) {
-        multiplyUsersCoef = multiplyUsersCoef || 1;
-        var multiplyArray = [];
-
-        var cloneArr = function(arr, num) {
-            return angular.forEach(angular.copy(arr), function(value) {
-                var id = value.id + num * arr.length;
-                value.id = id;
-                if (value._dealer) {
-                    value._dealer.id = id;
-                }
-                multiplyArray.push(value);
-            });
-        }
-        for (var i = 0; i < multiplyUsersCoef; i++) {
-            multiplyArray = _.union(multiplyArray, cloneArr(arr, i));
-        }
-        return multiplyArray;
-    }
-
     var usersData = _users._setAll(multiplyUsers(addPrefix([
         {
             id: 5,
@@ -413,4 +393,25 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
         {id: 14, email: 'a-bobkov@abo.com', last_login: '2012-01-01', status: {id: 'blocked'}, group: {id: 3}, site: {id: 12}},
         {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 3}, site: {id: 11}}
     ])));
+
+    function multiplyUsers(arr) {
+        multiplyUsersCoef = multiplyUsersCoef || 1;
+        var multiplyArray = [];
+
+        var cloneArr = function(arr, num) {
+            return angular.forEach(angular.copy(arr), function(value) {
+                var id = value.id + num * arr.length;
+                value.id = id;
+                value.email = num + value.email;
+                if (value._dealer) {
+                    value._dealer.id = id;
+                }
+                multiplyArray.push(value);
+            });
+        }
+        for (var i = 0; i < multiplyUsersCoef; i++) {
+            multiplyArray = _.union(multiplyArray, cloneArr(arr, i));
+        }
+        return multiplyArray;
+    }
 };
