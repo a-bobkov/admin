@@ -9,6 +9,7 @@
     </div>
 
     <div class="span-16">
+        <div class="notice" ng-show='savedUserListNotice'>{{savedUserListNotice}}</div>
         <table class="list">
             <thead>
                 <tr>
@@ -32,11 +33,11 @@
                 </tr>
             </tbody>
         </table>
+        <div class="notice" ng-show='savedUserListNotice'>{{savedUserListNotice}}</div>
         <div pagination total-items="totalItems" page="currentPage" items-per-page="itemsPerPage" max-size='maxSize' boundary-links="true"></div>
         <div class="append-bottom">
             <input type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
         </div>
-        <div class="notice" ng-show='savedUserListNotice'>{{savedUserListNotice}}</div>
     </div>
     <fieldset class="span-8 last">
         <legend>Фильтр</legend>
