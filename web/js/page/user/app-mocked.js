@@ -149,7 +149,7 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
                 obj.dealer = {
                     id: this._dealer.id,
                     company_name: this._dealer.company_name,
-                    manager: this._dealer.manager
+                    manager: this._dealer._manager
                 };
             } else if (this.isSite()) {
                 obj.site = {id: this._site.id};
@@ -387,9 +387,9 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
             id: 10, company_name: 'Два в одном', manager: {id: 2}}},
         {id: 11, email: 'a-bobkov@abj.com', last_login: '2012-01-01', status: {id: 'blocked'}, group: {id: 3}, site: {id: 11}},
         {id: 12, email: 'a-bobkov@abk.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 2}, dealer: {
-            id: 12, company_name: 'Авто-мото', manager: {id: 1}}},
+            id: 12, company_name: 'Авто-мото', manager: {id: 0}}},
         {id: 13, email: 'a-bobkov@abl.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 2}, dealer: {
-            id: 13, company_name: 'Свет', manager: {id: 2}}},
+            id: 13, company_name: 'Свет', manager: {id: 4}}},
         {id: 14, email: 'a-bobkov@abo.com', last_login: '2012-01-01', status: {id: 'blocked'}, group: {id: 3}, site: {id: 12}},
         {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: {id: 'active'}, group: {id: 3}, site: {id: 11}}
     ])));

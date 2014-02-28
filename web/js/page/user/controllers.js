@@ -86,7 +86,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 .controller('UserListCtrl', function($scope, $rootScope, $filter, $location, data) {
     var allUsers = data.users;
     $scope.optionsStatus = data.statuses;
-    $scope.optionsTag = data.managers;
+    $scope.optionsManager = data.managers;
 
     if ($rootScope.savedUserListNotice) {
         $scope.savedUserListNotice = $rootScope.savedUserListNotice;
@@ -138,22 +138,22 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         }
     };
 
-    var filterTag = function(item) {
-        return ($scope.patterns.tag == null)
-            || (item.dealer && item.dealer.manager === $scope.patterns.tag);
+    var filterManager = function(item) {
+        return ($scope.patterns.manager == null)
+            || (item.dealer && item.dealer.manager === $scope.patterns.manager);
     };
 
     var filterPatterns = function(item) {
         return filterComplex(item)
             && filterStatus(item)
-            && filterTag(item);
+            && filterManager(item);
     };
 
     $scope.setPatternsDefault = function() {
         $scope.patterns = {
             complex: '',
             status: [_.find($scope.optionsStatus, {id: 'active'})],
-            tag: null
+            manager: null
         };
     }
 
