@@ -53,18 +53,14 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     return Loader;
 })
 
-.factory('UserList_Loader', function($q, users, statuses) {
+.factory('UserList_Loader', function(Directories_Loader, users) {
     var data = {};
     var Loader = {};
     Loader.load = function() {
-        return $q.all({
-            statuses: statuses.getAll(),
-            directories: users.getDirectories()
-        }).then(function(respond){
-            data.statuses = angular.extend(respond.statuses);
-            angular.extend(data, respond.directories);
+        return Directories_Loader.load().then(function(respond) {
+            data = respond;
             return users.getAll().then(function(respond) {
-                data.users = angular.extend(respond);
+                data.users = respond;
                 return data;
             });
         });
@@ -72,16 +68,12 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     return Loader;
 })
 
-.factory('User_Loader', function($q, users, statuses) {
+.factory('User_Loader', function(Directories_Loader, users) {
     var data = {};
     var Loader = {};
     Loader.load = function(id) {
-        return $q.all({
-            statuses: statuses.getAll(),
-            directories: users.getDirectories()
-        }).then(function(respond){
-            data = respond.directories;
-            data.statuses = respond.statuses;
+        return Directories_Loader.load().then(function(respond) {
+            data = respond;
             return users.get(id).then(function(respond) {
                 data.user = respond;
                 return data;
