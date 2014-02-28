@@ -27,8 +27,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         templateUrl: 'template/page/user/edit.html',
         controller: 'UserCtrl',
         resolve: {
-            data: function(Directories_Loader) {
-                return Directories_Loader.load();
+            data: function(UserList_Loader) {
+                return UserList_Loader.load();
             }
         }
     })
