@@ -333,7 +333,7 @@ describe('Сервисы users и userApi', function() {
                 { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}' }, 
                 { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}' }, 
                 { message: 'Нет параметра id в элементе: {"ident":6}' }, 
-                { message: 'Не найдена ссылка для элемента {"id":55}' }, 
+                { message: 'Не найдена ссылка для элемента: {"id":55} в коллекции: cities' }, 
                 { message: 'Неизвестная секция: roles' } 
             ]);
         });
@@ -347,6 +347,7 @@ describe('Сервисы users и userApi', function() {
                 newUserData = {
                     name: 'Другой',
                     ext: 'Extra',
+                    group: {id: 2},
                     user: {id: 2},
                     dealer: {id: 3, name: 'Дилер'}
                 },
@@ -354,6 +355,7 @@ describe('Сервисы users и userApi', function() {
                     id: 4,
                     name: 'Другой',
                     ext: 'Extra',
+                    group: {id: 2},
                     user: {id: 2},
                     dealer: {id: 3}
                 },

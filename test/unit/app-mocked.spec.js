@@ -183,7 +183,7 @@ describe('app-mocked', function() {
                     email: 'new@maxposter.ru',
                     last_login: '2013-12-01',
                     status: {id: 'active'},
-                    group: {id: 1},
+                    group: {id: 2},
                     dealer: {
                         company_name: 'Новая компания',
                         city: {id: 5},
@@ -227,10 +227,10 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            expect(actualError.data).toEqual({
+            expect(actualError.data).toEqualData({
                 status: 'error',
                 message : 'Ошибка при создании',
-                errors: [{message: 'Не найдена ссылка для элемента {"id":999}'}]
+                errors: [{message: 'Не найдена ссылка для элемента: {"id":999} в коллекции: _cities'}]
             });
         });
 
@@ -239,7 +239,7 @@ describe('app-mocked', function() {
                     email: 'new@maxposter.ru',
                     last_login: '2013-12-01',
                     status: {id: 'active'},
-                    group: {id: 1},
+                    group: {id: 2},
                     dealer: {
                         company_name: 'Новая компания',
                         city: {id: 5},
@@ -299,7 +299,7 @@ describe('app-mocked', function() {
                     email: 'new@maxposter.ru',
                     last_login: '2013-12-01',
                     status: {id: 'active'},
-                    group: {id: 1},
+                    group: {id: 2},
                     dealer: {
                         company_name: 'Новая компания',
                         city: {id: 5},
@@ -354,7 +354,7 @@ describe('app-mocked', function() {
             expect(actualError.data).toEqual({
                 status: 'error',
                 message : 'Ошибка при обновлении',
-                errors: [{message: 'Не найдена ссылка для элемента {"id":999}'}]
+                errors: [{message: 'Не найдена ссылка для элемента: {"id":999} в коллекции: _cities'}]
             });
         });
 

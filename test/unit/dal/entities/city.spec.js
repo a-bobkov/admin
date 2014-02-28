@@ -188,7 +188,7 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             expect($log.error).toHaveBeenCalledWith([
-                {message : 'Не найдена ссылка для элемента {"id":22}'}
+                {message : 'Не найдена ссылка для элемента: {"id":22} в коллекции: cities'}
             ]);
         });
     });
