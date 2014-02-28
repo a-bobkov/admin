@@ -134,6 +134,9 @@ describe('MaxPoster frontend app', function() {
             input('patterns.complex').enter('5, 1');
             expect(element('#UserListNumberUsers').text()).toMatch(/ 847$/);
 
+            input('patterns.complex').enter('1 2, 5');
+            expect(element('#UserListNumberUsers').text()).toMatch(/ 635$/);
+
             input('patterns.complex').enter('1,2,3,4,5,6,7,8');
             expect(element('#UserListNumberUsers').text()).toMatch(/ 999$/);
 
@@ -159,8 +162,22 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('фильтруется по менеджерам', function() {
-            select('patterns.tag').option(['0']);
+            select('patterns.manager').option(['0']);
             expect(element('#UserListNumberUsers').text()).toMatch(/ 200$/);
+
+            select('patterns.manager').option(['1']);
+            expect(element('#UserListNumberUsers').text()).toMatch(/ 300$/);
         });
+
+        it('фильтруется по всем фильтрам вместе и инициализирует фильтры', function() {
+            input('patterns.complex').enter('1 2, 5 демо');
+            select('patterns.status').option(['0']);
+            select('patterns.manager').option(['0']);
+            expect(element('#UserListNumberUsers').text()).toMatch(/ 22$/);
+
+            element('#UserListFilterSetDefault').click();
+            expect(element('#UserListNumberUsers').text()).toMatch(/ 1000$/);
+        });
+
     });
 });
