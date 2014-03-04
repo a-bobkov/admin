@@ -5,16 +5,16 @@
     </div>
 
     <div class="append-bottom">
-        <input type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
+        <input id='UserListAddUser' type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
     </div>
 
     <div class="span-16">
         <div class="notice" ng-show='savedUserListNotice'>{{savedUserListNotice}}</div>
         <table class="list">
             <thead>
-                <tr id="UserListTableHeader">
-					<th ng-repeat='column in sortableColumns' ng-class='{"active": sorting.column === column.id}'>
-                		<a ng-click='changeSorting(column.id)' id="UserListTableHeaderRef">{{column.name}}</a><span>{{sortingMark(column.id)}}</span>
+                <tr>
+					<th ng-repeat='column in sortableColumns' id="UserListTableHeader" ng-class='{"active": sorting.column === column.id}'>
+                		<a ng-click='changeSorting(column.id)' id="UserListTableHeaderRef">{{column.name}}</a><span id="UserListTableHeaderDir">{{sortingMark(column.id)}}</span>
                     </th>
                     <th>Действия</th>
                 </tr>
@@ -36,7 +36,7 @@
         <div class="notice" ng-show='savedUserListNotice'>{{savedUserListNotice}}</div>
         <div pagination total-items="totalItems" page="currentPage" items-per-page="itemsPerPage" max-size='maxSize' boundary-links="true"></div>
         <div class="append-bottom">
-            <input type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
+            <input id='UserListAddUser' type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
         </div>
     </div>
     <fieldset class="span-8 last">
@@ -58,7 +58,7 @@
                 <tr>
                     <th><label for="sf_guard_user_filters_complex">Код, email, название</label></th>
                     <td>
-                        <input type="text" ng-model='patterns.complex' id="sf_guard_user_filters_complex"placeholder='через пробелы и запятые'/>
+                        <input type="text" ng-model='patterns.complex' id="sf_guard_user_filters_complex" placeholder='через пробелы и запятые'/>
                     </td>
                 </tr>
                 <tr>

@@ -1,10 +1,5 @@
 'use strict';
 
-// angular.scenario.matcher('toView', function() {
-//     console.log(this.actual);
-//     return true;
-// });
-
 describe('MaxPoster frontend app', function() {
     describe('Список пользователей', function() {
         beforeEach(function() {
@@ -14,7 +9,125 @@ describe('MaxPoster frontend app', function() {
             expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
         });
 
-        beforeEach(function() {
+        it('показывает количество пользователей', function() {
+            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
+        });
+
+        it('переходит по верхней кнопке добавления пользователя', function() {
+            element.all(by.id('UserListAddUser')).get(0).click();
+            expect(browser.getCurrentUrl()).toMatch('\/usernew');
+        });
+
+        it('переходит по нижней кнопке добавления пользователя', function() {
+            element.all(by.id('UserListAddUser')).get(1).click();
+            expect(browser.getCurrentUrl()).toMatch('\/usernew');
+        });
+
+        it('показывает сортируемые колонки заголовка таблицы пользователей - количество', function() {
+            var sortableColumns = element.all(by.id('UserListTableHeader'));
+            expect(sortableColumns.count()).toBe(3);
+        });
+
+        it('показывает сортируемые колонки заголовка таблицы пользователей - ссылки', function() {
+            var sortableColumnsRef = element.all(by.id('UserListTableHeaderRef'));
+            expect(sortableColumnsRef.get(0).getText()).toBeTruthy();
+        });
+
+        it('показывает сортируемые колонки заголовка таблицы пользователей - знак сортировки', function() {
+            var sortableColumnsRef = element.all(by.id('UserListTableHeaderRef'));
+            var sortableColumnsDir = element.all(by.id('UserListTableHeaderDir'));
+            expect(sortableColumnsDir.get(0).getText()).toBe('↓');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(0).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('↑');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(1).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('↓');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(1).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('↑');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(2).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('↓');
+
+            expect(sortableColumnsRef.get(2).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('↑');
+        });
+
+        it('показывает реквизиты пользователя', function() {
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('1');
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.email')).getText()).toBe('0a-bobkov@ab.com');
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.last_login')).getText()).toBe('01.01.12');
+        });
+
+        it('переходит к редактированию пользователя по ссылке в id', function() {
+            element(by.repeater('user in pagedUsers').row(0).column('user.id')).click();
+            expect(browser.getCurrentUrl()).toMatch('\/users\/1\/edit');
+        });
+
+        it('переходит к редактированию пользователя по ссылке в email', function() {
+            element(by.repeater('user in pagedUsers').row(0).column('user.email')).click();
+            expect(browser.getCurrentUrl()).toMatch('\/users\/1\/edit');
+        });
+
+        it('показывает 25 пользователей', function() {
+            expect(element.all(by.repeater('user in pagedUsers')).count()).toBe(25);
+        });
+
+        it('показывает постраничку', function() {
+            expect(element.all(by.id('paginationFirst')).count()).toBe(1);
+            expect(element.all(by.id('paginationPrev')).count()).toBe(1);
+            expect(element.all(by.id('paginationNext')).count()).toBe(1);
+            expect(element.all(by.id('paginationLast')).count()).toBe(1);
+            expect(element.all(by.id('paginationPages')).count()).toBe(9);
+        });
+
+        it('переходит по страничкам', function() {
+            element.all(by.id('paginationPages')).get(2).click();
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('76');
+
+            element(by.id('paginationPrev')).click();
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('39');
+
+            element(by.id('paginationNext')).click();
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('76');
+
+            element(by.id('paginationFirst')).click();
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('1');
+
+            element(by.id('paginationLast')).click();
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('1464');
+        });
+
+        it('накладывает фильтры и инициализирует фильтры', function() {
+            var selectDropdown = function (dropdown, optIndex) {
+                return element(dropdown).findElements(by.tagName('option')).then(function(options) {
+                    options[optIndex].click();
+                });
+            };
+
+            element(by.model('patterns.complex')).sendKeys('1 2, 5 демо');
+            selectDropdown(by.select('patterns.status'), 0);
+            selectDropdown(by.select('patterns.manager'), 1);
+            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 128$/);
+
+            element(by.id('UserListFilterSetDefault')).click();
+            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
+        });
+
+        it('сортирует по коду, емэйлу, дате', function() {
             this.addMatchers({
                 toBeSortedArrayOf: function(params) {
                     // var params = 'AscendingNumbers';
@@ -44,28 +157,7 @@ describe('MaxPoster frontend app', function() {
                     return true;
                 }
             });
-        });
 
-        it('показывает 25 пользователей', function() {
-            var users = element.all(by.repeater('user in pagedUsers'));
-            expect(users.count()).toBe(25);
-
-            // expect(repeater('#UserListTable tr').count()).toBe(25);
-            // expect(repeater('#UsersTable_Paginate a').count()).toBe(6); // кнопок в постраничке
-
-            // element('#UsersTable_Paginate a:nth-child(4)').click();
-            // expect(repeater('#UsersTable tr').count()).toBe(5);
-
-            // input('patterns.email').enter('di');
-            // expect(repeater('#UsersTable tr').count()).toBe(2);
-            // expect(repeater('#UsersTable_Paginate a').count()).toBe(5);
-
-            // input('patterns.code').enter('mi');
-            // expect(repeater('#UsersTable tr').count()).toBe(2);
-            // expect(repeater('#UsersTable_Paginate a').count()).toBe(5);
-        });
-
-        it('сортируется по коду, емэйлу, дате', function() {
             var mapText = function(q) {
                 return q.map(function(elm) {
                     return elm.getText();
@@ -157,85 +249,5 @@ describe('MaxPoster frontend app', function() {
                 });
             })
         });
-
-        xit('фильтруется по сложному фильтру', function() {
-            input('patterns.complex').enter('5');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 435$/);
-
-            input('patterns.complex').enter('55');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 30$/);
-
-            input('patterns.complex').enter('max');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 100$/);
-
-            input('patterns.complex').enter('ё');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 100$/);
-
-            input('patterns.complex').enter('демо');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 100$/);
-
-            input('patterns.complex').enter('5 1');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 204$/);
-
-            input('patterns.complex').enter('5 демо');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 72$/);
-
-            input('patterns.complex').enter('5 abb');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 31$/);
-
-            input('patterns.complex').enter('демо abb');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 0$/);
-
-            input('patterns.complex').enter('5,');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 435$/);
-
-            input('patterns.complex').enter('5, 1');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 847$/);
-
-            input('patterns.complex').enter('1 2, 5');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 635$/);
-
-            input('patterns.complex').enter('1,2,3,4,5,6,7,8');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 999$/);
-
-            input('patterns.complex').enter('5, демо');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 463$/);
-
-            input('patterns.complex').enter('5, abb');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 504$/);
-
-            input('patterns.complex').enter('');
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 1000$/);
-        });
-
-        xit('фильтруется по статусам', function() {
-            select('patterns.status').option(['0']);
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 200$/);
-
-            select('patterns.status').option(['2']);
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 300$/);
-
-            select('patterns.status').options(['0'], ['1']);
-            // expect(element('#UserListNumberUsers').text()).toMatch(/ 1200$/);
-        });
-
-        xit('фильтруется по менеджерам', function() {
-            select('patterns.manager').option(['0']);
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 200$/);
-
-            select('patterns.manager').option(['1']);
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 300$/);
-        });
-
-        xit('фильтруется по всем фильтрам вместе и инициализирует фильтры', function() {
-            input('patterns.complex').enter('1 2, 5 демо');
-            select('patterns.status').option(['0']);
-            select('patterns.manager').option(['0']);
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 22$/);
-
-            element('#UserListFilterSetDefault').click();
-            expect(element('#UserListNumberUsers').text()).toMatch(/ 1000$/);
-        });
-
     });
 });

@@ -1,18 +1,18 @@
 <table class="pagination">
     <tr>
         <td class="back">
-            <a ng-click="selectPage(pages[1].number)" class="bigger">&#8592;&#160;Предыдущая</a>
-            <a ng-click="selectPage(pages[0].number)" class="smaller">Первая</a>
+            <a id="paginationPrev" ng-click="selectPage(pages[1].number)" class="bigger">&#8592;&#160;Предыдущая</a>
+            <a id="paginationFirst" ng-click="selectPage(pages[0].number)" class="smaller">Первая</a>
         </td>
         <td class="pages">
-            <b ng-repeat="page in pages.slice(2, pages.length-2)">
+            <b id="paginationPages" ng-repeat="page in pages.slice(2, pages.length-2)">
                 <span ng-click="selectPage(page.number)" ng-hide="!page.active">{{page.text}}</span>
                 <a ng-click="selectPage(page.number)" ng-hide="page.active">{{page.text}}</a>
             </b>
         </td>
         <td class="forward">
-            <a ng-click="selectPage(pages[pages.length-2].number)" class="bigger">Следующая&#160;&#8594;</a>
-            <a ng-click="selectPage(pages[pages.length-1].number)" class="smaller">Последняя</a>
+            <a id="paginationNext" ng-click="selectPage(pages[pages.length-2].number)" class="bigger">Следующая&#160;&#8594;</a>
+            <a id="paginationLast" ng-click="selectPage(pages[pages.length-1].number)" class="smaller">Последняя</a>
         </td>
     </tr>
 </table>
