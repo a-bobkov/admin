@@ -1,6 +1,33 @@
 'use strict';
 
 describe('MaxPoster frontend app', function() {
+    describe('Редактирование пользователя', function() {
+        beforeEach(function() {
+            // var ptor = protractor.getInstance();
+            // ptor.ignoreSynchronization = true;
+            browser.get('users.html#/users/5/edit');
+            expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Редактирование /);
+        });
+
+        it('выводит email', function() {
+            expect(element(by.model('userEdited.email')).getAttribute('value')).toBe('0demo@maxposter.ru');
+        });
+
+        it('выводит ошибку, если email пустой', function() {
+            element(by.model('userEdited.email')).clear();
+            expect(element(by.id('UserEditEmailErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если email не соответствует формату', function() {
+            element(by.model('userEdited.email')).sendKeys('@@@');
+            expect(element(by.id('UserEditEmailErrorEmail')).isDisplayed()).toBeTruthy();
+        });
+    });
+
     describe('Список пользователей', function() {
         beforeEach(function() {
             // var ptor = protractor.getInstance();
