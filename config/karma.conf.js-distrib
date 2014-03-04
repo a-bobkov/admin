@@ -9,13 +9,15 @@ module.exports = function(config){
         'web/js/lib/angular/angular-mocks.js',
         'web/js/lib/angular/i18n/angular-locale_ru-ru.js',
         'web/js/lib/lodash/lodash.min.js',
+        'web/js/lib/ui-bootstrap/pagination-0.7.0.js',
 
         // хелперы
         'test/lib/helpers.js',
 
         // функционал
         'web/js/dal/**/*.js',
-
+        'web/js/page/**/*.js',
+        
         // тесты
         'test/unit/**/*.js'
     ],

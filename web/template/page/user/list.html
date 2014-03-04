@@ -14,7 +14,7 @@
             <thead>
                 <tr id="UserListTableHeader">
 					<th ng-repeat='column in sortableColumns' ng-class='{"active": sorting.column === column.id}'>
-                		<a ng-click='changeSorting(column.id)'>{{column.name}}</a><span>{{sortingMark(column.id)}}</span>
+                		<a ng-click='changeSorting(column.id)' id="UserListTableHeaderRef">{{column.name}}</a><span>{{sortingMark(column.id)}}</span>
                     </th>
                     <th>Действия</th>
                 </tr>

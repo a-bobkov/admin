@@ -1,48 +1,56 @@
 'use strict';
 
-angular.scenario.matcher('toView', function() {
-    console.log(this.actual);
-    return true;
-});
-
-angular.scenario.matcher('toBeSorted', function(params) {
-    var convert = function(arg) {
-        if (params.match('Numbers')) {
-            return parseInt(arg, 10);
-        } else if (params.match('Dates')) {
-            return Date.parse(arg);
-        } else {
-            return arg;
-        }
-    }
-
-    var compare = function(a, b) {
-        if (params.match('Ascending')) {
-            return (a > b);
-        } else {
-            return (a < b);
-        }
-    }
-
-    if (angular.isArray(this.actual) && (this.actual.length > 1)) {
-        for (var i = this.actual.length; --i; ) {
-            if (compare(convert(this.actual[i - 1]), convert(this.actual[i]))) {
-                return false;
-            }
-        }
-    }
-    return true;
-});
+// angular.scenario.matcher('toView', function() {
+//     console.log(this.actual);
+//     return true;
+// });
 
 describe('MaxPoster frontend app', function() {
     describe('Список пользователей', function() {
         beforeEach(function() {
-            browser().navigateTo('/users.html');
-            // pause();
+            // var ptor = protractor.getInstance();
+            // ptor.ignoreSynchronization = true;
+            browser.get('users.html');
+            expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
+        });
+
+        beforeEach(function() {
+            this.addMatchers({
+                toBeSortedArrayOf: function(params) {
+                    // var params = 'AscendingNumbers';
+                    var convert = function(arg) {
+                        if (params.match('Numbers')) {
+                            return parseInt(arg, 10);
+                        } else if (params.match('Dates')) {
+                            return Date.parse(arg);
+                        } else {
+                            return arg;
+                        }
+                    }
+                    var compare = function(a, b) {
+                        if (params.match('Ascending')) {
+                            return (a > b);
+                        } else {
+                            return (a < b);
+                        }
+                    }
+                    if (this.actual.length > 1) {
+                        for (var i = this.actual.length; --i; ) {
+                            if (compare(convert(this.actual[i - 1]), convert(this.actual[i]))) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+            });
         });
 
         it('показывает 25 пользователей', function() {
-            expect(repeater('#UserListTable tr').count()).toBe(25);
+            var users = element.all(by.repeater('user in pagedUsers'));
+            expect(users.count()).toBe(25);
+
+            // expect(repeater('#UserListTable tr').count()).toBe(25);
             // expect(repeater('#UsersTable_Paginate a').count()).toBe(6); // кнопок в постраничке
 
             // element('#UsersTable_Paginate a:nth-child(4)').click();
@@ -58,49 +66,99 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('сортируется по коду, емэйлу, дате', function() {
-            expect(repeater('#UserListTable tr').column('user.id')).toBeSorted('AscendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('AscendingStrings');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('DescendingStrings');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('AscendingDates');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('DescendingDates');
-            
-            element('#UserListTableHeader th:nth-child(1) a').click();
-            expect(repeater('#UserListTable tr').column('user.id')).toBeSorted('DescendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('AscendingStrings');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('DescendingStrings');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('AscendingDates');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('DescendingDates');
+            var mapText = function(q) {
+                return q.map(function(elm) {
+                    return elm.getText();
+                })
+            };
 
-            element('#UserListTableHeader th:nth-child(2) a').click();
-            expect(repeater('#UserListTable tr').column('user.email')).toBeSorted('AscendingStrings');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('AscendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('DescendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('AscendingDates');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('DescendingDates');
+            mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                expect(data).toBeSortedArrayOf('AscendingNumbers');
+                expect(data).not.toBeSortedArrayOf('DescendingNumbers');
+            });
 
-            element('#UserListTableHeader th:nth-child(2) a').click();
-            expect(repeater('#UserListTable tr').column('user.email')).toBeSorted('DescendingStrings');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('AscendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('DescendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('AscendingDates');
-            expect(repeater('#UserListTable tr').column('user.last_login')).not().toBeSorted('DescendingDates');
+            mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
+                expect(data).not.toBeSortedArrayOf('AscendingStrings');
+                expect(data).not.toBeSortedArrayOf('DescendingStrings');
+            });
 
-            element('#UserListTableHeader th:nth-child(3) a').click();
-            expect(repeater('#UserListTable tr').column('user.last_login')).toBeSorted('AscendingDates');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('AscendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('DescendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('AscendingStrings');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('DescendingStrings');
+            mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                expect(data).not.toBeSortedArrayOf('AscendingDates');
+                expect(data).not.toBeSortedArrayOf('DescendingDates');
+            });
 
-            element('#UserListTableHeader th:nth-child(3) a').click();
-            expect(repeater('#UserListTable tr').column('user.last_login')).toBeSorted('DescendingDates');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('AscendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.id')).not().toBeSorted('DescendingNumbers');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('AscendingStrings');
-            expect(repeater('#UserListTable tr').column('user.email')).not().toBeSorted('DescendingStrings');
+            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
+                arr[0].click();
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingNumbers');
+                    expect(data).toBeSortedArrayOf('DescendingNumbers');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingStrings');
+                    expect(data).not.toBeSortedArrayOf('DescendingStrings');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingDates');
+                    expect(data).not.toBeSortedArrayOf('DescendingDates');
+                });
+
+                arr[1].click();
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingNumbers');
+                    expect(data).not.toBeSortedArrayOf('DescendingNumbers');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
+                    expect(data).toBeSortedArrayOf('AscendingStrings');
+                    expect(data).not.toBeSortedArrayOf('DescendingStrings');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingDates');
+                    expect(data).not.toBeSortedArrayOf('DescendingDates');
+                });
+
+                arr[1].click();
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingNumbers');
+                    expect(data).not.toBeSortedArrayOf('DescendingNumbers');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingStrings');
+                    expect(data).toBeSortedArrayOf('DescendingStrings');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingDates');
+                    expect(data).not.toBeSortedArrayOf('DescendingDates');
+                });
+
+                arr[2].click();
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingNumbers');
+                    expect(data).not.toBeSortedArrayOf('DescendingNumbers');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingStrings');
+                    expect(data).not.toBeSortedArrayOf('DescendingStrings');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                    expect(data).toBeSortedArrayOf('AscendingDates');
+                });
+
+                arr[2].click();
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingNumbers');
+                    expect(data).not.toBeSortedArrayOf('DescendingNumbers');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
+                    expect(data).not.toBeSortedArrayOf('AscendingStrings');
+                    expect(data).not.toBeSortedArrayOf('DescendingStrings');
+                });
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                    expect(data).toBeSortedArrayOf('DescendingDates');
+                });
+            })
         });
 
-        it('фильтруется по сложному фильтру', function() {
+        xit('фильтруется по сложному фильтру', function() {
             input('patterns.complex').enter('5');
             expect(element('#UserListNumberUsers').text()).toMatch(/ 435$/);
 
@@ -150,7 +208,7 @@ describe('MaxPoster frontend app', function() {
             expect(element('#UserListNumberUsers').text()).toMatch(/ 1000$/);
         });
 
-        it('фильтруется по статусам', function() {
+        xit('фильтруется по статусам', function() {
             select('patterns.status').option(['0']);
             expect(element('#UserListNumberUsers').text()).toMatch(/ 200$/);
 
@@ -161,7 +219,7 @@ describe('MaxPoster frontend app', function() {
             // expect(element('#UserListNumberUsers').text()).toMatch(/ 1200$/);
         });
 
-        it('фильтруется по менеджерам', function() {
+        xit('фильтруется по менеджерам', function() {
             select('patterns.manager').option(['0']);
             expect(element('#UserListNumberUsers').text()).toMatch(/ 200$/);
 
@@ -169,7 +227,7 @@ describe('MaxPoster frontend app', function() {
             expect(element('#UserListNumberUsers').text()).toMatch(/ 300$/);
         });
 
-        it('фильтруется по всем фильтрам вместе и инициализирует фильтры', function() {
+        xit('фильтруется по всем фильтрам вместе и инициализирует фильтры', function() {
             input('patterns.complex').enter('1 2, 5 демо');
             select('patterns.status').option(['0']);
             select('patterns.manager').option(['0']);
