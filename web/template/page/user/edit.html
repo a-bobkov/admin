@@ -19,7 +19,7 @@
 	            <td>
 	            	<input type="password" name="user_password" ng-model="userEdited.password" ng-required='!userEdited.id'/>
 					<ul class="error_list" ng-show='formUser.user_password.$invalid'>
-					    <li ng-show="formUser.user_password.$error.required">Необходимо ввести значение.</li>
+					    <li id='UserEditPasswordErrorRequired' ng-show="formUser.user_password.$error.required">Необходимо ввести значение.</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -28,7 +28,7 @@
 	            <td>
 	                <input type="password" name="user_password_confirm" ng-model="userPasswordConfirm" ui-equal-to="userEdited.password"/>
 					<ul class="error_list" ng-show='formUser.user_password_confirm.$invalid'>
-					    <li ng-show="formUser.user_password_confirm.$error.equal">Значение должно совпадать с паролем.</li>
+					    <li id='UserEditPasswordErrorEqual' ng-show="formUser.user_password_confirm.$error.equal">Значение должно совпадать с паролем.</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -86,7 +86,7 @@
 	                    <option value=''></option>
 	                </select>
 					<ul class="error_list" ng-show='formUser.user_dealer_city.$invalid'>
-					    <li ng-show="formUser.user_dealer_city.$error.required">Необходимо ввести значение.</li>
+					    <li id='UserEditCityErrorRequired' ng-show="formUser.user_dealer_city.$error.required">Необходимо ввести значение.</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -152,9 +152,9 @@
 		            </select>
 		            <br>
 					<ul class="error_list" ng-show='phoneForm.user_dealer_phone.$invalid'>
-					    <li ng-show="phoneForm.user_dealer_phone.$error.consistent">Необходимо заполнить все три поля - "номер", "с" и "по".</li>
-					    <li ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в правильном формате.</li>
-					    <li ng-show="phoneForm.user_dealer_phone.$error.period">Необходимо указать время "с" меньше, чем время "по".</li>
+					    <li id='UserEditPhoneErrorConsistent' ng-show="phoneForm.user_dealer_phone.$error.consistent">Необходимо заполнить все три поля - "номер", "с" и "по".</li>
+					    <li id='UserEditPhoneErrorNumber' ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в правильном формате.</li>
+					    <li id='UserEditPhoneErrorPeriod' ng-show="phoneForm.user_dealer_phone.$error.period">Необходимо указать время "с" меньше, чем время "по".</li>
 					</ul>
 		        </td>
 		    </tr>
@@ -183,9 +183,9 @@
 
 	<div class="span-10 prepend-top clear">
 	    <ul class="actions row">
-	        <li class="delete"><a ng-click='removeUser()'>Удалить</a></li>
+	        <li class="delete"><a id='UserEditRemoveUser' ng-click='removeUser()'>Удалить</a></li>
 	        <li class="list"><a href="#/userlist">Вернуться к списку</a></li>
-	        <li class="save"><input type="submit" value="Сохранить" ng-disabled='formUser.$invalid' ng-click='saveUser()'/></li>
+	        <li class="save"><input id='UserEditSaveUser' type="submit" value="Сохранить" ng-disabled='formUser.$invalid' ng-click='saveUser()'/></li>
 	    </ul>
 	</div>
 </form>
