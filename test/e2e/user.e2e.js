@@ -515,8 +515,6 @@ describe('MaxPoster frontend app', function() {
                 return q.then(function(arr) {
                     for (var i=arr.length; --i; ) {
                         if (arr[i].disp) {
-                            // console.log('first displayed error:');
-                            // console.log(arr[i].id+': '+arr[i].text);
                             return false;
                         }
                     }
@@ -538,5 +536,37 @@ describe('MaxPoster frontend app', function() {
             setSelect(element(by.select('dealerEdited.city')), 1);
             expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
         });
+    });
+
+    it('разрешает сохранение, если нет видимых ошибок', function() {
+        browser.get('users.html#/users/5/edit');
+        var getErrors = function() {
+            return element.all(by.css('.error_list li')).map(function(elem) {
+                return {
+                    id:   elem.getAttribute('id'),
+                    text: elem.getText(),
+                    disp: elem.isDisplayed()
+                };
+            });
+        }
+
+        var noDisplayed = function(q) {
+            return q.then(function(arr) {
+                for (var i=arr.length; --i; ) {
+                    if (arr[i].disp) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        };
+
+        expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
+
+        element.all(by.model('phone.phoneNumber')).get(0).clear();
+        expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
+
+        setSelect(element(by.select('userEdited.group')), 1);
+        expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
     });
 });
