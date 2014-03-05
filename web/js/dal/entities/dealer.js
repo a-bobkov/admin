@@ -16,7 +16,9 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
 })
 
 .factory('Dealer', function(Item) {
-    var Dealer = function () {};
+    var Dealer = function () {
+        this.phones = [{}, {}, {}];
+    };
 
     angular.extend(Dealer.prototype, Item.prototype);
 

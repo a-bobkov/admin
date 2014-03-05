@@ -262,8 +262,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $scope.userEdited = new User;      // данные нового пользователя по умолчанию
         $scope.userEdited.status = _.find($scope.statuses, {id: 'inactive'});
         $scope.userEdited.manager = _.find($scope.managers, {id: 0});
-        $scope.dealerEdited = new Dealer;  // данные нового дилера по умолчанию
-        $scope.dealerEdited.phones = [{}, {}, {}];
+        $scope.dealerEdited = new Dealer;
         $scope.userEdited.dealer = $scope.dealerEdited;
     }
 
