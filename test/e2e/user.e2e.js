@@ -197,8 +197,6 @@ describe('MaxPoster frontend app', function() {
 
     describe('Редактирование пользователя', function() {
         beforeEach(function() {
-            // var ptor = protractor.getInstance();
-            // ptor.ignoreSynchronization = true;
             browser.get('users.html#/users/5/edit');
             expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
         });
@@ -455,6 +453,90 @@ describe('MaxPoster frontend app', function() {
             element(by.id('UserEditRemoveUser')).click();
             browser.switchTo().alert().accept();
             expect(browser.getCurrentUrl()).toMatch('#\/userlist');
+        });
+    });
+
+    describe('Создание пользователя', function() {
+        beforeEach(function() {
+            browser.get('users.html#/usernew');
+            expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание /);
+        });
+
+        it('выводит ошибку, если пароль пустой', function() {
+            element(by.model('userEdited.password')).clear();
+            expect(element(by.id('UserEditPasswordErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит начальные значения полей', function() {
+            expect(element(by.model('userEdited.email')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('userEdited.password')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('userPasswordConfirm')).getAttribute('value')).toBeFalsy();
+            expect(element(by.selectedOption('userEdited.status')).getText()).toBe('Неактивный');
+            expect(element(by.selectedOption('userEdited.group')).getText()).toBeFalsy();
+            expect(element(by.selectedOption('dealerEdited.manager')).getText()).toBeFalsy();
+            expect(element(by.model('dealerEdited.company_name')).getAttribute('value')).toBeFalsy();
+            expect(element(by.selectedOption('dealerEdited.city')).getText()).toBeFalsy();
+            expect(element(by.selectedOption('dealerEdited.market')).getText()).toBeFalsy();
+            expect(element(by.selectedOption('dealerEdited.metro')).getText()).toBeFalsy();
+            expect(element(by.model('dealerEdited.adress')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.dealer_email')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.site')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.contact_name')).getAttribute('value')).toBeFalsy();
+            expect(element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value')).toBeFalsy();
+            expect(element.all(by.model('phone.phoneFrom')).get(0).getText()).toBeFalsy();
+            expect(element.all(by.model('phone.phoneTo')).get(0).getText()).toBeFalsy();
+            expect(element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value')).toBeFalsy();
+            expect(element.all(by.model('phone.phoneFrom')).get(1).getText()).toBeFalsy();
+            expect(element.all(by.model('phone.phoneTo')).get(1).getText()).toBeFalsy();
+            expect(element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value')).toBeFalsy();
+            expect(element.all(by.model('phone.phoneFrom')).get(2).getText()).toBeFalsy();
+            expect(element.all(by.model('phone.phoneTo')).get(2).getText()).toBeFalsy();
+            expect(element(by.model('dealerEdited.company_info')).getAttribute('value')).toBeFalsy();
+            expect(element(by.selectedOption('userEdited.site')).getText()).toBeFalsy();
+        });
+
+        it('разрешает сохранение, если нет видимых ошибок', function() {
+            var getErrors = function() {
+                return element.all(by.css('.error_list li')).map(function(elem) {
+                    return {
+                        id:   elem.getAttribute('id'),
+                        text: elem.getText(),
+                        disp: elem.isDisplayed()
+                    };
+                });
+            }
+
+            var noDisplayed = function(q) {
+                return q.then(function(arr) {
+                    for (var i=arr.length; --i; ) {
+                        if (arr[i].disp) {
+                            // console.log('first displayed error:');
+                            // console.log(arr[i].id+': '+arr[i].text);
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+            };
+
+            expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
+
+            element(by.model('userEdited.email')).sendKeys('1@1.co');
+            element(by.model('userEdited.password')).sendKeys('111');
+            element(by.model('userPasswordConfirm')).sendKeys('111');
+
+            expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
+
+            setSelect(element(by.select('userEdited.group')), 2);
+            expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
+
+            setSelect(element(by.select('dealerEdited.city')), 1);
+            expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
         });
     });
 });
