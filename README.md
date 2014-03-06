@@ -13,8 +13,22 @@ cd maxposter_frontend
 npm install
 ```
 
-3. Скопировать конфиги и адаптировать их под локальные условия
+3. Установить средство для запуска e2e-тестов
+```
+npm install -g protractor
+webdriver-manager update
+
+если не установлен JDK, то установить его (http://www.oracle.com/technetwork/java/javase/downloads/index.html) и 
+включить в переменную PATH каталог с java.exe (я включил C:\Windows\SysWOW64)
+
+перед запуском e2e-тестов необходимо запускать сервер:
+webdriver-manager start
+
+```
+
+4. Скопировать конфиги и адаптировать их под локальные условия
 
 ```
 cp config/karma.conf.js-distrib config/karma.conf.js
+cp config/protractor.conf.js-distrib config/protractor.conf.js
 ```
