@@ -202,7 +202,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         if ($scope.currentPage != 1) {
             $scope.currentPage = 1;
         } else {
-            pageUsers();
+            pageUsers(1, null);
         };
     }
 
@@ -228,6 +228,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $rootScope.savedUserListPaging = $scope.paging;
         if (newValue !== oldValue) {
             $window.scrollTo(0,0);
+            delete $scope.savedUserListNotice;
         }
     };
 
