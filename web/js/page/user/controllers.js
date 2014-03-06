@@ -81,7 +81,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     return Loader;
 })
 
-.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, data) {
+.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, $window, data) {
     var allUsers = data.users;
     $scope.optionsStatus = data.statuses;
     $scope.optionsManager = data.managers;
@@ -90,6 +90,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $scope.savedUserListNotice = $rootScope.savedUserListNotice;
         delete $rootScope.savedUserListNotice;
     }
+
+    $window.scrollTo(0,0);
 
     var filteredUsers = [];
 
@@ -227,12 +229,13 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         var begin = (($scope.currentPage - 1) * $scope.itemsPerPage),
             end = begin + $scope.itemsPerPage;
         $scope.pagedUsers = sortedUsers.slice(begin, end);
+        $window.scrollTo(0,0);
     };
 
     $scope.$watch('currentPage', pageUsers);
 })
 
-.controller('UserCtrl', function($scope, $rootScope, $location, data, dealerPhoneHours, users, User, Dealer) {
+.controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours, users) {
     angular.extend($scope, data);
     $scope.dealerPhoneHours = dealerPhoneHours;
 
@@ -243,6 +246,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     }
     $scope.userEdited.password = '';
     $scope.userPasswordConfirm = '';
+
+    $window.scrollTo(0,0);
 
     function makeUserCopy() {
         $scope.actionName = "Редактирование";
