@@ -81,7 +81,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     return Loader;
 })
 
-.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, $window, data) {
+.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data) {
     var allUsers = data.users;
     $scope.optionsStatus = data.statuses;
     $scope.optionsManager = data.managers;
@@ -90,8 +90,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         $scope.savedUserListNotice = $rootScope.savedUserListNotice;
         delete $rootScope.savedUserListNotice;
     }
-
-    $window.scrollTo(0,0);
 
     var filteredUsers = [];
 
@@ -223,12 +221,14 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     $scope.pagedUsers = [];
 
-    var pageUsers = function () {
+    var pageUsers = function (newValue, oldValue) {
         var begin = (($scope.paging.currentPage - 1) * $scope.paging.itemsPerPage),
             end = begin + $scope.paging.itemsPerPage;
         $scope.pagedUsers = sortedUsers.slice(begin, end);
         $rootScope.savedUserListPaging = $scope.paging;
-        $window.scrollTo(0,0);
+        if (newValue !== oldValue) {
+            $window.scrollTo(0,0);
+        }
     };
 
     var setPagingDefault = function() {
@@ -246,6 +246,24 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     }
 
     $scope.$watch('paging.currentPage', pageUsers);
+
+    $scope.$on('$routeChangeStart', function() {
+        // from https://developer.mozilla.org/en-US/docs/Web/API/Window.scrollX
+        var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+        var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        $rootScope.savedUserListPosition = {
+            x: x,
+            y: y
+        };
+    });
+
+    $timeout(function() {   // wait for DOM to restore scroll position
+        if ($rootScope.savedUserListPosition) {
+            $window.scrollTo($rootScope.savedUserListPosition.x, $rootScope.savedUserListPosition.y);
+        } else {
+            $window.scrollTo(0, 0);
+        }
+    });
 })
 
 .controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours, users) {
