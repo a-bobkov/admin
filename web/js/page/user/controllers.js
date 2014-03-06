@@ -403,6 +403,18 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
                 }
             }
 
+            scope.$watch('userEdited.isDealer()', function (otherModelValue) {
+                if (scope.userEdited.isDealer()) {
+                    validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
+                    validatePhoneNumber(scope.$eval(attrs.uiPhoneFields));
+                    validatePhonePeriod(scope.$eval(attrs.uiPhoneFields));
+                } else {
+                    ctrl.$setValidity('period', true);
+                    ctrl.$setValidity('number', true);
+                    ctrl.$setValidity('consistent', true);
+                }
+            });
+
             scope.$watch(attrs.uiPhoneFields, function (otherModelValue) {
                 validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
                 validatePhoneNumber(scope.$eval(attrs.uiPhoneFields));
