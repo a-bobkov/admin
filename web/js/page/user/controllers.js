@@ -221,18 +221,31 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         setSortingDefault();
     }
 
-    $scope.itemsPerPage = 25;
-    $scope.maxSize = 9;
     $scope.pagedUsers = [];
 
     var pageUsers = function () {
-        var begin = (($scope.currentPage - 1) * $scope.itemsPerPage),
-            end = begin + $scope.itemsPerPage;
+        var begin = (($scope.paging.currentPage - 1) * $scope.paging.itemsPerPage),
+            end = begin + $scope.paging.itemsPerPage;
         $scope.pagedUsers = sortedUsers.slice(begin, end);
+        $rootScope.savedUserListPaging = $scope.paging;
         $window.scrollTo(0,0);
     };
 
-    $scope.$watch('currentPage', pageUsers);
+    var setPagingDefault = function() {
+        $scope.paging = {
+            itemsPerPage: 25,
+            maxSize: 9,
+            currentPage: 1
+        };
+    }
+
+    if ($rootScope.savedUserListPaging) {
+        $scope.paging = $rootScope.savedUserListPaging;
+    } else {
+        setPagingDefault();
+    }
+
+    $scope.$watch('paging.currentPage', pageUsers);
 })
 
 .controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours, users) {
