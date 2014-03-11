@@ -8,7 +8,39 @@ angular.module('max.dal.lib.filters', [])
     MORE_PRECISELY:  1
 })
 
-.factory('StringContainsFilterConstructor', function (FiltersCompare) {
+.factory('FilterConstructor', function (FiltersCompare) {
+    return function (filterName) {
+        var that = this;
+
+        if (!filterName || !_.isString(filterName)) {
+            throw new Error("Имя фильтра должно быть задано строковым значением");
+        }
+
+        this.getName = function () {
+            return filterName;
+        };
+
+        this.value = "";
+
+        this.filter = function () {
+            return true;
+        };
+
+        this.compare = function () {
+            return FiltersCompare.LESS_PRECISELY;
+        };
+
+        this.getAsObject = function () {
+            var object = {};
+
+            object[that.getName()] = that.value;
+
+            return object;
+        };
+    };
+})
+
+.factory('StringContainsFilterConstructor', function (FilterConstructor, FiltersCompare) {
 
     /**
      * Фильтр на вхождение строки
@@ -22,19 +54,11 @@ angular.module('max.dal.lib.filters', [])
     return function StringContainsFilterConstructor(filterName, fieldNames) {
         var that = this;
 
-        if (!filterName || !_.isString(filterName)) {
-            throw new Error("Имя фильтра должно быть задано строковым значением");
-        }
+        _.bind(FilterConstructor, this, filterName)();
 
         if (_.isUndefined(fieldNames) || !_.isArray(fieldNames) || _.isEmpty(fieldNames)) {
             throw new Error("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         }
-
-        this.getName = function () {
-            return filterName;
-        };
-
-        this.value = "";
 
         this.filter = function (object) {
             var fieldName,
@@ -77,18 +101,10 @@ angular.module('max.dal.lib.filters', [])
 
             return FiltersCompare.LESS_PRECISELY;
         };
-
-        this.getAsObject = function () {
-            var object = {};
-
-            object[that.getName()] = that.value;
-
-            return object;
-        };
     };
 })
 
-.factory('TheSameValueFilterConstructor', function (FiltersCompare) {
+.factory('TheSameValueFilterConstructor', function (FilterConstructor, FiltersCompare) {
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
@@ -100,19 +116,11 @@ angular.module('max.dal.lib.filters', [])
     return function TheSameValueFilterConstructor(filterName, fieldName) {
         var that = this;
 
-        if (!filterName || !_.isString(filterName)) {
-            throw new Error("Имя фильтра должно быть задано строковым значением");
-        }
+        _.bind(FilterConstructor, this, filterName)();
 
         if (_.isUndefined(fieldName) || !_.isString(fieldName)) {
             throw new Error("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
         }
-
-        this.getName = function () {
-            return filterName;
-        };
-
-        this.value = "";
 
         this.filter = function (object) {
 
@@ -141,14 +149,6 @@ angular.module('max.dal.lib.filters', [])
             }
 
             return FiltersCompare.LESS_PRECISELY;
-        };
-
-        this.getAsObject = function () {
-            var object = {};
-
-            object[that.getName()] = that.value;
-
-            return object;
         };
     };
 });

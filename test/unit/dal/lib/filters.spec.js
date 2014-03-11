@@ -1,5 +1,80 @@
 'use strict';
 
+describe('FilterConstructor', function () {
+    var FilterConstructor;
+
+
+    beforeEach(function () {
+        module('max.dal.lib.filters');
+
+        inject(function(_FilterConstructor_) {
+            FilterConstructor = _FilterConstructor_;
+
+        });
+    });
+
+    describe('Экземпляр фильтра создается с помощью конструктора', function () {
+        it('Конструктор должен получить валидные параметры', function () {
+            expect(
+                new FilterConstructor('uniqueName') instanceof FilterConstructor
+            ).toBeTruthy();
+        });
+
+        it('Уникальное имя фильтра обязательно должно быть передано', function () {
+            expect(function () {
+                new FilterConstructor();
+            }).toThrow("Имя фильтра должно быть задано строковым значением");
+        });
+
+        it('Уникальное имя фильтра должно быть строкой', function () {
+            expect(function () {
+                new FilterConstructor(1);
+            }).toThrow("Имя фильтра должно быть задано строковым значением");
+        });
+    });
+
+    it('Экземпляр фильтра умеет возвращать свое уникальное название', function () {
+        var filterName = 'uniqueName',
+            filter = new FilterConstructor('uniqueName');
+
+        expect(filter.getName()).toEqual(filterName);
+    });
+
+    it('Экземпляр базового фильтра не фильтрует коллекцию', function () {
+        var obj1 = { id: 1, status: 'active'   },
+            obj2 = { id: 2, status: 'blocked'  },
+            objects = [ obj1, obj2 ],
+            filter = new FilterConstructor('test');
+
+        filter.value = 'another value';
+        expect(_.filter(objects, filter.filter)).toEqual(objects);
+    });
+
+    it('Экземпляр базового фильтра всегда возвращает что он менее точный', function () {
+        var FiltersCompare,
+            filter,
+            anotherFilter;
+
+        inject(function(_FiltersCompare_) {
+            FiltersCompare = _FiltersCompare_;
+        });
+
+        filter = new FilterConstructor('uniqueName');
+        anotherFilter = _.cloneDeep(filter);
+        filter.value = 'active';
+        anotherFilter.value = 'active';
+
+        expect(filter.compare(anotherFilter)).toBe(FiltersCompare.LESS_PRECISELY);
+    });
+
+    it('Экземпляр базового фильтра умеет возвращать свое состояние в виде объекта', function () {
+        var filter = new FilterConstructor('uniqueName', 'status' );
+        filter.value = 'pattern';
+
+        expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });
+    });
+});
+
 describe('StringContainsFilterConstructor', function () {
     var StringContainsFilterConstructor;
 
