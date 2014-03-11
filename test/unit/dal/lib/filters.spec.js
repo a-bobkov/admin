@@ -125,3 +125,103 @@ describe('StringContainsFilter', function () {
         });
     })
 });
+
+describe('TheSameValueFilter', function () {
+    var TheSameValueFilter;
+
+
+    beforeEach(function () {
+        module('max.dal.lib.filters');
+
+        inject(function(_TheSameValueFilter_) {
+            TheSameValueFilter = _TheSameValueFilter_;
+
+        });
+    });
+
+    describe('Экземпляр фильтра создается с помощью конструктора', function () {
+        it('Конструктор должен получить валидные параметры', function () {
+            expect(new TheSameValueFilter('uniqueName', 'status') instanceof TheSameValueFilter).toBeTruthy();
+        });
+
+        it('Уникальное имя фильтра обязательно должно быть передано', function () {
+            expect(function () {
+                new TheSameValueFilter();
+            }).toThrow("Имя фильтра должно быть задано строковым значением");
+        });
+
+        it('Уникальное имя фильтра должно быть строкой', function () {
+            expect(function () {
+                new TheSameValueFilter(1);
+            }).toThrow("Имя фильтра должно быть задано строковым значением");
+        });
+
+        it('Перечень полей должен быть передан', function () {
+            expect(function () {
+                new TheSameValueFilter('uniqueName');
+            }).toThrow("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
+        });
+    });
+
+    it('Экземпляр фильтра умеет возвращать свое уникальное название', function () {
+        var filterName = 'uniqueName',
+            filter = new TheSameValueFilter('uniqueName', 'status');
+
+        expect(filter.getName()).toEqual(filterName);
+    });
+
+    it('Экземпляр фильтра фильтрует коллекцию объектов по совпадению значения в указанном поле', function () {
+        var obj1 = { id: 1, status: 'active'   },
+            obj2 = { id: 2, status: 'blocked'  },
+            obj3 = { id: 2, status: 'inactive' },
+            obj4 = { id: 3, status: 'active'   },
+            objects = [ obj1, obj2, obj3, obj4 ],
+            filter = new TheSameValueFilter('test', 'status');
+
+        filter.value = 'another value';
+        expect(_.filter(objects, filter.filter)).toEqual([]);
+
+        filter.value = 'active';
+        expect(_.filter(objects, filter.filter)).toEqual([ obj1, obj4 ]);
+
+        filter.value = 'blocked';
+        expect(_.filter(objects, filter.filter)).toEqual([ obj2 ]);
+    });
+
+    describe('Экземпляр фильтра умеет себя сравнивать', function () {
+        var FiltersCompare,
+            filter,
+            anotherFilter;
+
+        beforeEach(function () {
+            inject(function(_FiltersCompare_) {
+                FiltersCompare = _FiltersCompare_;
+            });
+
+            filter = new TheSameValueFilter('uniqueName', 'status');
+            anotherFilter = _.cloneDeep(filter);
+        });
+
+        it('Нельзя стравнивать фильтры с разными названиями', function () {
+            anotherFilter = new TheSameValueFilter('anotherFilter', 'status' );
+
+            expect(function () {
+                filter.compare(anotherFilter);
+            }).toThrow("Нельзя стравнивать разные фильтры");
+        });
+
+        it('Фильтры могут быть одинаковой точности', function () {
+            filter.value = 'active';
+            anotherFilter.value = 'active';
+
+            expect(filter.compare(anotherFilter)).toBe(FiltersCompare.THE_SAME);
+        });
+
+        it('Фильтры могут быть разными', function () {
+            filter.value = 'active';
+            anotherFilter.value = 'blocked';
+
+            expect(filter.compare(anotherFilter)).toBe(FiltersCompare.LESS_PRECISELY);
+        });
+    })
+});
