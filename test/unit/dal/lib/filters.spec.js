@@ -1,57 +1,59 @@
 'use strict';
 
-describe('StringContainsFilter', function () {
-    var StringContainsFilter;
+describe('StringContainsFilterConstructor', function () {
+    var StringContainsFilterConstructor;
 
 
     beforeEach(function () {
         module('max.dal.lib.filters');
 
-        inject(function(_StringContainsFilter_) {
-            StringContainsFilter = _StringContainsFilter_;
+        inject(function(_StringContainsFilterConstructor_) {
+            StringContainsFilterConstructor = _StringContainsFilterConstructor_;
 
         });
     });
 
     describe('Экземпляр фильтра создается с помощью конструктора', function () {
         it('Конструктор должен получить валидные параметры', function () {
-            expect(new StringContainsFilter('uniqueName', ['id']) instanceof StringContainsFilter).toBeTruthy();
+            expect(
+                new StringContainsFilterConstructor('uniqueName', ['id']) instanceof StringContainsFilterConstructor
+            ).toBeTruthy();
         });
 
         it('Уникальное имя фильтра обязательно должно быть передано', function () {
             expect(function () {
-                new StringContainsFilter();
+                new StringContainsFilterConstructor();
             }).toThrow("Имя фильтра должно быть задано строковым значением");
         });
 
         it('Уникальное имя фильтра должно быть строкой', function () {
             expect(function () {
-                new StringContainsFilter(1);
+                new StringContainsFilterConstructor(1);
             }).toThrow("Имя фильтра должно быть задано строковым значением");
         });
 
         it('Перечень полей должен быть передан', function () {
             expect(function () {
-                new StringContainsFilter('uniqueName');
+                new StringContainsFilterConstructor('uniqueName');
             }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         });
 
         it('Перечень полей должен быть массивом', function () {
             expect(function () {
-                new StringContainsFilter('uniqueName', '123');
+                new StringContainsFilterConstructor('uniqueName', '123');
             }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         });
 
         it('Перечень полей должен быть не пустым массивом', function () {
             expect(function () {
-                new StringContainsFilter('uniqueName', []);
+                new StringContainsFilterConstructor('uniqueName', []);
             }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         });
     });
 
     it('Экземпляр фильтра умеет возвращать свое уникальное название', function () {
         var filterName = 'uniqueName',
-            filter = new StringContainsFilter(filterName, [ 'id' ]);
+            filter = new StringContainsFilterConstructor(filterName, [ 'id' ]);
         expect(filter.getName()).toEqual(filterName);
     });
 
@@ -62,7 +64,7 @@ describe('StringContainsFilter', function () {
             obj4 = { id: 4, company_name: 'Салон четыре', email: '1@four.com' },
             obj5 = { id: 21, company_name: 'Салон 21', email: 'one@twenty-one.com' },
             objects = [ obj1, obj2, obj3, obj4, obj5 ],
-            filter = new StringContainsFilter('test', ['id', 'email', 'company_name']);
+            filter = new StringContainsFilterConstructor('test', ['id', 'email', 'company_name']);
 
         filter.value = 1;
         expect(_.filter(objects, filter.filter)).toEqual([ obj1, obj2, obj4, obj5 ]);
@@ -90,12 +92,12 @@ describe('StringContainsFilter', function () {
             });
 
             filterName = 'uniqueName';
-            filter = new StringContainsFilter(filterName, [ 'id' ]);
+            filter = new StringContainsFilterConstructor(filterName, [ 'id' ]);
             anotherFilter = _.cloneDeep(filter);
         });
 
         it('Нельзя стравнивать фильтры с разными названиями', function () {
-            anotherFilter = new StringContainsFilter('anotherFilter', [ 'id' ]);
+            anotherFilter = new StringContainsFilterConstructor('anotherFilter', [ 'id' ]);
 
             expect(function () {
                 filter.compare(anotherFilter);
@@ -125,53 +127,55 @@ describe('StringContainsFilter', function () {
     });
 
     it('Экземпляр фильтра умеет возвращать свое состояние в виде объекта', function () {
-        var filter = new StringContainsFilter('uniqueName', [ 'id' ]);
+        var filter = new StringContainsFilterConstructor('uniqueName', [ 'id' ]);
         filter.value = 'pattern';
 
         expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });
     });
 });
 
-describe('TheSameValueFilter', function () {
-    var TheSameValueFilter;
+describe('TheSameValueFilterConstructor', function () {
+    var TheSameValueFilterConstructor;
 
 
     beforeEach(function () {
         module('max.dal.lib.filters');
 
-        inject(function(_TheSameValueFilter_) {
-            TheSameValueFilter = _TheSameValueFilter_;
+        inject(function(_TheSameValueFilterConstructor_) {
+            TheSameValueFilterConstructor = _TheSameValueFilterConstructor_;
 
         });
     });
 
     describe('Экземпляр фильтра создается с помощью конструктора', function () {
         it('Конструктор должен получить валидные параметры', function () {
-            expect(new TheSameValueFilter('uniqueName', 'status') instanceof TheSameValueFilter).toBeTruthy();
+            expect(
+                new TheSameValueFilterConstructor('uniqueName', 'status') instanceof TheSameValueFilterConstructor
+            ).toBeTruthy();
         });
 
         it('Уникальное имя фильтра обязательно должно быть передано', function () {
             expect(function () {
-                new TheSameValueFilter();
+                new TheSameValueFilterConstructor();
             }).toThrow("Имя фильтра должно быть задано строковым значением");
         });
 
         it('Уникальное имя фильтра должно быть строкой', function () {
             expect(function () {
-                new TheSameValueFilter(1);
+                new TheSameValueFilterConstructor(1);
             }).toThrow("Имя фильтра должно быть задано строковым значением");
         });
 
         it('Перечень полей должен быть передан', function () {
             expect(function () {
-                new TheSameValueFilter('uniqueName');
+                new TheSameValueFilterConstructor('uniqueName');
             }).toThrow("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
         });
     });
 
     it('Экземпляр фильтра умеет возвращать свое уникальное название', function () {
         var filterName = 'uniqueName',
-            filter = new TheSameValueFilter('uniqueName', 'status');
+            filter = new TheSameValueFilterConstructor('uniqueName', 'status');
 
         expect(filter.getName()).toEqual(filterName);
     });
@@ -182,7 +186,7 @@ describe('TheSameValueFilter', function () {
             obj3 = { id: 2, status: 'inactive' },
             obj4 = { id: 3, status: 'active'   },
             objects = [ obj1, obj2, obj3, obj4 ],
-            filter = new TheSameValueFilter('test', 'status');
+            filter = new TheSameValueFilterConstructor('test', 'status');
 
         filter.value = 'another value';
         expect(_.filter(objects, filter.filter)).toEqual([]);
@@ -204,12 +208,12 @@ describe('TheSameValueFilter', function () {
                 FiltersCompare = _FiltersCompare_;
             });
 
-            filter = new TheSameValueFilter('uniqueName', 'status');
+            filter = new TheSameValueFilterConstructor('uniqueName', 'status');
             anotherFilter = _.cloneDeep(filter);
         });
 
         it('Нельзя стравнивать фильтры с разными названиями', function () {
-            anotherFilter = new TheSameValueFilter('anotherFilter', 'status' );
+            anotherFilter = new TheSameValueFilterConstructor('anotherFilter', 'status' );
 
             expect(function () {
                 filter.compare(anotherFilter);
@@ -232,7 +236,7 @@ describe('TheSameValueFilter', function () {
     });
 
     it('Экземпляр фильтра умеет возвращать свое состояние в виде объекта', function () {
-        var filter = new TheSameValueFilter('uniqueName', 'status' );
+        var filter = new TheSameValueFilterConstructor('uniqueName', 'status' );
         filter.value = 'pattern';
 
         expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });

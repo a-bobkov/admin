@@ -8,7 +8,7 @@ angular.module('max.dal.lib.filters', [])
     MORE_PRECISELY:  1
 })
 
-.factory('StringContainsFilter', function (FiltersCompare) {
+.factory('StringContainsFilterConstructor', function (FiltersCompare) {
 
     /**
      * Фильтр на вхождение строки
@@ -19,7 +19,7 @@ angular.module('max.dal.lib.filters', [])
      * @throw Error При вызове конструктора с неверными параметрами
      *
      */
-    return function StringContainFilter(filterName, fieldNames) {
+    return function StringContainsFilterConstructor(filterName, fieldNames) {
         var that = this;
 
         if (!filterName || !_.isString(filterName)) {
@@ -88,7 +88,7 @@ angular.module('max.dal.lib.filters', [])
     };
 })
 
-.factory('TheSameValueFilter', function (FiltersCompare) {
+.factory('TheSameValueFilterConstructor', function (FiltersCompare) {
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
@@ -97,7 +97,7 @@ angular.module('max.dal.lib.filters', [])
      * @throw Error При вызове конструктора с неверными параметрами
      *
      */
-    return function TheSameValueFilter(filterName, fieldName) {
+    return function TheSameValueFilterConstructor(filterName, fieldName) {
         var that = this;
 
         if (!filterName || !_.isString(filterName)) {
