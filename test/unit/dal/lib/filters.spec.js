@@ -56,8 +56,7 @@ describe('StringContainsFilter', function () {
     });
 
     it('Экземпляр фильтра фильтрует коллекцию объектов на условии ИЛИ по всем перечисленным в конструкторе полям', function () {
-        var filter,
-            obj1 = { id: 1, company_name: 'Салон один', email: 'one@one.com' },
+        var obj1 = { id: 1, company_name: 'Салон один', email: 'one@one.com' },
             obj2 = { id: 2, company_name: 'Салон 111', email: 'one@two.com' },
             obj3 = { id: 3, company_name: 'Салон три', email: 'one@three.com' },
             obj4 = { id: 4, company_name: 'Салон четыре', email: '1@four.com' },
