@@ -76,7 +76,15 @@ angular.module('max.dal.lib.filters', [])
             }
 
             return FiltersCompare.LESS_PRECISELY;
-        }
+        };
+
+        this.getAsObject = function () {
+            var object = {};
+
+            object[that.getName()] = that.value;
+
+            return object;
+        };
     };
 })
 
@@ -133,6 +141,14 @@ angular.module('max.dal.lib.filters', [])
             }
 
             return FiltersCompare.LESS_PRECISELY;
-        }
+        };
+
+        this.getAsObject = function () {
+            var object = {};
+
+            object[that.getName()] = that.value;
+
+            return object;
+        };
     };
 });

@@ -122,7 +122,14 @@ describe('StringContainsFilter', function () {
 
             expect(filter.compare(anotherFilter)).toBe(FiltersCompare.LESS_PRECISELY);
         });
-    })
+    });
+
+    it('Экземпляр фильтра умеет возвращать свое состояние в виде объекта', function () {
+        var filter = new StringContainsFilter('uniqueName', [ 'id' ]);
+        filter.value = 'pattern';
+
+        expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });
+    });
 });
 
 describe('TheSameValueFilter', function () {
@@ -222,5 +229,12 @@ describe('TheSameValueFilter', function () {
 
             expect(filter.compare(anotherFilter)).toBe(FiltersCompare.LESS_PRECISELY);
         });
-    })
+    });
+
+    it('Экземпляр фильтра умеет возвращать свое состояние в виде объекта', function () {
+        var filter = new TheSameValueFilter('uniqueName', 'status' );
+        filter.value = 'pattern';
+
+        expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });
+    });
 });
