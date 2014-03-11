@@ -1,0 +1,7 @@
+a {cursor: pointer}
+
+.routeSpinner {
+    background: url("../images/ajax_loader_orange_64.gif") no-repeat scroll center center;
+    width: 100%;
+    height: 400px;
+}

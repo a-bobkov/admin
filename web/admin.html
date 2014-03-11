@@ -14,12 +14,7 @@
     <!--[if IE 8]>
         <script src="js/lib/es5-shim/es5-shim.min.js"></script>
     <![endif]-->
-    <link rel="stylesheet" href="css/user.css">
-    <script type="text/javascript">
-        window.onload = function() {
-            document.getElementById("content_frame").style.display = "block";
-        };
-    </script>
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body ng-app="RootApp-mocked">
 <div class="container" id="container">
@@ -51,8 +46,9 @@
     </div>
 </div>
 
-<div id="content_frame" class="span-24 last hide">
-    <div ng-view></div>
+<div id="content_frame" class="span-24 last" ng-controller="AppCtrl">
+    <div class='routeSpinner' ng-show="viewRouteSpinner"></div>
+    <div ng-view ng-hide="viewRouteSpinner"></div>
 </div>
 
 <noscript>
