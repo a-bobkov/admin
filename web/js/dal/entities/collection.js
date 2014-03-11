@@ -362,6 +362,7 @@ var inheritCollection = function(child, parent) {
 
 var CollectionError = function(message) {
     this.message = message || "Неопределенная ошибка";
+    this.stack = (new Error()).stack;
     //console.log(this.message);
 }
 CollectionError.prototype = new Error();

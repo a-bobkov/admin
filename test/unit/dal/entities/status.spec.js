@@ -57,7 +57,7 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         actualSuccess = statuses._setAll(data);
 
         $rootScope.$digest();
-        expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"idd":"blocked","nameMale":"Блокированный","namePlural":"Блокированные"}'}]);
+        expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"idd":"blocked","nameMale":"Блокированный","namePlural":"Блокированные"}', stack: jasmine.any(String)}]);
         expect(actualSuccess).toEqualData(expected);
         // expect(actualError.errorMessage).toEqual(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
     });

@@ -157,8 +157,8 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             expect($log.error).toHaveBeenCalledWith([
-                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3'},
-                {message: 'Нет параметра id в элементе: {"ident":2}'}
+                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3', stack: jasmine.any(String)},
+                {message: 'Нет параметра id в элементе: {"ident":2}', stack: jasmine.any(String)}
             ]);
         });
 
@@ -188,7 +188,7 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
             expect($log.error).toHaveBeenCalledWith([
-                {message : 'Не найдена ссылка для элемента: {"id":22} в коллекции: cities'}
+                {message : 'Не найдена ссылка для элемента: {"id":22} в коллекции: cities', stack: jasmine.any(String)}
             ]);
         });
     });

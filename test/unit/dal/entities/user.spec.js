@@ -330,11 +330,11 @@ describe('Сервисы users и userApi', function() {
 
             $rootScope.$digest();
             expect($log.error).toHaveBeenCalledWith([ 
-                { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}' }, 
-                { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}' }, 
-                { message: 'Нет параметра id в элементе: {"ident":6}' }, 
-                { message: 'Не найдена ссылка для элемента: {"id":55} в коллекции: cities' }, 
-                { message: 'Неизвестная секция: roles' } 
+                { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}', stack: jasmine.any(String) }, 
+                { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}', stack: jasmine.any(String) }, 
+                { message: 'Нет параметра id в элементе: {"ident":6}', stack: jasmine.any(String) }, 
+                { message: 'Не найдена ссылка для элемента: {"id":55} в коллекции: cities', stack: jasmine.any(String) }, 
+                { message: 'Неизвестная секция: roles', stack: jasmine.any(String) } 
             ]);
         });
 

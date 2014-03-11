@@ -227,6 +227,7 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
+            delete actualError.data.errors[0].stack;
             expect(actualError.data).toEqualData({
                 status: 'error',
                 message : 'Ошибка при создании',
@@ -351,6 +352,7 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
+            delete actualError.data.errors[0].stack;
             expect(actualError.data).toEqual({
                 status: 'error',
                 message : 'Ошибка при обновлении',
