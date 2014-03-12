@@ -182,7 +182,8 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
         } else {
             return [404, {
                 status: 'error',
-                message: 'Пользователь не найден'
+                message: 'Ошибка при получении',
+                errors: 'Пользователь не найден'
             }];
         }
     });
@@ -198,34 +199,31 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
     var regexPost = /^\/api2\/users\/$/;
     $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
         var dataObj = addPrefix(angular.fromJson(data));
-        var respond;
-        var errorMessages = [];
 
-        var user = new _User;
-        if (dataObj._dealer) {
-            var dealer = new _Dealer;
-            respond = dealer._fillItem(dataObj._dealer);
-            errorMessages = _.union(errorMessages, respond.errorMessages);
-            dealer.id = 1 + _.max(usersData, function(item) {
-                return !item._dealer || item._dealer.id;
+        try {
+            var user = new _User;
+            if (dataObj._dealer) {
+                var dealer = new _Dealer;
+                dealer._fillItem(dataObj._dealer);
+                dealer.id = 1 + _.max(usersData, function(item) {
+                    return !item._dealer || item._dealer.id;
+                }).id;
+                delete dataObj._dealer;
+                user._dealer = dealer;
+            }
+
+            user._fillItem(dataObj);
+            user.id = 1 + _.max(usersData, function(item) {
+                return item.id;
             }).id;
-            delete dataObj._dealer;
-            user._dealer = dealer;
-        }
-
-        respond = user._fillItem(dataObj);
-        errorMessages = _.union(errorMessages, respond.errorMessages);
-        user.id = 1 + _.max(usersData, function(item) {
-            return item.id;
-        }).id;
-
-        if (errorMessages.length) {
+        } catch (err) {
             return [400, {
                 status: 'error',
                 message: 'Ошибка при создании',
-                errors: errorMessages
+                errors: err.message
             }];
         }
+
         // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
         usersData.push(user);
         return [200, {
@@ -242,28 +240,25 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
         var userIdx = _.findIndex(usersData, {id: id});
         if (userIdx !== -1) {
             var dataObj = addPrefix(angular.fromJson(data));
-            var respond;
-            var errorMessages;
-            var dealer = new _Dealer;
-            respond = dealer._fillItem(dataObj._dealer);
-            errorMessages = _.union(errorMessages, respond.errorMessages);
-            if (!dealer.id) {
-                dealer.id = 1 + _.max(usersData, function(item) {
-                    return !item._dealer || item._dealer.id;
-                }).id;
-            }
-            delete dataObj._dealer;
 
-            var user = new _User;
-            respond = user._fillItem(dataObj);
-            errorMessages = _.union(errorMessages, respond.errorMessages);
-            user._dealer = dealer;
+            try {
+                var dealer = new _Dealer;
+                dealer._fillItem(dataObj._dealer);
+                if (!dealer.id) {
+                    dealer.id = 1 + _.max(usersData, function(item) {
+                        return !item._dealer || item._dealer.id;
+                    }).id;
+                }
+                delete dataObj._dealer;
 
-            if (errorMessages.length) {
+                var user = new _User;
+                user._fillItem(dataObj);
+                user._dealer = dealer;
+            } catch (err) {
                 return [400, {
                     status: 'error',
                     message: 'Ошибка при обновлении',
-                    errors: errorMessages
+                    errors: err.message
                 }];
             }
             usersData[userIdx] = user;
@@ -276,7 +271,8 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
         } else {
             return [404, {
                 status: 'error',
-                message: 'Пользователь не найден'
+                message: 'Ошибка при обновлении',
+                errors: 'Пользователь не найден'
             }];
         }
     });

@@ -41,13 +41,7 @@ return (function() {
         var self = this;
         return Collection.prototype.get.call(this, id).then(function (item) {
             return self._getRestApiProvider().get(id).then(function(itemData){
-                var respond = item._fillItem(itemData);
-                var errorMessages = respond.errorMessages;
-                if (errorMessages.length) {
-                    $log.error(errorMessages);
-                    return $q.reject({response: respond.result, errorMessage: errorMessages});
-                }
-                return respond.result;
+                return item._fillItem(itemData);
             });
         })
     };    

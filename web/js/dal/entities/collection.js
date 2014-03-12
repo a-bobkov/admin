@@ -59,14 +59,13 @@ var Collection = (function() {
      */
     var addItem = function(itemData) {
         var newItem;
-        var errorMessages = [];
 
         if (typeof itemData.id === 'undefined') {
-            errorMessages.push(new CollectionError('Нет параметра id в элементе: ' + angular.toJson(itemData)));
+            throw new CollectionError('Нет параметра id в элементе: ' + angular.toJson(itemData));
         } else if (Object.keys(itemData).length === 1) {    // ссылка
             newItem = findItem.call(this, itemData.id);
             if (!newItem) {
-                errorMessages.push(new CollectionError('Не найдена ссылка для элемента: ' + angular.toJson(itemData) + ' в коллекции: ' + findCollection(this).collectionName));
+                throw new CollectionError('Не найдена ссылка для элемента: ' + angular.toJson(itemData) + ' в коллекции: ' + findCollection(this).collectionName);
             }
         } else {
             newItem = findItem.call(this, itemData.id);
@@ -76,9 +75,8 @@ var Collection = (function() {
                 getCollectionItems(this).push(newItem);
             }
             var respond = newItem._fillItem(itemData);
-            errorMessages = _.union(errorMessages, respond.errorMessages);
         }
-        return {result: newItem, errorMessages: errorMessages};    // если нет id, то вернется result: undefined
+        return newItem;
     };
 
     /**
@@ -89,17 +87,14 @@ var Collection = (function() {
      */
     var addArray = function(itemsData) {
         var newArray = [];
-        var errorMessages = [];
 
         if (!angular.isArray(itemsData)) {
-            errorMessages.push(new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData)));
+            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
         }
         for (var i = 0, length = itemsData.length; i < length; i++) {
-            var respond = addItem.call(this, itemsData[i]);
-            newArray[i] = respond.result;
-            errorMessages = _.union(errorMessages, respond.errorMessages)
+            newArray[i] = addItem.call(this, itemsData[i]);
         }
-        return {result: newArray, errorMessages: errorMessages};
+        return newArray;
     };
 
     /**
@@ -147,12 +142,7 @@ var Collection = (function() {
      * @returns {Array}
      */
     Collection.prototype._setAll = function(itemsData) {
-        var respond = addArray.call(this, itemsData);
-        var errorMessages = respond.errorMessages;
-        if (errorMessages.length) {
-            $log.error(errorMessages);
-        }
-        return respond.result;
+        return addArray.call(this, itemsData);
     };
 
     /**
@@ -185,12 +175,11 @@ var Collection = (function() {
      * @returns {Promise}
      */
     Collection.prototype.get = function(id) {
+        var self = this;
         return this.getAll().then(function (response) {
             var item = _.find(response, {id: id});
             if (!item) {
-                var errorMessage = 'В коллекции не найден элемент с id: ' + id;
-                $log.error(errorMessage);
-                return $q.reject({response: response, errorMessage: errorMessage});
+                throw new CollectionError('В коллекции ' + findCollection(self).collectionName + ' не найден элемент с id: ' + id);
             }
             return item;
         })
@@ -205,28 +194,14 @@ var Collection = (function() {
         if (itemData.id) {      // требуется обновление элемента
             var oldItem = findItem.call(self, itemData.id);
             if (!oldItem) {
-                var errorMessage = 'При обновлении в коллекции не найден элемент с id: ' + itemData.id;
-                $log.error(errorMessage);
-                return $q.reject({errorMessage: errorMessage});
+                throw new CollectionError('При обновлении в коллекции не найден элемент с id: ' + itemData.id);
             }
             return self._getRestApiProvider().update(itemData._serialize()).then(function(itemData){
-                var respond = oldItem._fillItem(itemData);
-                var errorMessages = respond.errorMessages;
-                if (errorMessages.length) {
-                    $log.error(errorMessages);
-                    return $q.reject({response: respond.result, errorMessage: errorMessages});
-                }
-                return respond.result;
+                return oldItem._fillItem(itemData);
             });
         } else {
             return self._getRestApiProvider().create(itemData._serialize()).then(function(itemData){
-                var respond = addItem.call(self, itemData);
-                var errorMessages = respond.errorMessages;
-                if (errorMessages.length) {
-                    $log.error(errorMessages);
-                    return $q.reject({response: respond.result, errorMessage: errorMessages});
-                }
-                return respond.result;
+                return addItem.call(self, itemData);
             });
         }
     };
@@ -242,9 +217,7 @@ var Collection = (function() {
                 return getCollectionItems(self).splice(findIndex.call(self, id), 1);
             });
         }
-        var errorMessage = 'При удалении в коллекции не найден элемент с id: ' + id;
-        $log.error(errorMessage);
-        return $q.reject({errorMessage: errorMessage});
+        throw new CollectionError('При удалении в коллекции не найден элемент с id: ' + id);
     };
 
     /**
@@ -257,22 +230,16 @@ var Collection = (function() {
             throw new CollectionError('Не определен метод REST API для загрузки зависимых справочников коллекции.');
         }
         return getDirectories().then(function(directoriesData){
-            var newDirectories = {},
-                errorMessages = [];
+            var newDirectories = {};
 
             for (var key in directoriesData) {
                 var collection = findEntity(key);
                 if (!collection) {
-                    errorMessages.push(new CollectionError('Неизвестная секция: ' + key));
+                    throw new CollectionError('Неизвестная секция: ' + key);
                     newDirectories[key] = undefined;
                 } else {
-                    var respond = addArray.call(collection, directoriesData[key]);
-                    newDirectories[key] = respond.result;
-                    errorMessages = _.union(errorMessages, respond.errorMessages);
+                    newDirectories[key] = addArray.call(collection, directoriesData[key]);
                 }
-            }
-            if (errorMessages.length) {
-                $log.error(errorMessages);
             }
             return newDirectories;
         })
@@ -311,23 +278,20 @@ return Collection;
      * метод для разбора ответа от сервера, вызывается синхронно
      */
     Item.prototype._fillItem = function(itemData) {
-        var errorMessages = [];
         for (var key in itemData) {
             var attr = itemData[key],
                 refElem = attr;
             if (angular.isObject(attr)) {
                 var entity = findEntity(key);
                 if (!entity) {
-                    errorMessages.push(new CollectionError('Неизвестный ссылочный параметр ' + key + ' в элементе с id: ' + itemData.id));
+                    throw new CollectionError('Неизвестный ссылочный параметр ' + key + ' в элементе с id: ' + itemData.id);
                 } else {
-                    var respond = addItem.call(entity, attr);
-                    refElem = respond.result;
-                    errorMessages = _.union(errorMessages, respond.errorMessages);
+                    refElem = addItem.call(entity, attr);
                 }
             }
             this[key] = refElem;
         }
-        return {result: this, errorMessages: errorMessages};
+        return this;
     };
 
     /**
@@ -363,7 +327,7 @@ var inheritCollection = function(child, parent) {
 var CollectionError = function(message) {
     this.message = message || "Неопределенная ошибка";
     this.stack = (new Error()).stack;
-    //console.log(this.message);
+    // console.log(this.message);
 }
 CollectionError.prototype = new Error();
 CollectionError.prototype.constructor = CollectionError;

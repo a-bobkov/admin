@@ -290,52 +290,70 @@ describe('Сервисы users и userApi', function() {
             expect(user.market).toBe(market);
         });
 
-        it('проверять корректность ответа при загрузке опций с сервера и выдавать полный список ошибок', function() {
+        it('при загрузке опций с сервера - выбрасывать ошибку при отсутствии массива в секции', function() {
             var directoriesData = {
                     groups:
-                        {id: 1, name: 'Роль один'},
-                    managers: [
-                        {name: 'Менеджер один'},
-                        {id: 4, name: 'Менеджер два'}
-                    ],
-                    cities: [
-                        {id: 5, name: 'Город один'},
-                        {id: 6, name: 'Город два'}
-                    ],
-                    markets: [
-                        {id: 7, name: 'Рынок один', city: {id: 5}},
-                        {id: 8, name: 'Рынок два', city: {ident: 6}}
-                    ],
-                    metros: [
-                        {id: 9, name: 'Метро один', city: {id: 55}},
-                        {id: 10, name: 'Метро два', city: {id: 6}}
-                    ],
-                    roles: [
-                        {id: 11, name: 'Сайт один'},
-                        {id: 12, name: 'Сайт два'}
-                    ]
+                        {id: 1, name: 'Роль один'}
                 },
                 actualSuccess,
                 actualError;
 
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
+
+            expect(function() {
+                users.getDirectories();
+                $rootScope.$digest();
+            }).toThrow('Отсутствует массив в данных: {"id":1,"name":"Роль один"}');
+        });
+
+        it('при загрузке опций с сервера - выбрасывать ошибку при отсутствии id в элементе', function() {
+            var directoriesData = {
+                    managers: [
+                        {name: 'Менеджер один'}
+                    ]
+                }
 
             spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
-            spyOn($log, 'error').andReturn(null);
 
-            users.getDirectories().then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
+            expect(function() {
+                users.getDirectories();
+                $rootScope.$digest();
+            }).toThrow('Нет параметра id в элементе: {"name":"Менеджер один"}');
+        });
 
-            $rootScope.$digest();
-            expect($log.error).toHaveBeenCalledWith([ 
-                { message: 'Отсутствует массив в данных: {"id":1,"name":"Роль один"}', stack: jasmine.any(String) }, 
-                { message: 'Нет параметра id в элементе: {"name":"Менеджер один"}', stack: jasmine.any(String) }, 
-                { message: 'Нет параметра id в элементе: {"ident":6}', stack: jasmine.any(String) }, 
-                { message: 'Не найдена ссылка для элемента: {"id":55} в коллекции: cities', stack: jasmine.any(String) }, 
-                { message: 'Неизвестная секция: roles', stack: jasmine.any(String) } 
-            ]);
+        it('при загрузке опций с сервера - выбрасывать ошибку если в коллекции не найден элемент по ссылке', function() {
+            var directoriesData = {
+                    cities: [
+                        {id: 5, name: 'Город один'},
+                        {id: 6, name: 'Город два'}
+                    ],
+                    metros: [
+                        {id: 9, name: 'Метро один', city: {id: 55}}
+                    ]
+                };
+
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
+
+            expect(function() {
+                users.getDirectories();
+                $rootScope.$digest();
+            }).toThrow('Не найдена ссылка для элемента: {"id":55} в коллекции: cities');
+        });
+
+        it('при загрузке опций с сервера - выбрасывать ошибку для секции, если не найдена одноименная коллекция', function() {
+            var directoriesData = {
+                    roles: [
+                        {id: 1, name: 'Роль один'},
+                        {id: 2, name: 'Роль два'}
+                    ]
+                };
+
+            spyOn(userApi, 'getDirectories').andReturn($q.when(directoriesData));
+
+            expect(function() {
+                users.getDirectories();
+                $rootScope.$digest();
+            }).toThrow('Неизвестная секция: roles');
         });
 
         it('при сохранении без id - передавать в $http объект со ссылками в форме {id: ??}, кроме dealer', function() {

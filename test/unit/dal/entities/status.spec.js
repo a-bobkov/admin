@@ -38,28 +38,17 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
         expect(actualSuccess).toEqualData(expected);
     });
 
-    it('при инициализации выдавать ошибку при отсутствии id в начальных значениях и пропускать их', function() {
+    it('при инициализации выбрасывать ошибку при отсутствии id в элементе', function() {
         var data = [
                 { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
                 { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
                 { 'idd': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }
-            ],
-            expected = [
-                { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
-                { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
-                undefined
-            ],
-            actualSuccess,
-            actualError;
+            ];
 
-        spyOn($log, 'error').andReturn(null);
-
-        actualSuccess = statuses._setAll(data);
-
-        $rootScope.$digest();
-        expect($log.error).toHaveBeenCalledWith([{message: 'Нет параметра id в элементе: {"idd":"blocked","nameMale":"Блокированный","namePlural":"Блокированные"}', stack: jasmine.any(String)}]);
-        expect(actualSuccess).toEqualData(expected);
-        // expect(actualError.errorMessage).toEqual(['Нет параметра id в элементе: {"name":"Без идентификатора"}']);
+        expect(function() {
+            statuses._setAll(data);
+            $rootScope.$digest();
+        }).toThrow('Нет параметра id в элементе: {"idd":"blocked","nameMale":"Блокированный","namePlural":"Блокированные"}');
     });
 
     it('возвращать массив объектов', function() {
@@ -112,21 +101,10 @@ describe('Сервис statuses из модуля app.dal.entities.status', func
     });
 
     it('должен возвращать ошибку, если требуемый элемент не найден в коллекции', function() {
-        var expected = {
-            'id': 'active',
-            'nameMale': 'Активный',
-            'namePlural': 'Активные'
-        },
-        actualSuccess,
-        actualError;
-
-        statuses.get('bla').then(function(respond) {
-            actualSuccess = respond;
-        },function(respond) {
-            actualError = respond;
-        });
-        $rootScope.$digest();
-        expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: bla');
+        expect(function() {
+            statuses.get('bla');
+            $rootScope.$digest();
+        }).toThrow('В коллекции statuses не найден элемент с id: bla');
     });
 
     it('должен выбрасывать эксепшен при попытке получить провайдера REST API', function() {

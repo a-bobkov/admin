@@ -137,11 +137,28 @@ describe('Сервис cities должен', function() {
             expect(city3.city).toBe(city2);
         });
 
-        it('при загрузке выдавать в лог ошибки при невозможности разрешить ссылки', function() {
+        it('при загрузке выбрасывать ошибку, если до этого не был загружен референтный справочник', function() {
             var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
-                    { id: 3, name: 'Третий', market: {id: 2} },
+                    { id: 3, name: 'Третий', market: {id: 2} }
+                ],
+                actualSuccess,
+                actualError;
+
+            spyOn(cityApi, 'query').andReturn($q.when(data));
+            spyOn($log, 'error').andReturn(null);
+
+            expect(function() {
+                cities.getAll();
+                $rootScope.$digest();
+            }).toThrow('Неизвестный ссылочный параметр market в элементе с id: 3');
+        });
+
+        it('при загрузке выбрасывать ошибку, если во вложенном (ссылочном) объекте нет id', function() {
+            var data = [
+                    { id: 1, name: 'Первый' },
+                    { id: 2, name: 'Второй' },
                     { id: 4, name: 'Четвертый', city: {ident: 2} }
                 ],
                 actualSuccess,
@@ -150,19 +167,13 @@ describe('Сервис cities должен', function() {
             spyOn(cityApi, 'query').andReturn($q.when(data));
             spyOn($log, 'error').andReturn(null);
 
-            cities.getAll().then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $rootScope.$digest();
-            expect($log.error).toHaveBeenCalledWith([
-                {message: 'Неизвестный ссылочный параметр market в элементе с id: 3', stack: jasmine.any(String)},
-                {message: 'Нет параметра id в элементе: {"ident":2}', stack: jasmine.any(String)}
-            ]);
+            expect(function() {
+                cities.getAll();
+                $rootScope.$digest();
+            }).toThrow('Нет параметра id в элементе: {"ident":2}');
         });
 
-        it('при загрузке не создавать недостающие элементы справочников по ссылкам, а выдавать ошибки', function() {
+        it('при загрузке выбрасывать ошибку, если в коллекции не найден элемент по ссылке', function() {
             var data = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -174,22 +185,10 @@ describe('Сервис cities должен', function() {
             spyOn(cityApi, 'query').andReturn($q.when(data));
             spyOn($log, 'error').andReturn(null);
 
-            cities.getAll().then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $rootScope.$digest();
-
-            cities.get(22).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $rootScope.$digest();
-            expect($log.error).toHaveBeenCalledWith([
-                {message : 'Не найдена ссылка для элемента: {"id":22} в коллекции: cities', stack: jasmine.any(String)}
-            ]);
+            expect(function() {
+                cities.getAll();
+                $rootScope.$digest();
+            }).toThrow('Не найдена ссылка для элемента: {"id":22} в коллекции: cities');
         });
     });
 
@@ -225,18 +224,18 @@ describe('Сервис cities должен', function() {
             expect(actualSuccess.length).toBe(3);
 
             var city = new City ();
-            city._fillItem(newItemData);
+            city.name = 'Другой';
+            city.ext = 'Extra';
             cities.save(city).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
                 actualError = respond;
             });
             $rootScope.$digest();
-            expect(cityApi.create).toHaveBeenCalled();
             expect(cityApi.create).toHaveBeenCalledWith(newItemData);
             expect(actualSuccess).toEqualData(newItem);
 
-            cities.get(actualSuccess).then(function(respond) {
+            cities.get(actualSuccess.id).then(function(respond) {
                 actualSuccess = respond;
             }, function(respond) {
                 actualError = respond;
@@ -412,7 +411,7 @@ describe('Сервис cities должен', function() {
             expect(cityApi.update).toHaveBeenCalledWith(savedItemData);
         });
 
-        it('при сохранении с id - выдавать reject с ошибкой для элемента с отсутствующим в коллекции id', function() {
+        it('при сохранении с id - выбрасывать ошибку для элемента с отсутствующим в коллекции id', function() {
             var items = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -433,13 +432,10 @@ describe('Сервис cities должен', function() {
             var newCity = new City;
             newCity.id = 5;
 
-            cities.save(newCity).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $rootScope.$digest();
-            expect(actualError.errorMessage).toBe("При обновлении в коллекции не найден элемент с id: 5");
+            expect(function() {
+                cities.save(newCity);
+                $rootScope.$digest();
+            }).toThrow('При обновлении в коллекции не найден элемент с id: 5');
         });
 
         it('при сохранении с id - выдавать reject с ошибкой, выданной REST API, не изменяя коллекцию', function() {
@@ -519,16 +515,13 @@ describe('Сервис cities должен', function() {
             $rootScope.$digest();
             expect(actualSuccess.length).toEqual(2);
 
-            cities.get(2).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $rootScope.$digest();
-            expect(actualError.errorMessage).toEqual('В коллекции не найден элемент с id: 2');
+            expect(function() {
+                cities.get(2);
+                $rootScope.$digest();
+            }).toThrow('В коллекции cities не найден элемент с id: 2');
         });
 
-        it('при удалении - выдавать reject с ошибкой для элемента с отсутствующим в коллекции id', function() {
+        it('при удалении - выбрасывать ошибку для элемента с отсутствующим в коллекции id', function() {
             var items = [
                     { id: 1, name: 'Первый' },
                     { id: 2, name: 'Второй' },
@@ -546,13 +539,10 @@ describe('Сервис cities должен', function() {
             });
             $rootScope.$digest();
 
-            cities.remove(5).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $rootScope.$digest();
-            expect(actualError.errorMessage).toBe("При удалении в коллекции не найден элемент с id: 5");
+            expect(function() {
+                cities.remove(5);
+                $rootScope.$digest();
+            }).toThrow('При удалении в коллекции не найден элемент с id: 5');
         });
 
         it('при удалении - выдавать reject с ошибкой, выданной REST API, не изменяя коллекцию', function() {
