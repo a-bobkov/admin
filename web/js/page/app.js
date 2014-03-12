@@ -17,21 +17,18 @@ angular.module('RootApp', ['UsersApp'])
 		return $delegate;
 
 		function logGoogleAnalytics(errorObj) {
-			if (errorObj instanceof CollectionError) {
-				_gaq.push([
-					'_trackEvent',
-					'CollectionError', 
-					errorObj.message, 
-					errorObj.stack,
-					0, true
-				]);
-			}
+			_gaq.push([
+				'_trackEvent',
+				errorObj.message, 
+				errorObj.stack,
+				'',
+				0, true
+			]);
 		}
 
         function decoratedLogger(originalFn) {
             return function() {
             	var errors = arguments[0];
-	            console.log(errors);
             	if (angular.isArray(errors)) {
             		angular.forEach(errors, logGoogleAnalytics)
             	} else {
@@ -41,6 +38,16 @@ angular.module('RootApp', ['UsersApp'])
             };
         }
     });
+})
+
+.factory('$exceptionHandler', function ($log) {
+    return function (exception, cause) {
+    	$log.error(exception);
+	    document.getElementById('content_frame').style.display = 'none';
+	    document.getElementById('javascriptErrorMessage').innerHTML = exception.message;
+	    document.getElementById('javascriptErrorStack').innerHTML = exception.stack.replace( /\n/g ,'<br>');
+	    document.getElementById('javascriptError').style.display = 'block';
+    };
 })
 
 .controller('AppCtrl', function($scope) {
