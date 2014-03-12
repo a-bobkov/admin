@@ -8,6 +8,31 @@ angular.module('max.dal.lib.filters', [])
     MORE_PRECISELY:  1
 })
 
+.factory('FilterCollectionConstructor', function (FiltersCompare) {
+    return function () {
+        var collection = {},
+            that = this;
+
+        this.add = function (filter) {
+            if (!_.isObject(filter)) {
+                throw new Error("В коллекцию фильтров можно бодавлять только объекты реализующие интерфейс фильтра");
+            }
+
+            _.forEach(['getName', 'filter', 'compare', 'getAsObject'], function (method) {
+                if (!_.isFunction(filter[method])) {
+                    throw new Error("У объекта типа фильтр должен быть реализован метод " + method + "()");
+                }
+            });
+
+            if (!_.isUndefined(collection[filter.getName()])) {
+                throw new Error("В коллекции фильтров уже есть фильтр с названием " + filter.getName());
+            }
+
+            collection[filter.getName()] = filter;
+        }
+    };
+})
+
 .factory('FilterConstructor', function (FiltersCompare) {
     return function (filterName) {
         var that = this;

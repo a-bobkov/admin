@@ -76,9 +76,13 @@ CacheProvider.query(params)
 
 Filter
   .getName()
-  .pattern
-  .filter()
+  .value
+  .filter(item)
   .compare()
 
-Filters
+FilterCollection
   .add(filter)
+  .remove(filter || name)
+  .filter(item)
+  .compare(filters)
+  .getAsObject()

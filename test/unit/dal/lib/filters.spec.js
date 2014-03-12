@@ -1,5 +1,76 @@
 'use strict';
 
+describe('FilterCollectionConstructor', function () {
+    var FilterCollectionConstructor,
+        FilterConstructor;
+
+
+    beforeEach(function () {
+        module('max.dal.lib.filters');
+
+        inject(function(_FilterCollectionConstructor_, _FilterConstructor_) {
+            FilterCollectionConstructor = _FilterCollectionConstructor_;
+            FilterConstructor = _FilterConstructor_;
+        });
+    });
+
+    it('Экземпляр коллекции фильтров создается с помощью конструктора', function () {
+        expect(
+            new FilterCollectionConstructor instanceof FilterCollectionConstructor
+        ).toBeTruthy();
+    });
+
+    describe('В экземпляр коллекции можно добавлять фильтры', function () {
+        var collection;
+
+        beforeEach(function () {
+            collection = new FilterCollectionConstructor;
+        });
+
+        it('Добавлять можно только объекты с реализованными обязательными методами', function () {
+            expect(function () {
+                collection.add(new FilterConstructor('uniqueName'));
+            }).not.toThrow();
+        });
+
+        it('Интерфейс фильтра требует наличие метода getName()', function () {
+            var errorMessage,
+                filter = {};
+
+            _.forEach(['getName', 'filter', 'compare', 'getAsObject'], function (method) {
+
+                errorMessage = "У объекта типа фильтр должен быть реализован метод " + method + "()";
+
+                expect(function () {
+                    collection.add(filter);
+                }).toThrow(errorMessage);
+
+                filter[method] = {};
+                expect(function () {
+                    collection.add(filter);
+                }).toThrow(errorMessage);
+
+                filter[method] = function () {};
+                expect(function () {
+                    collection.add(filter);
+                }).not.toThrow(errorMessage);
+            });
+        });
+
+        it('В коллекцию нельзя добавить несоклько фильтров с одинаковым именем', function () {
+            var filterName = 'uniqueName';
+
+            expect(function () {
+                collection.add(new FilterConstructor(filterName));
+            }).not.toThrow();
+
+            expect(function () {
+                collection.add(new FilterConstructor(filterName));
+            }).toThrow("В коллекции фильтров уже есть фильтр с названием " + filterName);
+        });
+    });
+});
+
 describe('FilterConstructor', function () {
     var FilterConstructor;
 
