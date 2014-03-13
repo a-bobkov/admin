@@ -7,6 +7,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     .when('/userlist', {
         templateUrl: 'template/page/user/list.html',
         controller: 'UserListCtrl',
+        reloadOnSearch: false,
         resolve: {
             data: function(UserList_Loader) {
                 return UserList_Loader.load();
@@ -163,13 +164,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
 
     $scope.$watch('patterns', $scope.onPatternChange, true);
 
-    // по мотивам: http://stackoverflow.com/questions/12940974/maintain-model-of-scope-when-changing-between-views-in-angularjs
-    if ($rootScope.savedUserListPatterns) {
-        $scope.patterns = $rootScope.savedUserListPatterns;
-    } else {
-        $scope.setPatternsDefault();
-    }
-
     var sortedUsers = [];
 
     $scope.sortableColumns = [
@@ -199,8 +193,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     var onSortingChange = function() {
         sortedUsers = $filter('orderBy')(filteredUsers, $scope.sorting.column, $scope.sorting.reverse);
         $scope.totalItems = filteredUsers.length;
-        if ($scope.currentPage != 1) {
-            $scope.currentPage = 1;
+        if ($scope.paging.currentPage != 1) {
+            $scope.paging.currentPage = 1;
         } else {
             pageUsers(1, null);
         };
@@ -213,12 +207,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         };
     }
 
-    if ($rootScope.savedUserListSorting) {
-        $scope.sorting = $rootScope.savedUserListSorting;
-    } else {
-        setSortingDefault();
-    }
-
     $scope.pagedUsers = [];
 
     var pageUsers = function (newValue, oldValue) {
@@ -226,6 +214,9 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             end = begin + $scope.paging.itemsPerPage;
         $scope.pagedUsers = sortedUsers.slice(begin, end);
         $rootScope.savedUserListPaging = $scope.paging;
+
+        $location.search(toSearch(angular.extend({}, $scope.patterns, $scope.sorting, $scope.paging)));
+
         if (newValue !== oldValue) {
             $window.scrollTo(0,0);
             delete $scope.savedUserListNotice;
@@ -238,12 +229,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             maxSize: 9,
             currentPage: 1
         };
-    }
-
-    if ($rootScope.savedUserListPaging) {
-        $scope.paging = $rootScope.savedUserListPaging;
-    } else {
-        setPagingDefault();
     }
 
     $scope.$watch('paging.currentPage', pageUsers);
@@ -265,6 +250,60 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             $window.scrollTo(0, 0);
         }
     });
+
+    var ls = $location.search();
+    if (_.size(ls)) {
+        $scope.patterns = {
+            complex: ls.complex,
+            status: _.invoke(ls.status.split(';'), function() {
+                    return _.find($scope.optionsStatus, {id: this})
+                }),
+            manager: _.find($scope.optionsManager, {id: _.parseInt(ls.manager)})
+        }
+        $scope.sorting = {
+            column: ls.column,
+            reverse: !(ls.reverse === 'false')
+        }
+        $scope.paging = {
+            itemsPerPage: _.parseInt(ls.itemsPerPage),
+            maxSize: _.parseInt(ls.maxSize),
+            currentPage: _.parseInt(ls.currentPage)
+        }
+    } else {
+        if ($rootScope.savedUserListPatterns) {
+            $scope.patterns = $rootScope.savedUserListPatterns;
+        } else {
+            $scope.setPatternsDefault();
+        }
+        if ($rootScope.savedUserListSorting) {
+            $scope.sorting = $rootScope.savedUserListSorting;
+        } else {
+            setSortingDefault();
+        }
+        if ($rootScope.savedUserListPaging) {
+            $scope.paging = $rootScope.savedUserListPaging;
+        } else {
+            setPagingDefault();
+        }
+    }
+
+    function toSearch(value) {
+        if (angular.isArray(value)) {
+            return _.invoke(value, function() {
+                return toSearch(this);
+            }).join(';');
+        } else if (angular.isObject(value)) {
+            if (value.id !== undefined) {
+                return value.id;
+            } else {
+                return _.mapValues(value, function(value) {
+                    return toSearch(value);
+                });
+            }
+        } else {
+            return value;
+        }
+    }
 })
 
 .controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours, users) {
