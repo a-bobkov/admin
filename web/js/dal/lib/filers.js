@@ -8,31 +8,6 @@ angular.module('max.dal.lib.filters', [])
     MORE_PRECISELY:  1
 })
 
-.factory('FilterCollectionConstructor', function (FiltersCompare) {
-    return function () {
-        var collection = {},
-            that = this;
-
-        this.add = function (filter) {
-            if (!_.isObject(filter)) {
-                throw new Error("В коллекцию фильтров можно бодавлять только объекты реализующие интерфейс фильтра");
-            }
-
-            _.forEach(['getName', 'filter', 'compare', 'getAsObject'], function (method) {
-                if (!_.isFunction(filter[method])) {
-                    throw new Error("У объекта типа фильтр должен быть реализован метод " + method + "()");
-                }
-            });
-
-            if (!_.isUndefined(collection[filter.getName()])) {
-                throw new Error("В коллекции фильтров уже есть фильтр с названием " + filter.getName());
-            }
-
-            collection[filter.getName()] = filter;
-        }
-    };
-})
-
 .factory('FilterConstructor', function (FiltersCompare) {
     return function (filterName) {
         var that = this;
@@ -47,7 +22,7 @@ angular.module('max.dal.lib.filters', [])
 
         this.value = "";
 
-        this.filter = function () {
+        this.filter = function (object) {
             return true;
         };
 
@@ -109,18 +84,17 @@ angular.module('max.dal.lib.filters', [])
 
         this.compare = function (filter) {
             var value,
-                filterValue;
-
+                comparingValue;
             if (that.getName() !== filter.getName()) {
                 throw new Error("Нельзя стравнивать разные фильтры");
             }
 
             value = _.isString(that.value) ? that.value : that.value.toString();
-            filterValue = _.isString(filter.value) ? filter.value : filter.value.toString();
+            comparingValue = _.isString(filter.value) ? filter.value : filter.value.toString();
 
-            if (value === filterValue) {
+            if (value === comparingValue) {
                 return FiltersCompare.THE_SAME;
-            } else if (-1 !== filterValue.indexOf(value)) {
+            } else if (-1 !== comparingValue.indexOf(value)) {
                 return FiltersCompare.MORE_PRECISELY;
             }
 
@@ -174,6 +148,97 @@ angular.module('max.dal.lib.filters', [])
             }
 
             return FiltersCompare.LESS_PRECISELY;
+        };
+    };
+})
+
+.factory('FilterCollectionConstructor', function (FiltersCompare) {
+    return function () {
+        var collection = {},
+            that = this;
+
+        this.add = function (filter) {
+            if (!_.isObject(filter)) {
+                throw new Error("В коллекцию фильтров можно бодавлять только объекты реализующие интерфейс фильтра");
+            }
+
+            _.forEach(['getName', 'filter', 'compare', 'getAsObject'], function (method) {
+                if (!_.isFunction(filter[method])) {
+                    throw new Error("У объекта типа фильтр должен быть реализован метод " + method + "()");
+                }
+            });
+
+            collection[filter.getName()] = filter;
+        };
+
+        this.get = function (filterName) {
+            return collection[filterName];
+        };
+
+        this.remove = function (filter) {
+            if (!_.isObject(filter) || !_.isFunction(filter.getName)) {
+                throw new Error("Для удаления из коллекциии необходимо передать объект с методом getName");
+            }
+
+            delete collection[filter.getName()];
+        };
+
+        this.length = function () {
+            return _.keys(collection).length;
+        };
+
+        this.filter = function (object) {
+            var filterName;
+
+            for (filterName in collection) {
+                if (false === collection[filterName].filter(object)) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        this.compare = function (comparingCollection) {
+            var filterName,
+                filter,
+                comparingFilter,
+                filterCompareResult,
+                collectionCompareResult;
+
+            if (that.length() > comparingCollection.length()) {
+                return FiltersCompare.LESS_PRECISELY;
+            }
+
+            collectionCompareResult = that.length() === comparingCollection.length()
+                ? FiltersCompare.THE_SAME
+                : FiltersCompare.MORE_PRECISELY;
+
+            for (filterName in collection) {
+                filter = collection[filterName];
+                comparingFilter = comparingCollection.get(filter.getName());
+                filterCompareResult = (_.isUndefined(comparingFilter))
+                    ? FiltersCompare.LESS_PRECISELY
+                    : filter.compare(comparingFilter);
+
+                if (FiltersCompare.LESS_PRECISELY === filterCompareResult) {
+                    return FiltersCompare.LESS_PRECISELY;
+                } else {
+                    collectionCompareResult = Math.max(collectionCompareResult, filterCompareResult);
+                }
+            }
+
+            return collectionCompareResult;
+        };
+
+        this.getAsObject = function () {
+            var ret = {};
+
+            _.forEach(collection, function (filter) {
+                _.merge(ret, filter.getAsObject());
+            })
+
+            return ret;
         };
     };
 });
