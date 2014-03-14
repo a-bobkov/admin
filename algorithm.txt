@@ -32,9 +32,25 @@ CacheProvider
   getParams()	-> { filers: [], sorting: [], pagination: {} }
 
 
+Filter
+  .constructor(uniqueName, ...)
+  .getName()
+  .value
+  .filter(item)
+  .compare()
+  .getAsObject()
 
+FilterCollection
+  .add(filter)
+  .remove(filter || name)
+  .filter(item)
+  .compare(filters)
+  .getAsObject()
 
-CacheProvider.query(params)
+Pager
+  .constructor(page, per_page, total)
+  .getAsObject()
+  .compare(pager)
 
 
 
