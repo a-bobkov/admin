@@ -6,7 +6,7 @@ describe('FilterCollectionConstructor', function () {
 
 
     beforeEach(function () {
-        module('max.dal.lib.filters');
+        module('max.dal.lib.filter');
 
         inject(function(_FilterCollectionConstructor_, _FilterConstructor_) {
             FilterCollectionConstructor = _FilterCollectionConstructor_;
@@ -322,7 +322,7 @@ describe('FilterConstructor', function () {
 
 
     beforeEach(function () {
-        module('max.dal.lib.filters');
+        module('max.dal.lib.filter');
 
         inject(function(_FilterConstructor_) {
             FilterConstructor = _FilterConstructor_;
@@ -397,7 +397,7 @@ describe('StringContainsFilterConstructor', function () {
 
 
     beforeEach(function () {
-        module('max.dal.lib.filters');
+        module('max.dal.lib.filter');
 
         inject(function(_StringContainsFilterConstructor_) {
             StringContainsFilterConstructor = _StringContainsFilterConstructor_;
@@ -526,7 +526,7 @@ describe('TheSameValueFilterConstructor', function () {
 
 
     beforeEach(function () {
-        module('max.dal.lib.filters');
+        module('max.dal.lib.filter');
 
         inject(function(_TheSameValueFilterConstructor_) {
             TheSameValueFilterConstructor = _TheSameValueFilterConstructor_;

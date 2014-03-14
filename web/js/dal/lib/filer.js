@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('max.dal.lib.filters', [])
+angular.module('max.dal.lib.filter', [])
 
 .constant('FiltersCompare', {
     THE_SAME:        0,
