@@ -304,11 +304,7 @@ return Collection;
         var itemData = {};
         angular.forEach(this, function(value, key){
             if (angular.isObject(value) && (key !== 'phones')) {
-                if (key === "dealer") {               // todo: перекрытием данного метода на User
-                    itemData[key] = value._serialize();
-                } else {
-                    itemData[key] = {id: value.id};
-                }
+                itemData[key] = {id: value.id};
             } else {
                 itemData[key] = value;
             }

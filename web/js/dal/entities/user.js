@@ -63,7 +63,18 @@ return (function() {
     }
 
     User.prototype._serialize = function() {
-        var itemData = Item.prototype._serialize.call(this);
+        var itemData = {};
+        angular.forEach(this, function(value, key){
+            if (angular.isObject(value)) {
+                if (key === "dealer") {
+                    itemData[key] = value._serialize();
+                } else {
+                    itemData[key] = {id: value.id};
+                }
+            } else {
+                itemData[key] = value;
+            }
+        });
         if (!this.isDealer()) {
             delete itemData.dealer;
         };
