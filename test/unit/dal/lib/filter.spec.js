@@ -177,13 +177,13 @@ describe('FilterCollectionConstructor', function () {
             comparingCollection,
             StringContainsFilterConstructor,
             TheSameValueFilterConstructor,
-            FiltersCompare;
+            FilterCompare;
 
         beforeEach(function () {
-            inject(function(_StringContainsFilterConstructor_, _TheSameValueFilterConstructor_, _FiltersCompare_) {
+            inject(function(_StringContainsFilterConstructor_, _TheSameValueFilterConstructor_, _FilterCompare_) {
                 StringContainsFilterConstructor = _StringContainsFilterConstructor_;
                 TheSameValueFilterConstructor = _TheSameValueFilterConstructor_;
-                FiltersCompare = _FiltersCompare_;
+                FilterCompare = _FilterCompare_;
             });
 
             collection = new FilterCollectionConstructor;
@@ -200,7 +200,7 @@ describe('FilterCollectionConstructor', function () {
             collection.add(filter);
             comparingCollection.add(comparingFilter);
 
-            expect(collection.compare(comparingCollection)).toEqual(FiltersCompare.THE_SAME);
+            expect(collection.compare(comparingCollection)).toEqual(FilterCompare.THE_SAME);
         });
 
         it('Сравнение неравных коллекций с одним фильтром', function () {
@@ -213,8 +213,8 @@ describe('FilterCollectionConstructor', function () {
             comparingFilter.value = 'abcd';
             comparingCollection.add(comparingFilter);
 
-            expect(collection.compare(comparingCollection)).toEqual(FiltersCompare.MORE_PRECISELY);
-            expect(comparingCollection.compare(collection)).toEqual(FiltersCompare.LESS_PRECISELY);
+            expect(collection.compare(comparingCollection)).toEqual(FilterCompare.MORE_PRECISELY);
+            expect(comparingCollection.compare(collection)).toEqual(FilterCompare.LESS_PRECISELY);
         });
 
         it('Сравнение равных коллекции с несколькими фильтрами', function () {
@@ -234,7 +234,7 @@ describe('FilterCollectionConstructor', function () {
             comparingCollection.add(comparingFilter1);
             comparingCollection.add(comparingFilter2);
 
-            expect(collection.compare(comparingCollection)).toEqual(FiltersCompare.THE_SAME);
+            expect(collection.compare(comparingCollection)).toEqual(FilterCompare.THE_SAME);
         });
 
         it('Сравнение неравных коллекции с несколькими фильтрами', function () {
@@ -256,8 +256,8 @@ describe('FilterCollectionConstructor', function () {
             comparingCollection.add(comparingFilter2);
             comparingCollection.add(comparingFilter1);
 
-            expect(collection.compare(comparingCollection)).toEqual(FiltersCompare.MORE_PRECISELY);
-            expect(comparingCollection.compare(collection)).toEqual(FiltersCompare.LESS_PRECISELY);
+            expect(collection.compare(comparingCollection)).toEqual(FilterCompare.MORE_PRECISELY);
+            expect(comparingCollection.compare(collection)).toEqual(FilterCompare.LESS_PRECISELY);
         });
 
         it('Сравнение коллекции с разным количеством фильтров', function () {
@@ -275,8 +275,8 @@ describe('FilterCollectionConstructor', function () {
             comparingCollection.add(comparingFilter1);
             comparingCollection.add(comparingFilter3);
 
-            expect(collection.compare(comparingCollection)).toEqual(FiltersCompare.MORE_PRECISELY);
-            expect(comparingCollection.compare(collection)).toEqual(FiltersCompare.LESS_PRECISELY);
+            expect(collection.compare(comparingCollection)).toEqual(FilterCompare.MORE_PRECISELY);
+            expect(comparingCollection.compare(collection)).toEqual(FilterCompare.LESS_PRECISELY);
         });
     });
 
@@ -368,12 +368,12 @@ describe('FilterConstructor', function () {
     });
 
     it('Экземпляр базового фильтра всегда возвращает что он менее точный', function () {
-        var FiltersCompare,
+        var FilterCompare,
             filter,
             anotherFilter;
 
-        inject(function(_FiltersCompare_) {
-            FiltersCompare = _FiltersCompare_;
+        inject(function(_FilterCompare_) {
+            FilterCompare = _FilterCompare_;
         });
 
         filter = new FilterConstructor('uniqueName');
@@ -381,7 +381,7 @@ describe('FilterConstructor', function () {
         filter.value = 'active';
         anotherFilter.value = 'active';
 
-        expect(filter.compare(anotherFilter)).toBe(FiltersCompare.LESS_PRECISELY);
+        expect(filter.compare(anotherFilter)).toBe(FilterCompare.LESS_PRECISELY);
     });
 
     it('Экземпляр базового фильтра умеет возвращать свое состояние в виде объекта', function () {
@@ -472,14 +472,14 @@ describe('StringContainsFilterConstructor', function () {
     });
 
     describe('Экземпляр фильтра умеет себя сравнивать', function () {
-        var FiltersCompare,
+        var FilterCompare,
             filterName,
             filter,
             comparingFilter;
 
         beforeEach(function () {
-            inject(function(_FiltersCompare_) {
-                FiltersCompare = _FiltersCompare_;
+            inject(function(_FilterCompare_) {
+                FilterCompare = _FilterCompare_;
 
             });
 
@@ -500,16 +500,16 @@ describe('StringContainsFilterConstructor', function () {
             filter.value = 'Букв одинаково';
             comparingFilter.value = 'Букв одинаково';
 
-            expect(filter.compare(comparingFilter)).toBe(FiltersCompare.THE_SAME);
-            expect(comparingFilter.compare(filter)).toBe(FiltersCompare.THE_SAME);
+            expect(filter.compare(comparingFilter)).toBe(FilterCompare.THE_SAME);
+            expect(comparingFilter.compare(filter)).toBe(FilterCompare.THE_SAME);
         });
 
         it('Фильтры могут быть разной точности', function () {
             filter.value = 'Букв';
             comparingFilter.value = 'Букв больше';
 
-            expect(filter.compare(comparingFilter)).toBe(FiltersCompare.MORE_PRECISELY);
-            expect(comparingFilter.compare(filter)).toBe(FiltersCompare.LESS_PRECISELY);
+            expect(filter.compare(comparingFilter)).toBe(FilterCompare.MORE_PRECISELY);
+            expect(comparingFilter.compare(filter)).toBe(FilterCompare.LESS_PRECISELY);
         });
     });
 
@@ -598,13 +598,13 @@ describe('TheSameValueFilterConstructor', function () {
     });
 
     describe('Экземпляр фильтра умеет себя сравнивать', function () {
-        var FiltersCompare,
+        var FilterCompare,
             filter,
             comparingFilter;
 
         beforeEach(function () {
-            inject(function(_FiltersCompare_) {
-                FiltersCompare = _FiltersCompare_;
+            inject(function(_FilterCompare_) {
+                FilterCompare = _FilterCompare_;
             });
 
             filter = new TheSameValueFilterConstructor('uniqueName', 'status');
@@ -623,15 +623,15 @@ describe('TheSameValueFilterConstructor', function () {
             filter.value = 'active';
             comparingFilter.value = 'active';
 
-            expect(filter.compare(comparingFilter)).toBe(FiltersCompare.THE_SAME);
-            expect(comparingFilter.compare(filter)).toBe(FiltersCompare.THE_SAME);
+            expect(filter.compare(comparingFilter)).toBe(FilterCompare.THE_SAME);
+            expect(comparingFilter.compare(filter)).toBe(FilterCompare.THE_SAME);
         });
 
         it('Фильтры могут быть разными', function () {
             filter.value = 'active';
             comparingFilter.value = 'blocked';
 
-            expect(filter.compare(comparingFilter)).toBe(FiltersCompare.LESS_PRECISELY);
+            expect(filter.compare(comparingFilter)).toBe(FilterCompare.LESS_PRECISELY);
         });
     });
 

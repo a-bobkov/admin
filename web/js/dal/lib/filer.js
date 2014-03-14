@@ -2,13 +2,13 @@
 
 angular.module('max.dal.lib.filter', [])
 
-.constant('FiltersCompare', {
-    THE_SAME:        0,
+.constant('FilterCompare', {
     LESS_PRECISELY: -1,
+    THE_SAME:        0,
     MORE_PRECISELY:  1
 })
 
-.factory('FilterCollectionConstructor', function (FiltersCompare) {
+.factory('FilterCollectionConstructor', function (FilterCompare) {
     return function () {
         var collection = {},
             that = this;
@@ -63,22 +63,22 @@ angular.module('max.dal.lib.filter', [])
                 collectionCompareResult;
 
             if (that.length() > comparingCollection.length()) {
-                return FiltersCompare.LESS_PRECISELY;
+                return FilterCompare.LESS_PRECISELY;
             }
 
             collectionCompareResult = that.length() === comparingCollection.length()
-                ? FiltersCompare.THE_SAME
-                : FiltersCompare.MORE_PRECISELY;
+                ? FilterCompare.THE_SAME
+                : FilterCompare.MORE_PRECISELY;
 
             for (filterName in collection) {
                 filter = collection[filterName];
                 comparingFilter = comparingCollection.get(filter.getName());
                 filterCompareResult = (_.isUndefined(comparingFilter))
-                    ? FiltersCompare.LESS_PRECISELY
+                    ? FilterCompare.LESS_PRECISELY
                     : filter.compare(comparingFilter);
 
-                if (FiltersCompare.LESS_PRECISELY === filterCompareResult) {
-                    return FiltersCompare.LESS_PRECISELY;
+                if (FilterCompare.LESS_PRECISELY === filterCompareResult) {
+                    return FilterCompare.LESS_PRECISELY;
                 } else {
                     collectionCompareResult = Math.max(collectionCompareResult, filterCompareResult);
                 }
@@ -99,7 +99,7 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('FilterConstructor', function (FiltersCompare) {
+.factory('FilterConstructor', function (FilterCompare) {
     return function (filterName) {
         var that = this;
 
@@ -118,7 +118,7 @@ angular.module('max.dal.lib.filter', [])
         };
 
         this.compare = function () {
-            return FiltersCompare.LESS_PRECISELY;
+            return FilterCompare.LESS_PRECISELY;
         };
 
         this.getAsObject = function () {
@@ -131,7 +131,7 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('StringContainsFilterConstructor', function (FilterConstructor, FiltersCompare) {
+.factory('StringContainsFilterConstructor', function (FilterConstructor, FilterCompare) {
 
     /**
      * Фильтр на вхождение строки
@@ -184,17 +184,17 @@ angular.module('max.dal.lib.filter', [])
             comparingValue = _.isString(filter.value) ? filter.value : filter.value.toString();
 
             if (value === comparingValue) {
-                return FiltersCompare.THE_SAME;
+                return FilterCompare.THE_SAME;
             } else if (-1 !== comparingValue.indexOf(value)) {
-                return FiltersCompare.MORE_PRECISELY;
+                return FilterCompare.MORE_PRECISELY;
             }
 
-            return FiltersCompare.LESS_PRECISELY;
+            return FilterCompare.LESS_PRECISELY;
         };
     };
 })
 
-.factory('TheSameValueFilterConstructor', function (FilterConstructor, FiltersCompare) {
+.factory('TheSameValueFilterConstructor', function (FilterConstructor, FilterCompare) {
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
@@ -235,10 +235,10 @@ angular.module('max.dal.lib.filter', [])
             }
 
             if (that.value === filter.value) {
-                return FiltersCompare.THE_SAME;
+                return FilterCompare.THE_SAME;
             }
 
-            return FiltersCompare.LESS_PRECISELY;
+            return FilterCompare.LESS_PRECISELY;
         };
     };
 });
