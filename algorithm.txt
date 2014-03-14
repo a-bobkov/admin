@@ -52,7 +52,12 @@ Pager
   .getAsObject()
   .compare(pager)
 
-
+Sorting
+  .constructor(fieldName, direction)
+  .getFiledName()
+  .getDirection()
+  .getAsObject()
+  .compare()
 
 
 
