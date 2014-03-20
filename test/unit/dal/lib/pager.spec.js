@@ -119,4 +119,24 @@ describe('PagerConstructor', function () {
             expect(pager.compare(comparingPager)).toBe(PagerCompare.DOESNT_INCLUDE);
         });
     });
+
+    describe('Экземпляр паджинатора знает все ли данные загружены или только часть', function () {
+        var pager;
+
+        it('Загружены все данные если per_page >= total', function () {
+            pager = new PagerConstructor(2, 100, 0);
+            expect(pager.areAllItemsLoaded()).toBe(true);
+
+            pager = new PagerConstructor(2, 100, 50);
+            expect(pager.areAllItemsLoaded()).toBe(true);
+
+            pager = new PagerConstructor(2, 100, 100);
+            expect(pager.areAllItemsLoaded()).toBe(true);
+        });
+
+        it('Загружены НЕ все данные если per_page < total', function () {
+            pager = new PagerConstructor(2, 100, 101);
+            expect(pager.areAllItemsLoaded()).toBe(false);
+        });
+    });
 });

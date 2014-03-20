@@ -73,5 +73,9 @@ angular.module('max.dal.lib.pager', [])
 
             return PagerCompare.DOESNT_INCLUDE;
         };
+
+        this.areAllItemsLoaded = function () {
+            return per_page >= total ? true : false;
+        }
     }
 });
