@@ -1,13 +1,13 @@
 'use strict';
 
-angular.module('max.dal.lib.sorting', [])
+angular.module('max.dal.lib.order', [])
 
-.constant('SortingCompare', {
+.constant('OrderCompare', {
     OTHER:      -1,
     THE_SAME:    0
 })
 
-.factory('SortingConstructor', function (SortingCompare) {
+.factory('OrderConstructor', function (OrderCompare) {
     var directions = ['asc', 'desc'];
 
     return function (fieldName, direction) {
@@ -31,21 +31,21 @@ angular.module('max.dal.lib.sorting', [])
 
         this.getAsObject = function () {
             return {
-                sorting_field:      fieldName,
-                sorting_direction:  direction
+                order_field:      fieldName,
+                order_direction:  direction
             }
         };
 
-        this.compare = function (sorting) {
-            if (!_.isObject(sorting) || !_.isFunction(sorting.getFieldName) || !_.isFunction(sorting.getDirection)) {
+        this.compare = function (order) {
+            if (!_.isObject(order) || !_.isFunction(order.getFieldName) || !_.isFunction(order.getDirection)) {
                 throw new Error("Сортировку можно сравнивать только с другой сортировкой");
             }
 
-            if ((fieldName === sorting.getFieldName()) && (direction === sorting.getDirection())) {
-                return SortingCompare.THE_SAME;
+            if ((fieldName === order.getFieldName()) && (direction === order.getDirection())) {
+                return OrderCompare.THE_SAME;
             }
 
-            return SortingCompare.OTHER;
+            return OrderCompare.OTHER;
         };
     }
 });
