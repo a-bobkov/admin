@@ -6,6 +6,13 @@ DataProvider
   remove(item)
   getItemConstructor()
 
+CacheProvider
+  get(id)
+  query(params)	-> collection
+  set(item)
+  remove(item)
+  clear()
+
 RestApiProvider
   get(id)
   query(params)	-> collection
@@ -13,12 +20,7 @@ RestApiProvider
   update(item)
   remove(item)
 
-CacheProvider
-  get(id)
-  query(params)	-> collection
-  set(item)
-  remove(item)
-  clear()
+
 
 // Коллекция
 Сollection
@@ -47,10 +49,12 @@ FilterCollection
   .compare(filters)
   .getAsObject()
 
+
 Pager
   .constructor(page, per_page, total)
   .getAsObject()
   .compare(pager)
+  .AllItemsLoaded()
 
 Sorting
   .constructor(fieldName, direction)
@@ -94,6 +98,7 @@ Sorting
   - Если в кэше часть данных, обратиться на сервер
 - Если фильтр менее точный, то перейти к загрузке данных с севера
 
+<<<<<<< HEAD
 
 Filter
   .getName()
