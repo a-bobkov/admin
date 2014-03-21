@@ -98,17 +98,3 @@ Sorting
   - Если в кэше часть данных, обратиться на сервер
 - Если фильтр менее точный, то перейти к загрузке данных с севера
 
-<<<<<<< HEAD
-
-Filter
-  .getName()
-  .value
-  .filter(item)
-  .compare()
-
-FilterCollection
-  .add(filter)
-  .remove(filter || name)
-  .filter(item)
-  .compare(filters)
-  .getAsObject()
