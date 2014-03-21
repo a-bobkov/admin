@@ -18,25 +18,25 @@ angular.module('max.dal.lib.filter', [])
                 throw new Error("В коллекцию фильтров можно бодавлять только объекты реализующие интерфейс фильтра");
             }
 
-            _.forEach(['getName', 'filter', 'compare', 'getAsObject'], function (method) {
+            _.forEach(['getId', 'filter', 'compare', 'getAsObject'], function (method) {
                 if (!_.isFunction(filter[method])) {
                     throw new Error("У объекта типа фильтр должен быть реализован метод " + method + "()");
                 }
             });
 
-            collection[filter.getName()] = filter;
+            collection[filter.getId()] = filter;
         };
 
-        this.get = function (filterName) {
-            return collection[filterName];
+        this.get = function (id) {
+            return collection[id];
         };
 
         this.remove = function (filter) {
-            if (!_.isObject(filter) || !_.isFunction(filter.getName)) {
-                throw new Error("Для удаления из коллекциии необходимо передать объект с методом getName");
+            if (!_.isObject(filter) || !_.isFunction(filter.getId)) {
+                throw new Error("Для удаления из коллекциии необходимо передать объект с методом getId");
             }
 
-            delete collection[filter.getName()];
+            delete collection[filter.getId()];
         };
 
         this.length = function () {
@@ -44,10 +44,10 @@ angular.module('max.dal.lib.filter', [])
         };
 
         this.filter = function (object) {
-            var filterName;
+            var getId;
 
-            for (filterName in collection) {
-                if (false === collection[filterName].filter(object)) {
+            for (getId in collection) {
+                if (false === collection[getId].filter(object)) {
                     return false;
                 }
             }
@@ -56,7 +56,7 @@ angular.module('max.dal.lib.filter', [])
         };
 
         this.compare = function (comparingCollection) {
-            var filterName,
+            var getId,
                 filter,
                 comparingFilter,
                 filterCompareResult,
@@ -70,9 +70,9 @@ angular.module('max.dal.lib.filter', [])
                 ? FilterCompare.THE_SAME
                 : FilterCompare.MORE_PRECISELY;
 
-            for (filterName in collection) {
-                filter = collection[filterName];
-                comparingFilter = comparingCollection.get(filter.getName());
+            for (getId in collection) {
+                filter = collection[getId];
+                comparingFilter = comparingCollection.get(filter.getId());
                 filterCompareResult = (_.isUndefined(comparingFilter))
                     ? FilterCompare.LESS_PRECISELY
                     : filter.compare(comparingFilter);
@@ -88,10 +88,10 @@ angular.module('max.dal.lib.filter', [])
         };
 
         this.getAsObject = function () {
-            var ret = {};
+            var ret = [];
 
             _.forEach(collection, function (filter) {
-                _.merge(ret, filter.getAsObject());
+                ret.push(filter.getAsObject())
             });
 
             return ret;
@@ -99,57 +99,30 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('FilterConstructor', function (FilterCompare) {
-    return function (filterName) {
-        var that = this;
-
-        if (!filterName || !_.isString(filterName)) {
-            throw new Error("Имя фильтра должно быть задано строковым значением");
-        }
-
-        this.getName = function () {
-            return filterName;
-        };
-
-        this.value = "";
-
-        this.filter = function (object) {
-            return true;
-        };
-
-        this.compare = function () {
-            return FilterCompare.LESS_PRECISELY;
-        };
-
-        this.getAsObject = function () {
-            var object = {};
-
-            object[that.getName()] = that.value;
-
-            return object;
-        };
-    };
-})
-
-.factory('StringContainsFilterConstructor', function (FilterConstructor, FilterCompare) {
+.factory('StringContainsFilterConstructor', function (FilterCompare) {
 
     /**
      * Фильтр на вхождение строки
      * Вхождение строки проверяется среди полей, перечисленных в fieldNames
      *
-     * @param filterName  String    Уникальное название фильтра, обязательный параметр
      * @param fieldNames  Array     Массив с именами полей, обязательный параметр
      * @throw Error При вызове конструктора с неверными параметрами
      *
      */
-    return function (filterName, fieldNames) {
-        var that = this;
-
-        _.bind(FilterConstructor, this, filterName)();
+    return function (fieldNames) {
+        var type = "contain",
+            that = this;
 
         if (_.isUndefined(fieldNames) || !_.isArray(fieldNames) || _.isEmpty(fieldNames)) {
             throw new Error("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         }
+
+        this.getId = function () {
+            var delimiter = "_";
+            return type + delimiter + fieldNames.join(delimiter);
+        };
+
+        this.value = "";
 
         this.filter = function (object) {
             var fieldName,
@@ -176,7 +149,7 @@ angular.module('max.dal.lib.filter', [])
         this.compare = function (filter) {
             var value,
                 comparingValue;
-            if (that.getName() !== filter.getName()) {
+            if (that.getId() !== filter.getId()) {
                 throw new Error("Нельзя стравнивать разные фильтры");
             }
 
@@ -191,26 +164,38 @@ angular.module('max.dal.lib.filter', [])
 
             return FilterCompare.LESS_PRECISELY;
         };
+
+        this.getAsObject = function () {
+            return {
+                type: type,
+                field: fieldNames,
+                value: that.value
+            }
+        };
     };
 })
 
-.factory('TheSameValueFilterConstructor', function (FilterConstructor, FilterCompare) {
+.factory('TheSameValueFilterConstructor', function (FilterCompare) {
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
-     * @param filterName  String    Уникальное название фильтра, обязательный параметр
      * @param fieldName   String    Имя поля объекта, в котором проверяется совпадение
      * @throw Error При вызове конструктора с неверными параметрами
      *
      */
-    return function (filterName, fieldName) {
-        var that = this;
-
-        _.bind(FilterConstructor, this, filterName)();
+    return function (fieldName) {
+        var type = 'equal',
+            that = this;
 
         if (_.isUndefined(fieldName) || !_.isString(fieldName)) {
             throw new Error("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
         }
+
+        this.getId = function () {
+            return type + "_" + fieldName;
+        };
+
+        this.value = "";
 
         this.filter = function (object) {
 
@@ -230,7 +215,7 @@ angular.module('max.dal.lib.filter', [])
 
         this.compare = function (filter) {
 
-            if (that.getName() !== filter.getName()) {
+            if (that.getId() !== filter.getId()) {
                 throw new Error("Нельзя стравнивать разные фильтры");
             }
 
@@ -239,6 +224,14 @@ angular.module('max.dal.lib.filter', [])
             }
 
             return FilterCompare.LESS_PRECISELY;
+        };
+
+        this.getAsObject = function () {
+            return {
+                type: type,
+                field: fieldName,
+                value: that.value
+            }
         };
     };
 });

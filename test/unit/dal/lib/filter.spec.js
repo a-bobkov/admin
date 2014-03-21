@@ -2,15 +2,15 @@
 
 describe('FilterCollectionConstructor', function () {
     var FilterCollectionConstructor,
-        FilterConstructor;
+        TheSameValueFilterConstructor;
 
 
     beforeEach(function () {
         module('max.dal.lib.filter');
 
-        inject(function(_FilterCollectionConstructor_, _FilterConstructor_) {
+        inject(function(_FilterCollectionConstructor_, _TheSameValueFilterConstructor_) {
             FilterCollectionConstructor = _FilterCollectionConstructor_;
-            FilterConstructor = _FilterConstructor_;
+            TheSameValueFilterConstructor = _TheSameValueFilterConstructor_;
         });
     });
 
@@ -29,15 +29,13 @@ describe('FilterCollectionConstructor', function () {
 
         it('Добавлять можно только объекты с реализованными обязательными методами', function () {
             expect(function () {
-                collection.add(new FilterConstructor('uniqueName'));
+                collection.add(new TheSameValueFilterConstructor('fieldName'));
             }).not.toThrow();
-        });
 
-        it('Интерфейс фильтра требует наличие метода getName()', function () {
             var errorMessage,
                 filter = {};
 
-            _.forEach(['getName', 'filter', 'compare', 'getAsObject'], function (method) {
+            _.forEach(['getId', 'filter', 'compare', 'getAsObject'], function (method) {
 
                 errorMessage = "У объекта типа фильтр должен быть реализован метод " + method + "()";
 
@@ -57,16 +55,16 @@ describe('FilterCollectionConstructor', function () {
             });
         });
 
-        it('Фильтры в коллекции упорядочены по уникальному имени и при совпадении имени новый фильтр заменяет старый', function () {
-            var filterName = 'uniqueName';
+        it('Фильтры в коллекции упорядочены по уникальному id и при совпадении id новый фильтр заменяет старый', function () {
+            var fileldName = 'someFieldName';
 
             expect(function () {
-                collection.add(new FilterConstructor(filterName));
+                collection.add(new TheSameValueFilterConstructor(fileldName));
             }).not.toThrow();
             expect(collection.length()).toEqual(1);
 
             expect(function () {
-                collection.add(new FilterConstructor(filterName));
+                collection.add(new TheSameValueFilterConstructor(fileldName));
             }).not.toThrow();
             expect(collection.length()).toEqual(1);
         });
@@ -80,10 +78,10 @@ describe('FilterCollectionConstructor', function () {
         });
 
         it('Если фильтр в коллекции есть, возвращается фильр', function () {
-            var filter = new FilterConstructor('uniqueName');
+            var filter = new TheSameValueFilterConstructor('fieldName');
             collection.add(filter);
 
-            expect(collection.get(filter.getName())).toBe(filter);
+            expect(collection.get(filter.getId())).toBe(filter);
         });
 
         it('Если фильтра в коллекции нет, возвращается undefined', function () {
@@ -98,22 +96,22 @@ describe('FilterCollectionConstructor', function () {
             collection = new FilterCollectionConstructor;
         });
 
-        it('Удаляемый фильтр должен быть объектом с реализованными методом getName', function () {
+        it('Удаляемый фильтр должен быть объектом с реализованными методом getId', function () {
             expect(function () {
                 collection.remove("ssss");
-            }).toThrow("Для удаления из коллекциии необходимо передать объект с методом getName");
+            }).toThrow("Для удаления из коллекциии необходимо передать объект с методом getId");
         });
 
         it('При удалении фильтра отсутствующего в коллекции не генерируется ошибка', function () {
             expect(function () {
-                collection.remove({ getName: function () { return 'uniqueName' }});
+                collection.remove({ getId: function () { return 'uniqueName' }});
             }).not.toThrow();
             expect(collection.length()).toEqual(0);
         });
 
         it('Фильтры, присутствующие в коллекции, удаляются', function () {
-            var filter1 = new FilterConstructor('uniqueName1'),
-                filter2 = new FilterConstructor('uniqueName2');
+            var filter1 = new TheSameValueFilterConstructor('field1'),
+                filter2 = new TheSameValueFilterConstructor('field2');
 
             collection.add(filter1);
             collection.add(filter2);
@@ -129,19 +127,14 @@ describe('FilterCollectionConstructor', function () {
     });
 
     describe('Экземпляр коллекции применяет все зарегистрированные фильтры к объекту', function () {
-        var collection,
-            TheSameValueFilterConstructor;
+        var collection;
 
         beforeEach(function () {
-            inject(function(_TheSameValueFilterConstructor_) {
-                TheSameValueFilterConstructor = _TheSameValueFilterConstructor_;
-            });
-
             collection = new FilterCollectionConstructor;
         });
 
         it('Если в коллекции один фильтр - проверяет только он', function () {
-            var filter1 = new TheSameValueFilterConstructor('status', 'status'),
+            var filter1 = new TheSameValueFilterConstructor('status'),
                 object1 = { id: 1, status: 'active' },
                 object2 = { id: 2, status: 'blocked' },
                 object3 = { id: 3, status: 'active' },
@@ -154,8 +147,8 @@ describe('FilterCollectionConstructor', function () {
         });
 
         it('Если в коллекции несколько фильтров - проверяются все', function () {
-            var filter1 = new TheSameValueFilterConstructor('status', 'status'),
-                filter2 = new TheSameValueFilterConstructor('role', 'role'),
+            var filter1 = new TheSameValueFilterConstructor('status'),
+                filter2 = new TheSameValueFilterConstructor('role'),
                 object1 = { id: 1, status: 'active', role: 'admin' },
                 object2 = { id: 2, status: 'blocked', role: 'user' },
                 object3 = { id: 3, status: 'active', role: 'user' },
@@ -176,13 +169,11 @@ describe('FilterCollectionConstructor', function () {
         var collection,
             comparingCollection,
             StringContainsFilterConstructor,
-            TheSameValueFilterConstructor,
             FilterCompare;
 
         beforeEach(function () {
-            inject(function(_StringContainsFilterConstructor_, _TheSameValueFilterConstructor_, _FilterCompare_) {
+            inject(function(_StringContainsFilterConstructor_, _FilterCompare_) {
                 StringContainsFilterConstructor = _StringContainsFilterConstructor_;
-                TheSameValueFilterConstructor = _TheSameValueFilterConstructor_;
                 FilterCompare = _FilterCompare_;
             });
 
@@ -191,8 +182,8 @@ describe('FilterCollectionConstructor', function () {
         });
 
         it('Сравнение равных коллекции с одним фильтром', function () {
-            var filter = new StringContainsFilterConstructor('filter1', ['field1']),
-                comparingFilter = new StringContainsFilterConstructor('filter1', ['field1']);
+            var filter = new StringContainsFilterConstructor(['field1']),
+                comparingFilter = new StringContainsFilterConstructor(['field1']);
 
             filter.value = 'abc';
             comparingFilter.value = 'abc';
@@ -203,9 +194,9 @@ describe('FilterCollectionConstructor', function () {
             expect(collection.compare(comparingCollection)).toEqual(FilterCompare.THE_SAME);
         });
 
-        it('Сравнение неравных коллекций с одним фильтром', function () {
-            var filter = new StringContainsFilterConstructor('filter1', ['field1']),
-                comparingFilter = new StringContainsFilterConstructor('filter1', ['field1']);
+        it('Сравнение коллекций с одинаковыми фильтрами имеющими разные value', function () {
+            var filter = new StringContainsFilterConstructor(['field1']),
+                comparingFilter = new StringContainsFilterConstructor(['field1']);
 
             filter.value = 'abc';
             collection.add(filter);
@@ -218,10 +209,10 @@ describe('FilterCollectionConstructor', function () {
         });
 
         it('Сравнение равных коллекции с несколькими фильтрами', function () {
-            var filter1 = new StringContainsFilterConstructor('filter1', ['field1']),
-                filter2 = new TheSameValueFilterConstructor('filter2', 'field1'),
-                comparingFilter1 = new StringContainsFilterConstructor('filter1', ['field1']),
-                comparingFilter2 = new TheSameValueFilterConstructor('filter2', 'field1');
+            var filter1 = new StringContainsFilterConstructor(['field1']),
+                filter2 = new TheSameValueFilterConstructor('field2'),
+                comparingFilter1 = new StringContainsFilterConstructor(['field1']),
+                comparingFilter2 = new TheSameValueFilterConstructor('field2');
 
             filter1.value = 'abc';
             comparingFilter1.value = 'abc';
@@ -235,15 +226,16 @@ describe('FilterCollectionConstructor', function () {
             comparingCollection.add(comparingFilter2);
 
             expect(collection.compare(comparingCollection)).toEqual(FilterCompare.THE_SAME);
+            expect(comparingCollection.compare(collection)).toEqual(FilterCompare.THE_SAME);
         });
 
         it('Сравнение неравных коллекции с несколькими фильтрами', function () {
             var filter1, filter2, comparingFilter1, comparingFilter2;
 
-            filter1 = new StringContainsFilterConstructor('filter1', ['field1']);
-            filter2 = new TheSameValueFilterConstructor('filter2', 'field2');
-            comparingFilter1 = new StringContainsFilterConstructor('filter1', ['field1']);
-            comparingFilter2 = new TheSameValueFilterConstructor('filter2', 'field2');
+            filter1 = new StringContainsFilterConstructor(['field1']);
+            filter2 = new TheSameValueFilterConstructor('field2');
+            comparingFilter1 = new StringContainsFilterConstructor(['field1']);
+            comparingFilter2 = new TheSameValueFilterConstructor('field2');
 
             filter1.value = 'abc';
             filter2.value = 'some value';
@@ -263,11 +255,11 @@ describe('FilterCollectionConstructor', function () {
         it('Сравнение коллекции с разным количеством фильтров', function () {
             var filter1, filter2, comparingFilter1, comparingFilter2, comparingFilter3;
 
-            filter1 = new StringContainsFilterConstructor('filter1', ['field1']);
-            filter2 = new TheSameValueFilterConstructor('filter2', 'field2');
-            comparingFilter1 = new StringContainsFilterConstructor('filter1', ['field1']);
-            comparingFilter2 = new TheSameValueFilterConstructor('filter2', 'field2');
-            comparingFilter3 = new TheSameValueFilterConstructor('filter3', 'field2');
+            filter1 = new StringContainsFilterConstructor(['field1']);
+            filter2 = new TheSameValueFilterConstructor('field2');
+            comparingFilter1 = new StringContainsFilterConstructor(['field1']);
+            comparingFilter2 = new TheSameValueFilterConstructor('field2');
+            comparingFilter3 = new TheSameValueFilterConstructor('field3');
 
             collection.add(filter1);
             collection.add(filter2);
@@ -282,113 +274,36 @@ describe('FilterCollectionConstructor', function () {
 
     describe('Экземпляр коллекции умеет себя сеарилизовать в объект ключ-значение', function () {
         var collection,
-            filter,
-            TheSameValueFilterConstructor;
+            filter;
 
         beforeEach(function () {
-            inject(function(_TheSameValueFilterConstructor_) {
-                TheSameValueFilterConstructor = _TheSameValueFilterConstructor_;
-            });
-
             collection = new FilterCollectionConstructor;
         });
 
         it('Сериализация с одним фильтром', function () {
 
-            filter = new TheSameValueFilterConstructor('filter1', 'some fileld');
+            filter = new TheSameValueFilterConstructor('some field');
             filter.value = 'some value';
             collection.add(filter);
 
-            expect(collection.getAsObject()).toEqual({ filter1: 'some value' })
+            expect(collection.getAsObject()).toEqual([{ type: 'equal', field: 'some field', value: 'some value' }])
         });
 
         it('Сериализация нескольких фильтров', function () {
 
-            filter = new TheSameValueFilterConstructor('filter1', 'some fileld');
+            filter = new TheSameValueFilterConstructor('some field');
             filter.value = 'some value';
             collection.add(filter);
 
-            filter = new TheSameValueFilterConstructor('filter2', 'some fileld');
+            filter = new TheSameValueFilterConstructor('another field');
             filter.value = 'another value';
             collection.add(filter);
 
-            expect(collection.getAsObject()).toEqual({ filter1: 'some value', filter2: 'another value' });
+            expect(collection.getAsObject()).toEqual([
+                { type: 'equal', field: 'some field', value: 'some value' },
+                { type: 'equal', field: 'another field', value: 'another value' }
+            ]);
         });
-    });
-});
-
-describe('FilterConstructor', function () {
-    var FilterConstructor;
-
-
-    beforeEach(function () {
-        module('max.dal.lib.filter');
-
-        inject(function(_FilterConstructor_) {
-            FilterConstructor = _FilterConstructor_;
-
-        });
-    });
-
-    describe('Экземпляр фильтра создается с помощью конструктора', function () {
-        it('Конструктор должен получить валидные параметры', function () {
-            expect(
-                new FilterConstructor('uniqueName') instanceof FilterConstructor
-            ).toBeTruthy();
-        });
-
-        it('Уникальное имя фильтра обязательно должно быть передано', function () {
-            expect(function () {
-                new FilterConstructor();
-            }).toThrow("Имя фильтра должно быть задано строковым значением");
-        });
-
-        it('Уникальное имя фильтра должно быть строкой', function () {
-            expect(function () {
-                new FilterConstructor(1);
-            }).toThrow("Имя фильтра должно быть задано строковым значением");
-        });
-    });
-
-    it('Экземпляр фильтра умеет возвращать свое уникальное название', function () {
-        var filterName = 'uniqueName',
-            filter = new FilterConstructor('uniqueName');
-
-        expect(filter.getName()).toEqual(filterName);
-    });
-
-    it('Экземпляр базового фильтра не фильтрует коллекцию', function () {
-        var obj1 = { id: 1, status: 'active'   },
-            obj2 = { id: 2, status: 'blocked'  },
-            objects = [ obj1, obj2 ],
-            filter = new FilterConstructor('test');
-
-        filter.value = 'another value';
-        expect(_.filter(objects, filter.filter)).toEqual(objects);
-    });
-
-    it('Экземпляр базового фильтра всегда возвращает что он менее точный', function () {
-        var FilterCompare,
-            filter,
-            anotherFilter;
-
-        inject(function(_FilterCompare_) {
-            FilterCompare = _FilterCompare_;
-        });
-
-        filter = new FilterConstructor('uniqueName');
-        anotherFilter = _.cloneDeep(filter);
-        filter.value = 'active';
-        anotherFilter.value = 'active';
-
-        expect(filter.compare(anotherFilter)).toBe(FilterCompare.LESS_PRECISELY);
-    });
-
-    it('Экземпляр базового фильтра умеет возвращать свое состояние в виде объекта', function () {
-        var filter = new FilterConstructor('uniqueName', 'status' );
-        filter.value = 'pattern';
-
-        expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });
     });
 });
 
@@ -408,45 +323,32 @@ describe('StringContainsFilterConstructor', function () {
     describe('Экземпляр фильтра создается с помощью конструктора', function () {
         it('Конструктор должен получить валидные параметры', function () {
             expect(
-                new StringContainsFilterConstructor('uniqueName', ['id']) instanceof StringContainsFilterConstructor
+                new StringContainsFilterConstructor(['id']) instanceof StringContainsFilterConstructor
             ).toBeTruthy();
-        });
-
-        it('Уникальное имя фильтра обязательно должно быть передано', function () {
-            expect(function () {
-                new StringContainsFilterConstructor();
-            }).toThrow("Имя фильтра должно быть задано строковым значением");
-        });
-
-        it('Уникальное имя фильтра должно быть строкой', function () {
-            expect(function () {
-                new StringContainsFilterConstructor(1);
-            }).toThrow("Имя фильтра должно быть задано строковым значением");
         });
 
         it('Перечень полей должен быть передан', function () {
             expect(function () {
-                new StringContainsFilterConstructor('uniqueName');
+                new StringContainsFilterConstructor();
             }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         });
 
         it('Перечень полей должен быть массивом', function () {
             expect(function () {
-                new StringContainsFilterConstructor('uniqueName', '123');
+                new StringContainsFilterConstructor('123');
             }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         });
 
         it('Перечень полей должен быть не пустым массивом', function () {
             expect(function () {
-                new StringContainsFilterConstructor('uniqueName', []);
+                new StringContainsFilterConstructor([]);
             }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         });
     });
 
-    it('Экземпляр фильтра умеет возвращать свое уникальное название', function () {
-        var filterName = 'uniqueName',
-            filter = new StringContainsFilterConstructor(filterName, [ 'id' ]);
-        expect(filter.getName()).toEqual(filterName);
+    it('Экземпляр фильтра умеет возвращать свой уникальный идентификатор', function () {
+        var filter = new StringContainsFilterConstructor([ 'id' ]);
+        expect(filter.getId()).toEqual('contain_id');
     });
 
     it('Экземпляр фильтра фильтрует коллекцию объектов на условии ИЛИ по всем перечисленным в конструкторе полям', function () {
@@ -456,7 +358,7 @@ describe('StringContainsFilterConstructor', function () {
             obj4 = { id: 4, company_name: 'Салон четыре', email: '1@four.com' },
             obj5 = { id: 21, company_name: 'Салон 21', email: 'one@twenty-one.com' },
             objects = [ obj1, obj2, obj3, obj4, obj5 ],
-            filter = new StringContainsFilterConstructor('test', ['id', 'email', 'company_name']);
+            filter = new StringContainsFilterConstructor(['id', 'email', 'company_name']);
 
         filter.value = 1;
         expect(_.filter(objects, filter.filter)).toEqual([ obj1, obj2, obj4, obj5 ]);
@@ -483,13 +385,12 @@ describe('StringContainsFilterConstructor', function () {
 
             });
 
-            filterName = 'uniqueName';
-            filter = new StringContainsFilterConstructor(filterName, [ 'id' ]);
-            comparingFilter = new StringContainsFilterConstructor(filterName, [ 'id' ]);
+            filter = new StringContainsFilterConstructor([ 'id' ]);
+            comparingFilter = new StringContainsFilterConstructor([ 'id' ]);
         });
 
-        it('Нельзя стравнивать фильтры с разными названиями', function () {
-            comparingFilter = new StringContainsFilterConstructor('comparingFilter', [ 'id' ]);
+        it('Нельзя стравнивать фильтры разного типа применяемые к разным полям', function () {
+            comparingFilter = new StringContainsFilterConstructor([ 'name' ]);
 
             expect(function () {
                 filter.compare(comparingFilter);
@@ -514,10 +415,10 @@ describe('StringContainsFilterConstructor', function () {
     });
 
     it('Экземпляр фильтра умеет возвращать свое состояние в виде объекта', function () {
-        var filter = new StringContainsFilterConstructor('uniqueName', [ 'id' ]);
+        var filter = new StringContainsFilterConstructor([ 'id' ]);
         filter.value = 'pattern';
 
-        expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });
+        expect(filter.getAsObject()).toEqual({ type: 'contain', field: ['id'], value: 'pattern'});
     });
 });
 
@@ -536,34 +437,21 @@ describe('TheSameValueFilterConstructor', function () {
     describe('Экземпляр фильтра создается с помощью конструктора', function () {
         it('Конструктор должен получить валидные параметры', function () {
             expect(
-                new TheSameValueFilterConstructor('uniqueName', 'status') instanceof TheSameValueFilterConstructor
+                new TheSameValueFilterConstructor('status') instanceof TheSameValueFilterConstructor
             ).toBeTruthy();
         });
 
-        it('Уникальное имя фильтра обязательно должно быть передано', function () {
+        it('Название фильтруемого поля должно быть передано', function () {
             expect(function () {
                 new TheSameValueFilterConstructor();
-            }).toThrow("Имя фильтра должно быть задано строковым значением");
-        });
-
-        it('Уникальное имя фильтра должно быть строкой', function () {
-            expect(function () {
-                new TheSameValueFilterConstructor(1);
-            }).toThrow("Имя фильтра должно быть задано строковым значением");
-        });
-
-        it('Перечень полей должен быть передан', function () {
-            expect(function () {
-                new TheSameValueFilterConstructor('uniqueName');
             }).toThrow("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
         });
     });
 
-    it('Экземпляр фильтра умеет возвращать свое уникальное название', function () {
-        var filterName = 'uniqueName',
-            filter = new TheSameValueFilterConstructor('uniqueName', 'status');
+    it('Экземпляр фильтра умеет возвращать свой уникальный идентификатор', function () {
+        var filter = new TheSameValueFilterConstructor('status');
 
-        expect(filter.getName()).toEqual(filterName);
+        expect(filter.getId()).toEqual('equal_status');
     });
 
     describe('Экземпляр фильтра фильтрует коллекцию объектов', function () {
@@ -573,7 +461,7 @@ describe('TheSameValueFilterConstructor', function () {
                 obj3 = { id: 2, status: 'inactive' },
                 obj4 = { id: 3, status: 'active'   },
                 objects = [ obj1, obj2, obj3, obj4 ],
-                filter = new TheSameValueFilterConstructor('test', 'status');
+                filter = new TheSameValueFilterConstructor('status');
 
             filter.value = 'another value';
             expect(_.filter(objects, filter.filter)).toEqual([]);
@@ -589,7 +477,7 @@ describe('TheSameValueFilterConstructor', function () {
             var obj1 = { id: 1, status: 'active'   },
                 obj2 = { id: 2 },
                 objects = [ obj1, obj2 ],
-                filter = new TheSameValueFilterConstructor('test', 'status');
+                filter = new TheSameValueFilterConstructor('status');
 
             filter.value = 'active';
             expect(_.filter(objects, filter.filter)).toEqual([ obj1 ]);
@@ -607,12 +495,12 @@ describe('TheSameValueFilterConstructor', function () {
                 FilterCompare = _FilterCompare_;
             });
 
-            filter = new TheSameValueFilterConstructor('uniqueName', 'status');
-            comparingFilter = new TheSameValueFilterConstructor('uniqueName', 'status');
+            filter = new TheSameValueFilterConstructor('status');
+            comparingFilter = new TheSameValueFilterConstructor('status');
         });
 
-        it('Нельзя стравнивать фильтры с разными названиями', function () {
-            comparingFilter = new TheSameValueFilterConstructor('comparingFilter', 'status' );
+        it('Нельзя стравнивать фильтры с разными идентификаторами', function () {
+            comparingFilter = new TheSameValueFilterConstructor('name' );
 
             expect(function () {
                 filter.compare(comparingFilter);
@@ -636,9 +524,9 @@ describe('TheSameValueFilterConstructor', function () {
     });
 
     it('Экземпляр фильтра умеет возвращать свое состояние в виде объекта', function () {
-        var filter = new TheSameValueFilterConstructor('uniqueName', 'status' );
+        var filter = new TheSameValueFilterConstructor('status' );
         filter.value = 'pattern';
 
-        expect(filter.getAsObject()).toEqual({ uniqueName: 'pattern' });
+        expect(filter.getAsObject()).toEqual({ type: 'equal', field: 'status', value: 'pattern' });
     });
 });
