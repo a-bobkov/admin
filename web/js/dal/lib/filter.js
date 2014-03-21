@@ -131,7 +131,7 @@ angular.module('max.dal.lib.filter', [])
         this.filter = function (object) {
             var fieldName,
                 fieldValue,
-                value = _.isString(that.value) ? that.value : that.value.toString();
+                value = that.value.toString();
 
             if (_.isEmpty(value)) {
                 return true;
