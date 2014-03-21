@@ -7,7 +7,7 @@ angular.module('max.dal.lib.order', [])
     THE_SAME:    0
 })
 
-.factory('OrderConstructor', function (OrderCompare) {
+.factory('Order', function (OrderCompare) {
     var directions = ['asc', 'desc'];
 
     return function (fieldName, direction) {

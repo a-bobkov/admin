@@ -8,7 +8,7 @@ angular.module('max.dal.lib.pager', [])
     INCLUDE:           1
 })
 
-.factory('PagerConstructor', function (PagerCompare) {
+.factory('Pager', function (PagerCompare) {
     var validate = function (value, min, name) {
         var errorMessage = "Парамер " + name + " должен быть целым числом больше или равным " + min;
 

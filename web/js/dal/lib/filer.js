@@ -8,7 +8,7 @@ angular.module('max.dal.lib.filter', [])
     MORE_PRECISELY:  1
 })
 
-.factory('FilterCollectionConstructor', function (FilterCompare) {
+.factory('FilterCollection', function (FilterCompare) {
     return function () {
         var collection = {},
             that = this;
@@ -103,7 +103,7 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('StringContainsFilterConstructor', function (FilterCompare) {
+.factory('StringContainsFilter', function (FilterCompare) {
 
     /**
      * Фильтр на вхождение строки
@@ -179,7 +179,7 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('TheSameValueFilterConstructor', function (FilterCompare) {
+.factory('TheSameValueFilter', function (FilterCompare) {
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
