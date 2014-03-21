@@ -24,13 +24,18 @@ angular.module('max.dal.lib.pager', [])
         return value;
     };
 
-    return function (page, per_page, total) {
+    return function (pageParams) {
+        var page, per_page, total;
 
-        page = validate(page, 1, 'page');
-        per_page = validate(per_page, 1, 'per_page');
+        if (!_.isObject(pageParams)) {
+            throw new Error('В конструктор параметров паджинации должен быть передан объект');
+        }
 
-        if (!_.isUndefined(total)) {
-            total = validate(total, 0, 'total');
+        page = validate(pageParams.page, 1, 'page');
+        per_page = validate(pageParams.per_page, 1, 'per_page');
+
+        if (!_.isUndefined(pageParams.total)) {
+            total = validate(pageParams.total, 0, 'total');
         }
 
         this.getPage = function () {
