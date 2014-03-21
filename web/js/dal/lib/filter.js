@@ -179,7 +179,7 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('TheSameValueFilter', function (FilterCompare) {
+.factory('EqualFilter', function (FilterCompare) {
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
