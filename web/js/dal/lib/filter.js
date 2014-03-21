@@ -238,4 +238,29 @@ angular.module('max.dal.lib.filter', [])
             }
         };
     };
+})
+
+.factory('DalFilterFactory', function (StringContainsFilter, EqualFilter) {
+    return {
+        create: function (obj) {
+            var filter;
+
+            if (!_.isObject(obj)) {
+                throw new Error('В фабрику фильтров должен быть передан объект');
+            }
+
+            if ('equal' === obj.type) {
+                filter = new EqualFilter(obj.field);
+            } else if ('contain' === obj.type) {
+                filter = new StringContainsFilter(obj.field);
+            } else {
+                throw new Error('В фабрику фильтров передан передан неверный тип фильтра: ' + obj.type);
+            }
+            // todo: Сделать фильр in
+
+            filter.value = obj.value;
+
+            return filter;
+        }
+    };
 });

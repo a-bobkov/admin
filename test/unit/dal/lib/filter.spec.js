@@ -542,3 +542,46 @@ describe('EqualFilter', function () {
         expect(filter.getAsObject()).toEqual({ type: 'equal', field: 'status', value: 'pattern' });
     });
 });
+
+describe('DalFilterFactory', function () {
+    var DalFilterFactory,
+        StringContainsFilter,
+        EqualFilter;
+
+
+    beforeEach(function () {
+        module('max.dal.lib.filter');
+
+        inject(function(_DalFilterFactory_, _StringContainsFilter_, _EqualFilter_) {
+            DalFilterFactory = _DalFilterFactory_;
+            StringContainsFilter = _StringContainsFilter_;
+            EqualFilter = _EqualFilter_;
+        });
+    });
+
+    describe('Позволяет создавать экземпляры фильтров', function () {
+        it('В метод create должен быть передан объект', function () {
+            expect(function () {
+                DalFilterFactory.create('not an object');
+            }).toThrow('В фабрику фильтров должен быть передан объект');
+        });
+
+        it('Если у объекта указан тип contain создается фильтр StringContainsFilter', function () {
+            expect(DalFilterFactory.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
+        });
+
+        it('Если у объекта указан тип contain создается фильтр EqualFilter', function () {
+            expect(DalFilterFactory.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
+        });
+
+        it('Если тип фильтра неизвестен выбрасывается exception', function () {
+            expect(function () {
+                DalFilterFactory.create({});
+            }).toThrow('В фабрику фильтров передан передан неверный тип фильтра: undefined');
+
+            expect(function () {
+                DalFilterFactory.create({type: 'in'});
+            }).toThrow('В фабрику фильтров передан передан неверный тип фильтра: in');
+        });
+    });
+});
