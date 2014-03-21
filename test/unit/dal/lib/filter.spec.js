@@ -68,6 +68,12 @@ describe('FilterCollectionConstructor', function () {
             }).not.toThrow();
             expect(collection.length()).toEqual(1);
         });
+
+        it('При добавлении фильтра коллекции возвращается сама коллекция', function () {
+            expect(
+                collection.add(new TheSameValueFilterConstructor('someField'))
+            ).toBe(collection);
+        });
     });
 
     describe('Из экземпляра коллекции можно получать ранее добавленные фильтры', function () {
@@ -107,6 +113,12 @@ describe('FilterCollectionConstructor', function () {
                 collection.remove({ getId: function () { return 'uniqueName' }});
             }).not.toThrow();
             expect(collection.length()).toEqual(0);
+        });
+
+        it('При удалении фильтра возвращается сама коллекция', function () {
+            expect(
+                collection.remove({ getId: function () { return 'uniqueName' }})
+            ).toBe(collection);
         });
 
         it('Фильтры, присутствующие в коллекции, удаляются', function () {

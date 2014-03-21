@@ -25,6 +25,8 @@ angular.module('max.dal.lib.filter', [])
             });
 
             collection[filter.getId()] = filter;
+
+            return that;
         };
 
         this.get = function (id) {
@@ -37,6 +39,8 @@ angular.module('max.dal.lib.filter', [])
             }
 
             delete collection[filter.getId()];
+
+            return that;
         };
 
         this.length = function () {
