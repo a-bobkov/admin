@@ -10,8 +10,16 @@ angular.module('max.dal.lib.order', [])
 .factory('Order', function (OrderCompare) {
     var directions = ['asc', 'desc'];
 
-    return function (fieldName, direction) {
-        if (!_.isString(fieldName)) {
+    return function (orderParams) {
+
+        if (!_.isObject(orderParams)) {
+            throw new Error('В конструктор параметров сортировки  должен быть передан объект');
+        }
+
+        var field = orderParams.field;
+        var direction = orderParams.direction;
+
+        if (!_.isString(field)) {
             throw new Error("Название поля для сортировки обязательно должно быть задано");
         }
 
@@ -21,8 +29,8 @@ angular.module('max.dal.lib.order', [])
             throw new Error("Направление сортировки может быть задано значениеям: " + directions.join(", "));
         }
 
-        this.getFieldName = function () {
-            return fieldName;
+        this.getField = function () {
+            return field;
         };
 
         this.getDirection = function () {
@@ -31,17 +39,17 @@ angular.module('max.dal.lib.order', [])
 
         this.getAsObject = function () {
             return {
-                order_field:      fieldName,
+                order_field:      field,
                 order_direction:  direction
             }
         };
 
         this.compare = function (order) {
-            if (!_.isObject(order) || !_.isFunction(order.getFieldName) || !_.isFunction(order.getDirection)) {
+            if (!_.isObject(order) || !_.isFunction(order.getField) || !_.isFunction(order.getDirection)) {
                 throw new Error("Сортировку можно сравнивать только с другой сортировкой");
             }
 
-            if ((fieldName === order.getFieldName()) && (direction === order.getDirection())) {
+            if ((field === order.getField()) && (direction === order.getDirection())) {
                 return OrderCompare.THE_SAME;
             }
 
