@@ -35,7 +35,7 @@ describe('FilterCollection', function () {
             var errorMessage,
                 filter = {};
 
-            _.forEach(['getId', 'filter', 'compare', 'getAsObject'], function (method) {
+            _.forEach(['getId', 'apply', 'compare', 'getAsObject'], function (method) {
 
                 errorMessage = "У объекта типа фильтр должен быть реализован метод " + method + "()";
 
@@ -373,16 +373,16 @@ describe('StringContainsFilter', function () {
             filter = new StringContainsFilter(['id', 'email', 'company_name']);
 
         filter.value = 1;
-        expect(_.filter(objects, filter.filter)).toEqual([ obj1, obj2, obj4, obj5 ]);
+        expect(_.filter(objects, filter.apply)).toEqual([ obj1, obj2, obj4, obj5 ]);
 
         filter.value = 2;
-        expect(_.filter(objects, filter.filter)).toEqual([ obj2, obj5 ]);
+        expect(_.filter(objects, filter.apply)).toEqual([ obj2, obj5 ]);
 
         filter.value = 4;
-        expect(_.filter(objects, filter.filter)).toEqual([ obj4 ]);
+        expect(_.filter(objects, filter.apply)).toEqual([ obj4 ]);
 
         filter.value = 'twenty';
-        expect(_.filter(objects, filter.filter)).toEqual([ obj5 ]);
+        expect(_.filter(objects, filter.apply)).toEqual([ obj5 ]);
     });
 
     describe('Экземпляр фильтра умеет себя сравнивать', function () {
@@ -476,13 +476,13 @@ describe('EqualFilter', function () {
                 filter = new EqualFilter('status');
 
             filter.value = 'another value';
-            expect(_.filter(objects, filter.filter)).toEqual([]);
+            expect(_.filter(objects, filter.apply)).toEqual([]);
 
             filter.value = 'active';
-            expect(_.filter(objects, filter.filter)).toEqual([ obj1, obj4 ]);
+            expect(_.filter(objects, filter.apply)).toEqual([ obj1, obj4 ]);
 
             filter.value = 'blocked';
-            expect(_.filter(objects, filter.filter)).toEqual([ obj2 ]);
+            expect(_.filter(objects, filter.apply)).toEqual([ obj2 ]);
         });
 
         it('Объекты не имеющие поля, по которому выполняется фильтрация, отбрасываются', function () {
@@ -492,7 +492,7 @@ describe('EqualFilter', function () {
                 filter = new EqualFilter('status');
 
             filter.value = 'active';
-            expect(_.filter(objects, filter.filter)).toEqual([ obj1 ]);
+            expect(_.filter(objects, filter.apply)).toEqual([ obj1 ]);
 
         });
     });

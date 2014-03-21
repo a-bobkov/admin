@@ -18,7 +18,7 @@ angular.module('max.dal.lib.filter', [])
                 throw new Error("В коллекцию фильтров можно бодавлять только объекты реализующие интерфейс фильтра");
             }
 
-            _.forEach(['getId', 'filter', 'compare', 'getAsObject'], function (method) {
+            _.forEach(['getId', 'apply', 'compare', 'getAsObject'], function (method) {
                 if (!_.isFunction(filter[method])) {
                     throw new Error("У объекта типа фильтр должен быть реализован метод " + method + "()");
                 }
@@ -51,7 +51,7 @@ angular.module('max.dal.lib.filter', [])
             var getId;
 
             for (getId in collection) {
-                if (false === collection[getId].filter(object)) {
+                if (false === collection[getId].apply(object)) {
                     return false;
                 }
             }
@@ -128,7 +128,7 @@ angular.module('max.dal.lib.filter', [])
 
         this.value = "";
 
-        this.filter = function (object) {
+        this.apply = function (object) {
             var fieldName,
                 fieldValue,
                 value = that.value.toString();
@@ -201,7 +201,7 @@ angular.module('max.dal.lib.filter', [])
 
         this.value = "";
 
-        this.filter = function (object) {
+        this.apply = function (object) {
 
             if (_.isEmpty(that.value)) {
                 return true;
