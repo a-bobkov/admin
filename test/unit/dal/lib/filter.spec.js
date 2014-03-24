@@ -320,7 +320,7 @@ describe('FilterCollection', function () {
 });
 
 
-describe('dalFilter', function () {
+describe('dalFilter включает библиотеки для работы с фильтрами', function () {
     var dalFilter,
         StringContainsFilter,
         EqualFilter;
@@ -337,29 +337,65 @@ describe('dalFilter', function () {
         });
     });
 
-    describe('Позволяет создавать экземпляры фильтров', function () {
-        it('В метод create должен быть передан объект', function () {
-            expect(function () {
-                dalFilter.factory.create('not an object');
-            }).toThrow('В фабрику фильтров должен быть передан объект');
+    describe('dalFilter.factory', function () {
+
+        describe('Позволяет регистрировать фильтры', function () {
+            it('Чтобы зарегистрировать фильтр неоходимо передать его алиас и конструктор', function () {
+                expect(function () {
+                    dalFilter.factory.register('some alias', EqualFilter);
+                }).not.toThrow();
+            });
+
+            it('Алиас должен быть не пустой строкой', function () {
+                expect(function () {
+                    dalFilter.factory.register(123);
+                }).toThrow("Алиас для фильтра должен быть непустой строкой");
+
+                expect(function () {
+                    dalFilter.factory.register("");
+                }).toThrow("Алиас для фильтра должен быть непустой строкой");
+            });
+
+            it('Конструктор функции должен быть именно функцией', function () {
+                expect(function () {
+                    dalFilter.factory.register('some alias', {});
+                }).toThrow("Конструктор для фильтра должен быть функцией-конструктором");
+            });
+
+            it('Попытка повторной регистрации алиаса приводит в выбросу исключения', function () {
+
+                dalFilter.factory.register('some alias', EqualFilter);
+
+                expect(function () {
+                    dalFilter.factory.register('some alias', StringContainsFilter);
+                }).toThrow("Для алиаса 'some alias' уже задан конструктор фильтра");
+            });
         });
 
-        it('Если у объекта указан тип contain создается фильтр StringContainsFilter', function () {
-            expect(dalFilter.factory.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
-        });
+        describe('Позволяет создавать экземпляры фильтров', function () {
+            it('В метод create должен быть передан объект', function () {
+                expect(function () {
+                    dalFilter.factory.create('not an object');
+                }).toThrow('В фабрику фильтров должен быть передан объект');
+            });
 
-        it('Если у объекта указан тип contain создается фильтр EqualFilter', function () {
-            expect(dalFilter.factory.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
-        });
+            it('Если у объекта указан тип contain создается фильтр StringContainsFilter', function () {
+                expect(dalFilter.factory.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
+            });
 
-        it('Если тип фильтра неизвестен выбрасывается exception', function () {
-            expect(function () {
-                dalFilter.factory.create({});
-            }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: undefined');
+            it('Если у объекта указан тип contain создается фильтр EqualFilter', function () {
+                expect(dalFilter.factory.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
+            });
 
-            expect(function () {
-                dalFilter.factory.create({type: 'in'});
-            }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: in');
+            it('Если тип фильтра неизвестен выбрасывается exception', function () {
+                expect(function () {
+                    dalFilter.factory.create({});
+                }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: undefined');
+
+                expect(function () {
+                    dalFilter.factory.create({type: 'in'});
+                }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: in');
+            });
         });
     });
 });
