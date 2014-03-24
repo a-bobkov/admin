@@ -63,6 +63,6 @@ angular.module('max.dal.lib.filter.equal', ['max.dal.lib.filter'])
     };
 })
 
-.run(function (DalFilterFactory, EqualFilter) {
-    DalFilterFactory.register('equal', EqualFilter);
+.run(function (dalFilter, EqualFilter) {
+    dalFilter.register('equal', EqualFilter);
 });

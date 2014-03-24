@@ -2,7 +2,7 @@
 
 angular.module('max.dal.lib.query-params', ['max.dal.lib.filter', 'max.dal.lib.order', 'max.dal.lib.pager'])
 
-.factory('QueryParams', function (FilterCollection, DalFilterFactory, Order, Pager) {
+.factory('QueryParams', function (FilterCollection, dalFilter, Order, Pager) {
     return function (params) {
         var that = this;
         var queryParams = {
@@ -16,7 +16,7 @@ angular.module('max.dal.lib.query-params', ['max.dal.lib.filter', 'max.dal.lib.o
         }
 
         _.forEach(params.filters, function (filterData) {
-            queryParams.filters.add(DalFilterFactory.create(filterData));
+            queryParams.filters.add(dalFilter.create(filterData));
         });
 
         if (params.order) {

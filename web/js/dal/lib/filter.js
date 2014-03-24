@@ -103,10 +103,11 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('DalFilterFactory', function () {
+.factory('dalFilter', function () {
     var filters = {};
 
     return {
+
         register: function (alias, Constructor) {
             if (!_.isString(alias) || !alias) {
                 throw new Error("Алиас для фильтра должен быть непустой строкой");

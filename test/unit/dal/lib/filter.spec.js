@@ -320,8 +320,8 @@ describe('FilterCollection', function () {
 });
 
 
-describe('DalFilterFactory', function () {
-    var DalFilterFactory,
+describe('dalFilter', function () {
+    var dalFilter,
         StringContainsFilter,
         EqualFilter;
 
@@ -330,8 +330,8 @@ describe('DalFilterFactory', function () {
         module('max.dal.lib.filter.equal');
         module('max.dal.lib.filter.string-contains');
 
-        inject(function(_DalFilterFactory_, _StringContainsFilter_, _EqualFilter_) {
-            DalFilterFactory = _DalFilterFactory_;
+        inject(function(_dalFilter_, _StringContainsFilter_, _EqualFilter_) {
+            dalFilter = _dalFilter_;
             StringContainsFilter = _StringContainsFilter_;
             EqualFilter = _EqualFilter_;
         });
@@ -340,25 +340,25 @@ describe('DalFilterFactory', function () {
     describe('Позволяет создавать экземпляры фильтров', function () {
         it('В метод create должен быть передан объект', function () {
             expect(function () {
-                DalFilterFactory.create('not an object');
+                dalFilter.create('not an object');
             }).toThrow('В фабрику фильтров должен быть передан объект');
         });
 
         it('Если у объекта указан тип contain создается фильтр StringContainsFilter', function () {
-            expect(DalFilterFactory.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
+            expect(dalFilter.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
         });
 
         it('Если у объекта указан тип contain создается фильтр EqualFilter', function () {
-            expect(DalFilterFactory.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
+            expect(dalFilter.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
         });
 
         it('Если тип фильтра неизвестен выбрасывается exception', function () {
             expect(function () {
-                DalFilterFactory.create({});
+                dalFilter.create({});
             }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: undefined');
 
             expect(function () {
-                DalFilterFactory.create({type: 'in'});
+                dalFilter.create({type: 'in'});
             }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: in');
         });
     });
