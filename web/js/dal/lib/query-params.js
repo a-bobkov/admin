@@ -16,7 +16,7 @@ angular.module('max.dal.lib.query-params', ['max.dal.lib.filter', 'max.dal.lib.o
         }
 
         _.forEach(params.filters, function (filterData) {
-            queryParams.filters.add(dalFilter.create(filterData));
+            queryParams.filters.add(dalFilter.factory.create(filterData));
         });
 
         if (params.order) {

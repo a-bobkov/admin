@@ -340,25 +340,25 @@ describe('dalFilter', function () {
     describe('Позволяет создавать экземпляры фильтров', function () {
         it('В метод create должен быть передан объект', function () {
             expect(function () {
-                dalFilter.create('not an object');
+                dalFilter.factory.create('not an object');
             }).toThrow('В фабрику фильтров должен быть передан объект');
         });
 
         it('Если у объекта указан тип contain создается фильтр StringContainsFilter', function () {
-            expect(dalFilter.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
+            expect(dalFilter.factory.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
         });
 
         it('Если у объекта указан тип contain создается фильтр EqualFilter', function () {
-            expect(dalFilter.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
+            expect(dalFilter.factory.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
         });
 
         it('Если тип фильтра неизвестен выбрасывается exception', function () {
             expect(function () {
-                dalFilter.create({});
+                dalFilter.factory.create({});
             }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: undefined');
 
             expect(function () {
-                dalFilter.create({type: 'in'});
+                dalFilter.factory.create({type: 'in'});
             }).toThrow('В фабрику фильтров передан неизвестный тип фильтра: in');
         });
     });

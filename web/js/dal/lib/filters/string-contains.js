@@ -79,5 +79,5 @@ angular.module('max.dal.lib.filter.string-contains', ['max.dal.lib.filter'])
 })
 
 .run(function (dalFilter, StringContainsFilter) {
-    dalFilter.register('contain', StringContainsFilter);
+    dalFilter.factory.register('contain', StringContainsFilter);
 });

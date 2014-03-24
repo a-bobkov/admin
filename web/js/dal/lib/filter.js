@@ -107,38 +107,39 @@ angular.module('max.dal.lib.filter', [])
     var filters = {};
 
     return {
+        factory: {
+            register: function (alias, Constructor) {
+                if (!_.isString(alias) || !alias) {
+                    throw new Error("Алиас для фильтра должен быть непустой строкой");
+                }
 
-        register: function (alias, Constructor) {
-            if (!_.isString(alias) || !alias) {
-                throw new Error("Алиас для фильтра должен быть непустой строкой");
+                if (!_.isFunction(Constructor)) {
+                    throw new Error("Конструктор для фильтра должен быть функцией-конструктором");
+                }
+
+                if (!_.isUndefined(filters[alias])) {
+                    throw new Error("Для алиаса '" + alias + "' уже задан конструктор фильтра");
+                }
+
+                filters[alias] = Constructor;
+            },
+
+            create: function (obj) {
+                var filter;
+
+                if (!_.isObject(obj)) {
+                    throw new Error('В фабрику фильтров должен быть передан объект');
+                }
+
+                if (_.isUndefined(filters[obj.type])) {
+                    throw new Error('В фабрику фильтров передан неизвестный тип фильтра: ' + obj.type);
+                }
+
+                filter = new filters[obj.type](obj.field);
+                filter.value = obj.value;
+
+                return filter;
             }
-
-            if (!_.isFunction(Constructor)) {
-                throw new Error("Конструктор для фильтра должен быть функцией-конструктором");
-            }
-
-            if (!_.isUndefined(filters[alias])) {
-                throw new Error("Для алиаса '" + alias + "' уже задан конструктор фильтра");
-            }
-
-            filters[alias] = Constructor;
-        },
-
-        create: function (obj) {
-            var filter;
-
-            if (!_.isObject(obj)) {
-                throw new Error('В фабрику фильтров должен быть передан объект');
-            }
-
-            if (_.isUndefined(filters[obj.type])) {
-                throw new Error('В фабрику фильтров передан неизвестный тип фильтра: ' + obj.type);
-            }
-
-            filter = new filters[obj.type](obj.field);
-            filter.value = obj.value;
-
-            return filter;
         }
     };
 });
