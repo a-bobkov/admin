@@ -2,7 +2,7 @@
 
 angular.module('max.dal.lib.filter.equal', ['max.dal.lib.filter'])
 
-.factory('EqualFilter', function (FilterCompare) {
+.factory('EqualFilter', function (FilterCompare, dalFilter) {
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
@@ -25,13 +25,14 @@ angular.module('max.dal.lib.filter.equal', ['max.dal.lib.filter'])
         this.value = "";
 
         this.apply = function (object) {
-
+            var value;
             if (_.isEmpty(that.value)) {
                 return true;
             }
 
-            if (!_.isUndefined(object[fieldName])){
-                if (that.value === object[fieldName]) {
+            value = dalFilter.utils.getDeepValue(object, fieldName);
+            if (!_.isUndefined(value)){
+                if (that.value === value) {
                     return true;
                 }
             } // todo: log.error на отсутствие значения в объекте

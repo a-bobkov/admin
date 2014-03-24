@@ -51,6 +51,24 @@ describe('EqualFilter', function () {
             expect(_.filter(objects, filter.apply)).toEqual([ obj2 ]);
         });
 
+        it('Фильтрация умеетр работать по свойствам вложенных объектов', function () {
+            var obj1 = { id: 1, dealer: { status: 'active' }},
+                obj2 = { id: 2, dealer: { status: 'blocked' }},
+                obj3 = { id: 2, dealer: { status: 'inactive' }},
+                obj4 = { id: 3, dealer: { status: 'active' }},
+                objects = [ obj1, obj2, obj3, obj4 ],
+                filter = new EqualFilter('dealer.status');
+
+            filter.value = 'another value';
+            expect(_.filter(objects, filter.apply)).toEqual([]);
+
+            filter.value = 'active';
+            expect(_.filter(objects, filter.apply)).toEqual([ obj1, obj4 ]);
+
+            filter.value = 'blocked';
+            expect(_.filter(objects, filter.apply)).toEqual([ obj2 ]);
+        });
+
         it('Объекты не имеющие поля, по которому выполняется фильтрация, отбрасываются', function () {
             var obj1 = { id: 1, status: 'active'   },
                 obj2 = { id: 2 },

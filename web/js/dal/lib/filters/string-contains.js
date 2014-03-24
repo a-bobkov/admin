@@ -2,7 +2,7 @@
 
 angular.module('max.dal.lib.filter.string-contains', ['max.dal.lib.filter'])
 
-.factory('StringContainsFilter', function (FilterCompare) {
+.factory('StringContainsFilter', function (FilterCompare, dalFilter) {
 
     /**
      * Фильтр на вхождение строки
@@ -38,8 +38,9 @@ angular.module('max.dal.lib.filter.string-contains', ['max.dal.lib.filter'])
 
             for (var i = 0, l = fieldNames.length; i < l ; i++) {
                 fieldName = fieldNames[i];
-                if (!_.isUndefined(object[fieldName])){
-                    fieldValue = object[fieldName].toString();
+                fieldValue = dalFilter.utils.getDeepValue(object, fieldName);
+                if (!_.isUndefined(fieldValue)){
+                    fieldValue = fieldValue.toString();
                     if (-1 !== fieldValue.indexOf(value)) {
                         return true;
                     }
