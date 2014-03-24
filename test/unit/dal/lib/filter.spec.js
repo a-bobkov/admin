@@ -29,7 +29,7 @@ describe('FilterCollection', function () {
 
         it('Добавлять можно только объекты с реализованными обязательными методами', function () {
             expect(function () {
-                collection.add(new EqualFilter('fieldName'));
+                collection.add(new EqualFilter(['fieldName']));
             }).not.toThrow();
 
             var errorMessage,
@@ -56,22 +56,22 @@ describe('FilterCollection', function () {
         });
 
         it('Фильтры в коллекции упорядочены по уникальному id и при совпадении id новый фильтр заменяет старый', function () {
-            var fileldName = 'someFieldName';
+            var fileldNames = ['someFieldName'];
 
             expect(function () {
-                collection.add(new EqualFilter(fileldName));
+                collection.add(new EqualFilter(fileldNames));
             }).not.toThrow();
             expect(collection.length()).toEqual(1);
 
             expect(function () {
-                collection.add(new EqualFilter(fileldName));
+                collection.add(new EqualFilter(fileldNames));
             }).not.toThrow();
             expect(collection.length()).toEqual(1);
         });
 
-        it('При добавлении фильтра коллекции возвращается сама коллекция', function () {
+        it('При добавлении фильтра возвращается сама коллекция', function () {
             expect(
-                collection.add(new EqualFilter('someField'))
+                collection.add(new EqualFilter(['someField']))
             ).toBe(collection);
         });
     });
@@ -84,7 +84,7 @@ describe('FilterCollection', function () {
         });
 
         it('Если фильтр в коллекции есть, возвращается фильр', function () {
-            var filter = new EqualFilter('fieldName');
+            var filter = new EqualFilter(['fieldName']);
             collection.add(filter);
 
             expect(collection.get(filter.getId())).toBe(filter);
@@ -122,8 +122,8 @@ describe('FilterCollection', function () {
         });
 
         it('Фильтры, присутствующие в коллекции, удаляются', function () {
-            var filter1 = new EqualFilter('field1'),
-                filter2 = new EqualFilter('field2');
+            var filter1 = new EqualFilter(['field1']),
+                filter2 = new EqualFilter(['field2']);
 
             collection.add(filter1);
             collection.add(filter2);
@@ -146,7 +146,7 @@ describe('FilterCollection', function () {
         });
 
         it('Если в коллекции один фильтр - проверяет только он', function () {
-            var filter1 = new EqualFilter('status'),
+            var filter1 = new EqualFilter(['status']),
                 object1 = { id: 1, status: 'active' },
                 object2 = { id: 2, status: 'blocked' },
                 object3 = { id: 3, status: 'active' },
@@ -159,8 +159,8 @@ describe('FilterCollection', function () {
         });
 
         it('Если в коллекции несколько фильтров - проверяются все', function () {
-            var filter1 = new EqualFilter('status'),
-                filter2 = new EqualFilter('role'),
+            var filter1 = new EqualFilter(['status']),
+                filter2 = new EqualFilter(['role']),
                 object1 = { id: 1, status: 'active', role: 'admin' },
                 object2 = { id: 2, status: 'blocked', role: 'user' },
                 object3 = { id: 3, status: 'active', role: 'user' },
@@ -222,9 +222,9 @@ describe('FilterCollection', function () {
 
         it('Сравнение равных коллекции с несколькими фильтрами', function () {
             var filter1 = new StringContainsFilter(['field1']),
-                filter2 = new EqualFilter('field2'),
+                filter2 = new EqualFilter(['field2']),
                 comparingFilter1 = new StringContainsFilter(['field1']),
-                comparingFilter2 = new EqualFilter('field2');
+                comparingFilter2 = new EqualFilter(['field2']);
 
             filter1.value = 'abc';
             comparingFilter1.value = 'abc';
@@ -245,9 +245,9 @@ describe('FilterCollection', function () {
             var filter1, filter2, comparingFilter1, comparingFilter2;
 
             filter1 = new StringContainsFilter(['field1']);
-            filter2 = new EqualFilter('field2');
+            filter2 = new EqualFilter(['field2']);
             comparingFilter1 = new StringContainsFilter(['field1']);
-            comparingFilter2 = new EqualFilter('field2');
+            comparingFilter2 = new EqualFilter(['field2']);
 
             filter1.value = 'abc';
             filter2.value = 'some value';
@@ -268,10 +268,10 @@ describe('FilterCollection', function () {
             var filter1, filter2, comparingFilter1, comparingFilter2, comparingFilter3;
 
             filter1 = new StringContainsFilter(['field1']);
-            filter2 = new EqualFilter('field2');
+            filter2 = new EqualFilter(['field2']);
             comparingFilter1 = new StringContainsFilter(['field1']);
-            comparingFilter2 = new EqualFilter('field2');
-            comparingFilter3 = new EqualFilter('field3');
+            comparingFilter2 = new EqualFilter(['field2']);
+            comparingFilter3 = new EqualFilter(['field3']);
 
             collection.add(filter1);
             collection.add(filter2);
@@ -294,26 +294,26 @@ describe('FilterCollection', function () {
 
         it('Сериализация с одним фильтром', function () {
 
-            filter = new EqualFilter('some field');
+            filter = new EqualFilter(['some field']);
             filter.value = 'some value';
             collection.add(filter);
 
-            expect(collection.getAsObject()).toEqual([{ type: 'equal', field: 'some field', value: 'some value' }])
+            expect(collection.getAsObject()).toEqual([{ type: 'equal', fields: ['some field'], value: 'some value' }])
         });
 
         it('Сериализация нескольких фильтров', function () {
 
-            filter = new EqualFilter('some field');
+            filter = new EqualFilter(['some field']);
             filter.value = 'some value';
             collection.add(filter);
 
-            filter = new EqualFilter('another field');
+            filter = new EqualFilter(['another field']);
             filter.value = 'another value';
             collection.add(filter);
 
             expect(collection.getAsObject()).toEqual([
-                { type: 'equal', field: 'some field', value: 'some value' },
-                { type: 'equal', field: 'another field', value: 'another value' }
+                { type: 'equal', fields: ['some field'], value: 'some value' },
+                { type: 'equal', fields: ['another field'], value: 'another value' }
             ]);
         });
     });
@@ -380,11 +380,11 @@ describe('dalFilter включает библиотеки для работы с
             });
 
             it('Если у объекта указан тип contain создается фильтр StringContainsFilter', function () {
-                expect(dalFilter.factory.create({ type: 'contain', field: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
+                expect(dalFilter.factory.create({ type: 'contain', fields: ['id'] }) instanceof StringContainsFilter).toBeTruthy();
             });
 
             it('Если у объекта указан тип contain создается фильтр EqualFilter', function () {
-                expect(dalFilter.factory.create({ type: 'equal', field: 'status' }) instanceof EqualFilter).toBeTruthy();
+                expect(dalFilter.factory.create({ type: 'equal', fields: ['status'] }) instanceof EqualFilter).toBeTruthy();
             });
 
             it('Если тип фильтра неизвестен выбрасывается exception', function () {
@@ -409,9 +409,7 @@ describe('dalFilter включает библиотеки для работы с
                     dealer: {
                         id: 5,
                         name: 'Some dealer',
-                        city: {
-                            id: 10
-                        }
+                        city: { id: 10 }
                     },
                     market: {
                         id: 13,

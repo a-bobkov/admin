@@ -21,7 +21,7 @@ describe('QueryParams', function () {
         });
 
         it('Если переданы параметры фильтров, они сохраняются', function () {
-            var queryParams = new QueryParams({ filters: [ { type: 'equal', field: 'status', value: 123 } ]});
+            var queryParams = new QueryParams({ filters: [ { type: 'equal', fields: ['status'], value: 123 } ]});
 
             expect(queryParams.hasFilters()).toBeTruthy();
         });
@@ -89,8 +89,8 @@ describe('QueryParams', function () {
 
         it('Фильтры заданы, тело запроса содержит фильтры', function () {
             var filters = [
-                { type: 'equal', field: 'id', value: 100 },
-                { type: 'contain', field: ['name'], value: 'something' }
+                { type: 'equal', fields: ['id'], value: 100 },
+                { type: 'contain', fields: ['name'], value: 'something' }
             ];
 
             var queryParams = new QueryParams({ filters: filters });

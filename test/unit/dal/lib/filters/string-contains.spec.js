@@ -111,6 +111,6 @@ describe('StringContainsFilter', function () {
         var filter = new StringContainsFilter([ 'id' ]);
         filter.value = 'pattern';
 
-        expect(filter.getAsObject()).toEqual({ type: 'contain', field: ['id'], value: 'pattern'});
+        expect(filter.getAsObject()).toEqual({ type: 'contain', fields: ['id'], value: 'pattern'});
     });
 });

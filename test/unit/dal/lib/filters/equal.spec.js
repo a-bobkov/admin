@@ -15,21 +15,29 @@ describe('EqualFilter', function () {
     describe('Экземпляр фильтра создается с помощью конструктора', function () {
         it('Конструктор должен получить валидные параметры', function () {
             expect(
-                new EqualFilter('status') instanceof EqualFilter
+                new EqualFilter(['status']) instanceof EqualFilter
             ).toBeTruthy();
         });
 
-        it('Название фильтруемого поля должно быть передано', function () {
+        it('Название фильтруемых полей должны быть переданы', function () {
             expect(function () {
                 new EqualFilter();
-            }).toThrow("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
+            }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
+
+            expect(function () {
+                new EqualFilter([]);
+            }).toThrow("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         });
     });
 
     it('Экземпляр фильтра умеет возвращать свой уникальный идентификатор', function () {
-        var filter = new EqualFilter('status');
+        var filter;
 
+        filter = new EqualFilter(['status']);
         expect(filter.getId()).toEqual('equal_status');
+
+        filter = new EqualFilter(['status', 'name']);
+        expect(filter.getId()).toEqual('equal_status_name');
     });
 
     describe('Экземпляр фильтра фильтрует коллекцию объектов', function () {
@@ -39,7 +47,7 @@ describe('EqualFilter', function () {
                 obj3 = { id: 2, status: 'inactive' },
                 obj4 = { id: 3, status: 'active'   },
                 objects = [ obj1, obj2, obj3, obj4 ],
-                filter = new EqualFilter('status');
+                filter = new EqualFilter(['status']);
 
             filter.value = 'another value';
             expect(_.filter(objects, filter.apply)).toEqual([]);
@@ -57,7 +65,7 @@ describe('EqualFilter', function () {
                 obj3 = { id: 2, dealer: { status: 'inactive' }},
                 obj4 = { id: 3, dealer: { status: 'active' }},
                 objects = [ obj1, obj2, obj3, obj4 ],
-                filter = new EqualFilter('dealer.status');
+                filter = new EqualFilter(['dealer.status']);
 
             filter.value = 'another value';
             expect(_.filter(objects, filter.apply)).toEqual([]);
@@ -73,7 +81,7 @@ describe('EqualFilter', function () {
             var obj1 = { id: 1, status: 'active'   },
                 obj2 = { id: 2 },
                 objects = [ obj1, obj2 ],
-                filter = new EqualFilter('status');
+                filter = new EqualFilter(['status']);
 
             filter.value = 'active';
             expect(_.filter(objects, filter.apply)).toEqual([ obj1 ]);
@@ -91,12 +99,12 @@ describe('EqualFilter', function () {
                 FilterCompare = _FilterCompare_;
             });
 
-            filter = new EqualFilter('status');
-            comparingFilter = new EqualFilter('status');
+            filter = new EqualFilter(['status']);
+            comparingFilter = new EqualFilter(['status']);
         });
 
         it('Нельзя стравнивать фильтры с разными идентификаторами', function () {
-            comparingFilter = new EqualFilter('name' );
+            comparingFilter = new EqualFilter(['name']);
 
             expect(function () {
                 filter.compare(comparingFilter);
@@ -120,9 +128,9 @@ describe('EqualFilter', function () {
     });
 
     it('Экземпляр фильтра умеет возвращать свое состояние в виде объекта', function () {
-        var filter = new EqualFilter('status' );
+        var filter = new EqualFilter(['status']);
         filter.value = 'pattern';
 
-        expect(filter.getAsObject()).toEqual({ type: 'equal', field: 'status', value: 'pattern' });
+        expect(filter.getAsObject()).toEqual({ type: 'equal', fields: ['status'], value: 'pattern' });
     });
 });

@@ -6,38 +6,41 @@ angular.module('max.dal.lib.filter.equal', ['max.dal.lib.filter'])
     /**
      * Фильтр на совпадение значений в фильтре и в объекте
      *
-     * @param fieldName   String    Имя поля объекта, в котором проверяется совпадение
+     * @param fieldNames   Arrau    Массив имен полей объекта, по которым проверяется совпадение
      * @throw Error При вызове конструктора с неверными параметрами
      *
      */
-    return function (fieldName) {
+    return function (fieldNames) {
         var type = 'equal',
             that = this;
 
-        if (_.isUndefined(fieldName) || !_.isString(fieldName)) {
-            throw new Error("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
+        if (_.isUndefined(fieldNames) || !_.isArray(fieldNames) || _.isEmpty(fieldNames)) {
+            throw new Error("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
         }
 
         this.getId = function () {
-            return type + "_" + fieldName;
+            var delimiter = "_";
+            return type + delimiter + fieldNames.join(delimiter);
         };
 
         this.value = "";
 
         this.apply = function (object) {
-            var value;
+            var ret = false;
             if (_.isEmpty(that.value)) {
                 return true;
             }
 
-            value = dalFilter.utils.getDeepValue(object, fieldName);
-            if (!_.isUndefined(value)){
-                if (that.value === value) {
-                    return true;
-                }
-            } // todo: log.error на отсутствие значения в объекте
+            _.forEach(fieldNames, function (fieldName) {
+                var value = dalFilter.utils.getDeepValue(object, fieldName);
 
-            return  false;
+                // todo: log.error на отсутствие значения в объекте
+                ret = !_.isUndefined(value) && (that.value === value);
+
+                return ret;
+            });
+
+            return  ret;
         };
 
 
@@ -56,9 +59,9 @@ angular.module('max.dal.lib.filter.equal', ['max.dal.lib.filter'])
 
         this.getAsObject = function () {
             return {
-                type: type,
-                field: fieldName,
-                value: that.value
+                type:   type,
+                fields: fieldNames,
+                value:  that.value
             }
         };
     };

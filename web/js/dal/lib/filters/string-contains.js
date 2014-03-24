@@ -71,9 +71,9 @@ angular.module('max.dal.lib.filter.string-contains', ['max.dal.lib.filter'])
 
         this.getAsObject = function () {
             return {
-                type: type,
-                field: fieldNames,
-                value: that.value
+                type:   type,
+                fields: fieldNames,
+                value:  that.value
             }
         };
     };

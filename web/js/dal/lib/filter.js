@@ -135,7 +135,7 @@ angular.module('max.dal.lib.filter', [])
                     throw new Error('В фабрику фильтров передан неизвестный тип фильтра: ' + obj.type);
                 }
 
-                filter = new filters[obj.type](obj.field);
+                filter = new filters[obj.type](obj.fields);
                 filter.value = obj.value;
 
                 return filter;
