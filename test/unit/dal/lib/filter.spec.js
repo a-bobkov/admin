@@ -398,4 +398,57 @@ describe('dalFilter включает библиотеки для работы с
             });
         });
     });
+
+    describe('dalFilter.factory', function () {
+        describe('Позволяет получать значение из вложенных объектов по имени через точку', function () {
+            var object;
+
+            beforeEach(function () {
+                object = {
+                    id: 1,
+                    dealer: {
+                        id: 5,
+                        name: 'Some dealer',
+                        city: {
+                            id: 10
+                        }
+                    },
+                    market: {
+                        id: 13,
+                        name: 'Some market'
+                    }
+                }
+            });
+
+            it('Если имя не содержит точки, то возвращается непосредственное свойство объекта', function () {
+                expect(
+                    dalFilter.utils.getDeepValue(object, 'id')
+                ).toBe(object.id);
+
+                expect(
+                    dalFilter.utils.getDeepValue(object, 'dealer')
+                ).toBe(object.dealer);
+            });
+
+            it('Если имя содержит точки, то возвращается свойство вложенного объекта', function () {
+                expect(
+                    dalFilter.utils.getDeepValue(object, 'dealer.id')
+                ).toBe(object.dealer.id);
+
+                expect(
+                    dalFilter.utils.getDeepValue(object, 'dealer.city.id')
+                ).toBe(object.dealer.city.id);
+            });
+
+            it('Если свойство не удалось найти возвращается undefined', function () {
+                expect(
+                    dalFilter.utils.getDeepValue(object, 'nothing')
+                ).toBeUndefined();
+
+                expect(
+                    dalFilter.utils.getDeepValue(object, 'nothing.city.id')
+                ).toBeUndefined();
+            });
+        })
+    });
 });

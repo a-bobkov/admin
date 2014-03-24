@@ -140,6 +140,17 @@ angular.module('max.dal.lib.filter', [])
 
                 return filter;
             }
+        },
+        utils: {
+            getDeepValue: function (object, property) {
+                var value = object;
+
+                _.forEach(property.split('.'), function (property) {
+                    return !_.isUndefined(value = value[property]);
+                });
+
+                return value;
+            }
         }
     };
 });
