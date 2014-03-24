@@ -103,145 +103,26 @@ angular.module('max.dal.lib.filter', [])
     };
 })
 
-.factory('StringContainsFilter', function (FilterCompare) {
+.factory('DalFilterFactory', function () {
+    var filters = {};
 
-    /**
-     * Фильтр на вхождение строки
-     * Вхождение строки проверяется среди полей, перечисленных в fieldNames
-     *
-     * @param fieldNames  Array     Массив с именами полей, обязательный параметр
-     * @throw Error При вызове конструктора с неверными параметрами
-     *
-     */
-    return function (fieldNames) {
-        var type = "contain",
-            that = this;
-
-        if (_.isUndefined(fieldNames) || !_.isArray(fieldNames) || _.isEmpty(fieldNames)) {
-            throw new Error("Названия полей, по которым выполняется фильтрация, должны быть переданы в виде массива со строками");
-        }
-
-        this.getId = function () {
-            var delimiter = "_";
-            return type + delimiter + fieldNames.join(delimiter);
-        };
-
-        this.value = "";
-
-        this.apply = function (object) {
-            var fieldName,
-                fieldValue,
-                value = that.value.toString();
-
-            if (_.isEmpty(value)) {
-                return true;
-            }
-
-            for (var i = 0, l = fieldNames.length; i < l ; i++) {
-                fieldName = fieldNames[i];
-                if (!_.isUndefined(object[fieldName])){
-                    fieldValue = object[fieldName].toString();
-                    if (-1 !== fieldValue.indexOf(value)) {
-                        return true;
-                    }
-                } // todo: log.error на отсутствие значения в объекте
-            }
-
-            return  false;
-        };
-
-        this.compare = function (filter) {
-            var value,
-                comparingValue;
-            if (that.getId() !== filter.getId()) {
-                throw new Error("Нельзя стравнивать разные фильтры");
-            }
-
-            value = _.isString(that.value) ? that.value : that.value.toString();
-            comparingValue = _.isString(filter.value) ? filter.value : filter.value.toString();
-
-            if (value === comparingValue) {
-                return FilterCompare.THE_SAME;
-            } else if (-1 !== comparingValue.indexOf(value)) {
-                return FilterCompare.MORE_PRECISELY;
-            }
-
-            return FilterCompare.LESS_PRECISELY;
-        };
-
-        this.getAsObject = function () {
-            return {
-                type: type,
-                field: fieldNames,
-                value: that.value
-            }
-        };
-    };
-})
-
-.factory('EqualFilter', function (FilterCompare) {
-    /**
-     * Фильтр на совпадение значений в фильтре и в объекте
-     *
-     * @param fieldName   String    Имя поля объекта, в котором проверяется совпадение
-     * @throw Error При вызове конструктора с неверными параметрами
-     *
-     */
-    return function (fieldName) {
-        var type = 'equal',
-            that = this;
-
-        if (_.isUndefined(fieldName) || !_.isString(fieldName)) {
-            throw new Error("Название поля по которому выполняется фильтрация должно быть передано в виде строки");
-        }
-
-        this.getId = function () {
-            return type + "_" + fieldName;
-        };
-
-        this.value = "";
-
-        this.apply = function (object) {
-
-            if (_.isEmpty(that.value)) {
-                return true;
-            }
-
-            if (!_.isUndefined(object[fieldName])){
-                if (that.value === object[fieldName]) {
-                    return true;
-                }
-            } // todo: log.error на отсутствие значения в объекте
-
-            return  false;
-        };
-
-
-        this.compare = function (filter) {
-
-            if (that.getId() !== filter.getId()) {
-                throw new Error("Нельзя стравнивать разные фильтры");
-            }
-
-            if (that.value === filter.value) {
-                return FilterCompare.THE_SAME;
-            }
-
-            return FilterCompare.LESS_PRECISELY;
-        };
-
-        this.getAsObject = function () {
-            return {
-                type: type,
-                field: fieldName,
-                value: that.value
-            }
-        };
-    };
-})
-
-.factory('DalFilterFactory', function (StringContainsFilter, EqualFilter) {
     return {
+        register: function (alias, Constructor) {
+            if (!_.isString(alias) || !alias) {
+                throw new Error("Алиас для фильтра должен быть непустой строкой");
+            }
+
+            if (!_.isFunction(Constructor)) {
+                throw new Error("Конструктор для фильтра должен быть функцией-конструктором");
+            }
+
+            if (!_.isUndefined(filters[alias])) {
+                throw new Error("Для алиаса '" + alias + "' уже задан конструктор фильтра");
+            }
+
+            filters[alias] = Constructor;
+        },
+
         create: function (obj) {
             var filter;
 
@@ -249,15 +130,11 @@ angular.module('max.dal.lib.filter', [])
                 throw new Error('В фабрику фильтров должен быть передан объект');
             }
 
-            if ('equal' === obj.type) {
-                filter = new EqualFilter(obj.field);
-            } else if ('contain' === obj.type) {
-                filter = new StringContainsFilter(obj.field);
-            } else {
-                throw new Error('В фабрику фильтров передан передан неверный тип фильтра: ' + obj.type);
+            if (_.isUndefined(filters[obj.type])) {
+                throw new Error('В фабрику фильтров передан неизвестный тип фильтра: ' + obj.type);
             }
-            // todo: Сделать фильр in
 
+            filter = new filters[obj.type](obj.field);
             filter.value = obj.value;
 
             return filter;

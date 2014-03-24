@@ -5,6 +5,8 @@ describe('QueryParams', function () {
 
     beforeEach(function () {
         module('max.dal.lib.query-params');
+        module('max.dal.lib.filter.equal');
+        module('max.dal.lib.filter.string-contains');
 
         inject(function(_QueryParams_) {
             QueryParams = _QueryParams_;
