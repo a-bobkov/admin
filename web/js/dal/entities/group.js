@@ -1,30 +1,44 @@
 'use strict';
 
-angular.module('app.dal.entities.group', ['app.dal.entities.collection'])
+angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.dal.rest.api'])
 
-.factory('groups', function(Collection) {
-    return (function() {
-
-        var GroupsCollection = inheritCollection(function() {}, Collection);
-
-        return new GroupsCollection;
-    }());
+.factory('groupApi', function(RestApi, Api) {
+    var groupApi = new RestApi('groups', 'group');
+    return groupApi;
 })
 
 .factory('Group', function(Item) {
-    var Group = function () {};
 
-    angular.extend(Group.prototype, Item.prototype);
-
+    var Group = function(itemData, directories) {
+        _.extend(this, itemData);
+    };
+    _.extend(Group.prototype, Item.prototype);
     return Group;
 })
 
-.run(function(groups, Group) {
-    groups._registerCollection('group', 'groups', Group, undefined);
-    groups._setAll([
-        { 'id': 1, 'name': 'Катя'},
-        { 'id': 2, 'name': 'Инна'},
-        { 'id': 4, 'name': 'Потеряшки'},
-        { 'id': 0, 'name': 'Без тэга'}
-    ]);
+.factory('Groups', function(Collection) {
+    var Groups = (function() {
+        var Groups = function(itemsData, queryParams) {
+            Collection.call(this, itemsData, queryParams);
+        };
+        angular.extend(Groups.prototype, Collection.prototype);
+        return Groups;
+    }());
+    return Groups;
+})
+
+.service('groupsLoader', function(Group, Groups) {
+
+    this.makeCollection = function(itemsData, queryParams, directories) {
+        if (!_.isArray(itemsData)) {
+            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
+        }
+        var items = _.collect(itemsData, function(itemData) {
+            if (typeof itemData.id === 'undefined') {
+                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
+            }
+            return new Group(itemData, directories);
+        });
+        return new Groups(items, queryParams);
+    };
 });

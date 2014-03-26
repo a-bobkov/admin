@@ -2,27 +2,59 @@
 
 angular.module('app.dal.entities.market', ['app.dal.entities.collection', 'app.dal.rest.api'])
 
-.factory('marketApi', function(RestApi) {
-   return new RestApi('markets', 'market');
-})
-
-.factory('markets', function(Collection) {
-    return (function() {
-
-        var MarketsCollection = inheritCollection(function() {}, Collection);
-
-        return new MarketsCollection;
-    }());
+.factory('marketApi', function(RestApi, Api) {
+    var marketApi = new RestApi('markets', 'market');
+    return marketApi;
 })
 
 .factory('Market', function(Item) {
-    var Market = function () {};
 
-    angular.extend(Market.prototype, Item.prototype);
-
+    var Market = function(itemData, directories) {
+        var self = this;
+        _.forOwn(itemData, function(value, key) {
+            var newValue;
+            if (value.id) {
+                if (key === 'city') {
+                    newValue = directories.cities.get(value.id);
+                } else {
+                    throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' +angular.toJson(value));
+                }
+                if (!newValue) {
+                    throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
+                }
+            } else {
+                newValue = value;
+            }
+            self[key] = newValue;
+        });
+    };
+    _.extend(Market.prototype, Item.prototype);
     return Market;
 })
 
-.run(function(markets, Market, marketApi) {
-    markets._registerCollection('market', 'markets', Market, marketApi);
+.factory('Markets', function(Collection) {
+    var Markets = (function() {
+        var Markets = function(itemsData, queryParams) {
+            Collection.call(this, itemsData, queryParams);
+        };
+        angular.extend(Markets.prototype, Collection.prototype);
+        return Markets;
+    }());
+    return Markets;
+})
+
+.service('marketsLoader', function(Market, Markets) {
+
+    this.makeCollection = function(itemsData, queryParams, directories) {
+        if (!_.isArray(itemsData)) {
+            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
+        }
+        var items = _.collect(itemsData, function(itemData) {
+            if (typeof itemData.id === 'undefined') {
+                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
+            }
+            return new Market(itemData, directories);
+        });
+        return new Markets(items, queryParams);
+    };
 });

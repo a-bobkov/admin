@@ -4,66 +4,55 @@ describe('app-mocked', function() {
     var $httpBackend,
         $http,
         $rootScope,
-        Collection,
-        Item,
-        users,
-        User,
-        Dealer;
+        usersLoader;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$httpBackend_, _$http_, _$rootScope_, _Collection_, _Item_, _users_, _User_, _Dealer_) {
+        inject(function(_$httpBackend_, _$http_, _$rootScope_, _usersLoader_) {
             $httpBackend = _$httpBackend_;
             $http = _$http_;
             $rootScope = _$rootScope_;
-            Collection = _Collection_;
-            Item = _Item_;
-            users = _users_;
-            User = _User_;
-            Dealer = _Dealer_;
+            usersLoader = _usersLoader_;
         });
 
-        setHttpMock($httpBackend, Collection, Item);
+        setHttpMock($httpBackend, usersLoader);
     });
 
     describe('Методы CRUD должны', function() {
 
-        it('remove - удалять данные пользователя', function() {
+        it('remove - удалять пользователя', function() {
             var actualSuccess,
                 actualError;
+            var directories;
 
-            users.getDirectories().then(function(respond) {
-                actualSuccess = respond;
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
             }, function(respond) {
                 actualError = respond;
             });
             $httpBackend.flush();
             $rootScope.$digest();
 
-            users.getAll().then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $httpBackend.flush();
-            $rootScope.$digest();
-            var usersArr = actualSuccess;
-            var len = usersArr.length;
+            var items = directories.users.getItems();
+            var len = items.length;
 
-            users.remove(1).then(function(respond) {
+            items[0].remove().then(function(respond) {
                 actualSuccess = respond;
             });
             $httpBackend.flush();
             $rootScope.$digest();
 
-            users.getAll().then(function(respond) {
-                actualSuccess = respond;
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
             }, function(respond) {
                 actualError = respond;
             });
+            $httpBackend.flush();
             $rootScope.$digest();
-            expect(actualSuccess.length).toBe(len-1);
+
+            var items = directories.users.getItems();
+            expect(items.length).toBe(len-1);
         });
 
         it('post - сохранять данные нового пользователя', function() {
