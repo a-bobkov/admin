@@ -24,7 +24,7 @@ var Collection = (function() {
         return params;
     };
     Collection.prototype.get = function(id) {
-        return _.find(items, {id: id};
+        return _.find(items, {id: id});
     };
 
     return Collection;

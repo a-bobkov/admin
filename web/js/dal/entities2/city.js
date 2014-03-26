@@ -27,7 +27,7 @@ angular.module('app.dal.entities.city', ['app.dal.entities.collection', 'app.dal
 .factory('citiesLoader', function(cityApi, Cities, City) {
     this.makeItem = function() {
         return _.assign({}, this);
-    });
+    };
 
     this.makeCollection = function(itemsData, queryParams) {
         if (!_.isArray(itemsData)) {

@@ -1,10 +1,10 @@
 'use strict';
 
-angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal.rest.api', 
+angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal.rest.api',
     'app.dal.entities.group',
     'app.dal.entities.status',
     'app.dal.entities.dealer',
-    'app.dal.entities.site', 
+    'app.dal.entities.site',
     'app.dal.entities.manager',
     'app.dal.entities.city',
     'app.dal.entities.market',
@@ -12,39 +12,47 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 ])
 
 .factory('userApi', function(RestApi, Api) {
+
     var userApi = new RestApi('users', 'user');
+
     userApi.getDirectories = function() {
         return Api.get('/combined/users');
-    }
+    };
+
     userApi.query = function() {
         return Api.get('/users/partial').then(
             this._getResponseHandler('users')
         );
     };
+
     return userApi;
 })
 
 .factory('User', function() {
+
     var User = function(itemData) {
         angular.extend(this, itemData);
     };
+
     User.prototype.isDealer = function() {
         return (this.group && this.group.id == 2);
-    }
+    };
+
     User.prototype.isSite = function() {
         return (this.group && this.group.id == 3);
-    }
+    };
+
     return User;
 })
 
 .factory('Users', function(User) {
-var Users = (function() {
-    var Users = inheritCollection(function(itemsData, queryParams) {
-        Collection.prototype.construct(itemsData, queryParams, User);
-    });
+    var Users = (function() {
+        var Users = inheritCollection(function(itemsData, queryParams) {
+            Collection.prototype.construct(itemsData, queryParams, User);
+        });
+        return Users;
+    }());
     return Users;
-}());
-return Users;
 })
 
 .factory('usersLoader', function(userApi, Users, User, Dealer, statusesLoader, groupsLoader, dealersLoader, sitesLoader, managersLoader, citiesLoader, marketsLoader, metrosLoader) {
@@ -89,9 +97,10 @@ return Users;
             } else {
                 // здесь можно реализовать дополнительную проверку и конвертацию данных айтема
             }
+
             return newItem;
         });
-    });
+    };
 
     /*
     Метод проверки и обработки данных справочника, полученных от дата-провайдера
@@ -109,6 +118,7 @@ return Users;
             throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
         }
         var newItemsData = _.invoke(itemsData, this.makeItem, directories);
+
         return new Users(newItemsData, queryParams);
     };
 
@@ -142,6 +152,7 @@ return Users;
                     directories[key] = statusesLoader.makeCollection(itemsData, directories);
                 }
             });
+
             return directories;
         });
     };
@@ -161,7 +172,8 @@ return Users;
             if (itemData.dealer) {
                 dealers.push(itemData.dealer);
             }
-        })
+        });
+
         return dealers;
     };
 
@@ -181,7 +193,7 @@ return Users;
             return userApi.query(queryParams).then(function(itemsData) {
                 _.extend(directories, {dealers: dealersLoader.makeCollection(takeDealers(itemsData), queryParams, directories)});
                 return _.extend(directories, {users: self.makeCollection(itemsData, queryParams, directories)});
-            }));
+            });
         });
     };
 
@@ -199,10 +211,10 @@ return Users;
         return loadDirectories().then(function(directories) {
             return userApi.get(id).then(function(itemData) {
                 if (itemData.dealer) {
-                    _.extend(directories, {dealer: new Dealer(dealersLoader.makeItem.call(itemData.dealer, directories)});
+                    _.extend(directories, {dealer: new Dealer(dealersLoader.makeItem.call(itemData.dealer, directories))});
                 }
                 return _.extend(directories, {user: new User(self.makeItem.call(itemData, directories))});
-            }));
+            });
         });
     };
 });

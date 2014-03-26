@@ -46,7 +46,7 @@ return Markets;
             }
             return newItem;
         });
-    });
+    };
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {

@@ -46,7 +46,7 @@ return Metros;
             }
             return newValue;
         });
-    });
+    };
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {

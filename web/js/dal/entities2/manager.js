@@ -27,7 +27,7 @@ angular.module('app.dal.entities.manager', ['app.dal.entities.collection', 'app.
 .factory('managersLoader', function(managerApi, Managers, Manager) {
     this.makeItem = function() {
         return _.assign({}, this);
-    });
+    };
 
     this.makeCollection = function(itemsData, queryParams) {
         if (!_.isArray(itemsData)) {

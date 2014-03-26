@@ -27,7 +27,7 @@ angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal
 .factory('groupsLoader', function(groupApi, Sites, Site) {
     this.makeItem = function() {
         return _.assign({}, this);
-    });
+    };
 
     this.makeCollection = function(itemsData, queryParams) {
         if (!_.isArray(itemsData)) {
