@@ -9,8 +9,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         controller: 'UserListCtrl',
         reloadOnSearch: false,
         resolve: {
-            data: function(UserList_Loader) {
-                return UserList_Loader.load();
+            data: function(usersLoader) {
+                return usersLoader.loadItems();
             }
         }
     })
@@ -18,9 +18,9 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         templateUrl: 'template/page/user/edit.html',
         controller: 'UserCtrl',
         resolve: {
-            data: function(User_Loader, $location) {
-                var userId = parseInt($location.$$path.replace(/^\/users\/(?:([^\/]+))\/edit$/,'$1'));
-                return User_Loader.load(userId);
+            data: function(usersLoader, $location) {
+                var id = parseInt($location.$$path.replace(/^\/users\/(?:([^\/]+))\/edit$/,'$1'));
+                return usersLoader.loadItem(id);
             }
         }
     })
@@ -28,8 +28,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         templateUrl: 'template/page/user/edit.html',
         controller: 'UserCtrl',
         resolve: {
-            data: function(UserList_Loader) {
-                return UserList_Loader.load();
+            data: function(usersLoader) {
+                return usersLoader.loadDirectories();
             }
         }
     })
@@ -38,54 +38,13 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     });
 }])
 
-.factory('Directories_Loader', function($q, users, statuses) {
-    var Loader = {};
-    Loader.load = function() {
-        return $q.all({
-            statuses: statuses.getAll(),
-            directories: users.getDirectories()
-        }).then(function(respond){
-            var data = {};
-            data.statuses = angular.extend(respond.statuses);
-            angular.extend(data, respond.directories);
-            return data;
-        });
-    };
-    return Loader;
-})
-
-.factory('UserList_Loader', function(Directories_Loader, users) {
-    var Loader = {};
-    Loader.load = function() {
-        return Directories_Loader.load().then(function(respond) {
-            var data = respond;
-            return users.getAll().then(function(respond) {
-                data.users = respond;
-                return data;
-            });
-        });
-    };
-    return Loader;
-})
-
-.factory('User_Loader', function(Directories_Loader, users) {
-    var Loader = {};
-    Loader.load = function(id) {
-        return Directories_Loader.load().then(function(respond) {
-            var data = respond;
-            return users.get(id).then(function(respond) {
-                data.user = respond;
-                return data;
-            });
-        });
-    };
-    return Loader;
-})
-
 .controller('UserListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data) {
-    var allUsers = data.users;
-    $scope.optionsStatus = data.statuses;
-    $scope.optionsManager = data.managers;
+    _.forOwn(data, function(collection, key) {
+        $scope[key] = collection.getItems();
+    });
+    var allUsers = $scope.users;
+    $scope.optionsStatus = $scope.userstatuses;
+    $scope.optionsManager = $scope.managers;
 
     if ($rootScope.savedUserListNotice) {
         $scope.savedUserListNotice = $rootScope.savedUserListNotice;
@@ -306,8 +265,15 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     }
 })
 
-.controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours, users) {
-    angular.extend($scope, data);
+.controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours) {
+    _.forOwn(data, function(collection, key) {
+        if (key === 'user') {
+            $scope[key] = collection;
+        } else {
+            $scope[key] = collection.getItems();
+        }
+    });
+    // angular.extend($scope, data);
     $scope.dealerPhoneHours = dealerPhoneHours;
 
     if (data.user) {
@@ -358,7 +324,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.$watch('dealerEdited.city', $scope.onCityChange);
 
     $scope.saveUser = function() {
-        users.save($scope.userEdited).then(function(user) {
+        $scope.userEdited.save(data).then(function(user) {
             $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
             $location.path('/userlist');
         });
@@ -367,7 +333,7 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     $scope.removeUser = function() {
         if (confirm('Вы уверены?')) {
             if ($scope.userEdited.id) {
-                users.remove($scope.userEdited.id).then(function() {
+                $scope.userEdited.remove().then(function() {
                     $rootScope.savedUserListNotice = 'Удалён пользователь с идентификатором: ' + $scope.userEdited.id;
                     $location.path('/userlist');
                 })

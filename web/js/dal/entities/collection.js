@@ -40,8 +40,12 @@ return Collection;
     Item.prototype.serialize = function() {
         var itemData = {};
         _.forEach(this, function(value, key){
-            if (_.isObject(value) && key !== 'phones') {
-                itemData[key] = {id: value.id};
+            if (_.isObject(value)) {
+                if (key === 'phones') {
+                    itemData[key] = angular.copy(value);
+                } else {
+                    itemData[key] = {id: value.id};
+                }
             } else {
                 itemData[key] = value;
             }

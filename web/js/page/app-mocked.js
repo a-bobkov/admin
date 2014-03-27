@@ -97,7 +97,7 @@ function setHttpMock($httpBackend, usersLoader, User, multiplyUsersCoef) {
         {id: 14, email: 'a-bobkov@abo.com', last_login: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 12}},
         {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 11}}
     ], multiplyUsersCoef), null, userDirectories);
-
+    
     function multiplyArr(arr, coef) {
         coef = coef || 1;
         var multiplyArray = [];
