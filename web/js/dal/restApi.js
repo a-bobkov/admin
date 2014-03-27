@@ -12,7 +12,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
      */
     var RestApiConstructor = function (collectionName, entityName) {
 
-        var url = '/' + collectionName + '/';
+        var url = '/' + collectionName;
 
         this._getResponseHandler = function (sectionName, id) {
             return function(response) {
@@ -41,7 +41,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.get = function(id) {
-            return Api.get(url + id).then(
+            return Api.get(url + '/' + id).then(
                 this._getResponseHandler(entityName, id)
             );
         };
@@ -53,7 +53,11 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.query = function(params) {
-            return Api.get(url).then(
+            if (params) {
+                var paramsOrderPager =  _.assign({}, params.order, params.pager);
+            }
+            var paramsFiltersFields = _.pick(params, ['filters', 'fields']);
+            return Api.post(url, paramsFiltersFields, paramsOrderPager).then(
                 this._getResponseHandler(collectionName)
             );
         };
@@ -63,7 +67,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.create = function(data) {
-            return Api.post(url, data).then(
+            return Api.post(url + '/new', data).then(
                 this._getResponseHandler(entityName)
             );
         };
@@ -73,7 +77,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.update = function(data) {
-            return Api.put(url + data.id, data).then(
+            return Api.put(url + '/' + data.id, data).then(
                 this._getResponseHandler(entityName, data.id)
             );
         };
@@ -83,7 +87,7 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
          * @returns {Promise}
          */
         this.remove = function(id) {
-            return Api.remove(url + id);
+            return Api.remove(url + '/' + id);
         };
     };
 

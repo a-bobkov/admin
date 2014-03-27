@@ -18,12 +18,6 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
         return Api.get('/combined/users');
     };
 
-    userApi.query = function() {
-        return Api.get('/users/partial').then(
-            this._getResponseHandler('users')
-        );
-    };
-
     return userApi;
 })
 

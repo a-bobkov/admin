@@ -69,10 +69,11 @@ angular.module('app.dal.api', [])
          * @param params
          * @returns {Promise}
          */
-        Api.post = function(name, data) {
+        Api.post = function(name, data, params) {
             return $http({
                 method: 'POST',
                 url: options.apiUrl + name,
+                params: params,
                 data: data,
                 withCredentials: true
             }).then(responseHandler, errorHandler);

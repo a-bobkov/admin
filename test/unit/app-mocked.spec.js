@@ -6,22 +6,48 @@ describe('app-mocked', function() {
         $rootScope,
         usersLoader,
         User,
+        Users,
         Group;
 
     beforeEach(function() {
         module('app.dal.entities.user');
 
-        inject(function(_$httpBackend_, _$http_, _$rootScope_, _usersLoader_, _User_, _Group_) {
+        inject(function(_$httpBackend_, _$http_, _$rootScope_, _usersLoader_, _User_, _Users_, _Group_) {
             $httpBackend = _$httpBackend_;
             $http = _$http_;
             $rootScope = _$rootScope_;
             usersLoader = _usersLoader_;
             User = _User_;
+            Users = _Users_;
             Group = _Group_;
         });
 
-        setHttpMock($httpBackend, usersLoader, User);
+        setHttpMock($httpBackend, usersLoader, User, Users);
     });
+
+        it('query - фильтровать данные пользователей', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'equal', fields: ['status'], value: 'active' }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(10);
+        });
 
     describe('Методы CRUD должны', function() {
         it('post - сохранять данные нового пользователя', function() {

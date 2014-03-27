@@ -3,13 +3,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, usersLoader, User) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, usersLoader, User, 100);
+    setHttpMock($httpBackend, usersLoader, User, Users, 100);
 });
 
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, usersLoader, User, multiplyUsersCoef) {
+function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 3, name: 'Автосайт'},
@@ -103,7 +103,7 @@ function setHttpMock($httpBackend, usersLoader, User, multiplyUsersCoef) {
         var multiplyArray = [];
 
         var cloneArr = function(arr, num) {
-            return angular.forEach(angular.copy(arr), function(value) {
+            return _.forEach(angular.copy(arr), function(value) {
                 var id = value.id + num * arr.length;
                 value.id = id;
                 value.email = num + value.email;
@@ -116,14 +116,93 @@ function setHttpMock($httpBackend, usersLoader, User, multiplyUsersCoef) {
         return multiplyArray;
     }
 
-    var regexQuery = /^\/api2\/users\/partial$/;
-    $httpBackend.whenGET(regexQuery).respond(function(method, url, data) {
+    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&]*))?$/;
+
+    var processUserQueryUrl = function(url, arr) {
+
+        var search = url.replace(regexUserQuery, '$1');
+        var pairs = search.split('&');
+        var params = {};
+        _.forEach(pairs, function(value) {
+            var param = value.split('=');
+            params[param[0]] = param[1];
+        })
+
+        var order_field = params.order_field || 'id';
+        var order_direction = params.order_direction || 'asc';
+        var per_page = params.per_page || 100;
+        var page = params.page || 1;
+
+        var sorted_arr = _.sortBy(arr, function(item) { return item[order_field]; });
+        if (order_direction === 'desc') {
+            sorted_arr.reverse();
+        }
+        var paged_arr = sorted_arr.slice(page * per_page - per_page, page * per_page);
+
         return [200, {
             status: 'success',
             data: {
-                users: users.serialize()
+                params: {
+                    filters: null,
+                    order: {
+                        field: order_field,
+                        direction: order_direction
+                    },
+                    pager: {
+                        per_page:   per_page,
+                        page:       page,
+                        total:      arr.length
+                    },
+                    fields: null
+                },
+                users: (new Users (paged_arr)).serialize()
             }
         }];
+    }
+
+    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
+        return processUserQueryUrl(url, users.getItems());
+    });
+
+    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
+
+        var filterItem = function(item, filter) {
+            var itemValues = [];
+            _.forOwn(item, function(value, key) {
+                if (filter.fields.indexOf(key) !== -1) {
+                    if (_.isObject(value)) {
+                        itemValues.push(String(value.id));
+                    } else {
+                        itemValues.push(String(value));
+                    }
+                }
+            });
+
+            if (filter.type === 'equal') {
+                return (itemValues.indexOf(filter.value) !== -1);
+            } else if (filter.type === 'in') {
+                return (filter.value.indexOf(String(itemValue)) !== -1)
+            } else if (filter.type === 'contain') {
+                return (String(itemValue).indexOf(filter.value) !== -1)
+            }
+            return true;
+        }
+
+        var filterArr = function(arr, filters) {
+            return _.filter(arr, function(item) {
+                return _.every(filters, function(filter) {
+                    return filterItem(item, filter);
+                });
+            })
+        }
+
+        var arr = users.getItems();
+        var filters = angular.fromJson(data).filters;
+        var filtered_arr = filterArr(arr, filters);
+
+        var respond = processUserQueryUrl(url, filtered_arr);
+        respond[1].data.params.filters = filters;
+        return respond;
     });
 
     var regexGet = /^\/api2\/users\/(?:([^\/]+))$/;
@@ -156,7 +235,7 @@ function setHttpMock($httpBackend, usersLoader, User, multiplyUsersCoef) {
         }];
     });
 
-    var regexPost = /^\/api2\/users\/$/;
+    var regexPost = /^\/api2\/users\/new$/;
     $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
         var items = users.getItems();
         try {
