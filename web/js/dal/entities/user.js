@@ -75,13 +75,6 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 
     _.extend(User.prototype, Item.prototype);
 
-    User.prototype.remove = function() {
-        if (this.id) {
-            return userApi.remove(this.id);
-        }
-        throw new CollectionError('Попытка удалить элемент без id');
-    };
-
     User.prototype.isDealer = function() {
         return (this.group && this.group.id == 2);
     };
@@ -93,12 +86,12 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     User.prototype.serialize = function() {
         var itemData = {};
         _.forOwn(this, function(value, key){
-            if (_.isObject(value)) {
-                if (key === "dealer") {
-                    itemData[key] = value.serialize();
-                } else {
-                    itemData[key] = {id: value.id};
-                }
+            if (key === 'status' ) {
+                itemData[key] = value.id;
+            } else if (key === "dealer") {
+                itemData[key] = value.serialize();
+            } else if (_.isObject(value)) {
+                itemData[key] = {id: value.id};
             } else {
                 itemData[key] = value;
             }
@@ -110,6 +103,25 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
             delete itemData.site;
         }
         return itemData;
+    };
+
+    User.prototype.save = function(directories) {
+        if (this.id) {
+            return userApi.update(this.serialize()).then(function(userData) {
+                return new User(userData, directories);
+            });
+        } else {
+            return userApi.create(this.serialize()).then(function(userData) {
+                return new User(userData, directories);
+            });
+        }
+    };
+
+    User.prototype.remove = function() {
+        if (this.id) {
+            return userApi.remove(this.id);
+        }
+        throw new CollectionError('Попытка удалить элемент без id');
     };
 
     return User;
@@ -196,7 +208,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     Необходимые зависимости:
         Дата-провайдер, который выдает данные справочников
     */
-    var loadDirectories = function() {
+    this.loadDirectories = function() {
         var self = this;
         return userApi.getDirectories().then(function(directoriesData) {
             return self.makeDirectories(directoriesData);
@@ -215,7 +227,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     */
     this.loadItems = function(queryParams) {
         var self = this;
-        return loadDirectories().then(function(directories) {
+        return this.loadDirectories().then(function(directories) {
             return userApi.query(queryParams).then(function(itemsData) {
                 return _.extend(directories, {users: self.makeCollection(itemsData, queryParams, directories)});
             });
@@ -235,7 +247,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     */
     this.loadItem = function(id) {
         var self = this;
-        return loadDirectories().then(function(directories) {
+        return this.loadDirectories().then(function(directories) {
             return userApi.get(id).then(function(itemData) {
                 return _.extend(directories, {user: new User(itemData, directories)});
             });
@@ -243,11 +255,12 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     };
 })
 
-.factory('UserStatus', function() {
+.factory('UserStatus', function(Item) {
 
     var UserStatus = function(itemData, directories) {
         _.extend(this, itemData);
     };
+    _.extend(UserStatus.prototype, Item.prototype);
     return UserStatus;
 })
 

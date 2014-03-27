@@ -39,7 +39,7 @@ angular.module('app.dal.entities.dealer', ['app.dal.entities.collection', 'app.d
 
     Dealer.prototype.serialize = function() {
 
-        var itemData = Item.prototype._serialize.call(this);
+        var itemData = Item.prototype.serialize.call(this);
         
         function popPhone(name) {
             var phone = itemData.phones.pop();

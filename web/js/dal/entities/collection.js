@@ -21,7 +21,9 @@ var Collection = (function() {
         return _.find(Collection.prototype.getItems.call(this), {id: id});
     };
     Collection.prototype.serialize = function() {
-        return _.invoke(Collection.prototype.getItems.call(this), this.serialize);
+        return _.invoke(Collection.prototype.getItems.call(this), function() {
+            return this.serialize();
+        });
     };
 
     return Collection;
@@ -38,7 +40,7 @@ return Collection;
     Item.prototype.serialize = function() {
         var itemData = {};
         _.forEach(this, function(value, key){
-            if (_.isObject(value) && (key !== 'phones')) {
+            if (_.isObject(value) && key !== 'phones') {
                 itemData[key] = {id: value.id};
             } else {
                 itemData[key] = value;
@@ -58,7 +60,7 @@ var inherit = function(child, parent) {
 var CollectionError = function(message) {
     this.message = message || "Неопределенная ошибка";
     this.stack = (new Error()).stack;
-    console.log(this.message);
+    // console.log(this.message);
 }
 CollectionError.prototype = new Error();
 CollectionError.prototype.constructor = CollectionError;

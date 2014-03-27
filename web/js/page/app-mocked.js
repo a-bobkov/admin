@@ -1,15 +1,15 @@
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, Collection, Item) {
+.run(function($httpBackend, usersLoader, User) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, usersLoader, 100);
+    setHttpMock($httpBackend, usersLoader, User, 100);
 });
 
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, usersLoader, multiplyUsersCoef) {
+function setHttpMock($httpBackend, usersLoader, User, multiplyUsersCoef) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 3, name: 'Автосайт'},
@@ -141,7 +141,7 @@ function setHttpMock($httpBackend, usersLoader, multiplyUsersCoef) {
             return [404, {
                 status: 'error',
                 message: 'Ошибка при получении',
-                errors: 'Пользователь не найден'
+                errors: 'Не найден пользователь с id: ' + id
             }];
         }
     });
@@ -150,8 +150,8 @@ function setHttpMock($httpBackend, usersLoader, multiplyUsersCoef) {
     $httpBackend.whenGET(regexDirectories).respond(function(method, url, data) {
         return [200, {
             status: 'success',
-            data: _.forOwn(userDirectories, function(directory) {
-                return directory.serialize();
+            data: _.mapValues(userDirectories, function(directory) {
+               return directory.serialize();
             })
         }];
     });
@@ -210,7 +210,7 @@ function setHttpMock($httpBackend, usersLoader, multiplyUsersCoef) {
             return [404, {
                 status: 'error',
                 message: 'Ошибка при обновлении',
-                errors: 'Пользователь не найден'
+                errors: 'Не найден пользователь с id: ' + id
             }];
         }
     });
@@ -230,7 +230,7 @@ function setHttpMock($httpBackend, usersLoader, multiplyUsersCoef) {
             return [404, {
                 status: 'error',
                 message: 'Ошибка при удалении',
-                errors: 'Пользователь не найден'
+                errors: 'Не найден пользователь с id: ' + id
             }];
         }
     });
