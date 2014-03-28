@@ -57,9 +57,15 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
                 var paramsOrderPager =  _.assign({}, params.order, params.pager);
             }
             var paramsFiltersFields = _.pick(params, ['filters', 'fields']);
-            return Api.post(url, paramsFiltersFields, paramsOrderPager).then(
-                this._getResponseHandler(collectionName)
-            );
+            if (!_.isEmpty(paramsFiltersFields)) {
+                return Api.post(url, paramsFiltersFields, paramsOrderPager).then(
+                    this._getResponseHandler(collectionName)
+                );
+            } else {
+                return Api.get(url, paramsOrderPager).then(
+                    this._getResponseHandler(collectionName)
+                );
+            }
         };
 
         /**

@@ -11,10 +11,26 @@ beforeEach(function() {
         toBeArray: function () {
             return angular.isArray(this.actual);
         },
-        toBeSortedAscendingNumbers: function () {
-            if (angular.isArray(this.actual) && (this.actual.length > 1)) {
+        toBeSorted: function(params) {
+            var convert = function(arg) {
+                if (params.match('Numbers')) {
+                    return parseInt(arg, 10);
+                } else if (params.match('Dates')) {
+                    return Date.parse(arg);
+                } else {
+                    return arg;
+                }
+            }
+            var compare = function(a, b) {
+                if (params.match('Ascending')) {
+                    return (a > b);
+                } else {
+                    return (a < b);
+                }
+            }
+            if (_.isArray(this.actual) && (this.actual.length > 1)) {
                 for (var i = this.actual.length; --i; ) {
-                    if (parseInt(this.actual[i - 1], 10) > parseInt(this.actual[i], 10)) {
+                    if (compare(convert(this.actual[i - 1]), convert(this.actual[i]))) {
                         return false;
                     }
                 }

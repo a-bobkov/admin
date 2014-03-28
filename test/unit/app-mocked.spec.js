@@ -9,6 +9,15 @@ describe('app-mocked', function() {
         Users,
         Group;
 
+    function getDeepValue(item, field) {
+        var value = item[field.shift()];
+        if (field.length && value) {
+            return getDeepValue(value, field);
+        } else {
+            return value;
+        }
+    }
+
     beforeEach(function() {
         module('app.dal.entities.user');
 
@@ -25,7 +34,9 @@ describe('app-mocked', function() {
         setHttpMock($httpBackend, usersLoader, User, Users);
     });
 
-        it('query - фильтровать данные пользователей', function() {
+    describe('Методы query должны', function() {
+
+        it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -48,6 +59,419 @@ describe('app-mocked', function() {
 
             expect(len).toEqual(10);
         });
+
+        it('equal - фильтровать данные пользователей по равенству в нескольких полях', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'equal', fields: ['status', 'group'], value: '3' }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(5);
+        });
+
+        it('equal - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'equal', fields: ['dealer.company_name', 'group'], value: 'Демокомпания' }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(1);
+        });
+
+        it('in - фильтровать данные пользователей по равенству в одном поле', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'in', fields: ['status'], value: ['inactive', 'blocked'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(5);
+        });
+
+        it('in - фильтровать данные пользователей по равенству в нескольких поле', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'in', fields: ['status', 'group'], value: ['blocked', '2'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(12);
+        });
+
+        it('in - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'in', fields: ['dealer.company_name', 'group'], value: ['Свет', '3'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(6);
+        });
+
+        it('contain - фильтровать данные пользователей по подстроке в одном поле', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'contain', fields: ['last_login'], value: ['2000'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(2);
+        });
+
+        it('contain - фильтровать данные пользователей по подстроке в нескольких полях', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'contain', fields: ['email', 'status'], value: ['act'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(13);
+        });
+
+        it('contain - фильтровать данные пользователей по подстроке в полях во вложенных объектах', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'contain', fields: ['email', 'dealer.company_name'], value: ['компания'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(4);
+        });
+
+        it('order - сортировать данные пользователей по возрастанию id', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'asc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersId = _.pluck(directories.users.getItems(), 'id');
+            expect(usersId).toBeSorted('AscendingNumbers');
+        });
+
+        it('order - сортировать данные пользователей по убыванию id', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersId = _.pluck(directories.users.getItems(), 'id');
+            expect(usersId).toBeSorted('DescendingNumbers');
+        });
+
+        it('order - сортировать данные пользователей по возрастанию email', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'email',
+                    order_direction: 'asc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersEmail = _.pluck(directories.users.getItems(), 'email');
+            expect(usersEmail).toBeSorted('AscendingStrings');
+        });
+
+        it('order - сортировать данные пользователей по убыванию email', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'email',
+                    order_direction: 'desc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersEmail = _.pluck(directories.users.getItems(), 'email');
+            expect(usersEmail).toBeSorted('DescendingStrings');
+        });
+
+        it('order - сортировать данные пользователей по возрастанию даты', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'last_login',
+                    order_direction: 'asc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersDates = _.pluck(directories.users.getItems(), 'last_login');
+            expect(usersDates).toBeSorted('AscendingDates');
+        });
+
+        it('order - сортировать данные пользователей по убыванию даты', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'last_login',
+                    order_direction: 'desc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersDates = _.pluck(directories.users.getItems(), 'last_login');
+            expect(usersDates).toBeSorted('DescendingDates');
+        });
+
+        it('order - сортировать данные пользователей по возрастанию поля вложенного объекта', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'dealer.company_name',
+                    order_direction: 'asc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersCompany_name = _.invoke(directories.users.getItems(), function() {
+                return getDeepValue(this, params.order.order_field.split('.'));
+            });
+            expect(usersCompany_name).toBeSorted('AscendingStrings');
+        });
+
+        it('order - сортировать данные пользователей по убыванию поля вложенного объекта', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'dealer.company_name',
+                    order_direction: 'desc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var usersCompany_name = _.invoke(directories.users.getItems(), function() {
+                return getDeepValue(this, params.order.order_field.split('.'));
+            });
+            expect(usersCompany_name).toBeSorted('DescendingStrings');
+        });
+
+        it('pager - ограничивать выборку заданной страницей', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                pager: {
+                    page: 2,
+                    per_page: 10
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users = directories.users.getItems();
+            expect(users.length).toBe(5);
+        });
+    });
 
     describe('Методы CRUD должны', function() {
         it('post - сохранять данные нового пользователя', function() {
@@ -98,7 +522,6 @@ describe('app-mocked', function() {
                 actualSuccess = respond;
             }, function(respond){
                 actualError = respond;
-                console.log(actualError);
             });
 
             $httpBackend.flush();

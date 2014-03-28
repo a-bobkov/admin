@@ -1,7 +1,7 @@
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, usersLoader, User) {
+.run(function($httpBackend, usersLoader, User, Users) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100);
 });
@@ -79,7 +79,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         {id: 2, email: 'a-bobkov@abb.com', last_login: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 11}},
         {id: 3, email: 'a-bobkov@abc.com', last_login: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
             company_name: 'Другая компания', manager: {id: 1}}},
-        {id: 4, email: 'a-bobkov@abd.com', last_login: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 12}},
+        {id: 4, email: 'a-bobkov@act.com', last_login: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 12}},
         {id: 6, email: 'a-bobkov@abe.com', last_login: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
             company_name: 'Крутая компания', manager: {id: 2}}},
         {id: 7, email: 'a-bobkov@abf.com', last_login: '2000-01-12', status: 'inactive', group: {id: 2}, dealer: {
@@ -116,7 +116,16 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         return multiplyArray;
     }
 
-    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&]*))?$/;
+    function getDeepValue(item, field) {
+        var value = item[field.shift()];
+        if (field.length && value) {
+            return getDeepValue(value, field);
+        } else {
+            return value;
+        }
+    }
+
+    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
 
     var processUserQueryUrl = function(url, arr) {
 
@@ -133,11 +142,15 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         var per_page = params.per_page || 100;
         var page = params.page || 1;
 
-        var sorted_arr = _.sortBy(arr, function(item) { return item[order_field]; });
+        var sorted_arr = _.sortBy(arr, function(item) {
+            return getDeepValue(item, order_field.split('.'));
+        });
+
         if (order_direction === 'desc') {
             sorted_arr.reverse();
         }
-        var paged_arr = sorted_arr.slice(page * per_page - per_page, page * per_page);
+        console.log(sorted_arr.length);
+        var paged_arr = sorted_arr.slice(per_page * (page - 1), per_page * page);
 
         return [200, {
             status: 'success',
@@ -167,23 +180,26 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
     $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
 
         var filterItem = function(item, filter) {
-            var itemValues = [];
-            _.forOwn(item, function(value, key) {
-                if (filter.fields.indexOf(key) !== -1) {
-                    if (_.isObject(value)) {
-                        itemValues.push(String(value.id));
-                    } else {
-                        itemValues.push(String(value));
-                    }
+
+            var itemValues = _.invoke(filter.fields, function() {
+                var value = getDeepValue(item, this.split('.'));
+                if (_.isObject(value) && value.id) {
+                    return String(value.id);
+                } else {
+                    return String(value);
                 }
-            });
+            })
 
             if (filter.type === 'equal') {
-                return (itemValues.indexOf(filter.value) !== -1);
+                return _.contains(itemValues, filter.value);
             } else if (filter.type === 'in') {
-                return (filter.value.indexOf(String(itemValue)) !== -1)
+                return _.any(filter.value, function(value) {
+                    return _.contains(itemValues, value);
+                });
             } else if (filter.type === 'contain') {
-                return (String(itemValue).indexOf(filter.value) !== -1)
+                return _.any(itemValues, function(value) {
+                    return (value.indexOf(filter.value) !== -1);
+                });
             }
             return true;
         }
