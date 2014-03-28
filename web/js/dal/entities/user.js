@@ -58,7 +58,7 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
                 }
             } else if (key === 'status') {
                 newValue = directories.userstatuses.get(value);
-            } else if (key === 'dealer') {
+            } else if (key === 'dealer') {      // todo: дилер всегда будет приходить с id
                 newValue = new Dealer(value, directories);
             } else {
                 newValue = value;
@@ -101,12 +101,12 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
 
     User.prototype.save = function(directories) {
         if (this.id) {
-            return userApi.update(this.serialize()).then(function(userData) {
-                return new User(userData, directories);
+            return userApi.update(this.serialize()).then(function(respond) {
+                return new User(respond.user, directories);
             });
         } else {
-            return userApi.create(this.serialize()).then(function(userData) {
-                return new User(userData, directories);
+            return userApi.create(this.serialize()).then(function(respond) {
+                return new User(respond.user, directories);
             });
         }
     };
@@ -217,13 +217,12 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
         Промис: объект, свойства которого - коллекции с разрешенными ссылками
     Необходимые зависимости:
         Дата-провайдер, который выдает данные справочника
-        Загрузчик дилеров
     */
     this.loadItems = function(queryParams) {
         var self = this;
         return this.loadDirectories().then(function(directories) {
-            return userApi.query(queryParams).then(function(itemsData) {
-                return _.extend(directories, {users: self.makeCollection(itemsData, queryParams, directories)});
+            return userApi.query(queryParams).then(function(respond) {
+                return _.extend(directories, {users: self.makeCollection(respond.users, respond.params, directories)});
             });
         });
     };
@@ -241,8 +240,8 @@ angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal
     this.loadItem = function(id) {
         var self = this;
         return this.loadDirectories().then(function(directories) {
-            return userApi.get(id).then(function(itemData) {
-                return _.extend(directories, {user: new User(itemData, directories)});
+            return userApi.get(id).then(function(respond) {
+                return _.extend(directories, {user: new User(respond.user, directories)});
             });
         });
     };

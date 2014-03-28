@@ -139,7 +139,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
 
         var order_field = params.order_field || 'id';
         var order_direction = params.order_direction || 'asc';
-        var per_page = params.per_page || 100;
+        var per_page = Math.min(params.per_page || 100, 100);
         var page = params.page || 1;
 
         var sorted_arr = _.sortBy(arr, function(item) {
@@ -149,7 +149,6 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         if (order_direction === 'desc') {
             sorted_arr.reverse();
         }
-        console.log(sorted_arr.length);
         var paged_arr = sorted_arr.slice(per_page * (page - 1), per_page * page);
 
         return [200, {
@@ -158,8 +157,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
                 params: {
                     filters: null,
                     order: {
-                        field: order_field,
-                        direction: order_direction
+                        order_field: order_field,
+                        order_direction: order_direction
                     },
                     pager: {
                         per_page:   per_page,
@@ -212,12 +211,40 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             })
         }
 
-        var arr = users.getItems();
-        var filters = angular.fromJson(data).filters;
-        var filtered_arr = filterArr(arr, filters);
+        function setDeepValue(item, field, value) {
+            var prop = field.shift();
+            if (field.length) {
+                if (!_.has(item, prop)) {
+                    item[prop] = {};
+                }
+                setDeepValue(item[prop], field, value);
+            } else {
+                item[prop] = value;
+            }
+        }
 
+        var fieldArr = function(arr, fields) {
+            return _.map(arr, function(item) {
+                var newItem = {};
+                _.forEach(fields, function(field) {
+                    var value = getDeepValue(item, field.split('.'));
+                    if (value) setDeepValue(newItem, field.split('.'), value);
+                });
+                return newItem;
+            });
+        }
+
+        var filters = angular.fromJson(data).filters;
+        var fields = angular.fromJson(data).fields;
+
+        var filtered_arr = filterArr(users.getItems(), filters);
         var respond = processUserQueryUrl(url, filtered_arr);
         respond[1].data.params.filters = filters;
+
+        if (_.size(fields)) {
+            respond[1].data.users = fieldArr(respond[1].data.users, fields);
+            respond[1].data.params.fields = fields;
+        }
         return respond;
     });
 

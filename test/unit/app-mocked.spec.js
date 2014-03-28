@@ -252,6 +252,46 @@ describe('app-mocked', function() {
             expect(len).toEqual(4);
         });
 
+        it('если параметр filters в запросе указан, то в ответе filters должен быть таким же', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'equal', fields: ['status'], value: 'active' }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var pars = directories.users.getParams();
+            expect(pars.filters).toEqual(params.filters);
+        });
+
+        it('если параметр filters в запросе НЕ указан, то в ответе filters должен быть null', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var params = directories.users.getParams();
+            expect(params.filters).toBe(null);
+        });
+
         it('order - сортировать данные пользователей по возрастанию id', function() {
             var actualSuccess,
                 actualError;
@@ -448,6 +488,52 @@ describe('app-mocked', function() {
             expect(usersCompany_name).toBeSorted('DescendingStrings');
         });
 
+        it('если параметр order в запросе указан, то в ответе order должен быть таким же', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'asc'
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var pars = directories.users.getParams();
+            expect(pars.order).toEqual(params.order);
+        });
+
+        it('если параметр order в запросе НЕ указан, то в ответе order должен быть по по-умолчанию', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {}
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var pars = directories.users.getParams();
+            expect(pars.order).toEqual({
+                order_field: 'id',
+                order_direction: 'asc'
+            });
+        });
+
         it('pager - ограничивать выборку заданной страницей', function() {
             var actualSuccess,
                 actualError;
@@ -470,6 +556,160 @@ describe('app-mocked', function() {
 
             var users = directories.users.getItems();
             expect(users.length).toBe(5);
+        });
+
+        it('если параметр per_page в запросе НЕ указан, то в ответе он должен быть максимальным', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                pager: {
+                    page: 2
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var pars = directories.users.getParams();
+            expect(pars.pager.per_page).toEqual(100);
+        });
+
+        it('если параметр per_page в запросе указан больше максимального, то в ответе он должен быть максимальным', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                pager: {
+                    page: 2,
+                    per_page: 10000
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var pars = directories.users.getParams();
+            expect(pars.pager.per_page).toEqual(100);
+        });
+
+        it('если параметр page в запросе НЕ указан, то в ответе page должен быть по-умолчанию 1', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                pager: {
+                    per_page: 10
+                }
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var pars = directories.users.getParams();
+            expect(pars.pager.page).toEqual(1);
+        });
+
+        it('fields - выбирать поля данных пользователей', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                fields: ['id', 'email', 'status']
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users = directories.users.getItems();
+
+            expect(_.keys(users[0])).toEqual(params.fields);
+        });
+
+        it('fields - выбирать поля данных пользователей во вложенных объектах', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                fields: ['id', 'email', 'dealer.company_name']
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users = directories.users.getItems();
+
+            expect(_.keys(users[0])).toEqual(['id', 'email', 'dealer']);
+            expect(_.keys(users[0].dealer)).toEqual(['company_name', 'phones']);
+        });
+
+        it('если параметр fields в запросе указан, то в ответе fields должен быть таким же', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                fields: ['id', 'email', 'dealer.company_name']
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var pars = directories.users.getParams();
+
+            expect(pars.fields).toEqual(params.fields);
+        });
+
+        it('если параметр fields в запросе НЕ указан, то в ответе fields должен быть null', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var params = directories.users.getParams();
+            expect(params.fields).toBe(null);
         });
     });
 

@@ -25,14 +25,14 @@ angular.module('app.dal.rest.api', ['app.dal.api'])
                     errorMessage = 'Ответ сервера не содержит массив в секции ' + sectionName;
                 } else if (id && id !== data.id) {
                     errorMessage = 'Ответ сервера не содержит данных требуемого элемента ' + id;
-                }
+                }   // todo: проверить, что в ответе на запрос query всегда есть секция params (+юнит-тест)
 
                 if (errorMessage) {
                     $log.error(errorMessage);
                     return $q.reject({response: response, errorMessage: errorMessage});
                 }
 
-                return data;
+                return response;
             }
         };
 
