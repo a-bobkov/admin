@@ -108,6 +108,54 @@ describe('app-mocked', function() {
             expect(len).toEqual(1);
         });
 
+        it('equal - если значение опущено, фильтр отключен', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'equal', fields: ['dealer.manager'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(15);
+        });
+
+        it('equal - если значение undefined, фильтр отключен', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'equal', fields: ['dealer.manager'], value: undefined }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(15);
+        });
+
         it('in - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
                 actualError;
@@ -180,6 +228,54 @@ describe('app-mocked', function() {
             expect(len).toEqual(6);
         });
 
+        it('in - если значение опущено, фильтр отключен', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'in', fields: ['status'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(15);
+        });
+
+        it('in - если значение undefined, фильтр отключен', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'in', fields: ['status'], value: undefined }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(15);
+        });
+
         it('contain - фильтровать данные пользователей по подстроке в одном поле', function() {
             var actualSuccess,
                 actualError;
@@ -250,6 +346,80 @@ describe('app-mocked', function() {
             var len = directories.users.getItems().length;
 
             expect(len).toEqual(4);
+        });
+
+        it('contain - если значение опущено, фильтр отключен', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'contain', fields: ['last_login'] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(15);
+        });
+
+        it('contain - если значение undefined, фильтр отключен', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'contain', fields: ['last_login'], value: undefined }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(15);
+        });
+
+        it('filters - комбинация трех разных фильтров', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'contain', fields: ['id', 'email', 'dealer.company_name'], value: '1' },
+                    { type: 'in', fields: ['status'], value: ['active'] },
+                    { type: 'equal', fields: ['dealer.manager'], value: '2' }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(2);
         });
 
         it('если параметр filters в запросе указан, то в ответе filters должен быть таким же', function() {
@@ -713,7 +883,7 @@ describe('app-mocked', function() {
         });
     });
 
-    describe('Методы CRUD должны', function() {
+    xdescribe('Методы CRUD должны', function() {
         it('post - сохранять данные нового пользователя', function() {
             var data = {
                     email: 'new@maxposter.ru',

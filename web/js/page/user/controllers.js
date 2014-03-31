@@ -3,14 +3,47 @@
 angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pagination'])
 
 .config(['$routeProvider', function($routeProvider) {
+
+    function makeQueryParams(ls) {
+        if (_.size(ls)) {
+            return {
+                filters: [
+                    { type: 'contain', fields: ['id', 'email', 'dealer.company_name'], value: ls.complex },
+                    { type: 'in', fields: ['status'], value: ls.status.split(';') },
+                    { type: 'equal', fields: ['dealer.manager'], value: ls.manager }
+                ],
+                order: {
+                    order_field: ls.column,
+                    order_direction: ls.reverse ? 'desc': 'asc'
+                },
+                pager: {
+                    page: ls.currentPage,
+                    per_page: ls.itemsPerPage
+                }
+            }
+        } else {
+            return {
+                filters: [
+                    { type: 'contain', fields: ['id', 'email', 'dealer.company_name'] },
+                    { type: 'in', fields: ['status'], value: ['active'] },
+                    { type: 'equal', fields: ['dealer.manager'] }
+                ],
+                pager: {
+                    per_page: 25
+                }
+            }
+        }
+    }
+
     $routeProvider
     .when('/userlist', {
         templateUrl: 'template/page/user/list.html',
         controller: 'UserListCtrl',
-        reloadOnSearch: false,
         resolve: {
-            data: function(usersLoader) {
-                return usersLoader.loadItems();
+            data: function(usersLoader, $location) {
+                var qp = makeQueryParams($location.search());
+                // console.log(qp);
+                return usersLoader.loadItems(qp);
             }
         }
     })
@@ -42,88 +75,35 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     _.forOwn(data, function(collection, key) {
         $scope[key] = collection.getItems();
     });
-    var allUsers = $scope.users;
-    $scope.optionsStatus = $scope.userstatuses;
-    $scope.optionsManager = $scope.managers;
+
+    // console.log(data.users.getParams());
+    // console.log($scope.users);
+
 
     if ($rootScope.savedUserListNotice) {
         $scope.savedUserListNotice = $rootScope.savedUserListNotice;
         delete $rootScope.savedUserListNotice;
     }
 
-    var filteredUsers = [];
-
     $scope.clickNewUser = function() {
         $location.path('/usernew');
     }
 
-    var filterComma = function(item, pattern) {
-        var arr = pattern.split(',');
-        for (var i = arr.length; i--; ) {
-            if (arr[i] && filterSpace(item, arr[i])) {
-                return true;
-            }
+    $scope.onPatternChange = function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+            onSortingChange();
         }
-        return false;
-    }
-
-    var filterSpace = function(item, pattern) {
-        var arr = pattern.split(' ');
-        for (var i = arr.length; i--; ) {
-            if (arr[i]
-                && (String(item.id).indexOf(arr[i]) === -1)
-                && ((!item.email) || (item.email.toLowerCase().indexOf(arr[i]) === -1))
-                && ((!item.dealer) || (!item.dealer.company_name) || (item.dealer.company_name.toLowerCase().indexOf(arr[i]) === -1))) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    var filterComplex = function(item) {
-        return (!$scope.patterns.complex || filterComma(item, $scope.patterns.complex.toLowerCase()));
-    }
-
-    var filterStatus = function(item) {
-        if ($scope.patterns.status.length > 0) {
-            if ($scope.patterns.status.indexOf(item.status) !== -1) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    };
-
-    var filterManager = function(item) {
-        return ($scope.patterns.manager == null)
-            || (item.dealer && item.dealer.manager === $scope.patterns.manager);
-    };
-
-    var filterPatterns = function(item) {
-        return filterComplex(item)
-            && filterStatus(item)
-            && filterManager(item);
     };
 
     $scope.setPatternsDefault = function() {
         $scope.patterns = {
             complex: '',
-            status: [_.find($scope.optionsStatus, {id: 'active'})],
+            status: [_.find($scope.userstatuses, {id: 'active'})],
             manager: null
         };
     }
 
-    $scope.onPatternChange = function () {
-        filteredUsers = $filter('filter')(allUsers, filterPatterns);
-        $rootScope.savedUserListPatterns = $scope.patterns;
-        onSortingChange();
-    };
-
     $scope.$watch('patterns', $scope.onPatternChange, true);
-
-    var sortedUsers = [];
 
     $scope.sortableColumns = [
         {id: "id", name: "Код"},
@@ -145,52 +125,27 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
             $scope.sorting.column = column;
             $scope.sorting.reverse = false;
         }
-        $rootScope.savedUserListSorting = $scope.sorting;
         onSortingChange();
     }
 
     var onSortingChange = function() {
-        sortedUsers = $filter('orderBy')(filteredUsers, $scope.sorting.column, $scope.sorting.reverse);
-        $scope.totalItems = filteredUsers.length;
-        if ($scope.paging.currentPage != 1) {
-            $scope.paging.currentPage = 1;
-        } else {
-            pageUsers(1, null);
-        };
+        $scope.onSelectPage(1);
     }
 
-    var setSortingDefault = function() {
-        $scope.sorting = {
-            column: 'id',
-            reverse: false
-        };
-    }
+    $scope.onSelectPage = function(page) {
+        console.log(page);
+        $scope.paging.currentPage = page;
 
-    $scope.pagedUsers = [];
+        var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
+            return value;
+        });
+        $location.search(toUrlSearch(searchParams));
 
-    var pageUsers = function (newValue, oldValue) {
-        var begin = (($scope.paging.currentPage - 1) * $scope.paging.itemsPerPage),
-            end = begin + $scope.paging.itemsPerPage;
-        $scope.pagedUsers = sortedUsers.slice(begin, end);
-        $rootScope.savedUserListPaging = $scope.paging;
-
-        $location.search(toSearch(angular.extend({}, $scope.patterns, $scope.sorting, $scope.paging)));
-
-        if (newValue !== oldValue) {
-            $window.scrollTo(0,0);
-            delete $scope.savedUserListNotice;
-        }
+        // if (newValue !== oldValue) {
+        //     $window.scrollTo(0,0);
+        //     delete $scope.savedUserListNotice;
+        // }
     };
-
-    var setPagingDefault = function() {
-        $scope.paging = {
-            itemsPerPage: 25,
-            maxSize: 9,
-            currentPage: 1
-        };
-    }
-
-    $scope.$watch('paging.currentPage', pageUsers);
 
     $scope.$on('$routeChangeStart', function() {
         // from https://developer.mozilla.org/en-US/docs/Web/API/Window.scrollX
@@ -210,53 +165,36 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         }
     });
 
-    var ls = $location.search();
-    if (_.size(ls)) {
-        $scope.patterns = {
-            complex: ls.complex,
-            status: _.invoke(ls.status.split(';'), function() {
-                    return _.find($scope.optionsStatus, {id: this})
-                }),
-            manager: _.find($scope.optionsManager, {id: _.parseInt(ls.manager)})
-        }
-        $scope.sorting = {
-            column: ls.column,
-            reverse: !(ls.reverse === 'false')
-        }
-        $scope.paging = {
-            itemsPerPage: _.parseInt(ls.itemsPerPage),
-            maxSize: _.parseInt(ls.maxSize),
-            currentPage: _.parseInt(ls.currentPage)
-        }
-    } else {
-        if ($rootScope.savedUserListPatterns) {
-            $scope.patterns = $rootScope.savedUserListPatterns;
-        } else {
-            $scope.setPatternsDefault();
-        }
-        if ($rootScope.savedUserListSorting) {
-            $scope.sorting = $rootScope.savedUserListSorting;
-        } else {
-            setSortingDefault();
-        }
-        if ($rootScope.savedUserListPaging) {
-            $scope.paging = $rootScope.savedUserListPaging;
-        } else {
-            setPagingDefault();
-        }
-    }
+    var params = data.users.getParams();
+    $scope.patterns = {
+        complex: params.filters[0].value,
+        status: _.invoke(params.filters[1].value, function() {
+                return _.find($scope.userstatuses, {id: this})
+            }),
+        manager: _.find($scope.managers, {id: _.parseInt(params.filters[2].value)})
+    };
+    $scope.sorting = {
+        column: params.order.order_field,
+        reverse: (params.order.order_direction === 'desc')
+    };
+    $scope.paging = {
+        currentPage: _.parseInt(params.pager.page),
+        itemsPerPage: _.parseInt(params.pager.per_page)
+    };
+    $scope.totalItems = _.parseInt(params.pager.total);
+    $scope.maxSizePaging = 9;
 
-    function toSearch(value) {
-        if (angular.isArray(value)) {
+    function toUrlSearch(value) {
+        if (_.isArray(value)) {
             return _.invoke(value, function() {
-                return toSearch(this);
+                return toUrlSearch(this);
             }).join(';');
-        } else if (angular.isObject(value)) {
+        } else if (_.isObject(value)) {
             if (value.id !== undefined) {
                 return value.id;
             } else {
                 return _.mapValues(value, function(value) {
-                    return toSearch(value);
+                    return toUrlSearch(value);
                 });
             }
         } else {

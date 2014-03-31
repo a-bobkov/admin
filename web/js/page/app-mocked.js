@@ -180,6 +180,10 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
 
         var filterItem = function(item, filter) {
 
+            if (!filter.value) {
+                return true;
+            }
+
             var itemValues = _.invoke(filter.fields, function() {
                 var value = getDeepValue(item, this.split('.'));
                 if (_.isObject(value) && value.id) {
@@ -190,6 +194,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             })
 
             if (filter.type === 'equal') {
+                // console.log(itemValues);
+                // console.log(filter.value);
+                // console.log(_.contains(itemValues, filter.value))
                 return _.contains(itemValues, filter.value);
             } else if (filter.type === 'in') {
                 return _.any(filter.value, function(value) {
@@ -200,6 +207,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
                     return (value.indexOf(filter.value) !== -1);
                 });
             }
+
             return true;
         }
 
@@ -238,6 +246,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         var fields = angular.fromJson(data).fields;
 
         var filtered_arr = filterArr(users.getItems(), filters);
+        console.log(filters);
+        console.log(users.getItems());
+        console.log(filtered_arr);
         var respond = processUserQueryUrl(url, filtered_arr);
         respond[1].data.params.filters = filters;
 

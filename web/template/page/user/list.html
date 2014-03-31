@@ -20,7 +20,7 @@
                 </tr>
             </thead>
             <tbody id="UserListTable">
-                <tr ng-repeat='user in pagedUsers' ng-click='clickLine(user.id)' ng-class-odd="'odd'" ng-class-even="'even'">
+                <tr ng-repeat='user in users' ng-click='clickLine(user.id)' ng-class-odd="'odd'" ng-class-even="'even'">
                     <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.id}}</a></td>
                     <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.email}}</a></td>
                     <td class="date">{{user.last_login | date:'shortDate'}}</td>
@@ -33,7 +33,7 @@
                 </tr>
             </tbody>
         </table>
-        <div pagination total-items="totalItems" page="paging.currentPage" items-per-page="paging.itemsPerPage" max-size='paging.maxSize' boundary-links="true"></div>
+        <div pagination on-select-page='onSelectPage(page)' total-items="totalItems" page="paging.currentPage" items-per-page="paging.itemsPerPage" max-size='maxSizePaging' boundary-links="true"></div>
         <div class="append-bottom">
             <input id='UserListAddUser' type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
         </div>
@@ -63,14 +63,14 @@
                 <tr>
                     <th><label for="sf_guard_user_filters_status">Статус</label></th>
                     <td>
-                        <select ng-model="patterns.status" multiple ng-options='opt.namePlural for opt in optionsStatus' id="sf_guard_user_filters_status">
+                        <select ng-model="patterns.status" multiple ng-options='opt.namePlural for opt in userstatuses' id="sf_guard_user_filters_status">
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <th><label for="sf_guard_user_filters_manager_id">Тэг</label></th>
                     <td>
-                        <select ng-model='patterns.manager' ng-options='opt.name for opt in optionsManager' id='sf_guard_user_filters_manager_id' >
+                        <select ng-model='patterns.manager' ng-options='opt.name for opt in managers' id='sf_guard_user_filters_manager_id' >
 		                    <option value='' selected="selected"></option>
                         </select>
                     </td>
