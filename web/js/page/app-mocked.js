@@ -194,17 +194,14 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             })
 
             if (filter.type === 'equal') {
-                // console.log(itemValues);
-                // console.log(filter.value);
-                // console.log(_.contains(itemValues, filter.value))
-                return _.contains(itemValues, filter.value);
+                return _.contains(itemValues, String(filter.value));
             } else if (filter.type === 'in') {
                 return _.any(filter.value, function(value) {
-                    return _.contains(itemValues, value);
+                    return _.contains(itemValues, String(value));
                 });
             } else if (filter.type === 'contain') {
                 return _.any(itemValues, function(value) {
-                    return (value.indexOf(filter.value) !== -1);
+                    return (value.indexOf(String(filter.value)) !== -1);
                 });
             }
 
@@ -246,9 +243,6 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         var fields = angular.fromJson(data).fields;
 
         var filtered_arr = filterArr(users.getItems(), filters);
-        console.log(filters);
-        console.log(users.getItems());
-        console.log(filtered_arr);
         var respond = processUserQueryUrl(url, filtered_arr);
         respond[1].data.params.filters = filters;
 

@@ -108,7 +108,7 @@ describe('app-mocked', function() {
             expect(len).toEqual(1);
         });
 
-        it('equal - если значение опущено, фильтр отключен', function() {
+        it('equal - если значение опущено, то фильтр отключен', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -132,7 +132,7 @@ describe('app-mocked', function() {
             expect(len).toEqual(15);
         });
 
-        it('equal - если значение undefined, фильтр отключен', function() {
+        it('equal - если значение undefined, то фильтр отключен', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -154,6 +154,30 @@ describe('app-mocked', function() {
             var len = directories.users.getItems().length;
 
             expect(len).toEqual(15);
+        });
+
+        it('equal - значение фильтра может быть числом', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'equal', fields: ['id'], value: 1 }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(1);
         });
 
         it('in - фильтровать данные пользователей по равенству в одном поле', function() {
@@ -228,7 +252,7 @@ describe('app-mocked', function() {
             expect(len).toEqual(6);
         });
 
-        it('in - если значение опущено, фильтр отключен', function() {
+        it('in - если значение опущено, то фильтр отключен', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -252,7 +276,7 @@ describe('app-mocked', function() {
             expect(len).toEqual(15);
         });
 
-        it('in - если значение undefined, фильтр отключен', function() {
+        it('in - если значение undefined, то фильтр отключен', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -274,6 +298,30 @@ describe('app-mocked', function() {
             var len = directories.users.getItems().length;
 
             expect(len).toEqual(15);
+        });
+
+        it('in - значение фильтра может быть массивом чисел', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'in', fields: ['id'], value: [1, 2] }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(2);
         });
 
         it('contain - фильтровать данные пользователей по подстроке в одном поле', function() {
@@ -348,7 +396,7 @@ describe('app-mocked', function() {
             expect(len).toEqual(4);
         });
 
-        it('contain - если значение опущено, фильтр отключен', function() {
+        it('contain - если значение опущено, то фильтр отключен', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -372,7 +420,7 @@ describe('app-mocked', function() {
             expect(len).toEqual(15);
         });
 
-        it('contain - если значение undefined, фильтр отключен', function() {
+        it('contain - если значение undefined, то фильтр отключен', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -394,6 +442,30 @@ describe('app-mocked', function() {
             var len = directories.users.getItems().length;
 
             expect(len).toEqual(15);
+        });
+
+        it('contain - значение фильтра может быть числом', function() {
+            var actualSuccess,
+                actualError;
+            var directories;
+
+            var params = {
+                filters: [
+                    { type: 'contain', fields: ['last_login'], value: 2000 }
+                ]
+            }
+
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var len = directories.users.getItems().length;
+
+            expect(len).toEqual(2);
         });
 
         it('filters - комбинация трех разных фильтров', function() {
@@ -883,7 +955,7 @@ describe('app-mocked', function() {
         });
     });
 
-    xdescribe('Методы CRUD должны', function() {
+    describe('Методы CRUD должны', function() {
         it('post - сохранять данные нового пользователя', function() {
             var data = {
                     email: 'new@maxposter.ru',
