@@ -37,7 +37,9 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
         var self = this;
         _.forOwn(itemData, function(value, key) {
             var newValue;
-            if (value.id) {    // ссылка
+            if (key === 'dealer') {
+                newValue = new Dealer(value, directories);
+            } else if (value && value.id) {    // ссылка
                 if (key === 'group') {
                     newValue = directories.groups.get(value.id);
                 } else if (key === 'site') {
@@ -58,8 +60,6 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
                 }
             } else if (key === 'status') {
                 newValue = directories.userstatuses.get(value);
-            } else if (key === 'dealer') {      // todo: дилер всегда будет приходить с id
-                newValue = new Dealer(value, directories);
             } else {
                 newValue = value;
             }
@@ -79,7 +79,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
 
     User.prototype.serialize = function() {
         var itemData = {};
-        _.forOwn(this, function(value, key){
+        _.forOwn(this, function(value, key) {
             if (key === 'status' ) {
                 itemData[key] = value.id;
             } else if (key === "dealer") {
@@ -91,10 +91,10 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
             }
         });
         if (!this.isDealer()) {
-            delete itemData.dealer;
+            itemData.dealer = null;
         };
         if (!this.isSite()) {
-            delete itemData.site;
+            itemData.site = null;
         }
         return itemData;
     };

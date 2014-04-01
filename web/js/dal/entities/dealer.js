@@ -13,7 +13,7 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
         var self = this;
         _.forOwn(itemData, function(value, key) {
             var newValue;
-            if (value.id) {
+            if (value && value.id) {
                 if (key === 'manager') {
                     newValue = directories.managers.get(value.id);
                 } else if (key === 'city') {

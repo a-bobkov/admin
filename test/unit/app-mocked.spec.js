@@ -517,7 +517,7 @@ describe('app-mocked', function() {
             expect(pars.filters).toEqual(params.filters);
         });
 
-        it('если параметр filters в запросе НЕ указан, то в ответе filters должен быть null', function() {
+        it('если параметр filters в запросе НЕ указан, то в ответе filters должен быть пустым массивом', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -531,7 +531,7 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             var params = directories.users.getParams();
-            expect(params.filters).toBe(null);
+            expect(params.filters).toEqual([]);
         });
 
         it('order - сортировать данные пользователей по возрастанию id', function() {
@@ -937,7 +937,7 @@ describe('app-mocked', function() {
             expect(pars.fields).toEqual(params.fields);
         });
 
-        it('если параметр fields в запросе НЕ указан, то в ответе fields должен быть null', function() {
+        it('если параметр fields в запросе НЕ указан, то в ответе fields должен быть пустым массивом', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -951,7 +951,7 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             var params = directories.users.getParams();
-            expect(params.fields).toBe(null);
+            expect(params.fields).toEqual([]);
         });
     });
 

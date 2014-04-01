@@ -13,7 +13,7 @@ angular.module('max.dal.entities.metro', ['max.dal.entities.collection', 'max.da
         var self = this;
         _.forOwn(itemData, function(value, key) {
             var newValue;
-            if (value.id) {
+            if (value && value.id) {
                 if (key === 'city') {
                     newValue = directories.cities.get(value.id);
                 } else {
