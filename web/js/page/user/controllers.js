@@ -177,20 +177,25 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         }
     }
 
-    // $scope.$on('$routeChangeStart', function() {
-    //     // from https://developer.mozilla.org/en-US/docs/Web/API/Window.scrollX
-    //     var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-    //     var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-    //     $rootScope.savedUserListPosition = {
-    //         x: x,
-    //         y: y
-    //     };
-    // });
+    $scope.$on('$routeChangeStart', function() {
+        // from https://developer.mozilla.org/en-US/docs/Web/API/Window.scrollX
+        // var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+        // var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        // $rootScope.savedUserListPosition = {
+        //     x: x,
+        //     y: y
+        // };
+        $rootScope.savedUserListFocus = document.activeElement.id;
+        // console.log(el);
+    });
 
     $timeout(function() {   // ожидание построения DOM
         var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
         if (topUserList < 0) {
             window.scrollBy(0, topUserList);
+        }
+        if ($rootScope.savedUserListFocus) {
+            document.getElementById($rootScope.savedUserListFocus).focus();
         }
     });
 })
