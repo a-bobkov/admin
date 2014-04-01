@@ -39,11 +39,13 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
     .when('/userlist', {
         templateUrl: 'template/page/user/list.html',
         controller: 'UserListCtrl',
+        reloadOnSearch: false,
         resolve: {
-            data: function(usersLoader, $location) {
-                var qp = makeQueryParams($location.search());
-                // console.log(qp);
-                return usersLoader.loadItems(qp);
+            data: function(usersLoader, $location, $rootScope) {
+                if (!_.isEmpty($rootScope.savedUserListLocationSearch)) {
+                    $location.search($rootScope.savedUserListLocationSearch);
+                }
+                return usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch));
             }
         }
     })
@@ -134,7 +136,8 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
             return value;
         });
-        $location.search(toUrlSearch(searchParams));
+        $rootScope.savedUserListLocationSearch = toUrlSearch(searchParams);
+        $location.path('/userlist?');
 
         // if (newValue !== oldValue) {
         //     $window.scrollTo(0,0);
