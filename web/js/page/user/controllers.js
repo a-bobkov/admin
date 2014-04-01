@@ -138,11 +138,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         });
         $rootScope.savedUserListLocationSearch = toUrlSearch(searchParams);
         $location.path('/userlist?');
-
-        // if (newValue !== oldValue) {
-        //     $window.scrollTo(0,0);
-        //     delete $scope.savedUserListNotice;
-        // }
     };
 
     var params = data.users.getParams();
@@ -182,21 +177,20 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         }
     }
 
-    $scope.$on('$routeChangeStart', function() {
-        // from https://developer.mozilla.org/en-US/docs/Web/API/Window.scrollX
-        var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-        var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        $rootScope.savedUserListPosition = {
-            x: x,
-            y: y
-        };
-    });
+    // $scope.$on('$routeChangeStart', function() {
+    //     // from https://developer.mozilla.org/en-US/docs/Web/API/Window.scrollX
+    //     var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+    //     var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+    //     $rootScope.savedUserListPosition = {
+    //         x: x,
+    //         y: y
+    //     };
+    // });
 
-    $timeout(function() {   // wait for DOM to restore scroll position
-        if ($rootScope.savedUserListPosition) {
-            $window.scrollTo($rootScope.savedUserListPosition.x, $rootScope.savedUserListPosition.y);
-        } else {
-            $window.scrollTo(0, 0);
+    $timeout(function() {   // ожидание построения DOM
+        var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
+        if (topUserList < 0) {
+            window.scrollBy(0, topUserList);
         }
     });
 })
