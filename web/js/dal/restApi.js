@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.rest.api', ['app.dal.api'])
+angular.module('max.dal.rest.api', ['max.dal.api'])
 
 .factory('RestApi', function($q, Api, $log) {
 

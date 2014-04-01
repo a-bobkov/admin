@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pagination'])
+angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pagination'])
 
 .config(['$routeProvider', function($routeProvider) {
 
@@ -186,7 +186,6 @@ angular.module('UsersApp', ['ngRoute', 'app.dal.entities.user', 'ui.bootstrap.pa
         //     y: y
         // };
         $rootScope.savedUserListFocus = document.activeElement.id;
-        // console.log(el);
     });
 
     $timeout(function() {   // ожидание построения DOM

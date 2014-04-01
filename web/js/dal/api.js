@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.api', [])
+angular.module('max.dal.api', [])
 
 .provider('Api', function(){
 

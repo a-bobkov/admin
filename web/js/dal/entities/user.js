@@ -1,13 +1,13 @@
 'use strict';
 
-angular.module('app.dal.entities.user', ['app.dal.entities.collection', 'app.dal.rest.api',
-    'app.dal.entities.group',
-    'app.dal.entities.site',
-    'app.dal.entities.dealer',
-    'app.dal.entities.manager',
-    'app.dal.entities.city',
-    'app.dal.entities.market',
-    'app.dal.entities.metro'
+angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal.rest.api',
+    'max.dal.entities.group',
+    'max.dal.entities.site',
+    'max.dal.entities.dealer',
+    'max.dal.entities.manager',
+    'max.dal.entities.city',
+    'max.dal.entities.market',
+    'max.dal.entities.metro'
 ])
 
 .factory('userApi', function(RestApi, Api) {

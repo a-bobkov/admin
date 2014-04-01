@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.entities.site', ['app.dal.entities.collection', 'app.dal.rest.api'])
+angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal.rest.api'])
 
 .factory('siteApi', function(RestApi, Api) {
     var siteApi = new RestApi('sites', 'site');

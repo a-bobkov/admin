@@ -19,7 +19,7 @@ describe('app-mocked', function() {
     }
 
     beforeEach(function() {
-        module('app.dal.entities.user');
+        module('max.dal.entities.user');
 
         inject(function(_$httpBackend_, _$http_, _$rootScope_, _usersLoader_, _User_, _Users_, _Group_) {
             $httpBackend = _$httpBackend_;

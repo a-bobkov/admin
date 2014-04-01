@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.entities.group', ['app.dal.entities.collection', 'app.dal.rest.api'])
+angular.module('max.dal.entities.group', ['max.dal.entities.collection', 'max.dal.rest.api'])
 
 .factory('groupApi', function(RestApi, Api) {
     var groupApi = new RestApi('groups', 'group');

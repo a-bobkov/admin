@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.entities.metro', ['app.dal.entities.collection', 'app.dal.rest.api'])
+angular.module('max.dal.entities.metro', ['max.dal.entities.collection', 'max.dal.rest.api'])
 
 .factory('metroApi', function(RestApi, Api) {
     var metroApi = new RestApi('metros', 'metro');

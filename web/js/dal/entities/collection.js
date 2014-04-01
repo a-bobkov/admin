@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app.dal.entities.collection', [])
+angular.module('max.dal.entities.collection', [])
 
 .factory('Collection', function() {
 
