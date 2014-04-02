@@ -55,9 +55,10 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(10);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var status = String(value.status.id);
+                return (status === 'active');
+            })).toBeTruthy();
         });
 
         it('equal - фильтровать данные пользователей по равенству в нескольких полях', function() {
@@ -79,9 +80,11 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(5);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var status = String(value.status.id);
+                var group = String(value.group.id);
+                return (status === '3' || group === '3');
+            })).toBeTruthy();
         });
 
         it('equal - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
@@ -103,9 +106,11 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(1);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var company_name = String(value.dealer.company_name);
+                var group = String(value.group.id);
+                return (company_name === 'Демокомпания' || group === 'Демокомпания');
+            })).toBeTruthy();
         });
 
         it('equal - если значение опущено, то фильтр отключен', function() {
@@ -119,6 +124,16 @@ describe('app-mocked', function() {
                 ]
             }
 
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users1 = directories.users.getItems();
+
             usersLoader.loadItems(params).then(function(respond) {
                 directories = respond;
             }, function(respond) {
@@ -127,9 +142,9 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
+            var users2 = directories.users.getItems();
 
-            expect(len).toEqual(15);
+            expect(users1).toEqual(users2);
         });
 
         it('equal - если значение undefined, то фильтр отключен', function() {
@@ -143,6 +158,16 @@ describe('app-mocked', function() {
                 ]
             }
 
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users1 = directories.users.getItems();
+
             usersLoader.loadItems(params).then(function(respond) {
                 directories = respond;
             }, function(respond) {
@@ -151,9 +176,9 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
+            var users2 = directories.users.getItems();
 
-            expect(len).toEqual(15);
+            expect(users1).toEqual(users2);
         });
 
         it('equal - значение фильтра может быть числом', function() {
@@ -175,9 +200,10 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(1);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var id = String(value.id);
+                return (id === '1');
+            })).toBeTruthy();
         });
 
         it('in - фильтровать данные пользователей по равенству в одном поле', function() {
@@ -199,9 +225,10 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(5);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var status = String(value.status.id);
+                return (status === 'inactive' || status === 'blocked');
+            })).toBeTruthy();
         });
 
         it('in - фильтровать данные пользователей по равенству в нескольких поле', function() {
@@ -223,9 +250,11 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(12);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var status = String(value.status.id);
+                var group = String(value.group.id);
+                return (status === 'blocked' || status === '2' || group === 'blocked' || group === '2');
+            })).toBeTruthy();
         });
 
         it('in - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
@@ -247,9 +276,11 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(6);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var company_name = String(value.dealer.company_name);
+                var group = String(value.group.id);
+                return (company_name === 'Свет' || company_name === '3' || group === 'Свет' || group === '3');
+            })).toBeTruthy();
         });
 
         it('in - если значение опущено, то фильтр отключен', function() {
@@ -263,6 +294,16 @@ describe('app-mocked', function() {
                 ]
             }
 
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users1 = directories.users.getItems();
+
             usersLoader.loadItems(params).then(function(respond) {
                 directories = respond;
             }, function(respond) {
@@ -271,9 +312,9 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
+            var users2 = directories.users.getItems();
 
-            expect(len).toEqual(15);
+            expect(users1).toEqual(users2);
         });
 
         it('in - если значение undefined, то фильтр отключен', function() {
@@ -287,6 +328,16 @@ describe('app-mocked', function() {
                 ]
             }
 
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users1 = directories.users.getItems();
+
             usersLoader.loadItems(params).then(function(respond) {
                 directories = respond;
             }, function(respond) {
@@ -295,9 +346,9 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
+            var users2 = directories.users.getItems();
 
-            expect(len).toEqual(15);
+            expect(users1).toEqual(users2);
         });
 
         it('in - значение фильтра может быть массивом чисел', function() {
@@ -319,9 +370,10 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(2);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var id = String(value.id);
+                return (id === '1' || id === '2');
+            })).toBeTruthy();
         });
 
         it('contain - фильтровать данные пользователей по подстроке в одном поле', function() {
@@ -343,9 +395,10 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(2);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var last_login = String(value.last_login);
+                return (last_login.indexOf('2000') !== -1);
+            })).toBeTruthy();
         });
 
         it('contain - фильтровать данные пользователей по подстроке в нескольких полях', function() {
@@ -367,9 +420,11 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(13);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var email = String(value.email);
+                var status = String(value.status.id);
+                return (email.indexOf('act') !== -1 || status.indexOf('act') !== -1);
+            })).toBeTruthy();
         });
 
         it('contain - фильтровать данные пользователей по подстроке в полях во вложенных объектах', function() {
@@ -391,9 +446,11 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(4);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var email = String(value.email);
+                var company_name = String(value.dealer.company_name);
+                return (email.indexOf('компания') !== -1 || company_name.indexOf('компания') !== -1);
+            })).toBeTruthy();
         });
 
         it('contain - если значение опущено, то фильтр отключен', function() {
@@ -407,6 +464,16 @@ describe('app-mocked', function() {
                 ]
             }
 
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users1 = directories.users.getItems();
+
             usersLoader.loadItems(params).then(function(respond) {
                 directories = respond;
             }, function(respond) {
@@ -415,9 +482,9 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
+            var users2 = directories.users.getItems();
 
-            expect(len).toEqual(15);
+            expect(users1).toEqual(users2);
         });
 
         it('contain - если значение undefined, то фильтр отключен', function() {
@@ -431,6 +498,16 @@ describe('app-mocked', function() {
                 ]
             }
 
+            usersLoader.loadItems().then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+            $rootScope.$digest();
+
+            var users1 = directories.users.getItems();
+
             usersLoader.loadItems(params).then(function(respond) {
                 directories = respond;
             }, function(respond) {
@@ -439,9 +516,9 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
+            var users2 = directories.users.getItems();
 
-            expect(len).toEqual(15);
+            expect(users1).toEqual(users2);
         });
 
         it('contain - значение фильтра может быть числом', function() {
@@ -463,9 +540,10 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(2);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var last_login = String(value.last_login);
+                return (last_login.indexOf('2000') !== -1);
+            })).toBeTruthy();
         });
 
         it('filters - комбинация трех разных фильтров', function() {
@@ -489,9 +567,15 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var len = directories.users.getItems().length;
-
-            expect(len).toEqual(2);
+            expect(_.every(directories.users.getItems(), function(value) {
+                var id = String(value.id);
+                var email = String(value.email);
+                var company_name = String(value.dealer.company_name);
+                var status = String(value.status.id);
+                var manager = String(value.dealer.manager.id);
+                return ((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || company_name.indexOf('1') !== -1) 
+                    && (status === 'active') && (manager === '2'));
+            })).toBeTruthy();
         });
 
         it('если параметр filters в запросе указан, то в ответе filters должен быть таким же', function() {
@@ -754,7 +838,7 @@ describe('app-mocked', function() {
             expect(pars.order).toEqual(params.order);
         });
 
-        it('если параметр order в запросе НЕ указан, то в ответе order должен быть по по-умолчанию', function() {
+        it('если параметр order в запросе НЕ указан, то в ответе order должен быть по-умолчанию', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -776,14 +860,13 @@ describe('app-mocked', function() {
             });
         });
 
-        it('pager - ограничивать выборку заданной страницей', function() {
+        it('pager - ограничивать количество элементов выборки заданным', function() {
             var actualSuccess,
                 actualError;
             var directories;
 
             var params = {
                 pager: {
-                    page: 2,
                     per_page: 10
                 }
             }
@@ -797,10 +880,10 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             var users = directories.users.getItems();
-            expect(users.length).toBe(5);
+            expect(users.length).toBe(10);
         });
 
-        it('если параметр per_page в запросе НЕ указан, то в ответе он должен быть максимальным', function() {
+        it('если параметр per_page в запросе НЕ указан, то в ответе per_page должен быть 100', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -823,7 +906,7 @@ describe('app-mocked', function() {
             expect(pars.pager.per_page).toEqual(100);
         });
 
-        it('если параметр per_page в запросе указан больше максимального, то в ответе он должен быть максимальным', function() {
+        it('если параметр per_page в запросе указан больше 100, то в ответе per_page должен быть 100', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -847,7 +930,7 @@ describe('app-mocked', function() {
             expect(pars.pager.per_page).toEqual(100);
         });
 
-        it('если параметр page в запросе НЕ указан, то в ответе page должен быть по-умолчанию 1', function() {
+        it('если параметр page в запросе НЕ указан, то в ответе page должен быть 1', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -887,9 +970,9 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var users = directories.users.getItems();
-
-            expect(_.keys(users[0])).toEqual(params.fields);
+            expect(_.every(directories.users.getItems(), function(value) {
+                return _.isEqual(_.keys(value), params.fields);
+            })).toBeTruthy();
         });
 
         it('fields - выбирать поля данных пользователей во вложенных объектах', function() {
@@ -911,8 +994,10 @@ describe('app-mocked', function() {
 
             var users = directories.users.getItems();
 
-            expect(_.keys(users[0])).toEqual(['id', 'email', 'dealer']);
-            expect(_.keys(users[0].dealer)).toEqual(['company_name', 'phones']);
+            expect(_.every(directories.users.getItems(), function(value) {
+                return !_.isEqual(_.keys(value), ['id', 'email', 'dealer']) 
+                    || _.isEqual(_.keys(value.dealer), ['company_name', 'phones']);
+            })).toBeTruthy();
         });
 
         it('если параметр fields в запросе указан, то в ответе fields должен быть таким же', function() {
