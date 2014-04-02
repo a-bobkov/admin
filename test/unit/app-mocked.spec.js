@@ -996,7 +996,7 @@ describe('app-mocked', function() {
 
             expect(_.every(directories.users.getItems(), function(value) {
                 return !_.isEqual(_.keys(value), ['id', 'email', 'dealer']) 
-                    || _.isEqual(_.keys(value.dealer), ['company_name', 'phones']);
+                    || _.isEqual(_.keys(value.dealer), ['company_name']);
             })).toBeTruthy();
         });
 

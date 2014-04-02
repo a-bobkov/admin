@@ -41,11 +41,7 @@ return Collection;
         var itemData = {};
         _.forEach(this, function(value, key){
             if (_.isObject(value)) {
-                if (key === 'phones') {
-                    itemData[key] = angular.copy(value);
-                } else {
-                    itemData[key] = {id: value.id};
-                }
+                itemData[key] = {id: value.id};
             } else {
                 itemData[key] = value;
             }

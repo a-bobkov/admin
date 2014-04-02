@@ -229,6 +229,20 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         if (data.user.dealer) {
             angular.extend($scope.dealerEdited, data.user.dealer);
         }
+
+        $scope.dealerEditedPhones = [];
+        pushPhone('phone');
+        pushPhone('phone2');
+        pushPhone('phone3');
+
+        function pushPhone(name) {
+            $scope.dealerEditedPhones.push({
+                phoneNumber: $scope.dealerEdited[name],
+                phoneFrom: $scope.dealerEdited[name + '_from'],
+                phoneTo: $scope.dealerEdited[name + '_to']
+            });
+        }
+
     }
 
     function makeUserNew() {
@@ -238,6 +252,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         $scope.userEdited.manager = _.find($scope.managers, {id: 0});
         $scope.dealerEdited = new Dealer;
         $scope.userEdited.dealer = $scope.dealerEdited;
+        $scope.dealerEditedPhones = [{}, {}, {}];
     }
 
     $scope.matchCity = function(city) {
@@ -258,6 +273,18 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     $scope.$watch('dealerEdited.city', $scope.onCityChange);
 
     $scope.saveUser = function() {
+
+        function popPhone(name) {
+            var phone = $scope.dealerEditedPhones.pop();
+            $scope.dealerEdited[name] = phone.phoneNumber;
+            $scope.dealerEdited[name + '_from'] = phone.phoneFrom;
+            $scope.dealerEdited[name + '_to'] = phone.phoneTo;
+        }
+
+        popPhone('phone3');
+        popPhone('phone2');
+        popPhone('phone');
+
         $scope.userEdited.save(data).then(function(user) {
             $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
             $location.path('/userlist');

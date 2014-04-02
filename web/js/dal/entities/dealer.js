@@ -33,46 +33,9 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
             }
             self[key] = newValue;
         });
-
-        this.phones = [];
-        pushPhone.call(this, 'phone');
-        pushPhone.call(this, 'phone2');
-        pushPhone.call(this, 'phone3');
-
-        function pushPhone(name) {
-            this.phones.push({
-                phoneNumber: this[name],
-                phoneFrom: this[name + '_from'],
-                phoneTo: this[name + '_to']
-            });
-            delete this[name];
-            delete this[name + '_from'];
-            delete this[name + '_to'];
-        }
     };
 
     _.extend(Dealer.prototype, Item.prototype);
-
-    Dealer.prototype.serialize = function() {
-
-        function popPhone(name) {
-            var phone = itemData.phones.pop();
-            if (phone.phoneNumber || phone.phoneFrom || phone.phoneTo) {
-                itemData[name] = phone.phoneNumber;
-                itemData[name + '_from'] = phone.phoneFrom;
-                itemData[name + '_to'] = phone.phoneTo;
-            }
-        }
-
-        var itemData = Item.prototype.serialize.call(this);
-        if (_.isArray(itemData.phones)) {
-            popPhone('phone3');
-            popPhone('phone2');
-            popPhone('phone');
-            delete itemData.phones;
-        }
-        return itemData;
-    };
 
     return Dealer;
 })
