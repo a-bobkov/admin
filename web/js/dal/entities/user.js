@@ -37,7 +37,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
         var self = this;
         _.forOwn(itemData, function(value, key) {
             var newValue;
-            if (key === 'dealer') {
+            if (key === 'dealer' && value) {
                 newValue = new Dealer(value, directories);
             } else if (value && value.id) {    // ссылка
                 if (key === 'group') {
@@ -82,7 +82,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
         _.forOwn(this, function(value, key) {
             if (key === 'status' ) {
                 itemData[key] = value.id;
-            } else if (key === "dealer") {
+            } else if (key === "dealer" && value) {
                 itemData[key] = value.serialize();
             } else if (_.isObject(value)) {
                 itemData[key] = {id: value.id};

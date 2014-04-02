@@ -277,7 +277,7 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             expect(_.every(directories.users.getItems(), function(value) {
-                var company_name = String(value.dealer.company_name);
+                var company_name = value.dealer && String(value.dealer.company_name);
                 var group = String(value.group.id);
                 return (company_name === 'Свет' || company_name === '3' || group === 'Свет' || group === '3');
             })).toBeTruthy();
