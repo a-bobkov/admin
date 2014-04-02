@@ -12,14 +12,14 @@ module.exports = function(config){
         'web/js/vendor/ui-bootstrap/pagination-0.7.0.js',
 
         // хелперы
-        'test/lib/helpers.js',
+        'web/test/lib/helpers.js',
 
         // функционал
         'web/js/dal/**/*.js',
         'web/js/page/**/*.js',
 
         // тесты
-        'test/unit/**/*.js'
+        'web/test/unit/**/*.js'
     ],
 
     exclude : [
