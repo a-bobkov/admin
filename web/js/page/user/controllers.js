@@ -6,12 +6,8 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
     function makeQueryParams(ls) {
         if (_.size(ls)) {
-            return {
-                filters: [
-                    { type: 'contain', fields: ['id', 'email', 'dealer.company_name'], value: ls.complex },
-                    { type: 'in', fields: ['status'], value: ls.status.split(';') },
-                    { type: 'equal', fields: ['dealer.manager'], value: ls.manager }
-                ],
+            var queryParams = {
+                filters: [],
                 order: {
                     order_field: ls.column,
                     order_direction: ls.reverse ? 'desc': 'asc'
@@ -20,13 +16,33 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
                     page: ls.currentPage,
                     per_page: ls.itemsPerPage
                 }
+            };
+            if (ls.complex) {
+                queryParams.filters.push({
+                    type: 'contain',
+                    fields: ['id', 'email', 'dealer.company_name'],
+                    value: ls.complex
+                });
             }
+            if (ls.status) {
+                queryParams.filters.push({
+                    type: 'in',
+                    fields: ['status'],
+                    value: ls.status.split(';')
+                });
+            }
+            if (ls.manager) {
+                queryParams.filters.push({
+                    type: 'equal',
+                    fields: ['dealer.manager'],
+                    value: ls.manager
+                });
+            }
+            return queryParams;
         } else {
             return {
                 filters: [
-                    { type: 'contain', fields: ['id', 'email', 'dealer.company_name'] },
-                    { type: 'in', fields: ['status'], value: ['active'] },
-                    { type: 'equal', fields: ['dealer.manager'] }
+                    { type: 'in', fields: ['status'], value: ['active'] }
                 ],
                 pager: {
                     per_page: 25
@@ -140,13 +156,20 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         $location.path('/userlist?');
     };
 
+    function getFilterFieldsValue(filters, fields) {
+        var filter = _.find(filters, {fields: fields});
+        if (filter) {
+            return filter.value;
+        }
+    }
+
     var params = data.users.getParams();
     $scope.patterns = {
-        complex: params.filters[0].value,
-        status: _.invoke(params.filters[1].value, function() {
+        complex: getFilterFieldsValue(params.filters, ['id', 'email', 'dealer.company_name']),
+        status: _.invoke(getFilterFieldsValue(params.filters, ['status']), function() {
                 return _.find($scope.userstatuses, {id: this})
             }),
-        manager: _.find($scope.managers, {id: _.parseInt(params.filters[2].value)})
+        manager: _.find($scope.managers, {id: _.parseInt(getFilterFieldsValue(params.filters, ['dealer.manager']))})
     };
     $scope.sorting = {
         column: params.order.order_field,
