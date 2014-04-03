@@ -268,7 +268,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит название компании', function() {
-            expect(element(by.model('dealerEdited.company_name')).getAttribute('value')).toBe('Демокомпания');
+            expect(element(by.model('dealerEdited.companyName')).getAttribute('value')).toBe('Демокомпания');
         });
 
         it('заполняет список городов', function() {
@@ -478,7 +478,7 @@ describe('MaxPoster frontend app', function() {
             expect(element(by.selectedOption('userEdited.status')).getText()).toBe('Неактивный');
             expect(element(by.selectedOption('userEdited.group')).getText()).toBeFalsy();
             expect(element(by.selectedOption('dealerEdited.manager')).getText()).toBeFalsy();
-            expect(element(by.model('dealerEdited.company_name')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.companyName')).getAttribute('value')).toBeFalsy();
             expect(element(by.selectedOption('dealerEdited.city')).getText()).toBeFalsy();
             expect(element(by.selectedOption('dealerEdited.market')).getText()).toBeFalsy();
             expect(element(by.selectedOption('dealerEdited.metro')).getText()).toBeFalsy();

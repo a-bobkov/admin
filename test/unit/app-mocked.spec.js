@@ -94,7 +94,7 @@ describe('app-mocked', function() {
 
             var params = {
                 filters: [
-                    { type: 'equal', fields: ['dealer.company_name', 'group'], value: 'Демокомпания' }
+                    { type: 'equal', fields: ['dealer.companyName', 'group'], value: 'Демокомпания' }
                 ]
             }
 
@@ -107,9 +107,9 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             expect(_.every(directories.users.getItems(), function(value) {
-                var company_name = String(value.dealer.company_name);
+                var companyName = String(value.dealer.companyName);
                 var group = String(value.group.id);
-                return (company_name === 'Демокомпания' || group === 'Демокомпания');
+                return (companyName === 'Демокомпания' || group === 'Демокомпания');
             })).toBeTruthy();
         });
 
@@ -196,7 +196,7 @@ describe('app-mocked', function() {
 
             var params = {
                 filters: [
-                    { type: 'in', fields: ['dealer.company_name', 'group'], value: ['Свет', '3'] }
+                    { type: 'in', fields: ['dealer.companyName', 'group'], value: ['Свет', '3'] }
                 ]
             }
 
@@ -209,9 +209,9 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             expect(_.every(directories.users.getItems(), function(value) {
-                var company_name = value.dealer && String(value.dealer.company_name);
+                var companyName = value.dealer && String(value.dealer.companyName);
                 var group = String(value.group.id);
-                return (company_name === 'Свет' || company_name === '3' || group === 'Свет' || group === '3');
+                return (companyName === 'Свет' || companyName === '3' || group === 'Свет' || group === '3');
             })).toBeTruthy();
         });
 
@@ -298,7 +298,7 @@ describe('app-mocked', function() {
 
             var params = {
                 filters: [
-                    { type: 'contain', fields: ['email', 'dealer.company_name'], value: ['компания'] }
+                    { type: 'contain', fields: ['email', 'dealer.companyName'], value: ['компания'] }
                 ]
             }
 
@@ -312,8 +312,8 @@ describe('app-mocked', function() {
 
             expect(_.every(directories.users.getItems(), function(value) {
                 var email = String(value.email);
-                var company_name = String(value.dealer.company_name);
-                return (email.indexOf('компания') !== -1 || company_name.indexOf('компания') !== -1);
+                var companyName = String(value.dealer.companyName);
+                return (email.indexOf('компания') !== -1 || companyName.indexOf('компания') !== -1);
             })).toBeTruthy();
         });
 
@@ -349,7 +349,7 @@ describe('app-mocked', function() {
 
             var params = {
                 filters: [
-                    { type: 'contain', fields: ['id', 'email', 'dealer.company_name'], value: '1' },
+                    { type: 'contain', fields: ['id', 'email', 'dealer.companyName'], value: '1' },
                     { type: 'in', fields: ['status'], value: ['active'] },
                     { type: 'equal', fields: ['dealer.manager'], value: '2' }
                 ]
@@ -366,10 +366,10 @@ describe('app-mocked', function() {
             expect(_.every(directories.users.getItems(), function(value) {
                 var id = String(value.id);
                 var email = String(value.email);
-                var company_name = String(value.dealer.company_name);
+                var companyName = String(value.dealer.companyName);
                 var status = String(value.status.id);
                 var manager = String(value.dealer.manager.id);
-                return ((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || company_name.indexOf('1') !== -1) 
+                return ((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || companyName.indexOf('1') !== -1) 
                     && (status === 'active') && (manager === '2'));
             })).toBeTruthy();
         });
@@ -565,7 +565,7 @@ describe('app-mocked', function() {
 
             var params = {
                 order: {
-                    order_field: 'dealer.company_name',
+                    order_field: 'dealer.companyName',
                     order_direction: 'asc'
                 }
             }
@@ -591,7 +591,7 @@ describe('app-mocked', function() {
 
             var params = {
                 order: {
-                    order_field: 'dealer.company_name',
+                    order_field: 'dealer.companyName',
                     order_direction: 'desc'
                 }
             }
@@ -777,7 +777,7 @@ describe('app-mocked', function() {
             var directories;
 
             var params = {
-                fields: ['id', 'email', 'dealer.company_name']
+                fields: ['id', 'email', 'dealer.companyName']
             }
 
             usersLoader.loadItems(params).then(function(respond) {
@@ -792,7 +792,7 @@ describe('app-mocked', function() {
 
             expect(_.every(directories.users.getItems(), function(value) {
                 return !_.isEqual(_.keys(value), ['id', 'email', 'dealer']) 
-                    || _.isEqual(_.keys(value.dealer), ['company_name']);
+                    || _.isEqual(_.keys(value.dealer), ['companyName']);
             })).toBeTruthy();
         });
 
@@ -802,7 +802,7 @@ describe('app-mocked', function() {
             var directories;
 
             var params = {
-                fields: ['id', 'email', 'dealer.company_name']
+                fields: ['id', 'email', 'dealer.companyName']
             }
 
             usersLoader.loadItems(params).then(function(respond) {
@@ -844,7 +844,7 @@ describe('app-mocked', function() {
                     status: 'active',
                     group: {id: 2},
                     dealer: {
-                        company_name: 'Новая компания',
+                        companyName: 'Новая компания',
                         city: {id: 5},
                         market: {id: 8},
                         metro: {id: 10},
@@ -914,7 +914,7 @@ describe('app-mocked', function() {
                     status: 'active',
                     group: {id: 2},
                     dealer: {
-                        company_name: 'Новая компания',
+                        companyName: 'Новая компания',
                         city: {id: 5},
                         market: {id: 8},
                         metro: {id: 10},

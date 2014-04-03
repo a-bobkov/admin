@@ -45,13 +45,13 @@ describe('StringContainsFilter', function () {
     });
 
     it('Экземпляр фильтра фильтрует коллекцию объектов на условии ИЛИ по всем перечисленным в конструкторе полям', function () {
-        var obj1 = { id: 1, dealer: { company_name: 'Салон один' }, email: 'one@one.com' },
-            obj2 = { id: 2, dealer: { company_name: 'Салон 111' }, email: 'one@two.com' },
-            obj3 = { id: 3, dealer: { company_name: 'Салон три' }, email: 'one@three.com' },
-            obj4 = { id: 4, dealer: { company_name: 'Салон четыре' }, email: '1@four.com' },
-            obj5 = { id: 21, dealer: { company_name: 'Салон 21' }, email: 'one@twenty-one.com' },
+        var obj1 = { id: 1, dealer: { companyName: 'Салон один' }, email: 'one@one.com' },
+            obj2 = { id: 2, dealer: { companyName: 'Салон 111' }, email: 'one@two.com' },
+            obj3 = { id: 3, dealer: { companyName: 'Салон три' }, email: 'one@three.com' },
+            obj4 = { id: 4, dealer: { companyName: 'Салон четыре' }, email: '1@four.com' },
+            obj5 = { id: 21, dealer: { companyName: 'Салон 21' }, email: 'one@twenty-one.com' },
             objects = [ obj1, obj2, obj3, obj4, obj5 ],
-            filter = new StringContainsFilter(['id', 'email', 'dealer.company_name']);
+            filter = new StringContainsFilter(['id', 'email', 'dealer.companyName']);
 
         filter.value = 1;
         expect(_.filter(objects, filter.apply)).toEqual([ obj1, obj2, obj4, obj5 ]);

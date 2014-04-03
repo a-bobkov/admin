@@ -53,7 +53,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             group: {id: 2},
             dealer: {
                 id: 5,
-                company_name: 'Демокомпания',
+                companyName: 'Демокомпания',
                 city: {id: 5},
                 market: {id: 8},
                 metro: {id: 10},
@@ -76,25 +76,25 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             }
         },
         {id: 1, email: 'a-bobkov@ab.com', last_login: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 1, company_name: 'Ещё одна компания', manager: {id: 2}}},
+            id: 1, companyName: 'Ещё одна компания', manager: {id: 2}}},
         {id: 2, email: 'a-bobkov@abb.com', last_login: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 11}},
         {id: 3, email: 'a-bobkov@abc.com', last_login: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
-            id: 3, company_name: 'Другая компания', manager: {id: 1}}},
+            id: 3, companyName: 'Другая компания', manager: {id: 1}}},
         {id: 4, email: 'a-bobkov@act.com', last_login: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 12}},
         {id: 6, email: 'a-bobkov@abe.com', last_login: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
-            id: 6, company_name: 'Крутая компания', manager: {id: 2}}},
+            id: 6, companyName: 'Крутая компания', manager: {id: 2}}},
         {id: 7, email: 'a-bobkov@abf.com', last_login: '2000-01-12', status: 'inactive', group: {id: 2}, dealer: {
-            id: 7, company_name: 'Супер-салон', manager: {id: 2}}},
+            id: 7, companyName: 'Супер-салон', manager: {id: 2}}},
         {id: 8, email: 'a-bobkov@abg.com', last_login: '2000-08-07', status: 'active', group: {id: 1}},
         {id: 9, email: 'a-bobkov@abh.com', last_login: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 9, company_name: 'Битые корыта', manager: {id: 1}}},
+            id: 9, companyName: 'Битые корыта', manager: {id: 1}}},
         {id: 10, email: 'a-bobkov@abi.com', last_login: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 10, company_name: 'Два в одном', manager: {id: 2}}},
+            id: 10, companyName: 'Два в одном', manager: {id: 2}}},
         {id: 11, email: 'a-bobkov@abj.com', last_login: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 11}},
         {id: 12, email: 'a-bobkov@abk.com', last_login: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 12, company_name: 'Авто-мото', manager: {id: 0}}},
+            id: 12, companyName: 'Авто-мото', manager: {id: 0}}},
         {id: 13, email: 'a-bobkov@abl.com', last_login: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 13, company_name: 'Свет', manager: {id: 4}}},
+            id: 13, companyName: 'Свет', manager: {id: 4}}},
         {id: 14, email: 'a-bobkov@abo.com', last_login: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 12}},
         {id: 15, email: 'a-bobkov@abm.com', last_login: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 11}}
     ], multiplyUsersCoef), null, userDirectories);

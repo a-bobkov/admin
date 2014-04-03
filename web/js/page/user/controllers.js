@@ -20,7 +20,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             if (ls.complex) {
                 queryParams.filters.push({
                     type: 'contain',
-                    fields: ['id', 'email', 'dealer.company_name'],
+                    fields: ['id', 'email', 'dealer.companyName'],
                     value: ls.complex
                 });
             }
@@ -165,7 +165,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
     var params = data.users.getParams();
     $scope.patterns = {
-        complex: getFilterFieldsValue(params.filters, ['id', 'email', 'dealer.company_name']),
+        complex: getFilterFieldsValue(params.filters, ['id', 'email', 'dealer.companyName']),
         status: _.invoke(getFilterFieldsValue(params.filters, ['status']), function() {
                 return _.find($scope.userstatuses, {id: this})
             }),
