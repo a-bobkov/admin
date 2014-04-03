@@ -321,7 +321,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит значение адреса', function() {
-            expect(element(by.model('dealerEdited.adress')).getAttribute('value')).toMatch(/^191040/);
+            expect(element(by.model('dealerEdited.address')).getAttribute('value')).toMatch(/^191040/);
         });
 
         it('выводит значение факса', function() {
@@ -482,7 +482,7 @@ describe('MaxPoster frontend app', function() {
             expect(element(by.selectedOption('dealerEdited.city')).getText()).toBeFalsy();
             expect(element(by.selectedOption('dealerEdited.market')).getText()).toBeFalsy();
             expect(element(by.selectedOption('dealerEdited.metro')).getText()).toBeFalsy();
-            expect(element(by.model('dealerEdited.adress')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.address')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.dealer_email')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.site')).getAttribute('value')).toBeFalsy();

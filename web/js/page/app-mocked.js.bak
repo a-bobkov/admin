@@ -347,7 +347,7 @@ function setHttpMock($httpBackend, Collection, Item, multiplyUsersCoef) {
                 city: {id: 5},
                 market: {id: 8},
                 metro: {id: 10},
-                adress: '191040, Лиговский проспект, 150, оф.505',
+                address: '191040, Лиговский проспект, 150, оф.505',
                 fax: '+7(812)232-4123',
                 dealer_email: 'demo@demo.ru',
                 site: 'http://www.w3schools.com',
