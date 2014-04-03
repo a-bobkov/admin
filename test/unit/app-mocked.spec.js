@@ -862,7 +862,7 @@ describe('app-mocked', function() {
                         phone3: '+7-812-232-4125',
                         phone3_from: '7',
                         phone3_to: '15',
-                        company_info: 'Здесь может быть произвольный текст...',
+                        companyInfo: 'Здесь может быть произвольный текст...',
                         manager: {id: 4}
                     }
                 },
@@ -932,7 +932,7 @@ describe('app-mocked', function() {
                         phone3: '+7-812-232-4125',
                         phone3_from: '7',
                         phone3_to: '15',
-                        company_info: 'Здесь может быть произвольный текст...',
+                        companyInfo: 'Здесь может быть произвольный текст...',
                         manager: {id: 4}
                     }
                 },

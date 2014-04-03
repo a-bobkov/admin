@@ -404,7 +404,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит информацию о компании', function() {
-            expect(element(by.model('dealerEdited.company_info')).getAttribute('value')).toBe('Здесь может быть произвольный текст...');
+            expect(element(by.model('dealerEdited.companyInfo')).getAttribute('value')).toBe('Здесь может быть произвольный текст...');
         });
 
         it('заполняет список сайтов', function() {
@@ -496,7 +496,7 @@ describe('MaxPoster frontend app', function() {
             expect(element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value')).toBeFalsy();
             expect(element.all(by.model('phone.phoneFrom')).get(2).getText()).toBeFalsy();
             expect(element.all(by.model('phone.phoneTo')).get(2).getText()).toBeFalsy();
-            expect(element(by.model('dealerEdited.company_info')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.companyInfo')).getAttribute('value')).toBeFalsy();
             expect(element(by.selectedOption('userEdited.site')).getText()).toBeFalsy();
         });
 

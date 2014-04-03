@@ -34,7 +34,7 @@ describe('Сервисы dealers и dealerApi', function() {
                     phone2_to: 21,
                     phone3: '+7-812-232-4125',
                     phone3_from: 7,
-                    company_info: 'Здесь может быть произвольный текст...',
+                    companyInfo: 'Здесь может быть произвольный текст...',
                 }];
 
             var dealer = dealers._setAll(dealersData)[0];
@@ -65,7 +65,7 @@ describe('Сервисы dealers и dealerApi', function() {
                     phone3: '+7-812-232-4125',
                     phone3_from: 7,
                     phone3_to: 15,
-                    company_info: 'Здесь может быть произвольный текст...',
+                    companyInfo: 'Здесь может быть произвольный текст...',
                 }];
 
             var dealer = dealers._setAll(dealersData)[0];
