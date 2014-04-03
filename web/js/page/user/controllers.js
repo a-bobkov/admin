@@ -261,8 +261,8 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         function pushPhone(name) {
             $scope.dealerEditedPhones.push({
                 phoneNumber: $scope.dealerEdited[name],
-                phoneFrom: $scope.dealerEdited[name + '_from'],
-                phoneTo: $scope.dealerEdited[name + '_to']
+                phoneFrom: $scope.dealerEdited[name + 'From'],
+                phoneTo: $scope.dealerEdited[name + 'To']
             });
         }
 
@@ -300,8 +300,8 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         function popPhone(name) {
             var phone = $scope.dealerEditedPhones.pop();
             $scope.dealerEdited[name] = phone.phoneNumber;
-            $scope.dealerEdited[name + '_from'] = phone.phoneFrom;
-            $scope.dealerEdited[name + '_to'] = phone.phoneTo;
+            $scope.dealerEdited[name + 'From'] = phone.phoneFrom;
+            $scope.dealerEdited[name + 'To'] = phone.phoneTo;
         }
 
         popPhone('phone3');
