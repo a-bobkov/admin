@@ -61,7 +61,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
                 fax: '+7(812)232-4123',
                 dealer_email: 'demo@demo.ru',
                 site: 'http://www.w3schools.com',
-                contact_name: 'Аверин Константин Петрович',
+                contactName: 'Аверин Константин Петрович',
                 phone: '+7(812)232-4123',
                 phoneFrom: 10,
                 phoneTo: 20,

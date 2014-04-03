@@ -25,7 +25,7 @@ describe('Сервисы dealers и dealerApi', function() {
         it('группировать телефоны в массив, удаляя линейные параметры телефонов', function() {
             var dealersData = [{
                     id: 5,
-                    contact_name: 'Аверин Константин Петрович',
+                    contactName: 'Аверин Константин Петрович',
                     phone: '+7-812-232-4123',
                     phoneFrom: 10,
                     phoneTo: 20,
@@ -58,7 +58,7 @@ describe('Сервисы dealers и dealerApi', function() {
         it('группировать телефоны в массив, так что пропущенные не сдвигаются', function() {
             var dealersData = [{
                     id: 5,
-                    contact_name: 'Аверин Константин Петрович',
+                    contactName: 'Аверин Константин Петрович',
                     phone: '+7-812-232-4123',
                     phoneFrom: 10,
                     phoneTo: 20,

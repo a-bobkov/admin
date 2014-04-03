@@ -852,7 +852,7 @@ describe('app-mocked', function() {
                         fax: '+7-812-232-4123',
                         dealer_email: 'demo@demo.ru',
                         site: 'http://www.w3schools.com',
-                        contact_name: 'Аверин Константин Петрович',
+                        contactName: 'Аверин Константин Петрович',
                         phone: '+7-812-232-4123',
                         phoneFrom: '10',
                         phoneTo: '20',
@@ -922,7 +922,7 @@ describe('app-mocked', function() {
                         fax: '+7-812-232-4123',
                         dealer_email: 'demo@demo.ru',
                         site: 'http://www.w3schools.com',
-                        contact_name: 'Аверин Константин Петрович',
+                        contactName: 'Аверин Константин Петрович',
                         phone: '+7-812-232-4123',
                         phoneFrom: '10',
                         phoneTo: '20',
@@ -985,7 +985,7 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             var user = directories.user;
-            expect(user.dealer.contact_name).toEqual('Аверин Константин Петрович');
+            expect(user.dealer.contactName).toEqual('Аверин Константин Петрович');
         });
 
         it('get - возвращать ошибку, если пользователь не найден', function() {

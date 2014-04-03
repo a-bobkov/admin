@@ -337,7 +337,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит значение контакта', function() {
-            expect(element(by.model('dealerEdited.contact_name')).getAttribute('value')).toMatch(/^Аверин/);
+            expect(element(by.model('dealerEdited.contactName')).getAttribute('value')).toMatch(/^Аверин/);
         });
 
         it('выводит список телефонов', function() {
@@ -486,7 +486,7 @@ describe('MaxPoster frontend app', function() {
             expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.dealer_email')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.site')).getAttribute('value')).toBeFalsy();
-            expect(element(by.model('dealerEdited.contact_name')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.contactName')).getAttribute('value')).toBeFalsy();
             expect(element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value')).toBeFalsy();
             expect(element.all(by.model('phone.phoneFrom')).get(0).getText()).toBeFalsy();
             expect(element.all(by.model('phone.phoneTo')).get(0).getText()).toBeFalsy();
