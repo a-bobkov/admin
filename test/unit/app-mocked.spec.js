@@ -247,7 +247,7 @@ describe('app-mocked', function() {
 
             var params = {
                 filters: [
-                    { type: 'contain', fields: ['last_login'], value: ['2000'] }
+                    { type: 'contain', fields: ['lastLogin'], value: ['2000'] }
                 ]
             }
 
@@ -260,8 +260,8 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             expect(_.every(directories.users.getItems(), function(value) {
-                var last_login = String(value.last_login);
-                return (last_login.indexOf('2000') !== -1);
+                var lastLogin = String(value.lastLogin);
+                return (lastLogin.indexOf('2000') !== -1);
             })).toBeTruthy();
         });
 
@@ -324,7 +324,7 @@ describe('app-mocked', function() {
 
             var params = {
                 filters: [
-                    { type: 'contain', fields: ['last_login'], value: 2000 }
+                    { type: 'contain', fields: ['lastLogin'], value: 2000 }
                 ]
             }
 
@@ -337,8 +337,8 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             expect(_.every(directories.users.getItems(), function(value) {
-                var last_login = String(value.last_login);
-                return (last_login.indexOf('2000') !== -1);
+                var lastLogin = String(value.lastLogin);
+                return (lastLogin.indexOf('2000') !== -1);
             })).toBeTruthy();
         });
 
@@ -517,7 +517,7 @@ describe('app-mocked', function() {
 
             var params = {
                 order: {
-                    order_field: 'last_login',
+                    order_field: 'lastLogin',
                     order_direction: 'asc'
                 }
             }
@@ -530,7 +530,7 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var usersDates = _.pluck(directories.users.getItems(), 'last_login');
+            var usersDates = _.pluck(directories.users.getItems(), 'lastLogin');
             expect(usersDates).toBeSorted('AscendingDates');
         });
 
@@ -541,7 +541,7 @@ describe('app-mocked', function() {
 
             var params = {
                 order: {
-                    order_field: 'last_login',
+                    order_field: 'lastLogin',
                     order_direction: 'desc'
                 }
             }
@@ -554,7 +554,7 @@ describe('app-mocked', function() {
             $httpBackend.flush();
             $rootScope.$digest();
 
-            var usersDates = _.pluck(directories.users.getItems(), 'last_login');
+            var usersDates = _.pluck(directories.users.getItems(), 'lastLogin');
             expect(usersDates).toBeSorted('DescendingDates');
         });
 
@@ -840,7 +840,7 @@ describe('app-mocked', function() {
         it('post - сохранять данные нового пользователя', function() {
             var data = {
                     email: 'new@maxposter.ru',
-                    last_login: '2013-12-01',
+                    lastLogin: '2013-12-01',
                     status: 'active',
                     group: {id: 2},
                     dealer: {
@@ -910,7 +910,7 @@ describe('app-mocked', function() {
         it('post - возвращать ошибку при попытке сохранения пользователя со ссылками на объекты, не существующие в БД', function() {
             var dataUser = {
                     email: 'new@maxposter.ru',
-                    last_login: '2013-12-01',
+                    lastLogin: '2013-12-01',
                     status: 'active',
                     group: {id: 2},
                     dealer: {

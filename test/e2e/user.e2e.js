@@ -73,7 +73,7 @@ describe('MaxPoster frontend app', function() {
         it('показывает реквизиты пользователя', function() {
             expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('1');
             expect(element(by.repeater('user in pagedUsers').row(0).column('user.email')).getText()).toBe('0a-bobkov@ab.com');
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.last_login')).getText()).toBe('01.01.12');
+            expect(element(by.repeater('user in pagedUsers').row(0).column('user.lastLogin')).getText()).toBe('01.01.12');
         });
 
         it('переходит к редактированию пользователя по ссылке в id', function() {
@@ -183,12 +183,12 @@ describe('MaxPoster frontend app', function() {
                 });
 
                 arr[2].click();
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.lastLogin'))).then(function(data) {
                     expect(data).toBeSortedArrayOf('AscendingDates');
                 });
 
                 arr[2].click();
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.last_login'))).then(function(data) {
+                mapText(element.all(by.repeater('user in pagedUsers').column('user.lastLogin'))).then(function(data) {
                     expect(data).toBeSortedArrayOf('DescendingDates');
                 });
             })

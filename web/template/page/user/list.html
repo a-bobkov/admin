@@ -23,7 +23,7 @@
                 <tr ng-repeat='user in users' ng-click='clickLine(user.id)' ng-class-odd="'odd'" ng-class-even="'even'">
                     <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.id}}</a></td>
                     <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.email}}</a></td>
-                    <td class="date">{{user.last_login | date:'shortDate'}}</td>
+                    <td class="date">{{user.lastLogin | date:'shortDate'}}</td>
                     <td>
                         <ul class="actions">
                             <li class="edit"><a href='#/users/{{user.id}}/edit'>изменить</a></li>

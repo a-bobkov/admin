@@ -122,7 +122,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     $scope.sortableColumns = [
         {id: "id", name: "Код"},
         {id: "email", name: "Email"},
-        {id: "last_login", name: "Был на сайте"}
+        {id: "lastLogin", name: "Был на сайте"}
     ];
 
     $scope.sortingMark = function(column) {
