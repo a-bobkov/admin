@@ -12,9 +12,9 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
-            {id: 3, name: 'Автосайт'},
-            {id: 2, name: 'Автосалон'},
-            {id: 1, name: 'Администратор'}
+            {id: 1, name: 'admin', description: 'Администратор'},
+            {id: 2, name: 'dealer', description: 'Автосалон'},
+            {id: 3, name: 'site', description: 'Автосайт'}
         ],
         managers: [
             {id: 1, name: 'Катя'},
@@ -276,11 +276,20 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
 
     var regexDirectories = /^\/api2\/combined\/users$/;
     $httpBackend.whenGET(regexDirectories).respond(function(method, url, data) {
+        try {
+            var directories = _.mapValues(userDirectories, function(directory) {
+               return directory.serialize();
+            });
+        } catch (err) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при загрузке справочников',
+                errors: err.message
+            }];
+        }
         return [200, {
             status: 'success',
-            data: _.mapValues(userDirectories, function(directory) {
-               return directory.serialize();
-            })
+            data: directories
         }];
     });
 
