@@ -610,7 +610,7 @@ describe('app-mocked', function() {
             expect(usersCompany_name).toBeSorted('DescendingStrings');
         });
 
-        it('если параметр order в запросе указан, то в ответе order должен быть таким же', function() {
+        it('если параметр order в запросе указан, то в ответе order должен быть таким же, но без order', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -631,7 +631,10 @@ describe('app-mocked', function() {
             $rootScope.$digest();
 
             var pars = directories.users.getParams();
-            expect(pars.order).toEqual(params.order);
+            expect(pars.order).toEqual({
+                    field: 'id',
+                    direction: 'asc'
+                });
         });
 
         it('если параметр order в запросе НЕ указан, то в ответе order должен быть по-умолчанию', function() {
@@ -651,8 +654,8 @@ describe('app-mocked', function() {
 
             var pars = directories.users.getParams();
             expect(pars.order).toEqual({
-                order_field: 'id',
-                order_direction: 'asc'
+                field: 'id',
+                direction: 'asc'
             });
         });
 

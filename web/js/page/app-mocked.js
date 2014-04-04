@@ -158,8 +158,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
                 params: {
                     filters: [],
                     order: {
-                        order_field: order_field,
-                        order_direction: order_direction
+                        field: order_field,
+                        direction: order_direction
                     },
                     pager: {
                         per_page:   per_page,

@@ -172,8 +172,8 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         manager: _.find($scope.managers, {id: _.parseInt(getFilterFieldsValue(params.filters, ['dealer.manager']))})
     };
     $scope.sorting = {
-        column: params.order.order_field,
-        reverse: (params.order.order_direction === 'desc')
+        column: params.order.field,
+        reverse: (params.order.direction === 'desc')
     };
     $scope.paging = {
         currentPage: _.parseInt(params.pager.page),
