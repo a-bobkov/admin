@@ -73,7 +73,9 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
          * @returns {Promise}
          */
         this.create = function(data) {
-            return Api.post(url + '/new', data).then(
+            var entityData = {};    // todo: проверить, что в запросе всегда есть секция user (+юнит-тест)
+            entityData[entityName] = data;
+            return Api.post(url + '/new', entityData).then(
                 this._getResponseHandler(entityName)
             );
         };
@@ -83,7 +85,9 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
          * @returns {Promise}
          */
         this.update = function(data) {
-            return Api.put(url + '/' + data.id, data).then(
+            var entityData = {};
+            entityData[entityName] = data;
+            return Api.put(url + '/' + data.id, entityData).then(
                 this._getResponseHandler(entityName, data.id)
             );
         };

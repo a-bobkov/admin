@@ -297,7 +297,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
     $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
         var items = users.getItems();
         try {
-            var user = new User(angular.fromJson(data), userDirectories);
+            var user = new User((angular.fromJson(data)).user, userDirectories);
             if (user.isDealer()) {
                 user.dealer.id = user.id;
             }
@@ -329,7 +329,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         var idx = _.findIndex(items, {id: id});
         if (idx !== -1) {
             try {
-                var user = new User(angular.fromJson(data), userDirectories);
+                var user = new User((angular.fromJson(data)).user, userDirectories);
                 if (user.isDealer()) {
                     user.dealer.id = user.id;
                 }
