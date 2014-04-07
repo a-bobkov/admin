@@ -297,16 +297,16 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
     $scope.saveUser = function() {
 
-        function popPhone(name) {
-            var phone = $scope.dealerEditedPhones.pop();
+        function getPhone(idx, name) {
+            var phone = $scope.dealerEditedPhones[idx];
             $scope.dealerEdited[name] = phone.phoneNumber;
             $scope.dealerEdited[name + 'From'] = phone.phoneFrom;
             $scope.dealerEdited[name + 'To'] = phone.phoneTo;
         }
 
-        popPhone('phone3');
-        popPhone('phone2');
-        popPhone('phone');
+        getPhone(0, 'phone');
+        getPhone(1, 'phone2');
+        getPhone(2, 'phone3');
 
         $scope.userEdited.save(data).then(function(user) {
             $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
