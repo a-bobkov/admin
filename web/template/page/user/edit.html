@@ -9,8 +9,8 @@
 	            <td>
 	                <input class="span-6 required" type="email" name="user_email" ng-model="userEdited.email" maxlength="50" required/>
 					<ul class="error_list" ng-show='formUser.user_email.$invalid'>
-					    <li id='UserEditEmailErrorRequired' ng-show="formUser.user_email.$error.required">Необходимо ввести значение.</li>
-					    <li id='UserEditEmailErrorEmail' ng-show="formUser.user_email.$error.email">Значение должно быть типа: aaa@bbb.cc</li>
+					    <li id='UserEditEmailErrorRequired' ng-show="formUser.user_email.$error.required">Необходимо ввести адрес электронной почты.</li>
+					    <li id='UserEditEmailErrorEmail' ng-show="formUser.user_email.$error.email">Адрес электронной почты должен быть вида: aaa@bbb.cc</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -19,7 +19,7 @@
 	            <td>
 	            	<input type="password" name="user_password" ng-model="userEdited.password" ng-required='!userEdited.id'/>
 					<ul class="error_list" ng-show='formUser.user_password.$invalid'>
-					    <li id='UserEditPasswordErrorRequired' ng-show="formUser.user_password.$error.required">Необходимо ввести значение.</li>
+					    <li id='UserEditPasswordErrorRequired' ng-show="formUser.user_password.$error.required">Необходимо ввести пароль.</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -41,16 +41,22 @@
 	        <tr>
 	            <th><label for="user_status">Статус</label></th>
 	            <td>
-	                <select id="user_status" ng-model='userEdited.status' ng-options='opt.nameMale for opt in userstatuses'>
+	                <select id="user_status" name="user_status" ng-model='userEdited.status' ng-options='opt.nameMale for opt in userstatuses' required>
 	                </select>
+					<ul class="error_list" ng-show='formUser.user_status.$invalid'>
+					    <li id='UserEditStatusErrorRequired' ng-show="formUser.user_status.$error.required">Необходимо выбрать статус.</li>
+					</ul>
 	            </td>
 	        </tr>
 	        <tr>
-	            <th><label for="user_groups_list">Группа</label></th>
+	            <th><label for="user_group">Группа</label></th>
 	            <td>
-		            <select class="form-control" ng-model='userEdited.group' ng-options='opt.description for opt in groups'>
+		            <select class="form-control" name="user_group" ng-model='userEdited.group' ng-options='opt.description for opt in groups' required>
 		                <option value=''></option>
 		            </select>
+					<ul class="error_list" ng-show='formUser.user_group.$invalid'>
+					    <li id='UserEditGroupErrorRequired' ng-show="formUser.user_group.$error.required">Необходимо выбрать группу.</li>
+					</ul>
 	            </td>
 	        </tr>
 	    </table>
@@ -60,11 +66,14 @@
 	    <legend>Тэг автосалона</legend>
 	    <table>
 	        <tr>
-	            <th><label for="user_dealer_manager_id">Тэг</label></th>
+	            <th><label for="user_dealer_manager">Тэг</label></th>
 	            <td>
-	                <select id="user_dealer_manager_id" ng-model='dealerEdited.manager' ng-options='opt.name for opt in managers'>
+	                <select class="required" ng-required='userEdited.isDealer()' name="user_dealer_manager" ng-model='dealerEdited.manager' ng-options='opt.name for opt in managers'>
 	                    <option value=''></option>
 	                </select>
+					<ul class="error_list" ng-show='formUser.user_dealer_manager.$invalid'>
+					    <li id='UserEditManagerErrorRequired' ng-show="formUser.user_dealer_manager.$error.required">Необходимо выбрать тэг.</li>
+					</ul>
 	            </td>
 	        </tr>
 	    </table>
@@ -76,17 +85,20 @@
 	        <tr>
 	            <th><label for="user_dealer_company_name">Название компании</label></th>
 	            <td>
-	                <input class="span-8" type="text" id="user_dealer_company_name" ng-model='dealerEdited.companyName'/>
+	                <input class="span-8 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_company_name" ng-model='dealerEdited.companyName'/>
+					<ul class="error_list" ng-show='formUser.user_dealer_company_name.$invalid'>
+					    <li id='UserEditDealerCompanyNameRequired' ng-show="formUser.user_dealer_company_name.$error.required">Необходимо ввести название компании.</li>
+					</ul>
 	           </td>
 	        </tr>
 	        <tr>
-	            <th><label for="user_dealer_city_id">Город</label><span>*</span></th>
+	            <th><label for="user_dealer_city">Город</label><span>*</span></th>
 	            <td>
 	                <select class="required" ng-required='userEdited.isDealer()' name="user_dealer_city" ng-model='dealerEdited.city' ng-options='opt.name for opt in cities'>
 	                    <option value=''></option>
 	                </select>
 					<ul class="error_list" ng-show='formUser.user_dealer_city.$invalid'>
-					    <li id='UserEditCityErrorRequired' ng-show="formUser.user_dealer_city.$error.required">Необходимо ввести значение.</li>
+					    <li id='UserEditCityErrorRequired' ng-show="formUser.user_dealer_city.$error.required">Необходимо выбрать город.</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -108,7 +120,12 @@
 		    </tr>
 		    <tr>
 		        <th><label for="user_dealer_address">Адрес</label></th>
-		        <td><input class="span-18" type="text" id="user_dealer_address" ng-model='dealerEdited.address'/></td>
+		        <td>
+		        	<input class="span-18 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_address" ng-model='dealerEdited.address'/>
+					<ul class="error_list" ng-show='formUser.user_dealer_address.$invalid'>
+					    <li id='UserEditDealerAddressRequired' ng-show="formUser.user_dealer_address.$error.required">Необходимо ввести адрес компании.</li>
+					</ul>
+		        </td>
 		    </tr>
 		    <tr>
 		        <th><label for="user_dealer_fax">Факс</label></th>
@@ -171,11 +188,14 @@
 	  	<legend>Профиль сайта</legend>
 	  		<table>
 	    		<tbody><tr>
-	  				<th><label for="user_sites_list">Сайт</label></th>
+	  				<th><label for="user_site">Сайт</label></th>
 	  				<td>
-	  					<select id="user_sites_list" ng-model='userEdited.site' ng-options='opt.name for opt in sites'>
+	  					<select class="required" ng-required='userEdited.isSite()' name="user_site" ng-model='userEdited.site' ng-options='opt.name for opt in sites'>
 						<option value=''></option>
 						</select>
+						<ul class="error_list" ng-show='formUser.user_site.$invalid'>
+						    <li id='UserEditSiteErrorRequired' ng-show="formUser.user_site.$error.required">Необходимо выбрать сайт.</li>
+						</ul>
 					</td>
 				</tr></tbody>
 			</table>

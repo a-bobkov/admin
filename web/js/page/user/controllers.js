@@ -271,7 +271,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     function makeUserNew() {
         $scope.actionName = "Создание";
         $scope.userEdited = new User;      // данные нового пользователя по умолчанию
-        $scope.userEdited.status = _.find($scope.statuses, {id: 'inactive'});
+        $scope.userEdited.status = _.find($scope.userstatuses, {id: 'inactive'});
         $scope.userEdited.manager = _.find($scope.managers, {id: 0});
         $scope.dealerEdited = new Dealer;
         $scope.userEdited.dealer = $scope.dealerEdited;
