@@ -118,7 +118,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     return DealerSiteStatuses;
 })
 
-.service('userStatusesLoader', function(DealerSiteStatus, DealerSiteStatuses) {
+.service('dealerSiteStatusesLoader', function(DealerSiteStatus, DealerSiteStatuses) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {

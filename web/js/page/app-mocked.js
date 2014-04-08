@@ -1,15 +1,18 @@
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, usersLoader, User, Users) {
+.run(function($httpBackend, usersLoader, User, Users, 
+    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, usersLoader, User, Users, 100);
+    setHttpMock($httpBackend, usersLoader, User, Users, 100, 
+        dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader);
 });
 
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) {
+function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
+    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 1, name: 'admin', description: 'Администратор'},
@@ -372,5 +375,114 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
     var regexUserDelete = /^\/api2\/users\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexUserDelete).respond(function(method, url, data) {
         return processDelete(url, regexUserDelete, users);
+    });
+
+    var dealers = dealersLoader.makeCollection([
+        {id: 1, company_name: 'Дилер-авто'},
+        {id: 2, company_name: 'Дилер-мото'}
+    ]);
+
+    var sites = sitesLoader.makeCollection([
+        {id: 1, name: 'Дром'},
+        {id: 5, name: 'Ауто'},
+        {id: 6, name: 'ИРР'},
+        {id: 13, name: 'Кьюто'},
+        {id: 14, name: 'Авито'}
+    ]);
+
+    var dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
+        { 'id': 'active', 'name': 'Акт' },
+        { 'id': 'blocked', 'name': 'Бло' }
+    ]);
+
+    var dealerSites = dealerSitesLoader.makeCollection(multiplyArr([
+        {
+            id: 1,
+            dealer: {id: 1},
+            site: {id: 1},
+            public_url: 'http://www.drom.ru/1.html',
+            status: 'active'
+        },
+        {
+            id: 2,
+            dealer: {id: 1},
+            site: {id: 5},
+            external_id: '1109238',
+            public_url: 'http://www.auto.mail.ru/1109238.html',
+            status: 'active'
+        },
+        {
+            id: 3,
+            dealer: {id: 1},
+            site: {id: 13},
+            external_id: '1109',
+            status: 'blocked'
+        },
+        {
+            id: 4,
+            dealer: {id: 1},
+            site: {id: 14},
+            status: 'active'
+        },
+        {
+            id: 5,
+            dealer: {id: 2},
+            site: {id: 1},
+            public_url: 'http://www.drom.ru/2.html',
+            status: 'active'
+        },
+        {
+            id: 6,
+            dealer: {id: 2},
+            site: {id: 5},
+            external_id: '11983248',
+            public_url: 'http://www.auto.mail.ru/11983248.html',
+            status: 'blocked'
+        },
+        {
+            id: 7,
+            dealer: {id: 2},
+            site: {id: 13},
+            external_id: '1110',
+            status: 'active'
+        },
+        {
+            id: 8,
+            dealer: {id: 2},
+            site: {id: 14},
+            status: 'blocked'
+        },
+        {
+            id: 9,
+            dealer: {id: 1},
+            site: {id: 6},
+            external_id: '119832',
+            public_url: 'http://www.irr.ru/pages/119832.html',
+            status: 'active'
+        }
+    ], multiplyUsersCoef), null, {dealerSiteStatuses: dealerSiteStatuses, dealers: dealers, sites: sites});
+
+    var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
+    });
+    $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
+        return processPostQuery (url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
+    });
+
+    var regexDealesQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealesQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexDealesQuery, dealers.getItems(), 'dealers', Dealers);
+    });
+    $httpBackend.whenPOST(regexDealesQuery).respond(function(method, url, data) {
+        return processPostQuery (url, regexDealesQuery, data, dealers, 'dealers', Dealers);
+    });
+
+    var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexSitesQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
+    });
+    $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
+        return processPostQuery (url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 };

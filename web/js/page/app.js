@@ -1,5 +1,5 @@
 'use strict';
-angular.module('RootApp', ['UsersApp'])
+angular.module('RootApp', ['UsersApp', 'DealerSiteApp'])
 
 .config(function(ApiProvider){  // $dialogProvider,
 //    $dialogProvider.options({modalFade: true});
