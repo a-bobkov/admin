@@ -2,17 +2,20 @@
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, usersLoader, User, Users, 
-    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader) {
+    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
+    DealerSites, Dealers, Sites) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
-        dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader);
+        dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
+        DealerSites, Dealers, Sites);
 });
 
 /**
  * мини-сервер http для комплексных тестов
  */
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
-    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader) {
+    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
+    DealerSites, Dealers, Sites) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 1, name: 'admin', description: 'Администратор'},
@@ -378,8 +381,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     });
 
     var dealers = dealersLoader.makeCollection([
-        {id: 1, company_name: 'Дилер-авто'},
-        {id: 2, company_name: 'Дилер-мото'}
+        {id: 1, companyName: 'Дилер-авто'},
+        {id: 2, companyName: 'Дилер-мото'}
     ]);
 
     var sites = sitesLoader.makeCollection([
@@ -467,7 +470,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         return processQueryUrl(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
     });
     $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processPostQuery (url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
+        return processPostQuery(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
     });
 
     var regexDealesQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
@@ -475,7 +478,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         return processQueryUrl(url, regexDealesQuery, dealers.getItems(), 'dealers', Dealers);
     });
     $httpBackend.whenPOST(regexDealesQuery).respond(function(method, url, data) {
-        return processPostQuery (url, regexDealesQuery, data, dealers, 'dealers', Dealers);
+        return processPostQuery(url, regexDealesQuery, data, dealers, 'dealers', Dealers);
     });
 
     var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
@@ -483,6 +486,6 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         return processQueryUrl(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
     });
     $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
-        return processPostQuery (url, regexSitesQuery, data, sites, 'sites', Sites);
+        return processPostQuery(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 };

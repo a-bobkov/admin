@@ -27,7 +27,7 @@ angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal
     return Sites;
 })
 
-.service('sitesLoader', function(Site, Sites) {
+.service('sitesLoader', function(siteApi, Site, Sites) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {

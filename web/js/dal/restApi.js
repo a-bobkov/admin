@@ -12,7 +12,7 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
      */
     var RestApiConstructor = function (collectionName, entityName) {
 
-        var url = '/' + collectionName;
+        var url = '/' + collectionName.toLowerCase();
 
         this._getResponseHandler = function (sectionName, id) {
             return function(response) {

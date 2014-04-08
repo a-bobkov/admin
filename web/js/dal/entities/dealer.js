@@ -66,7 +66,7 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
     return Dealers;
 })
 
-.service('dealersLoader', function(Dealer, Dealers) {
+.service('dealersLoader', function(dealerApi, Dealer, Dealers) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {

@@ -38,6 +38,20 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
 
     _.extend(DealerSite.prototype, Item.prototype);
 
+    DealerSite.prototype.serialize = function() {
+        var itemData = {};
+        _.forEach(this, function(value, key){
+            if (key === 'status') {
+                itemData[key] = value.id;
+            } else if (_.isObject(value)) {
+                itemData[key] = {id: value.id};
+            } else {
+                itemData[key] = value;
+            }
+        });
+        return itemData;
+    };
+
     return DealerSite;
 })
 
@@ -53,7 +67,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
 })
 
 .service('dealerSitesLoader', function(dealerSiteApi, DealerSite, DealerSites, 
-    dealerSiteStatusesLoader, dealersLoader, sitesLoader) {
+    dealerSiteStatusesLoader, dealersLoader, sitesLoader, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {
@@ -71,23 +85,26 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     this.loadItems = function(queryParams) {
         var self = this;
         return dealerSiteApi.query(queryParams).then(function(dealerSitesData) {
-            var dealerIds = _.pluck(_.pluck(dealerSitesData, 'dealer'), 'id');
+            var dealerIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'dealer'), 'id');
             var dealerQueryParams = {
-                    fields: ['dealer_list_name'],
                     filters: [
                         { type: 'in', fields: ['id'], value: dealerIds }
                     ]
                 };
             ;
-            var siteIds = _.pluck(_.pluck(dealerSitesData, 'site'), 'id');
+            var siteIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'site'), 'id');
             var siteQueryParams = {
                     filters: [
                         { type: 'in', fields: ['id'], value: siteIds }
                     ]
                 };
             return $q.all({
-                dealers: dealersLoader.loadItems(dealerQueryParams),
-                sites: sitesLoader.loadItems(siteQueryParams)
+                dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
+                    return respond.dealers;
+                }),
+                sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
+                    return respond.sites;
+                })
             }).then(function(directories) {
                 directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
                     { 'id': 'active', 'name': 'Акт' },

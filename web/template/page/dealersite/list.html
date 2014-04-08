@@ -1,0 +1,85 @@
+<h1>Список разрешений на экспорт</h1>
+
+<div class="span-6">
+    <h3 id="DealerSiteListNumberDealerSites">Количество записей: {{totalItems}}</h3>
+</div>
+
+<div class="append-bottom">
+    <input id='DealerSiteListAddDealerSiteUp' type="submit" value="Добавить запись" ng-click='clickNewDealerSite()'/>
+</div>
+
+<div class="span-17">
+    <div class="notice" ng-show='savedDealerSiteListNotice'>{{savedDealerSiteListNotice}}</div>
+    <table class="list">
+        <thead>
+            <tr>
+				<th ng-repeat='column in sortableColumns' id="DealerSiteListTableHeader" ng-class='{"active": sorting.column === column.id}'>
+            		<a ng-click='changeSorting(column.id)' id="DealerSiteListTableHeaderRef">{{column.name}}</a><span id="DealerSiteListTableHeaderDir">{{sortingMark(column.id)}}</span>
+                </th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="DealerSiteListTable">
+            <tr ng-repeat='dealerSite in dealerSites' ng-class='{"uneditableRow": dealerSite.status !== "active"}'>
+                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.id}}</a></td>
+                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.dealer.id}}</a></td>
+                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.dealer.company_name}}</a></td>
+                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.site.name}}</a></td>
+                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.external_id}}</a></td>
+                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.public_url}}</a></td>
+                <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.status.name}}</a></td>
+                <td>
+                    <ul class="actions">
+                        <li class="edit"><a ng-click='editDealerSite(dealerSite)'>изменить</a></li>
+                        <li class="delete"><a ng-click='removeDealerSite(dealerSite)'>удалить</a></li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div pagination on-select-page='onSelectPage(page)' total-items="totalItems" page="paging.currentPage" items-per-page="paging.itemsPerPage" max-size='maxSizePaging' boundary-links="true"></div>
+    <div class="append-bottom">
+        <input id='DealerSiteListAddDealerSiteDown' type="submit" value="Добавить запись" ng-click='clickNewDealerSite()'/>
+    </div>
+</div>
+<fieldset class="span-6 last">
+    <legend>Фильтр</legend>
+    <table>
+        <tfoot>
+            <tr>
+                <td>
+                    <ul class="actions">
+                        <li class="list">
+                            <a ng-click='setPatternsDefault()' id='DealerSiteListFilterSetDefault'>Сбросить</a>
+                        </li>
+                    </ul>
+                </td>
+                <td><input type="submit" value="Фильтровать"/></td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <th><label for="sf_guard_dealerSite_filters_dealer">Салоны</label></th>
+                <td>
+                    <div id="sf_guard_dealerSite_filters_dealer" ng-model="patterns.dealers" ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="sf_guard_dealerSite_filters_site">Cайты</label></th>
+                <td>
+                    <div id="sf_guard_dealerSite_filters_site" ng-model="patterns.sites" ui-mcombo-choices="sites" ui-mcombo-name="'name'">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="sf_guard_dealerSite_filters_status">Статус</label></th>
+                <td>
+                    <select ng-model='patterns.status' ng-options='opt.name for opt in dealerSiteStatuses' id='sf_guard_dealerSite_filters_status' >
+                        <option value='' selected="selected"></option>
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>
