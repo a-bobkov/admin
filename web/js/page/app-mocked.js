@@ -126,11 +126,70 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         }
     }
 
-    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
+    function filterItem(item, filter) {
 
-    var processUserQueryUrl = function(url, arr) {
+        if (!filter.value) {
+            return true;
+        }
 
-        var search = url.replace(regexUserQuery, '$1');
+        var itemValues = _.invoke(filter.fields, function() {
+            var value = getDeepValue(item, this.split('.'));
+            if (_.isObject(value) && value.id) {
+                return String(value.id);
+            } else {
+                return String(value);
+            }
+        })
+
+        if (filter.type === 'equal') {
+            return _.contains(itemValues, String(filter.value));
+        } else if (filter.type === 'in') {
+            return _.any(filter.value, function(value) {
+                return _.contains(itemValues, String(value));
+            });
+        } else if (filter.type === 'contain') {
+            return _.any(itemValues, function(value) {
+                return (value.indexOf(String(filter.value)) !== -1);
+            });
+        }
+
+        return true;
+    }
+
+    function filterArr(arr, filters) {
+        return _.filter(arr, function(item) {
+            return _.every(filters, function(filter) {
+                return filterItem(item, filter);
+            });
+        })
+    }
+
+    function setDeepValue(item, field, value) {
+        var prop = field.shift();
+        if (field.length) {
+            if (!_.has(item, prop)) {
+                item[prop] = {};
+            }
+            setDeepValue(item[prop], field, value);
+        } else {
+            item[prop] = value;
+        }
+    }
+
+    var fieldArr = function(arr, fields) {
+        return _.map(arr, function(item) {
+            var newItem = {};
+            _.forEach(fields, function(field) {
+                var value = getDeepValue(item, field.split('.'));
+                if (value) setDeepValue(newItem, field.split('.'), value);
+            });
+            return newItem;
+        });
+    }
+
+    var processQueryUrl = function(url, regex, arr, collectionName, collectionConstructor) {
+
+        var search = url.replace(regex, '$1');
         var pairs = search.split('&');
         var params = {};
         _.forEach(pairs, function(value) {
@@ -152,7 +211,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         }
         var paged_arr = sorted_arr.slice(per_page * (page - 1), per_page * page);
 
-        return [200, {
+        var respond = [200, {
             status: 'success',
             data: {
                 params: {
@@ -167,91 +226,37 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
                         total:      arr.length
                     },
                     fields: []
-                },
-                users: (new Users (paged_arr)).serialize()
+                }
             }
         }];
+        respond[1].data[collectionName] = (new collectionConstructor(paged_arr)).serialize();
+
+        return respond;
     }
 
-    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
-        return processUserQueryUrl(url, users.getItems());
-    });
-
-    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
-
-        var filterItem = function(item, filter) {
-
-            if (!filter.value) {
-                return true;
-            }
-
-            var itemValues = _.invoke(filter.fields, function() {
-                var value = getDeepValue(item, this.split('.'));
-                if (_.isObject(value) && value.id) {
-                    return String(value.id);
-                } else {
-                    return String(value);
-                }
-            })
-
-            if (filter.type === 'equal') {
-                return _.contains(itemValues, String(filter.value));
-            } else if (filter.type === 'in') {
-                return _.any(filter.value, function(value) {
-                    return _.contains(itemValues, String(value));
-                });
-            } else if (filter.type === 'contain') {
-                return _.any(itemValues, function(value) {
-                    return (value.indexOf(String(filter.value)) !== -1);
-                });
-            }
-
-            return true;
-        }
-
-        var filterArr = function(arr, filters) {
-            return _.filter(arr, function(item) {
-                return _.every(filters, function(filter) {
-                    return filterItem(item, filter);
-                });
-            })
-        }
-
-        function setDeepValue(item, field, value) {
-            var prop = field.shift();
-            if (field.length) {
-                if (!_.has(item, prop)) {
-                    item[prop] = {};
-                }
-                setDeepValue(item[prop], field, value);
-            } else {
-                item[prop] = value;
-            }
-        }
-
-        var fieldArr = function(arr, fields) {
-            return _.map(arr, function(item) {
-                var newItem = {};
-                _.forEach(fields, function(field) {
-                    var value = getDeepValue(item, field.split('.'));
-                    if (value) setDeepValue(newItem, field.split('.'), value);
-                });
-                return newItem;
-            });
-        }
-
+    var processPostQuery = function(url, regex, data, collection, collectionName, collectionConstructor) {
         var filters = angular.fromJson(data).filters;
         var fields = angular.fromJson(data).fields;
 
-        var filtered_arr = filterArr(users.getItems(), filters);
-        var respond = processUserQueryUrl(url, filtered_arr);
+        var filtered_arr = filterArr(collection.getItems(), filters);
+        var respond = processQueryUrl(url, regex, filtered_arr, collectionName, collectionConstructor);
         respond[1].data.params.filters = filters;
 
         if (_.size(fields)) {
-            respond[1].data.users = fieldArr(respond[1].data.users, fields);
+            respond[1].data[collectionName] = fieldArr(respond[1].data[collectionName], fields);
             respond[1].data.params.fields = fields;
         }
         return respond;
+    }
+
+    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
+
+    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexUserQuery, users.getItems(), 'users', Users);
+    });
+
+    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
+        return processPostQuery (url, regexUserQuery, data, users, 'users', Users);
     });
 
     var regexGet = /^\/api2\/users\/(?:([^\/]+))$/;
