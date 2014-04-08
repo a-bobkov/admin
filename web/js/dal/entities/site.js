@@ -41,4 +41,11 @@ angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal
         });
         return new Sites(items, queryParams);
     };
+
+    this.loadItems = function(queryParams) {
+        var self = this;
+        return siteApi.query(queryParams).then(function(respond) {
+            return {sites: self.makeCollection(respond.sites, respond.params)};
+        });
+    };
 });

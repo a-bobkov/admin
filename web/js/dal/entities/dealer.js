@@ -80,6 +80,13 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
         });
         return new Dealers(items, queryParams);
     };
+
+    this.loadItems = function(queryParams) {
+        var self = this;
+        return dealerApi.query(queryParams).then(function(respond) {
+            return {dealers: self.makeCollection(respond.dealers, respond.params)};
+        });
+    };
 })
 
 .service('dealerPhoneHours', function() {
