@@ -20,84 +20,79 @@ angular.module("ui.multicombo", [])
             '    </ul>' +
             '    <div class="mcombo-drop" ng-hide="hide">' +
             '        <ul class="choices">' +
-            '            <li class="item" ng-repeat="choice in filteredChoices()" ng-click="moveToSelected(choice, $event)">' +
+            '            <li class="item" ng-repeat="choice in _choices" ng-click="moveToSelected(choice, $event)">' +
             '                {{choice.id}}: {{choice[_choiceName]}}' +
             '            </li>' +
-            '            <li class="no-results" ng-show="_search && filteredChoices().length == 0">Нет подходящих значений</li>' +
+            '            <li class="no-results" ng-show="_search && _choices.length == 0">Нет подходящих значений</li>' +
             '        </ul>' +
             '    </div>' +
             '</div>',
         scope: {
-            _choices: '=uiMcomboChoices',
+            _choicesLoader: '=uiMcomboLoader',
             _selected: '=ngModel',
             _choiceName: '=uiMcomboName'
         },
         controller: ['$scope', '$filter', function($scope, $filter) {
-                $scope._searchElem = null;
+            $scope._searchElem = null;
+            if (_.isArray($scope._selected)) {
+                $scope._selectedChoices = $scope._selected;
+            } else if ($scope._selected) {
+                $scope._selectedChoices = [$scope._selected];
+            } else {
+                $scope._selectedChoices = [];
+            }
+            $scope.hide = !_.isArray($scope._selected) && $scope._selected;
+            $scope._search = '';
+
+            $scope.moveToSelected = function(choice, $event) {
+                $scope._selectedChoices.push(choice);
                 if (_.isArray($scope._selected)) {
-                    $scope._selectedChoices = $scope._selected;
-                } else if ($scope._selected) {
-                    $scope._selectedChoices = [$scope._selected];
+                    $scope._selected = $scope._selectedChoices;
                 } else {
-                    $scope._selectedChoices = [];
+                    $scope._selected = $scope._selectedChoices[0];
                 }
                 $scope.hide = !_.isArray($scope._selected) && $scope._selected;
 
-                var filterItem = function(item, pattern) {
-                    return !(pattern
-                        && (String(item.id).indexOf(pattern) === -1)
-                        && ((!item[$scope._choiceName]) || (item[$scope._choiceName].toLowerCase().indexOf(pattern) === -1)));
-                };
+                $scope._searchElem.focus();
 
-                var filterSpace = function(item, pattern) {
-                    var arr = pattern.split(' ');
-                    for (var i = arr.length; i--; ) {
-                        if (!filterItem(item, arr[i])) {
-                            return false;
-                        }
-                    }
-                    return true;
-                };
+                // do not 'close' on choice click
+                $event.preventDefault();
+                $event.stopPropagation();
+            };
 
-                var filterSearch = function(item) {
-                    return (!$scope._search || filterSpace(item, $scope._search.toLowerCase()));
+            $scope.removeFromSelected = function(choice) {
+                $scope._selectedChoices.splice($scope._selectedChoices.indexOf(choice), 1);
+                if (_.isArray($scope._selected)) {
+                    $scope._selected = $scope._selectedChoices;
+                } else {
+                    $scope._selected = $scope._selectedChoices[0];
                 }
+                $scope.hide = !_.isArray($scope._selected) && $scope._selected;
 
-                $scope.filteredChoices = function() {
-                    var filteredSearch = $filter('filter')($scope._choices, filterSearch);
-                    var filtered = _.difference(filteredSearch, $scope._selectedChoices);
-                    return $filter('orderBy')(filtered, 'id');
-                };
+                $scope._searchElem.focus();
+            };
 
-                $scope.moveToSelected = function(choice, $event) {
-                    $scope._selectedChoices.push(choice);
-                    if (_.isArray($scope._selected)) {
-                        $scope._selected = $scope._selectedChoices;
-                    } else {
-                        $scope._selected = $scope._selectedChoices[0];
+            $scope.onFilterChange = function(newValue, oldValue) {
+                var filters = _.invoke($scope._search.split(' '), function() {
+                    return { type: 'contain', fields: ['id', $scope._choiceName], value: this };
+                });
+                var queryParams = {
+                    filters: filters,
+                    pager: {
+                        per_page: 10
                     }
-                    $scope.hide = !_.isArray($scope._selected) && $scope._selected;
-
-                    $scope._searchElem.focus();
-
-                    // do not 'close' on choice click
-                    $event.preventDefault();
-                    $event.stopPropagation();
                 };
-
-                $scope.removeFromSelected = function(choice) {
-                    $scope._selectedChoices.splice($scope._selectedChoices.indexOf(choice), 1);
-                    if (_.isArray($scope._selected)) {
-                        $scope._selected = $scope._selectedChoices;
-                    } else {
-                        $scope._selected = $scope._selectedChoices[0];
-                    }
-                    $scope.hide = !_.isArray($scope._selected) && $scope._selected;
-
-                    $scope._searchElem.focus();
-                };
+                $scope._choicesLoader.loadItems(queryParams).then(function(respond) {
+                    $scope._choices = respond[_.keys(respond)[0]].items;
+                    _.remove($scope._choices, function(item) {
+                        return !!_.find($scope._selectedChoices, {id: item.id});
+                    });
+                });
             }
-        ],
+
+            $scope.$watch('_search', $scope.onFilterChange);
+
+        }],
         link: function(scope, element, attrs) {
             var selUl = element.children().eq(0);
             var selItems = selUl.children();

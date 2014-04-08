@@ -52,6 +52,25 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
         return itemData;
     };
 
+    DealerSite.prototype.save = function(directories) {
+        if (this.id) {
+            return dealerSiteApi.update(this.serialize()).then(function(respond) {
+                return new DealerSite(respond.dealerSite, directories);
+            });
+        } else {
+            return dealerSiteApi.create(this.serialize()).then(function(respond) {
+                return new DealerSite(respond.dealerSite, directories);
+            });
+        }
+    };
+
+    DealerSite.prototype.remove = function() {
+        if (this.id) {
+            return dealerSiteApi.remove(this.id);
+        }
+        throw new CollectionError('Попытка удалить элемент без id');
+    };
+
     return DealerSite;
 })
 
@@ -85,19 +104,32 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     this.loadItems = function(queryParams) {
         var self = this;
         return dealerSiteApi.query(queryParams).then(function(dealerSitesData) {
-            var dealerIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'dealer'), 'id');
+            function getFilterFieldsValue(filters, fields) {
+                var filter = _.find(filters, {fields: fields});
+                if (filter) {
+                    return filter.value;
+                }
+            }
+
+            var dealerIds = getFilterFieldsValue(queryParams.filters, ['dealer'])
+            if (_.isEmpty(dealerIds)) {
+                dealerIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'dealer'), 'id');
+            }
             var dealerQueryParams = {
-                    filters: [
-                        { type: 'in', fields: ['id'], value: dealerIds }
-                    ]
-                };
-            ;
-            var siteIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'site'), 'id');
+                filters: [
+                    { type: 'in', fields: ['id'], value: dealerIds }
+                ]
+            };
+
+            var siteIds = getFilterFieldsValue(queryParams.filters, ['site'])
+            if (_.isEmpty(siteIds)) {
+                siteIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'site'), 'id');
+            }
             var siteQueryParams = {
-                    filters: [
-                        { type: 'in', fields: ['id'], value: siteIds }
-                    ]
-                };
+                filters: [
+                    { type: 'in', fields: ['id'], value: siteIds }
+                ]
+            };
             return $q.all({
                 dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
                     return respond.dealers;

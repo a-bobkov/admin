@@ -156,7 +156,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             });
         } else if (filter.type === 'contain') {
             return _.any(itemValues, function(value) {
-                return (value.indexOf(String(filter.value)) !== -1);
+                return (value.toLowerCase().indexOf(String(filter.value).toLowerCase()) !== -1);
             });
         }
 
@@ -390,7 +390,17 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         {id: 5, name: 'Ауто'},
         {id: 6, name: 'ИРР'},
         {id: 13, name: 'Кьюто'},
-        {id: 14, name: 'Авито'}
+        {id: 14, name: 'Авито'},
+        {id: 21, name: 'Дром'},
+        {id: 25, name: 'Ауто'},
+        {id: 26, name: 'ИРР'},
+        {id: 33, name: 'Кьюто'},
+        {id: 34, name: 'Авито'},
+        {id: 41, name: 'Дром'},
+        {id: 45, name: 'Ауто'},
+        {id: 46, name: 'ИРР'},
+        {id: 53, name: 'Кьюто'},
+        {id: 54, name: 'Авито'}
     ]);
 
     var dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([

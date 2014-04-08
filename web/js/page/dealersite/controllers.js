@@ -65,15 +65,27 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             }
         }
     })
+    .when('/dealersites/:id/edit', {
+        templateUrl: 'template/page/dealersite/edit.html',
+        controller: 'DealerSiteEditCtrl',
+        resolve: {
+            data: function(dealerSitesLoader, $location) {
+                var id = parseInt($location.$$path.replace(/^\/dealersites\/(?:([^\/]+))\/edit$/,'$1'));
+                return dealerSitesLoader.loadItem(id);
+            }
+        }
+    })
     .otherwise({
         redirectTo: '/dealersitelist'
     });
 }])
 
-.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, DealerSite) {
+.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, DealerSite, dealersLoader, sitesLoader) {
     _.forOwn(data, function(collection, key) {
         $scope[key] = collection.getItems();
     });
+    $scope.dealersLoader = dealersLoader;
+    $scope.sitesLoader = sitesLoader;
 
     if ($rootScope.savedDealerSiteListNotice) {
         $scope.savedDealerSiteListNotice = $rootScope.savedDealerSiteListNotice;
@@ -223,7 +235,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             var dealerSiteEdited = new DealerSite;
             angular.extend(dealerSiteEdited, dealerSite);
             dealerSiteEdited.status = newStatus;
-            dealerSites.save(dealerSiteEdited).then(function(dealerSite) {
+            dealerSiteEdited.save().then(function() {
                 $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
             });
         }
@@ -237,12 +249,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         noticeMessage = 'Удалена регистрация';
         var dealerSiteInfo = ' салона "' + dealerSite.dealer.company_name + '" на сайте "' + dealerSite.site.name + '"';
         if (confirm(confirmMessage + dealerSiteInfo + '?')) {
-            dealerSites.remove(dealerSite.id).then(function() {
-                dealerSites.getAll().then(function(dealerSitesArray) {
-                    $scope.dealerSites = dealerSitesArray;
-                    $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
-                    $scope.onPatternChange();
-                });
+            dealerSite.remove().then(function() {
+                // dealerSites.getAll().then(function(dealerSitesArray) {
+                //     $scope.dealerSites = dealerSitesArray;
+                //     $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
+                //     $scope.onPatternChange();
+                // });
             });
         }
     };

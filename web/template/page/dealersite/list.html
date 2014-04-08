@@ -61,14 +61,14 @@
             <tr>
                 <th><label for="sf_guard_dealerSite_filters_dealer">Салоны</label></th>
                 <td>
-                    <div id="sf_guard_dealerSite_filters_dealer" ng-model="patterns.dealers" ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'">
+                    <div id="sf_guard_dealerSite_filters_dealer" ng-model="patterns.dealers" ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader">
                     </div>
                 </td>
             </tr>
             <tr>
                 <th><label for="sf_guard_dealerSite_filters_site">Cайты</label></th>
                 <td>
-                    <div id="sf_guard_dealerSite_filters_site" ng-model="patterns.sites" ui-mcombo-choices="sites" ui-mcombo-name="'name'">
+                    <div id="sf_guard_dealerSite_filters_site" ng-model="patterns.sites" ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader">
                     </div>
                 </td>
             </tr>
