@@ -1,16 +1,53 @@
 'use strict';
 
 describe('MaxPoster frontend app', function() {
+    // выбирает в селекте значение по порядковому номеру, начиная с 0
     var setSelect = function (elem, optIndex) {
         return elem.findElements(by.tagName('option')).then(function(options) {
             options[optIndex].click();
         });
     };
 
+    var mapText = function(q) {
+        return q.map(function(elm) {
+            return elm.getText();
+        })
+    };
+
     describe('Список пользователей', function() {
         beforeEach(function() {
-            browser.get('users.html');
+            browser.get('admin.html');
             expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
+
+            this.addMatchers({
+                toBeSortedArrayOf: function(params) {
+                    // var params = 'AscendingNumbers';
+                    var convert = function(arg) {
+                        if (params.match('Numbers')) {
+                            return parseInt(arg, 10);
+                        } else if (params.match('Dates')) {
+                            return Date.parse(arg);
+                        } else {
+                            return arg;
+                        }
+                    }
+                    var compare = function(a, b) {
+                        if (params.match('Ascending')) {
+                            return (a > b);
+                        } else {
+                            return (a < b);
+                        }
+                    }
+                    if (this.actual.length > 1) {
+                        for (var i = this.actual.length; --i; ) {
+                            if (compare(convert(this.actual[i - 1]), convert(this.actual[i]))) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+            });
         });
 
         it('показывает количество пользователей', function() {
@@ -18,12 +55,12 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('переходит по верхней кнопке добавления пользователя', function() {
-            element.all(by.id('UserListAddUser')).get(0).click();
+            element.all(by.id('UserListAddUserUp')).get(0).click();
             expect(browser.getCurrentUrl()).toMatch('#\/usernew');
         });
 
         it('переходит по нижней кнопке добавления пользователя', function() {
-            element.all(by.id('UserListAddUser')).get(1).click();
+            element.all(by.id('UserListAddUserDown')).get(0).click();
             expect(browser.getCurrentUrl()).toMatch('#\/usernew');
         });
 
@@ -71,23 +108,23 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('показывает реквизиты пользователя', function() {
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('1');
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.email')).getText()).toBe('0a-bobkov@ab.com');
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.lastLogin')).getText()).toBe('01.01.12');
+            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
+            expect(element(by.repeater('user in users').row(0).column('user.email')).getText()).toBe('0a-bobkov@ab.com');
+            expect(element(by.repeater('user in users').row(0).column('user.lastLogin')).getText()).toBe('01.01.12');
         });
 
         it('переходит к редактированию пользователя по ссылке в id', function() {
-            element(by.repeater('user in pagedUsers').row(0).column('user.id')).click();
+            element(by.repeater('user in users').row(0).column('user.id')).click();
             expect(browser.getCurrentUrl()).toMatch('#\/users\/1\/edit');
         });
 
         it('переходит к редактированию пользователя по ссылке в email', function() {
-            element(by.repeater('user in pagedUsers').row(0).column('user.email')).click();
+            element(by.repeater('user in users').row(0).column('user.email')).click();
             expect(browser.getCurrentUrl()).toMatch('#\/users\/1\/edit');
         });
 
         it('показывает 25 пользователей', function() {
-            expect(element.all(by.repeater('user in pagedUsers')).count()).toBe(25);
+            expect(element.all(by.repeater('user in users')).count()).toBe(25);
         });
 
         it('показывает постраничку', function() {
@@ -100,104 +137,94 @@ describe('MaxPoster frontend app', function() {
 
         it('переходит по страничкам', function() {
             element.all(by.id('paginationPages')).get(2).click();
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('76');
+            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
 
             element(by.id('paginationPrev')).click();
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('39');
+            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('39');
 
             element(by.id('paginationNext')).click();
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('76');
+            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
 
             element(by.id('paginationFirst')).click();
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('1');
+            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
 
             element(by.id('paginationLast')).click();
-            expect(element(by.repeater('user in pagedUsers').row(0).column('user.id')).getText()).toBe('1464');
+            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1464');
         });
 
         it('накладывает фильтры и инициализирует фильтры', function() {
-            element(by.model('patterns.complex')).sendKeys('1 2, 5 демо');
+            element(by.model('patterns.complex')).sendKeys('1 2');
             setSelect(element(by.select('patterns.status')), 0);
             setSelect(element(by.select('patterns.manager')), 1);
-            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 128$/);
+            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 72$/);
 
             element(by.id('UserListFilterSetDefault')).click();
             expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
         });
 
-        it('сортирует по коду, емэйлу, дате', function() {
-            this.addMatchers({
-                toBeSortedArrayOf: function(params) {
-                    // var params = 'AscendingNumbers';
-                    var convert = function(arg) {
-                        if (params.match('Numbers')) {
-                            return parseInt(arg, 10);
-                        } else if (params.match('Dates')) {
-                            return Date.parse(arg);
-                        } else {
-                            return arg;
-                        }
-                    }
-                    var compare = function(a, b) {
-                        if (params.match('Ascending')) {
-                            return (a > b);
-                        } else {
-                            return (a < b);
-                        }
-                    }
-                    if (this.actual.length > 1) {
-                        for (var i = this.actual.length; --i; ) {
-                            if (compare(convert(this.actual[i - 1]), convert(this.actual[i]))) {
-                                return false;
-                            }
-                        }
-                    }
-                    return true;
-                }
-            });
-
-            var mapText = function(q) {
-                return q.map(function(elm) {
-                    return elm.getText();
-                })
-            };
-
+        it('сортирует по возрастанию кода', function() {
             element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                mapText(element.all(by.repeater('user in users').column('user.id'))).then(function(data) {
                     expect(data).toBeSortedArrayOf('AscendingNumbers');
                 });
+            });
+        });
 
+        it('сортирует по убыванию кода', function() {
+            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
                 arr[0].click();
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.id'))).then(function(data) {
+                mapText(element.all(by.repeater('user in users').column('user.id'))).then(function(data) {
                     expect(data).toBeSortedArrayOf('DescendingNumbers');
                 });
+            });
+        });
 
+        it('сортирует по возрастанию емэйла', function() {
+            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
                 arr[1].click();
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
+                mapText(element.all(by.repeater('user in users').column('user.email'))).then(function(data) {
                     expect(data).toBeSortedArrayOf('AscendingStrings');
                 });
+            });
+        });
 
+        it('сортирует по убыванию емэйла', function() {
+            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
                 arr[1].click();
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.email'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('DescendingStrings');
+                element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
+                    arr[1].click();
+                    mapText(element.all(by.repeater('user in users').column('user.email'))).then(function(data) {
+                        expect(data).toBeSortedArrayOf('DescendingStrings');
+                    });
                 });
+            });
+        });
 
+        it('сортирует по возрастанию даты', function() {
+            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
                 arr[2].click();
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.lastLogin'))).then(function(data) {
+                mapText(element.all(by.repeater('user in users').column('user.lastLogin'))).then(function(data) {
                     expect(data).toBeSortedArrayOf('AscendingDates');
                 });
+            });
+        });
 
+        it('сортирует по убыванию даты', function() {
+            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
                 arr[2].click();
-                mapText(element.all(by.repeater('user in pagedUsers').column('user.lastLogin'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('DescendingDates');
+                element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
+                    arr[2].click();
+                    mapText(element.all(by.repeater('user in users').column('user.lastLogin'))).then(function(data) {
+                        expect(data).toBeSortedArrayOf('DescendingDates');
+                    });
                 });
-            })
+            });
         });
     });
 
     describe('Редактирование пользователя', function() {
         beforeEach(function() {
-            browser.get('users.html#/users/5/edit');
+            browser.get('admin.html#/users/5/edit');
             expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
         });
 
@@ -341,7 +368,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит список телефонов', function() {
-            expect(element.all(by.repeater('phone in dealerEdited.phones')).count()).toBe(3);
+            expect(element.all(by.repeater('phone in dealerEditedPhones')).count()).toBe(3);
         });
 
         it('показывает значение телефона', function() {
@@ -414,7 +441,8 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит значение сайта', function() {
-            setSelect(element(by.select('userEdited.group')), 1);    // иначе ниже выводит пустое значение
+            setSelect(element(by.select('userEdited.group')), 3);
+            setSelect(element(by.select('userEdited.site')), 1);
             expect(element(by.selectedOption('userEdited.site')).getText()).toBeTruthy();
         });
 
@@ -426,7 +454,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('если группа - сайт, то выводит данные сайта, а данные дилера - нет', function() {
-            setSelect(element(by.select('userEdited.group')), 1);
+            setSelect(element(by.select('userEdited.group')), 3);
             expect(element(by.id('user_sites_list')).isDisplayed()).toBeTruthy();
             expect(element(by.id('user_dealer_manager_id')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_company_name')).isDisplayed()).toBeFalsy();
@@ -438,7 +466,7 @@ describe('MaxPoster frontend app', function() {
             expect(element(by.id('user_dealer_manager_id')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_company_name')).isDisplayed()).toBeFalsy();
 
-            setSelect(element(by.select('userEdited.group')), 3);
+            setSelect(element(by.select('userEdited.group')), 1);
             expect(element(by.id('user_sites_list')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_manager_id')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_company_name')).isDisplayed()).toBeFalsy();
@@ -458,7 +486,7 @@ describe('MaxPoster frontend app', function() {
 
     describe('Создание пользователя', function() {
         beforeEach(function() {
-            browser.get('users.html#/usernew');
+            browser.get('admin.html#/usernew');
             expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
         });
 
@@ -539,7 +567,7 @@ describe('MaxPoster frontend app', function() {
     });
 
     it('разрешает сохранение, если нет видимых ошибок', function() {
-        browser.get('users.html#/users/5/edit');
+        browser.get('admin.html#/users/5/edit');
         var getErrors = function() {
             return element.all(by.css('.error_list li')).map(function(elem) {
                 return {

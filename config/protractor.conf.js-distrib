@@ -8,9 +8,8 @@ exports.config = {
 
     baseUrl: 'http://localhost:8000/maxposter_frontend/web/',
 
-    // Spec patterns are relative to the current working directly when
-    // protractor is called.
-    specs: ['../test/e2e/**/*.js'],
+    // Spec patterns are relative to the directly with the config file.
+    specs: ['../web/test/e2e/**/*.js'],
 
     // Options to be passed to Jasmine-node.
     jasmineNodeOpts: {
