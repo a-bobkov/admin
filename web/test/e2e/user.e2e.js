@@ -14,6 +14,10 @@ describe('MaxPoster frontend app', function() {
         })
     };
 
+    var regexpEmail = /^[\w-]+@[\w\.-]+$/;
+    var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
+    var regexpUrl = /^http:\/\/[\w\.-]+$/;
+
     if (browser.baseUrl.match(/maxposter.ru/)) {
         var test_maxposter_ru = true;
         browser.driver.get('http://test.maxposter.ru/');
@@ -179,13 +183,23 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('накладывает фильтры и инициализирует фильтры', function() {
-            element(by.model('patterns.complex')).sendKeys('1 2');
-            setSelect(element(by.select('patterns.status')), 0);
-            setSelect(element(by.select('patterns.manager')), 1);
-            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 72$/);
+            if (test_maxposter_ru) {
+                element(by.model('patterns.complex')).sendKeys('1 2');
+                setSelect(element(by.select('patterns.status')), 0);
+                setSelect(element(by.select('patterns.manager')), 1);
+                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 33$/);
 
-            element(by.id('UserListFilterSetDefault')).click();
-            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
+                element(by.id('UserListFilterSetDefault')).click();
+                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 310$/);
+            } else {
+                element(by.model('patterns.complex')).sendKeys('1 2');
+                setSelect(element(by.select('patterns.status')), 0);
+                setSelect(element(by.select('patterns.manager')), 1);
+                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 72$/);
+
+                element(by.id('UserListFilterSetDefault')).click();
+                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
+            }
         });
 
         it('сортирует по возрастанию кода', function() {
@@ -259,7 +273,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит email', function() {
-            expect(element(by.model('userEdited.email')).getAttribute('value')).toMatch(/^[\w-]+@[\w\.-]+$/);
+            expect(element(by.model('userEdited.email')).getAttribute('value')).toMatch(regexpEmail);
         });
 
         it('выводит ошибку, если email пустой', function() {
@@ -374,23 +388,23 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит значение адреса', function() {
-            expect(element(by.model('dealerEdited.address')).getAttribute('value')).toMatch(/^191040/);
+            expect(element(by.model('dealerEdited.address')).getAttribute('value')).toBeTruthy();
         });
 
         it('выводит значение факса', function() {
-            expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toBe('+7(812)232-4123');
+            expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toMatch(regexpPhoneNumber);
         });
 
         it('выводит значение мэйла', function() {
-            expect(element(by.model('dealerEdited.dealer_email')).getAttribute('value')).toBe('demo@demo.ru');
+            expect(element(by.model('dealerEdited.dealer_email')).getAttribute('value')).toMatch(regexpEmail);
         });
 
         it('выводит значение сайта', function() {
-            expect(element(by.model('dealerEdited.site')).getAttribute('value')).toBe('http://www.w3schools.com');
+            expect(element(by.model('dealerEdited.site')).getAttribute('value')).toMatch(regexpUrl);
         });
 
         it('выводит значение контакта', function() {
-            expect(element(by.model('dealerEdited.contactName')).getAttribute('value')).toMatch(/^Аверин/);
+            expect(element(by.model('dealerEdited.contactName')).getAttribute('value')).toBeTruthy();
         });
 
         it('выводит список телефонов', function() {
@@ -398,7 +412,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('показывает значение телефона', function() {
-            expect(element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value')).toBe('+7(812)232-4123');
+            expect(element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value')).toMatch(regexpPhoneNumber);
         });
 
         it('заполняет список часов С', function() {
@@ -457,7 +471,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит информацию о компании', function() {
-            expect(element(by.model('dealerEdited.companyInfo')).getAttribute('value')).toBe('Здесь может быть произвольный текст...');
+            expect(element(by.model('dealerEdited.companyInfo')).getAttribute('value')).toBeTruthy();
         });
 
         it('заполняет список сайтов', function() {
