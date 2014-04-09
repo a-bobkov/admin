@@ -18,10 +18,12 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
                 }
             };
             if (ls.complex) {
-                queryParams.filters.push({
-                    type: 'contain',
-                    fields: ['id', 'email', 'dealer.companyName'],
-                    value: ls.complex
+                queryParams.filters = _.invoke(ls.complex.split(' '), function() {
+                    return {
+                        type: 'contain',
+                        fields: ['id', 'email', 'dealer.companyName'],
+                        value: this
+                    };
                 });
             }
             if (ls.status) {
@@ -156,20 +158,28 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         $location.path('/userlist?');
     };
 
-    function getFilterFieldsValue(filters, fields) {
-        var filter = _.find(filters, {fields: fields});
+    function getFilterFieldsValue(filters, type, fields) {
+        var filter = _.find(filters, {type: type, fields: fields});
         if (filter) {
             return filter.value;
         }
     }
 
+    function getFiltersFieldsValues(filters, type, fields) {
+        var filters = _.filter(filters, {type: type, fields: fields});
+        if (!_.isEmpty(filters)) {
+            return _.pluck(filters, 'value');
+        }
+        return [];
+    }
+
     var params = data.users.getParams();
     $scope.patterns = {
-        complex: getFilterFieldsValue(params.filters, ['id', 'email', 'dealer.companyName']),
-        status: _.invoke(getFilterFieldsValue(params.filters, ['status']), function() {
+        complex: getFiltersFieldsValues(params.filters, 'contain', ['id', 'email', 'dealer.companyName']).join(' '),
+        status: _.invoke(getFilterFieldsValue(params.filters, 'in', ['status']), function() {
                 return _.find($scope.userstatuses, {id: this})
             }),
-        manager: _.find($scope.managers, {id: _.parseInt(getFilterFieldsValue(params.filters, ['dealer.manager']))})
+        manager: _.find($scope.managers, {id: _.parseInt(getFilterFieldsValue(params.filters, 'equal', ['dealer.manager']))})
     };
     $scope.sorting = {
         column: params.order.field,
