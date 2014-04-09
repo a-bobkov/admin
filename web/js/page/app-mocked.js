@@ -59,7 +59,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
                 metro: {id: 10},
                 address: '191040, Лиговский проспект, 150, оф.505',
                 fax: '+7(812)232-4123',
-                dealer_email: 'demo@demo.ru',
+                email: 'demo@demo.ru',
                 site: 'http://www.w3schools.com',
                 contactName: 'Аверин Константин Петрович',
                 phone: '+7(812)232-4123',
