@@ -14,6 +14,15 @@ describe('MaxPoster frontend app', function() {
         })
     };
 
+    if (browser.baseUrl.match(/maxposter.ru/)) {
+        var test_maxposter_ru = true;
+        browser.driver.get('http://test.maxposter.ru/');
+        var emailInput = browser.driver.findElement(by.id('signin_email'));
+        emailInput.sendKeys('protractor@maxposter.ru');
+        var passwordInput = browser.driver.findElement(by.id('signin_password'));
+        passwordInput.sendKeys('protractor\n');
+    }
+
     describe('Список пользователей', function() {
         beforeEach(function() {
             browser.get('admin.html');
@@ -51,7 +60,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('показывает количество пользователей', function() {
-            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
+            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/\d+$/);
         });
 
         it('переходит по верхней кнопке добавления пользователя', function() {
@@ -108,9 +117,9 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('показывает реквизиты пользователя', function() {
-            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
-            expect(element(by.repeater('user in users').row(0).column('user.email')).getText()).toBe('0a-bobkov@ab.com');
-            expect(element(by.repeater('user in users').row(0).column('user.lastLogin')).getText()).toBe('01.01.12');
+            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toMatch(/^\d+$/);
+            expect(element(by.repeater('user in users').row(0).column('user.email')).getText()).toMatch(/^[\w-]+@[\w\.-]+$/);
+            expect(element(by.repeater('user in users').row(0).column('user.lastLogin')).getText()).toMatch(/^\d\d.\d\d.\d\d$/);
         });
 
         it('переходит к редактированию пользователя по ссылке в id', function() {
@@ -136,20 +145,37 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('переходит по страничкам', function() {
-            element.all(by.id('paginationPages')).get(2).click();
-            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
+            if (test_maxposter_ru) {
+                element.all(by.id('paginationPages')).get(2).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('170');
 
-            element(by.id('paginationPrev')).click();
-            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('39');
+                element(by.id('paginationPrev')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('72');
 
-            element(by.id('paginationNext')).click();
-            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
+                element(by.id('paginationNext')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('170');
 
-            element(by.id('paginationFirst')).click();
-            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
+                element(by.id('paginationFirst')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
 
-            element(by.id('paginationLast')).click();
-            expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1464');
+                element(by.id('paginationLast')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('746');
+            } else {
+                element.all(by.id('paginationPages')).get(2).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
+
+                element(by.id('paginationPrev')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('39');
+
+                element(by.id('paginationNext')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
+
+                element(by.id('paginationFirst')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
+
+                element(by.id('paginationLast')).click();
+                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1464');
+            }
         });
 
         it('накладывает фильтры и инициализирует фильтры', function() {
@@ -233,7 +259,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит email', function() {
-            expect(element(by.model('userEdited.email')).getAttribute('value')).toBe('0demo@maxposter.ru');
+            expect(element(by.model('userEdited.email')).getAttribute('value')).toMatch(/^[\w-]+@[\w\.-]+$/);
         });
 
         it('выводит ошибку, если email пустой', function() {
@@ -295,7 +321,7 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит название компании', function() {
-            expect(element(by.model('dealerEdited.companyName')).getAttribute('value')).toBe('Демокомпания');
+            expect(element(by.model('dealerEdited.companyName')).getAttribute('value')).toBeTruthy();
         });
 
         it('заполняет список городов', function() {

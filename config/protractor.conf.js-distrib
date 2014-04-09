@@ -6,7 +6,10 @@ exports.config = {
       'browserName': 'chrome'
     },
 
+    // localhost http-mock testing
     baseUrl: 'http://localhost:8000/maxposter_frontend/web/',
+    // real server testing
+    // baseUrl: 'http://test.maxposter.ru/fend/',
 
     // Spec patterns are relative to the directly with the config file.
     specs: ['../web/test/e2e/**/*.js'],
