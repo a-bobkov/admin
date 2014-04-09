@@ -396,11 +396,11 @@ describe('MaxPoster frontend app', function() {
         });
 
         it('выводит значение мэйла', function() {
-            expect(element(by.model('dealerEdited.dealer_email')).getAttribute('value')).toMatch(regexpEmail);
+            expect(element(by.model('dealerEdited.email')).getAttribute('value')).toMatch(regexpEmail);
         });
 
         it('выводит значение сайта', function() {
-            expect(element(by.model('dealerEdited.site')).getAttribute('value')).toMatch(regexpUrl);
+            expect(element(by.model('dealerEdited.url')).getAttribute('value')).toMatch(regexpUrl);
         });
 
         it('выводит значение контакта', function() {
@@ -516,12 +516,6 @@ describe('MaxPoster frontend app', function() {
             element(by.id('UserEditSaveUser')).click();
             expect(browser.getCurrentUrl()).toMatch('#\/userlist');
         });
-
-        it('после удаления пользователя переходит к списку пользователей', function() {
-            element(by.id('UserEditRemoveUser')).click();
-            browser.switchTo().alert().accept();
-            expect(browser.getCurrentUrl()).toMatch('#\/userlist');
-        });
     });
 
     describe('Создание пользователя', function() {
@@ -552,8 +546,8 @@ describe('MaxPoster frontend app', function() {
             expect(element(by.selectedOption('dealerEdited.metro')).getText()).toBeFalsy();
             expect(element(by.model('dealerEdited.address')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toBeFalsy();
-            expect(element(by.model('dealerEdited.dealer_email')).getAttribute('value')).toBeFalsy();
-            expect(element(by.model('dealerEdited.site')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.email')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('dealerEdited.url')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.contactName')).getAttribute('value')).toBeFalsy();
             expect(element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value')).toBeFalsy();
             expect(element.all(by.model('phone.phoneFrom')).get(0).getText()).toBeFalsy();
@@ -603,6 +597,12 @@ describe('MaxPoster frontend app', function() {
 
             setSelect(element(by.select('dealerEdited.city')), 1);
             expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
+        });
+
+        it('после удаления пользователя переходит к списку пользователей', function() {
+            element(by.id('UserEditRemoveUser')).click();
+            browser.switchTo().alert().accept();
+            expect(browser.getCurrentUrl()).toMatch('#\/userlist');
         });
     });
 
