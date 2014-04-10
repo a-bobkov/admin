@@ -41,7 +41,7 @@ describe('MaxPoster frontend app', function() {
                         } else if (params.match('Dates')) {
                             return Date.parse(arg);
                         } else {
-                            return arg;
+                            return String(arg).toLowerCase();
                         }
                     }
                     var compare = function(a, b) {
@@ -187,7 +187,7 @@ describe('MaxPoster frontend app', function() {
                 element(by.model('patterns.complex')).sendKeys('1 2');
                 setSelect(element(by.select('patterns.status')), 0);
                 setSelect(element(by.select('patterns.manager')), 1);
-                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 33$/);
+                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 47$/);
 
                 element(by.id('UserListFilterSetDefault')).click();
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 310$/);
