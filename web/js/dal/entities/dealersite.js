@@ -2,7 +2,8 @@
 
 angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'max.dal.rest.api',
     'max.dal.entities.dealer',
-    'max.dal.entities.site'
+    'max.dal.entities.site',
+    'max.dal.entities.dealersitelogin'
 ])
 
 .factory('dealerSiteApi', function(RestApi, Api) {

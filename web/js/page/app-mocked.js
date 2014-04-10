@@ -3,11 +3,11 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSites, Dealers, Sites) {
+    DealerSites, Dealers, Sites, dealerSiteLoginsLoader) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-        DealerSites, Dealers, Sites);
+        DealerSites, Dealers, Sites, dealerSiteLoginsLoader);
 });
 
 /**
@@ -15,7 +15,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
  */
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSites, Dealers, Sites) {
+    DealerSites, Dealers, Sites, dealerSiteLoginsLoader) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 1, name: 'admin', description: 'Администратор'},
@@ -475,6 +475,63 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         }
     ], multiplyUsersCoef), null, {dealerSiteStatuses: dealerSiteStatuses, dealers: dealers, sites: sites});
 
+    var dealerSiteLogins = dealerSiteLoginsLoader.makeCollection([
+        {
+            id: 1,
+            dealer: {id: 1},
+            site: {id: 5},
+            type: 'site',
+            login: 'priv1108',
+            password: 'abyrabyr',
+            loginError: true
+        },
+        {
+            id: 2,
+            dealer: {id: 1},
+            site: {id: 14},
+            type: 'site',
+            login: 'priv1108',
+            password: 'abyr1010',
+            loginError: false
+        },
+        {
+            id: 3,
+            dealer: {id: 2},
+            site: {id: 5},
+            type: 'site',
+            login: 'pri29834',
+            password: 'asdfghj',
+            loginError: false
+        },
+        {
+            id: 4,
+            dealer: {id: 2},
+            site: {id: 14},
+            type: 'site',
+            login: 'pri29834',
+            password: 'abyr1110',
+            loginError: false
+        },
+        {
+            id: 5,
+            dealer: {id: 1},
+            site: {id: 6},
+            type: 'site',
+            login: 'as119832',
+            password: 'ab1110as',
+            loginError: false
+        },
+        {
+            id: 6,
+            dealer: {id: 1},
+            site: {id: 6},
+            type: 'ftp',
+            login: 'pr119832',
+            password: 'abyr1110',
+            loginError: true
+        }
+    ], null, {dealers: dealers, sites: sites});
+
     var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
         return processQueryUrl(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
@@ -485,6 +542,18 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
         return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
+    });
+
+    var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexDealerSiteLoginsQuery, dealerSiteLogins.getItems(), 'dealerSiteLogins', DealerSiteLogins);
+    });
+    $httpBackend.whenPOST(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
+        return processPostQuery(url, regexDealerSiteLoginsQuery, data, dealerSiteLogins, 'dealerSiteLogins', DealerSiteLogins);
+    });
+    var regexDealerSiteLoginsGet = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexDealerSiteLoginsGet).respond(function(method, url, data) {
+        return processGet(url, regexDealerSiteLoginsGet, dealerSiteLogins, 'dealerSiteLogin');
     });
 
     var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
