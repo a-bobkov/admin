@@ -492,7 +492,34 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         return processQueryUrl(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
     });
     $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
+
+        var applyFields = function(arr, fields) {
+            return _.map(arr, function(item) {
+                var newItem = {};
+                _.forEach(fields, function(group) {
+                    if (group === 'dealer_list_name') {
+                        newItem.id = item.id;
+                        if (item.companyName) {
+                            newItem.companyName = item.companyName;
+                        }
+                    }
+                });
+                return newItem;
+            });
+        }
+
+        var knownFields = function(fields) {
+            return _.filter(fields, function(group) {
+                return (group === 'dealer_list_name');
+            });
+        }
+
+        var respond = processPostQuery(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
+        var fields = angular.fromJson(data).fields;
+        if (_.size(fields)) {
+            respond[1].data[collectionName] = applyFields(respond[1].data[collectionName], fields);
+            respond[1].data.params.fields = knownFields(fields);
+        }
     });
 
     var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
