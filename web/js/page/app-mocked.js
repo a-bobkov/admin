@@ -164,29 +164,6 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         })
     }
 
-    function setDeepValue(item, field, value) {
-        var prop = field.shift();
-        if (field.length) {
-            if (!_.has(item, prop)) {
-                item[prop] = {};
-            }
-            setDeepValue(item[prop], field, value);
-        } else {
-            item[prop] = value;
-        }
-    }
-
-    var fieldArr = function(arr, fields) {
-        return _.map(arr, function(item) {
-            var newItem = {};
-            _.forEach(fields, function(field) {
-                var value = getDeepValue(item, field.split('.'));
-                if (value) setDeepValue(newItem, field.split('.'), value);
-            });
-            return newItem;
-        });
-    }
-
     var processQueryUrl = function(url, regex, arr, collectionName, collectionConstructor) {
 
         var search = url.replace(regex, '$1');
@@ -236,16 +213,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
 
     var processPostQuery = function(url, regex, data, collection, collectionName, collectionConstructor) {
         var filters = angular.fromJson(data).filters;
-        var fields = angular.fromJson(data).fields;
-
         var filtered_arr = filterArr(collection.getItems(), filters);
         var respond = processQueryUrl(url, regex, filtered_arr, collectionName, collectionConstructor);
         respond[1].data.params.filters = filters;
-
-        if (_.size(fields)) {
-            respond[1].data[collectionName] = fieldArr(respond[1].data[collectionName], fields);
-            respond[1].data.params.fields = fields;
-        }
         return respond;
     }
 
