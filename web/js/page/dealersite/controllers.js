@@ -304,4 +304,40 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         $scope.dealerSiteEdited = new DealerSite;
         $scope.dealerSiteEdited.status = _.find($scope.dealerSiteStatuses, {id: 'blocked'});
     }
+})
+
+.directive('uiDealerSiteUnique', function(dealerSitesLoader){
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+
+            function validateDealerSiteUnique(newValue) {
+                if (newValue.dealer && newValue.site) {
+                    var dealerSitesQueryParams = {
+                        filters: [
+                            { type: 'equal', fields: ['dealer'], value: newValue.dealer.id },
+                            { type: 'equal', fields: ['site'], value: newValue.site.id }
+                        ]
+                    };
+                    dealerSitesLoader.loadItems(dealerSitesQueryParams).then(function(directory) {
+                        var doubleItem = _.find(directory.dealerSites.getItems(), function(dealerSite) {
+                            return (dealerSite.id !== newValue.id);
+                        });
+                        ctrl.$setValidity('unique', doubleItem === undefined);
+                    });
+                } else {
+                    ctrl.$setValidity('unique', true);
+                }
+            }
+
+            scope.$watch(attrs.uiDealerSiteUnique + '.dealer', function () {
+                validateDealerSiteUnique(scope.$eval(attrs.uiDealerSiteUnique));
+            });
+
+            scope.$watch(attrs.uiDealerSiteUnique +'.site', function () {
+                validateDealerSiteUnique(scope.$eval(attrs.uiDealerSiteUnique));
+            });
+        }
+    };
 });
