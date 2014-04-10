@@ -1,0 +1,111 @@
+<h1>{{actionName}} разрешения на экспорт</h1>
+
+<form name="formDealerSite" autocomplete="off" novalidate>
+	<fieldset class="span-24">
+	    <legend>Ключевые поля</legend>
+	    <table>
+	        <tr>
+	            <th><label for="dealerSiteDealer">Салон</label></th>
+	            <td>
+                    <div id="dealerSiteDealer" name="dealerSiteDealer" ng-model='dealerSiteEdited.dealer' ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader" ui-dealer-site-unique='dealerSiteEdited' required>
+                    </div>
+					<ul class="error_list" ng-show='formDealerSite.dealerSiteDealer.$invalid'>
+					    <li id='dealerSiteEditDealerErrorRequired' ng-show="formDealerSite.dealerSiteDealer.$error.required">Необходимо выбрать значение.</li>
+					    <li id='dealerSiteEditDealerErrorUnique' ng-show="formDealerSite.dealerSiteDealer.$error.unique">Комбинация значений салона и сайта должна быть уникальной.</li>
+					</ul>
+	            </td>
+	        </tr>
+	        <tr>
+	            <th><label for="dealerSiteSite">Сайт</label></th>
+	            <td>
+                    <div id="dealerSiteSite" name="dealerSiteSite" ng-model='dealerSiteEdited.site' ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader" required>
+                    </div>
+					<ul class="error_list" ng-show='formDealerSite.dealerSiteSite.$invalid'>
+					    <li id='dealerSiteEditSiteErrorRequired' ng-show="formDealerSite.dealerSiteSite.$error.required">Необходимо выбрать значение.</li>
+					</ul>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+
+	<fieldset class="span-24">
+	    <legend>Атрибуты</legend>
+	    <table>
+	        <tr>
+	            <th><label for="dealerSiteExternalId">Код салона на сайте</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="dealerSiteExternalId" id="dealerSiteExternalId" ng-model='dealerSiteEdited.external_id' ng-required='formConfig[dealerSiteEdited.site.id]["external_id"]'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSiteExternalId.$invalid'>
+					    <li id='dealerSiteExternalIdErrorRequired' ng-show="formDealerSite.dealerSiteExternalId.$error.required">Необходимо ввести значение.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="dealerSitePublicUrl">Страница на сайте</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.public_url' ng-required='formConfig[dealerSiteEdited.site.id]["public_url"]'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSitePublicUrl.$invalid'>
+					    <li id='dealerSitePublicUrlErrorRequired' ng-show="formDealerSite.dealerSitePublicUrl.$error.required">Необходимо ввести значение.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <!--tr>
+	            <th><label for="dealerSiteLogin">Логин</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="dealerSiteLogin" id="dealerSiteLogin" ng-model='dealerSiteEdited.login' ng-required='formConfig[dealerSiteEdited.site.id]["login"]'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSiteLogin.$invalid'>
+					    <li id='dealerSiteLoginErrorRequired' ng-show="formDealerSite.dealerSiteLogin.$error.required">Необходимо ввести значение.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="dealerSitePassword">Пароль</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="dealerSitePassword" id="dealerSitePassword" ng-model='dealerSiteEdited.password' ng-required='formConfig[dealerSiteEdited.site.id]["password"]'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSitePassword.$invalid'>
+					    <li id='dealerSitePasswordErrorRequired' ng-show="formDealerSite.dealerSitePassword.$error.required">Необходимо ввести значение.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="dealerSiteLogin">Логин для ftp</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="dealerSiteLoginFtp" id="dealerSiteLoginFtp" ng-model='dealerSiteEdited.login_ftp' ng-required='formConfig[dealerSiteEdited.site.id]["login_ftp"]'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSiteLoginFtp.$invalid'>
+					    <li id='dealerSiteLoginFtpErrorRequired' ng-show="formDealerSite.dealerSiteLoginFtp.$error.required">Необходимо ввести значение.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="dealerSitePassword">Пароль для ftp</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="dealerSitePasswordFtp" id="dealerSitePasswordFtp" ng-model='dealerSiteEdited.password_ftp' ng-required='formConfig[dealerSiteEdited.site.id]["password_ftp"]'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSitePasswordFtp.$invalid'>
+					    <li id='dealerSitePasswordFtpErrorRequired' ng-show="formDealerSite.dealerSitePasswordFtp.$error.required">Необходимо ввести значение.</li>
+					</ul>
+	           </td>
+	        </tr-->
+	    </table>
+	</fieldset>
+
+	<fieldset class="span-24">
+	    <legend>Статус</legend>
+	    <table>
+	        <tr>
+	            <th><label for="dealerSiteStatus">Статус</label></th>
+	            <td>
+	                <select id="dealerSiteStatus" name="dealerSiteStatus" ng-model='dealerSiteEdited.status' ng-options='opt.name for opt in dealerSiteStatuses'>
+	                </select>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+
+	<div class="span-10 prepend-top clear">
+	    <ul class="actions row">
+	        <!--li class="delete"><a id='DealerSiteEditRemove' ng-click='removeDealerSite()'>Удалить</a></li-->
+	        <li class="list"><a href="#/dealersitelist">Отменить</a></li>
+	        <li class="save"><input id='dealerSiteEditSave' type="submit" value="Сохранить" ng-disabled='formDealerSite.$invalid' ng-click='saveDealerSite()'/></li>
+	    </ul>
+	</div>
+</form>

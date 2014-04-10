@@ -118,7 +118,8 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
             var dealerQueryParams = {
                 filters: [
                     { type: 'in', fields: ['id'], value: dealerIds }
-                ]
+                ],
+                fields: [ 'dealer_list_name' ]
             };
 
             var siteIds = getFilterFieldsValue(queryParams.filters, ['site'])
@@ -143,6 +144,37 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                     { 'id': 'blocked', 'name': 'Бло' }
                 ]);
                 return _.extend(directories, {dealerSites: self.makeCollection(dealerSitesData.dealerSites, dealerSitesData.params, directories)});
+            });
+        });
+    };
+
+    this.loadItem = function(id) {
+        var self = this;
+        return dealerSiteApi.get(id).then(function(dealerSiteData) {
+            var dealerQueryParams = {
+                filters: [
+                    { type: 'equal', fields: ['id'], value: dealerSiteData.dealerSite.dealer.id }
+                ],
+                fields: [ 'dealer_list_name' ]
+            };
+            var siteQueryParams = {
+                filters: [
+                    { type: 'equal', fields: ['id'], value: dealerSiteData.dealerSite.site.id }
+                ]
+            };
+            return $q.all({
+                dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
+                    return respond.dealers;
+                }),
+                sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
+                    return respond.sites;
+                })
+            }).then(function(directories) {
+                directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
+                    { 'id': 'active', 'name': 'Акт' },
+                    { 'id': 'blocked', 'name': 'Бло' }
+                ]);
+                return _.extend(directories, {dealerSite: new DealerSite(dealerSiteData.dealerSite, directories)});
             });
         });
     };

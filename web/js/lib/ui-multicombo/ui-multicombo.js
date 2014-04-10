@@ -20,10 +20,10 @@ angular.module("ui.multicombo", [])
             '    </ul>' +
             '    <div class="mcombo-drop" ng-hide="hide">' +
             '        <ul class="choices">' +
-            '            <li class="item" ng-repeat="choice in _choices" ng-click="moveToSelected(choice, $event)">' +
+            '            <li class="item" ng-repeat="choice in _filteredChoices" ng-click="moveToSelected(choice, $event)">' +
             '                {{choice.id}}: {{choice[_choiceName]}}' +
             '            </li>' +
-            '            <li class="no-results" ng-show="_search && _choices.length == 0">Нет подходящих значений</li>' +
+            '            <li class="no-results" ng-show="_search && _filteredChoices.length == 0">Нет подходящих значений</li>' +
             '        </ul>' +
             '    </div>' +
             '</div>',
@@ -43,6 +43,14 @@ angular.module("ui.multicombo", [])
             }
             $scope.hide = !_.isArray($scope._selected) && $scope._selected;
             $scope._search = '';
+            $scope._filteredChoices = [];
+
+            var filterChoices = function() {
+                var selectedIds = _.pluck($scope._selectedChoices, 'id');
+                $scope._filteredChoices = _.filter($scope._choices, function(value) {
+                    return (selectedIds.indexOf(value.id) === -1);
+                });
+            }
 
             $scope.moveToSelected = function(choice, $event) {
                 $scope._selectedChoices.push(choice);
@@ -52,6 +60,7 @@ angular.module("ui.multicombo", [])
                     $scope._selected = $scope._selectedChoices[0];
                 }
                 $scope.hide = !_.isArray($scope._selected) && $scope._selected;
+                filterChoices();
 
                 $scope._searchElem.focus();
 
@@ -68,6 +77,7 @@ angular.module("ui.multicombo", [])
                     $scope._selected = $scope._selectedChoices[0];
                 }
                 $scope.hide = !_.isArray($scope._selected) && $scope._selected;
+                filterChoices();
 
                 $scope._searchElem.focus();
             };
@@ -84,9 +94,7 @@ angular.module("ui.multicombo", [])
                 };
                 $scope._choicesLoader.loadItems(queryParams).then(function(respond) {
                     $scope._choices = respond[_.keys(respond)[0]].items;
-                    _.remove($scope._choices, function(item) {
-                        return !!_.find($scope._selectedChoices, {id: item.id});
-                    });
+                    filterChoices();
                 });
             }
 

@@ -484,7 +484,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     });
     var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
-        return processGet(url, regexDealerSitesGet, dealersites, 'dealersite');
+        return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
     });
 
     var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
@@ -517,9 +517,10 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         var respond = processPostQuery(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
         var fields = angular.fromJson(data).fields;
         if (_.size(fields)) {
-            respond[1].data[collectionName] = applyFields(respond[1].data[collectionName], fields);
+            respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
             respond[1].data.params.fields = knownFields(fields);
         }
+        return respond;
     });
 
     var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;

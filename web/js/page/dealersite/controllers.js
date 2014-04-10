@@ -260,8 +260,48 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     };
 
     $scope.editDealerSite = function(dealerSite) {
-        if (dealerSite.status === 'active') {
+        if (dealerSite.status.id === 'active') {
             $location.path('/dealersites/' + dealerSite.id + '/edit');
         }
     };
+})
+
+.controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, data, DealerSite, dealersLoader, sitesLoader) {
+    _.forOwn(data, function(collection, key) {
+        if (key === 'dealerSite') {
+            $scope[key] = collection;
+        } else {
+            $scope[key] = collection.getItems();
+        }
+    });
+    $scope.dealersLoader = dealersLoader;
+    $scope.sitesLoader = sitesLoader;
+
+    $scope.formConfig = {
+        1:  {                 public_url: 1 },
+        5:  { external_id: 1, public_url: 1, login: 1, password :1 },
+        6:  { external_id: 1, public_url: 1, login: 1, password: 1, login_ftp: 1, password_ftp: 1 },
+        13: { external_id: 1 },
+        14: {                                login: 1, password: 1 }
+    };
+
+    if (data.dealerSite) {
+        makeDealerSiteCopy();
+    } else {
+        makeDealerSiteNew();
+    }
+
+    $window.scrollTo(0,0);
+
+    function makeDealerSiteCopy() {
+        $scope.actionName = "Редактирование";
+        $scope.dealerSiteEdited = new DealerSite;
+        angular.extend($scope.dealerSiteEdited, $scope.dealerSite);
+    }
+
+    function makeDealerSiteNew() {
+        $scope.actionName = "Создание";
+        $scope.dealerSiteEdited = new DealerSite;
+        $scope.dealerSiteEdited.status = _.find($scope.dealerSiteStatuses, {id: 'blocked'});
+    }
 });

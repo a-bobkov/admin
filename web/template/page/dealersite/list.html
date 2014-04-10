@@ -23,7 +23,7 @@
             <tr ng-repeat='dealerSite in dealerSites' ng-class='{"uneditableRow": dealerSite.status !== "active"}'>
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.id}}</a></td>
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.dealer.id}}</a></td>
-                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.dealer.company_name}}</a></td>
+                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.dealer.companyName}}</a></td>
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.site.name}}</a></td>
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.external_id}}</a></td>
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.public_url}}</a></td>
