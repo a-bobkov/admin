@@ -249,34 +249,36 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         return respond;
     }
 
-    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
+    var processGet = function(url, regex, collection, itemName) {
+        var id = parseInt(url.replace(regex,'$1'));
+        var item = collection.get(id);
+        if (item) {
+            var respond = [200, {
+                status: 'success',
+                data: {}
+            }];
+            respond[1].data[itemName] = item.serialize();
+            return respond;
+        } else {
+            return [404, {
+                status: 'error',
+                message: 'Ошибка при получении',
+                errors: 'Не найден ' + itemName + ' с id: ' + id
+            }];
+        }
+    }
 
+    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
         return processQueryUrl(url, regexUserQuery, users.getItems(), 'users', Users);
     });
-
     $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
         return processPostQuery (url, regexUserQuery, data, users, 'users', Users);
     });
 
     var regexGet = /^\/api2\/users\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexGet).respond(function(method, url, data) {
-        var id = parseInt(url.replace(regexGet,'$1'));
-        var user = users.get(id);
-        if (user) {
-            return [200, {
-                status: 'success',
-                data: {
-                    user: user.serialize()
-                }
-            }];
-        } else {
-            return [404, {
-                status: 'error',
-                message: 'Ошибка при получении',
-                errors: 'Не найден пользователь с id: ' + id
-            }];
-        }
+        return processGet(url, regexGet, users, 'user');
     });
 
     var regexDirectories = /^\/api2\/combined\/users$/;

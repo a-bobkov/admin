@@ -1007,7 +1007,7 @@ describe('app-mocked', function() {
             expect(actualError.data).toEqualData({
                 status: 'error',
                 message: 'Ошибка при получении',
-                errors: 'Не найден пользователь с id: 9999'
+                errors: 'Не найден user с id: 9999'
             });
         });
 
