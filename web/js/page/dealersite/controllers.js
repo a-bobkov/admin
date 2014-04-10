@@ -279,10 +279,10 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
 
     $scope.formConfig = {
         1:  {                 public_url: 1 },
-        5:  { external_id: 1, public_url: 1, login: 1, password :1 },
-        6:  { external_id: 1, public_url: 1, login: 1, password: 1, login_ftp: 1, password_ftp: 1 },
+        5:  { external_id: 1, public_url: 1, site: 1 },
+        6:  { external_id: 1, public_url: 1, site: 1, ftp: 1 },
         13: { external_id: 1 },
-        14: {                                login: 1, password: 1 }
+        14: {                                site: 1 }
     };
 
     if (data.dealerSite) {

@@ -18,7 +18,8 @@ describe('app-mocked', function() {
         DealerSites,
         Dealers,
         Sites,
-        dealerSiteLoginsLoader;
+        dealerSiteLoginsLoader,
+        DealerSiteLogins;
 
     try {
         var ngMock = angular.module('ngMock');
@@ -56,13 +57,14 @@ describe('app-mocked', function() {
         DealerSites = injector.get('DealerSites');
         Dealers = injector.get('Dealers');
         Sites = injector.get('Sites');
-        dealerSiteLoginsLoader = _dealerSiteLoginsLoader_;
+        dealerSiteLoginsLoader = injector.get('dealerSiteLoginsLoader');
+        DealerSiteLogins = injector.get('DealerSiteLogins');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, usersLoader, User, Users, null,
                 dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-                DealerSites, Dealers, Sites, dealerSiteLoginsLoader);
+                DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};

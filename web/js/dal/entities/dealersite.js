@@ -87,7 +87,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
 })
 
 .service('dealerSitesLoader', function(dealerSiteApi, DealerSite, DealerSites, 
-    dealerSiteStatusesLoader, dealersLoader, sitesLoader, $q) {
+    dealerSiteStatusesLoader, dealersLoader, sitesLoader, dealerSiteLoginsLoader, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {
@@ -171,11 +171,21 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                     return respond.sites;
                 })
             }).then(function(directories) {
-                directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
-                    { 'id': 'active', 'name': 'Акт' },
-                    { 'id': 'blocked', 'name': 'Бло' }
-                ]);
-                return _.extend(directories, {dealerSite: new DealerSite(dealerSiteData.dealerSite, directories)});
+                var dealerSiteLoginQueryParams = {
+                    filters: [
+                        { type: 'equal', fields: ['dealer'], value: dealerSiteData.dealerSite.dealer.id },
+                        { type: 'equal', fields: ['site'], value: dealerSiteData.dealerSite.site.id }
+                    ]
+                };
+                return dealerSiteLoginsLoader.loadItems(dealerSiteLoginQueryParams, directories).then(function(directory) {
+                    directories.dealerSiteLogins = directory.dealerSiteLogins;
+                    directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
+                        { 'id': 'active', 'name': 'Акт' },
+                        { 'id': 'blocked', 'name': 'Бло' }
+                    ]);
+                    directories.dealerSite = new DealerSite(dealerSiteData.dealerSite, directories);
+                    return directories;
+                });
             });
         });
     };
