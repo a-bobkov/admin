@@ -482,13 +482,17 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
         return processPostQuery(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
     });
-
-    var regexDealesQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexDealesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealesQuery, dealers.getItems(), 'dealers', Dealers);
+    var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
+        return processGet(url, regexDealerSitesGet, dealersites, 'dealersite');
     });
-    $httpBackend.whenPOST(regexDealesQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealesQuery, data, dealers, 'dealers', Dealers);
+
+    var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealersQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
+    });
+    $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
+        return processPostQuery(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
     });
 
     var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;

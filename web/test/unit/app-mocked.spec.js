@@ -10,7 +10,14 @@ describe('app-mocked', function() {
         City,
         Metro,
         Market,
-        Group;
+        Group,
+        dealerSitesLoader,
+        dealerSiteStatusesLoader,
+        dealersLoader,
+        sitesLoader, 
+        DealerSites,
+        Dealers,
+        Sites;
 
     try {
         var ngMock = angular.module('ngMock');
@@ -26,7 +33,7 @@ describe('app-mocked', function() {
     }
 
     beforeEach(function() {
-        var modules = ['ng', 'max.dal.entities.user'];
+        var modules = ['ng', 'max.dal.entities.user', 'max.dal.entities.dealersite'];
         if (ngMock) {
             modules.push('ngMock');
         }
@@ -41,10 +48,19 @@ describe('app-mocked', function() {
         City = injector.get('City');
         Metro = injector.get('Metro');
         Market = injector.get('Market');
+        dealerSitesLoader = injector.get('dealerSitesLoader');
+        dealerSiteStatusesLoader = injector.get('dealerSiteStatusesLoader');
+        dealersLoader = injector.get('dealersLoader');
+        sitesLoader = injector.get('sitesLoader');
+        DealerSites = injector.get('DealerSites');
+        Dealers = injector.get('Dealers');
+        Sites = injector.get('Sites');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
-            setHttpMock($httpBackend, usersLoader, User, Users);
+            setHttpMock($httpBackend, usersLoader, User, Users, null,
+                dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
+                DealerSites, Dealers, Sites);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
