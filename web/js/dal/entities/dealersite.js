@@ -171,21 +171,12 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                     return respond.sites;
                 })
             }).then(function(directories) {
-                var dealerSiteLoginQueryParams = {
-                    filters: [
-                        { type: 'equal', fields: ['dealer'], value: dealerSiteData.dealerSite.dealer.id },
-                        { type: 'equal', fields: ['site'], value: dealerSiteData.dealerSite.site.id }
-                    ]
-                };
-                return dealerSiteLoginsLoader.loadItems(dealerSiteLoginQueryParams, directories).then(function(directory) {
-                    directories.dealerSiteLogins = directory.dealerSiteLogins;
-                    directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
-                        { 'id': 'active', 'name': 'Акт' },
-                        { 'id': 'blocked', 'name': 'Бло' }
-                    ]);
-                    directories.dealerSite = new DealerSite(dealerSiteData.dealerSite, directories);
-                    return directories;
-                });
+                directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
+                    { 'id': 'active', 'name': 'Акт' },
+                    { 'id': 'blocked', 'name': 'Бло' }
+                ]);
+                directories.dealerSite = new DealerSite(dealerSiteData.dealerSite, directories);
+                return directories;
             });
         });
     };

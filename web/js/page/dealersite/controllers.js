@@ -266,14 +266,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     };
 })
 
-.controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, data, DealerSite, dealersLoader, sitesLoader) {
-    _.forOwn(data, function(collection, key) {
-        if (key === 'dealerSite') {
-            $scope[key] = collection;
-        } else {
-            $scope[key] = collection.getItems();
-        }
-    });
+.controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, data, DealerSite, dealersLoader, sitesLoader, DealerSiteLogin, dealerSiteLoginsLoader) {
+    _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
@@ -298,6 +292,52 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         $scope.dealerSiteEdited = new DealerSite;
         angular.extend($scope.dealerSiteEdited, $scope.dealerSite);
     }
+
+    function makeDealerSiteLoginsCopy() {
+        _.assign($scope.dealerSiteLoginsEdited.site, {
+            dealer: $scope.dealerSiteEdited.dealer,
+            site: $scope.dealerSiteEdited.site
+        });
+        _.assign($scope.dealerSiteLoginsEdited.ftp, {
+            dealer: $scope.dealerSiteEdited.dealer,
+            site: $scope.dealerSiteEdited.site
+        });
+        _.forEach($scope.dealerSiteLogins.getItems(), function(dealerSiteLogin) {
+            if (dealerSiteLogin.type === 'site') {
+                _.assign($scope.dealerSiteLoginsEdited.site, dealerSiteLogin);
+            } else if (dealerSiteLogin.type === 'ftp') {
+                _.assign($scope.dealerSiteLoginsEdited.ftp, dealerSiteLogin);
+            }
+        });
+    }
+
+/*
+Задача: при изменении дилера или сайта, для загрузки новых доступов (обеспечения ссылочной целостности)
+необходимо передать ссылку на коллекции дилеров и сайтов. 
+Например, выпадающие справочники должны обновить их в скоупе контроллера?
+Передавать ссылку на коллекцию через ui-mcombo-choices?
+*/
+    function onDealerSiteChange() {
+        $scope.dealerSiteLoginsEdited = {
+            site: new DealerSiteLogin({type: 'site'}),
+            ftp: new DealerSiteLogin({type: 'ftp'})
+        };
+        if ($scope.dealerSiteEdited.dealer && $scope.dealerSiteEdited.site) {
+            var dealerSiteLoginQueryParams = {
+                filters: [
+                    { type: 'equal', fields: ['dealer'], value: $scope.dealerSiteEdited.dealer.id },
+                    { type: 'equal', fields: ['site'], value: $scope.dealerSiteEdited.site.id }
+                ]
+            };
+            dealerSiteLoginsLoader.loadItems(dealerSiteLoginQueryParams, $scope).then(function(directory) {
+                $scope.dealerSiteLogins = directory.dealerSiteLogins;
+                makeDealerSiteLoginsCopy();
+            });
+        }
+    }
+
+    // $scope.$watch('dealerSiteEdited.dealer', onDealerSiteChange);
+    $scope.$watch('dealerSiteEdited.site', onDealerSiteChange);
 
     function makeDealerSiteNew() {
         $scope.actionName = "Создание";
