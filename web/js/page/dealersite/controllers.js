@@ -75,6 +75,15 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             }
         }
     })
+    .when('/dealersitenew', {
+        templateUrl: 'template/page/dealersite/edit.html',
+        controller: 'DealerSiteEditCtrl',
+        resolve: {
+            data: function(dealerSiteStatusesLoader) {
+                return dealerSiteStatusesLoader.loadItems();
+            }
+        }
+    })
     .otherwise({
         redirectTo: '/dealersitelist'
     });
@@ -330,13 +339,13 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         }
     }
 
-    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
-
     function makeDealerSiteNew() {
         $scope.actionName = "Создание";
         $scope.dealerSiteEdited = new DealerSite;
-        $scope.dealerSiteEdited.status = _.find($scope.dealerSiteStatuses, {id: 'blocked'});
+        $scope.dealerSiteEdited.status = _.find($scope.dealerSiteStatuses.getItems(), {id: 'blocked'});
     }
+
+    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
 })
 
 .directive('uiDealerSiteUnique', function(dealerSitesLoader){

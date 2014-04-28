@@ -138,12 +138,11 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                 }),
                 sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
                     return respond.sites;
+                }),
+                dealerSiteStatuses: dealerSiteStatusesLoader.loadItems().then(function(respond) {
+                    return respond.dealerSiteStatuses;
                 })
             }).then(function(directories) {
-                directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
-                    { 'id': 'active', 'name': 'Акт' },
-                    { 'id': 'blocked', 'name': 'Бло' }
-                ]);
                 return _.extend(directories, {dealerSites: self.makeCollection(dealerSitesData.dealerSites, dealerSitesData.params, directories)});
             });
         });
@@ -169,12 +168,11 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                 }),
                 sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
                     return respond.sites;
+                }),
+                dealerSiteStatuses: dealerSiteStatusesLoader.loadItems().then(function(respond) {
+                    return respond.dealerSiteStatuses;
                 })
             }).then(function(directories) {
-                directories.dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
-                    { 'id': 'active', 'name': 'Акт' },
-                    { 'id': 'blocked', 'name': 'Бло' }
-                ]);
                 directories.dealerSite = new DealerSite(dealerSiteData.dealerSite, directories);
                 return directories;
             });
@@ -201,7 +199,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     return DealerSiteStatuses;
 })
 
-.service('dealerSiteStatusesLoader', function(DealerSiteStatus, DealerSiteStatuses) {
+.service('dealerSiteStatusesLoader', function(DealerSiteStatus, DealerSiteStatuses, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {
@@ -214,5 +212,13 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
             return new DealerSiteStatus(itemData, directories);
         });
         return new DealerSiteStatuses(items, queryParams);
+    };
+
+    this.loadItems = function() {
+        var self = this;
+        return $q.when({dealerSiteStatuses: self.makeCollection([
+            { id: 'active', name: 'Акт' },
+            { id: 'blocked', name: 'Бло' }
+        ])});
     };
 });
