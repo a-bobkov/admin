@@ -3,11 +3,11 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins) {
+    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-        DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins);
+        DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins);
 });
 
 /**
@@ -15,7 +15,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
  */
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins) {
+    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 1, name: 'admin', description: 'Администратор'},
@@ -542,6 +542,35 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
         return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
+    });
+
+    var regexDealerSitesPost = /^\/api2\/dealersites\/new$/;
+    $httpBackend.whenPOST(regexDealerSitesPost).respond(function(method, url, data) {
+        try {
+            var dealerSite = new DealerSite((angular.fromJson(data)).dealerSite, {
+                dealers: dealers,
+                sites: sites,
+                dealerSiteStatuses: dealerSiteStatuses
+            });
+        } catch (err) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при создании',
+                errors: err.message
+            }];
+        }
+
+        var items = dealerSites.getItems();
+        dealerSite.id = 1 + _.max(items, function(item) {
+            return item.id;
+        }).id;
+        items.push(dealerSite);
+        return [200, {
+            status: 'success',
+            data: {
+                dealerSite: dealerSite.serialize()
+            }
+        }];
     });
 
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;

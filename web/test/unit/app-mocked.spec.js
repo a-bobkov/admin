@@ -15,6 +15,7 @@ describe('app-mocked', function() {
         dealerSiteStatusesLoader,
         dealersLoader,
         sitesLoader, 
+        DealerSite,
         DealerSites,
         Dealers,
         Sites,
@@ -54,6 +55,7 @@ describe('app-mocked', function() {
         dealerSiteStatusesLoader = injector.get('dealerSiteStatusesLoader');
         dealersLoader = injector.get('dealersLoader');
         sitesLoader = injector.get('sitesLoader');
+        DealerSite = injector.get('DealerSite');
         DealerSites = injector.get('DealerSites');
         Dealers = injector.get('Dealers');
         Sites = injector.get('Sites');
@@ -64,7 +66,7 @@ describe('app-mocked', function() {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, usersLoader, User, Users, null,
                 dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-                DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins);
+                DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};

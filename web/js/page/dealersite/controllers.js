@@ -346,6 +346,13 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     }
 
     $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
+
+    $scope.saveDealerSite = function() {
+        $scope.dealerSiteEdited.save($scope).then(function(dealerSite) {
+            $rootScope.savedDealerSiteListNotice = 'Сохранено разрешение с идентификатором: ' + dealerSite.id;
+            $location.path('/dealersitelist');
+        });
+    };
 })
 
 .directive('uiDealerSiteUnique', function(dealerSitesLoader){
