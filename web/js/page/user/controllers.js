@@ -4,6 +4,146 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
 .config(['$routeProvider', function($routeProvider) {
 
+    $routeProvider
+    .when('/userlist', {
+        templateUrl: 'template/page/user/list.html',
+        controller: 'UserListCtrl',
+        reloadOnSearch: false,
+        resolve: {
+            data: function(usersLoader) {
+                return usersLoader.loadDirectories();
+            }
+        }
+    })
+    .when('/users/:userId/edit', {
+        templateUrl: 'template/page/user/edit.html',
+        controller: 'UserCtrl',
+        resolve: {
+            data: function(usersLoader, $location) {
+                var id = parseInt($location.$$path.replace(/^\/users\/(?:([^\/]+))\/edit$/,'$1'));
+                return usersLoader.loadItem(id);
+            }
+        }
+    })
+    .when('/usernew', {
+        templateUrl: 'template/page/user/edit.html',
+        controller: 'UserCtrl',
+        resolve: {
+            data: function(usersLoader) {
+                return usersLoader.loadDirectories();
+            }
+        }
+    })
+    .otherwise({
+        redirectTo: '/userlist'
+    });
+}])
+
+.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, usersLoader) {
+    _.forOwn(data, function(collection, key) {
+        $scope[key] = collection.getItems();
+    });
+
+    if ($rootScope.savedUserListNotice) {
+        $scope.savedUserListNotice = $rootScope.savedUserListNotice;
+        delete $rootScope.savedUserListNotice;
+    }
+
+    $scope.clickNewUser = function() {
+        $location.path('/usernew');
+    }
+
+    $scope.setPatternsDefault = function() {
+        $scope.patterns = {
+            complex: '',
+            status: [_.find($scope.userstatuses, {id: 'active'})],
+            manager: null
+        };
+    }
+
+    $scope.onPatternChange = function (newValue, oldValue) {
+        onSortingChange();
+    };
+
+    $scope.$watch('patterns', $scope.onPatternChange, true);
+
+    $scope.sortableColumns = [
+        {id: "id", name: "Код"},
+        {id: "email", name: "Email"},
+        {id: "lastLogin", name: "Был на сайте"}
+    ];
+
+    $scope.sortingMark = function(column) {
+        if (column === $scope.sorting.column) {
+            return ($scope.sorting.reverse) ? ' ↑': ' ↓';
+        }
+        return '\u00A0\u00A0\u00A0';
+    }
+
+    $scope.changeSorting = function(column) {
+        if (column === $scope.sorting.column) {
+            $scope.sorting.reverse = !$scope.sorting.reverse;
+        } else {
+            $scope.sorting.column = column;
+            $scope.sorting.reverse = false;
+        }
+        onSortingChange();
+    }
+
+    var onSortingChange = function() {
+        $scope.onSelectPage(1);
+    }
+
+    $scope.onSelectPage = function(page) {
+        $scope.paging.currentPage = page;
+
+        var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
+            return value;
+        });
+        $rootScope.savedUserListLocationSearch = toLocationSearch(searchParams);
+        $location.search($rootScope.savedUserListLocationSearch);
+        usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch), data).then(function(respond) {
+            $scope.users = respond.users.getItems();
+            $scope.totalItems = respond.users.getParams().pager.total;
+            var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
+            if (topUserList < 0) {
+                window.scrollBy(0, topUserList);
+            }
+        });
+    };
+
+    var ls = $location.search();
+    if (_.isEmpty(ls)) {
+        ls =  $rootScope.savedUserListLocationSearch;
+    }
+    if (_.size(ls)) {
+        $scope.patterns = {
+            complex: ls.complex || '',
+            status: ls.status && _.invoke(ls.status.split(';'), function() {
+                    return _.find($scope.userstatuses, {id: this})
+                }),
+            manager: _.find($scope.managers, {id: _.parseInt(ls.manager)})
+        };
+        $scope.sorting = {
+            column: ls.column,
+            reverse: !!ls.reverse
+        };
+        $scope.paging = {
+            currentPage: _.parseInt(ls.currentPage),
+            itemsPerPage: _.parseInt(ls.itemsPerPage)
+        };
+    } else {
+        $scope.setPatternsDefault();
+        $scope.sorting = {
+            column: 'id',
+            reverse: false
+        };
+        $scope.paging = {
+            itemsPerPage: 25
+        };
+    }
+    $scope.maxSizePaging = 9;
+
     function makeQueryParams(ls) {
         if (_.size(ls)) {
             var queryParams = {
@@ -53,183 +193,23 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         }
     }
 
-    $routeProvider
-    .when('/userlist', {
-        templateUrl: 'template/page/user/list.html',
-        controller: 'UserListCtrl',
-        reloadOnSearch: false,
-        resolve: {
-            data: function(usersLoader, $location, $rootScope) {
-                if (!_.isEmpty($rootScope.savedUserListLocationSearch)) {
-                    $location.search($rootScope.savedUserListLocationSearch);
-                }
-                return usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch));
-            }
-        }
-    })
-    .when('/users/:userId/edit', {
-        templateUrl: 'template/page/user/edit.html',
-        controller: 'UserCtrl',
-        resolve: {
-            data: function(usersLoader, $location) {
-                var id = parseInt($location.$$path.replace(/^\/users\/(?:([^\/]+))\/edit$/,'$1'));
-                return usersLoader.loadItem(id);
-            }
-        }
-    })
-    .when('/usernew', {
-        templateUrl: 'template/page/user/edit.html',
-        controller: 'UserCtrl',
-        resolve: {
-            data: function(usersLoader) {
-                return usersLoader.loadDirectories();
-            }
-        }
-    })
-    .otherwise({
-        redirectTo: '/userlist'
-    });
-}])
-
-.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data) {
-    _.forOwn(data, function(collection, key) {
-        $scope[key] = collection.getItems();
-    });
-
-    if ($rootScope.savedUserListNotice) {
-        $scope.savedUserListNotice = $rootScope.savedUserListNotice;
-        delete $rootScope.savedUserListNotice;
-    }
-
-    $scope.clickNewUser = function() {
-        $location.path('/usernew');
-    }
-
-    $scope.setPatternsDefault = function() {
-        $scope.patterns = {
-            complex: '',
-            status: [_.find($scope.userstatuses, {id: 'active'})],
-            manager: null
-        };
-    }
-
-    $scope.onPatternChange = function (newValue, oldValue) {
-        if (newValue !== oldValue) {
-            onSortingChange();
-        }
-    };
-
-    $scope.$watch('patterns', $scope.onPatternChange, true);
-
-    $scope.sortableColumns = [
-        {id: "id", name: "Код"},
-        {id: "email", name: "Email"},
-        {id: "lastLogin", name: "Был на сайте"}
-    ];
-
-    $scope.sortingMark = function(column) {
-        if (column === $scope.sorting.column) {
-            return ($scope.sorting.reverse) ? ' ↑': ' ↓';
-        }
-        return '\u00A0\u00A0\u00A0';
-    }
-
-    $scope.changeSorting = function(column) {
-        if (column === $scope.sorting.column) {
-            $scope.sorting.reverse = !$scope.sorting.reverse;
-        } else {
-            $scope.sorting.column = column;
-            $scope.sorting.reverse = false;
-        }
-        onSortingChange();
-    }
-
-    var onSortingChange = function() {
-        $scope.onSelectPage(1);
-    }
-
-    $scope.onSelectPage = function(page) {
-        $scope.paging.currentPage = page;
-
-        var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
-            return value;
-        });
-        $rootScope.savedUserListLocationSearch = toUrlSearch(searchParams);
-        $location.path('/userlist?');
-    };
-
-    function getFilterFieldsValue(filters, type, fields) {
-        var filter = _.find(filters, {type: type, fields: fields});
-        if (filter) {
-            return filter.value;
-        }
-    }
-
-    function getFiltersFieldsValues(filters, type, fields) {
-        var filters = _.filter(filters, {type: type, fields: fields});
-        if (!_.isEmpty(filters)) {
-            return _.pluck(filters, 'value');
-        }
-        return [];
-    }
-
-    var params = data.users.getParams();
-    $scope.patterns = {
-        complex: getFiltersFieldsValues(params.filters, 'contain', ['id', 'email', 'dealer.companyName']).join(' '),
-        status: _.invoke(getFilterFieldsValue(params.filters, 'in', ['status']), function() {
-                return _.find($scope.userstatuses, {id: this})
-            }),
-        manager: _.find($scope.managers, {id: _.parseInt(getFilterFieldsValue(params.filters, 'equal', ['dealer.manager']))})
-    };
-    $scope.sorting = {
-        column: params.order.field,
-        reverse: (params.order.direction === 'desc')
-    };
-    $scope.paging = {
-        currentPage: _.parseInt(params.pager.page),
-        itemsPerPage: _.parseInt(params.pager.per_page)
-    };
-    $scope.totalItems = _.parseInt(params.pager.total);
-    $scope.maxSizePaging = 9;
-
-    function toUrlSearch(value) {
+    function toLocationSearch(value) {
         if (_.isArray(value)) {
             return _.invoke(value, function() {
-                return toUrlSearch(this);
+                return toLocationSearch(this);
             }).join(';');
         } else if (_.isObject(value)) {
             if (value.id !== undefined) {
                 return value.id;
             } else {
                 return _.mapValues(value, function(value) {
-                    return toUrlSearch(value);
+                    return toLocationSearch(value);
                 });
             }
         } else {
             return value;
         }
     }
-
-    $scope.$on('$routeChangeStart', function() {
-        // from https://developer.mozilla.org/en-US/docs/Web/API/Window.scrollX
-        // var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-        // var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        // $rootScope.savedUserListPosition = {
-        //     x: x,
-        //     y: y
-        // };
-        $rootScope.savedUserListFocus = document.activeElement.id;
-    });
-
-    $timeout(function() {   // ожидание построения DOM
-        var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
-        if (topUserList < 0) {
-            window.scrollBy(0, topUserList);
-        }
-        if ($rootScope.savedUserListFocus) {
-            document.getElementById($rootScope.savedUserListFocus).focus();
-        }
-    });
 })
 
 .controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours) {

@@ -213,17 +213,22 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
     Метод загрузки списка элементов с дополнительными справочниками
     Входы:
         Параметры запроса данных
+        Справочники для разрешения ссылок - опционально
     Выходы:
         Промис: объект, свойства которого - коллекции с разрешенными ссылками
     Необходимые зависимости:
         Дата-провайдер, который выдает данные справочника
     */
-    this.loadItems = function(queryParams) {
+    this.loadItems = function(queryParams, directories) {
         var self = this;
-        return this.loadDirectories().then(function(directories) {
-            return userApi.query(queryParams).then(function(respond) {
+        return userApi.query(queryParams).then(function(respond) {
+            if (!directories) {
+                return this.loadDirectories().then(function(directories) {
+                    return _.extend(directories, {users: self.makeCollection(respond.users, respond.params, directories)});
+                });
+            } else {
                 return _.extend(directories, {users: self.makeCollection(respond.users, respond.params, directories)});
-            });
+            }
         });
     };
 
