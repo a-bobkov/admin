@@ -311,12 +311,6 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         });
     }
 
-/*
-Задача: при изменении дилера или сайта, для загрузки новых доступов (обеспечения ссылочной целостности)
-необходимо передать ссылку на коллекции дилеров и сайтов. 
-Например, выпадающие справочники должны обновить их в скоупе контроллера?
-Передавать ссылку на коллекцию через ui-mcombo-choices?
-*/
     function onDealerSiteChange() {
         $scope.dealerSiteLoginsEdited = {
             site: new DealerSiteLogin({type: 'site'}),
@@ -336,8 +330,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         }
     }
 
-    // $scope.$watch('dealerSiteEdited.dealer', onDealerSiteChange);
-    $scope.$watch('dealerSiteEdited.site', onDealerSiteChange);
+    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
 
     function makeDealerSiteNew() {
         $scope.actionName = "Создание";
