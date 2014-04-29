@@ -573,6 +573,42 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         }];
     });
 
+    var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexDealerSitesPut).respond(function(method, url, data) {
+        var id = parseInt(url.replace(regexDealerSitesPut,'$1'));
+        var items = dealerSites.getItems();
+        var idx = _.findIndex(items, {id: id});
+        if (idx === -1) {
+            return [404, {
+                status: 'error',
+                message: 'Ошибка при обновлении',
+                errors: 'Не найден элемент с id: ' + id
+            }];
+        }
+
+        try {
+            var dealerSite = new DealerSite((angular.fromJson(data)).dealerSite, {
+                dealers: dealers,
+                sites: sites,
+                dealerSiteStatuses: dealerSiteStatuses
+            });
+        } catch (err) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при обновлении',
+                errors: err.message
+            }];
+        }
+
+        items[idx] = dealerSite;
+        return [200, {
+            status: 'success',
+            data: {
+                dealerSite: dealerSite.serialize()
+            }
+        }];
+    });
+
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
         return processQueryUrl(url, regexDealerSiteLoginsQuery, dealerSiteLogins.getItems(), 'dealerSiteLogins', DealerSiteLogins);
