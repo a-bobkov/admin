@@ -3,11 +3,11 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins) {
+    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin) {
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-        DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins);
+        DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin);
 });
 
 /**
@@ -15,7 +15,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
  */
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins) {
+    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin) {
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 1, name: 'admin', description: 'Администратор'},
@@ -574,6 +574,24 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     var regexDealerSiteLoginsGet = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSiteLoginsGet).respond(function(method, url, data) {
         return processGet(url, regexDealerSiteLoginsGet, dealerSiteLogins, 'dealerSiteLogin');
+    });
+    var regexDealerSiteLoginsPost = /^\/api2\/dealersitelogins\/new$/;
+    $httpBackend.whenPOST(regexDealerSiteLoginsPost).respond(function(method, url, data) {
+        return processPost(data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
+            dealers: dealers,
+            sites: sites
+        });
+    });
+    var regexDealerSiteLoginsPut = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexDealerSiteLoginsPut).respond(function(method, url, data) {
+        return processPut(url, regexDealerSiteLoginsPut, data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
+            dealers: dealers,
+            sites: sites
+        });
+    });
+    var regexDealerSiteLoginsDelete = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexDealerSiteLoginsDelete).respond(function(method, url, data) {
+        return processDelete(url, regexDealerSiteLoginsDelete, dealerSiteLogins);
     });
 
     var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;

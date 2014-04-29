@@ -273,7 +273,9 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     };
 })
 
-.controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, data, DealerSite, dealersLoader, sitesLoader, DealerSiteLogin, dealerSiteLoginsLoader) {
+.controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, $q, data, 
+    DealerSite, dealersLoader, sitesLoader, DealerSiteLogin, dealerSiteLoginsLoader) {
+
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
@@ -345,11 +347,32 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
 
     $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
 
-    $scope.saveDealerSite = function() {
+    function saveDealerSiteEdited() {
         $scope.dealerSiteEdited.save($scope).then(function(dealerSite) {
             $rootScope.savedDealerSiteListNotice = 'Сохранено разрешение с идентификатором: ' + dealerSite.id;
-            $location.path('/dealersitelist');
         });
+    }
+
+    function saveRemoveDealerSiteLogin(dealerSiteLogin) {
+        if (dealerSiteLogin.login) {
+            dealerSiteLogin.save($scope).then(function(dealerSiteLogin) {
+                $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ с идентификатором: ' + dealerSiteLogin.id;
+            });
+        } else if (dealerSiteLogin.id) {
+            dealerSiteLogin.remove($scope).then(function() {
+                $rootScope.savedDealerSiteListNotice += '.\nУдалён доступ с идентификатором: ' + dealerSiteLogin.id;
+            });
+        }
+    }
+
+    $scope.saveDealerSiteEditedWithLogins = function() {
+        $q.all([
+            saveDealerSiteEdited(),
+            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.site),
+            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.ftp)
+        ]).then(function() {
+            $location.path('/dealersitelist');
+        })
     };
 })
 
