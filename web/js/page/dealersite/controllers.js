@@ -230,22 +230,23 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             noticeMessage,
             newStatus;
 
-        if (dealerSite.status === 'active') {
+        if (dealerSite.status.id === 'active') {
             confirmMessage = 'Блокировать регистрацию';
             noticeMessage = 'Блокирована регистрация';
-            newStatus = 'blocked';
+            newStatus = _.find($scope.dealerSiteStatuses, {id: 'blocked'});
         } else {
             confirmMessage = 'Разблокировать регистрацию';
             noticeMessage = 'Разблокирована регистрация';
-            newStatus = 'active';
+            newStatus = _.find($scope.dealerSiteStatuses, {id: 'active'});
         }
-        var dealerSiteInfo = ' салона "' + dealerSite.dealer.company_name + '" на сайте "' + dealerSite.site.name + '"';
+        var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
         if (confirm(confirmMessage + dealerSiteInfo + '?')) {
             var dealerSiteEdited = new DealerSite;
             angular.extend(dealerSiteEdited, dealerSite);
             dealerSiteEdited.status = newStatus;
-            dealerSiteEdited.save().then(function() {
+            dealerSiteEdited.save(data).then(function() {
                 $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
+                $location.path('/dealersitelist?');
             });
         }
     };
