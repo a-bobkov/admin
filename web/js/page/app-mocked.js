@@ -238,21 +238,84 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         }
     }
 
-    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexUserQuery, users.getItems(), 'users', Users);
-    });
-    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
-        return processPostQuery (url, regexUserQuery, data, users, 'users', Users);
-    });
+    var processPost = function(data, collection, itemName, itemConstuctor, directories) {
+        var items = collection.getItems();
+        try {
+            var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
+            // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
+        } catch (err) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при создании',
+                errors: err.message
+            }];
+        }
 
-    var regexGet = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenGET(regexGet).respond(function(method, url, data) {
-        return processGet(url, regexGet, users, 'user');
-    });
+        item.id = 1 + _.max(items, function(item) {
+            return item.id;
+        }).id;
+        items.push(item);
+        var respond = [200, {
+            status: 'success',
+            data: {}
+        }];
+        respond[1].data[itemName] = item.serialize();
+        return respond;
+    };
 
-    var regexDirectories = /^\/api2\/combined\/users$/;
-    $httpBackend.whenGET(regexDirectories).respond(function(method, url, data) {
+    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories) {
+        var id = parseInt(url.replace(regex,'$1'));
+        var items = collection.getItems();
+        var idx = _.findIndex(items, {id: id});
+        if (idx === -1) {
+            return [404, {
+                status: 'error',
+                message: 'Ошибка при обновлении',
+                errors: 'Не найден элемент с id: ' + id
+            }];
+        }
+
+        try {
+            var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
+            // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
+        } catch (err) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при обновлении',
+                errors: err.message
+            }];
+        }
+
+        items[idx] = item;
+        var respond = [200, {
+            status: 'success',
+            data: {}
+        }];
+        respond[1].data[itemName] = item.serialize();
+        return respond;
+    };
+
+    var processDelete = function(url, regex, collection) {
+        var id = parseInt(url.replace(regex,'$1'));
+        var items = collection.getItems();
+        var idx = _.findIndex(items, {id: id});
+        if (idx !== -1) {
+            items.splice(idx, 1);
+            return [200, {
+                status: 'success',
+                data: null
+            }];
+        } else {
+            return [404, {
+                status: 'error',
+                message: 'Ошибка при удалении',
+                errors: 'Не найден элемент с id: ' + id
+            }];
+        }
+    };
+
+    var regexUserDirectories = /^\/api2\/combined\/users$/;
+    $httpBackend.whenGET(regexUserDirectories).respond(function(method, url, data) {
         try {
             var directories = _.mapValues(userDirectories, function(directory) {
                return directory.serialize();
@@ -270,88 +333,31 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         }];
     });
 
-    var regexPost = /^\/api2\/users\/new$/;
-    $httpBackend.whenPOST(regexPost).respond(function(method, url, data) {
-        var items = users.getItems();
-        try {
-            var user = new User((angular.fromJson(data)).user, userDirectories);
-            if (user.isDealer()) {
-                user.dealer.id = user.id;
-            }
-            // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
-        } catch (err) {
-            return [400, {
-                status: 'error',
-                message: 'Ошибка при создании',
-                errors: err.message
-            }];
-        }
-
-        user.id = 1 + _.max(items, function(item) {
-            return item.id;
-        }).id;
-        items.push(user);
-        return [200, {
-            status: 'success',
-            data: {
-                user: user.serialize()
-            }
-        }];
+    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexUserQuery, users.getItems(), 'users', Users);
+    });
+    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
+        return processPostQuery (url, regexUserQuery, data, users, 'users', Users);
     });
 
-    var regexPut = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenPUT(regexPut).respond(function(method, url, data) {
-        var id = parseInt(url.replace(regexPut,'$1'));
-        var items = users.getItems();
-        var idx = _.findIndex(items, {id: id});
-        if (idx !== -1) {
-            try {
-                var user = new User((angular.fromJson(data)).user, userDirectories);
-                if (user.isDealer()) {
-                    user.dealer.id = user.id;
-                }
-                // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
-            } catch (err) {
-                return [400, {
-                    status: 'error',
-                    message: 'Ошибка при обновлении',
-                    errors: err.message
-                }];
-            }
-
-            items[idx] = user;
-            return [200, {
-                status: 'success',
-                data: {
-                    user: user.serialize()
-                }
-            }];
-        } else {
-            return [404, {
-                status: 'error',
-                message: 'Ошибка при обновлении',
-                errors: 'Не найден пользователь с id: ' + id
-            }];
-        }
+    var regexUserGet = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexUserGet).respond(function(method, url, data) {
+        return processGet(url, regexUserGet, users, 'user');
     });
 
-    var regexDelete = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenDELETE(regexDelete).respond(function(method, url, data) {
-        var id = parseInt(url.replace(regexDelete,'$1'));
-        var items = users.getItems();
-        var idx = _.findIndex(items, {id: id});
-        if (idx !== -1) {
-            items.splice(idx, 1);
-            return [200, {
-                status: 'success',
-                data: null
-            }];
-        } else {
-            return [404, {
-                status: 'error',
-                message: 'Ошибка при удалении',
-                errors: 'Не найден пользователь с id: ' + id
-            }];
-        }
+    var regexUserPost = /^\/api2\/users\/new$/;
+    $httpBackend.whenPOST(regexUserPost).respond(function(method, url, data) {
+        return processPost(data, users, 'user', User, userDirectories);
+    });
+
+    var regexUserPut = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexUserPut).respond(function(method, url, data) {
+        return processPut(url, regexUserPut, data, users, 'user', User, userDirectories);
+    });
+
+    var regexUserDelete = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexUserDelete).respond(function(method, url, data) {
+        return processDelete(url, regexUserDelete, users);
     });
 };

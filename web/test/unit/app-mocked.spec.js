@@ -1018,7 +1018,7 @@ describe('app-mocked', function() {
             expect(actualError.data).toEqualData({
                 status: 'error',
                 message: 'Ошибка при обновлении',
-                errors: 'Не найден пользователь с id: 9999'
+                errors: 'Не найден элемент с id: 9999'
             });
         });
 
@@ -1074,7 +1074,7 @@ describe('app-mocked', function() {
             expect(actualError.data).toEqualData({
                 status: 'error',
                 message: 'Ошибка при удалении',
-                errors: 'Не найден пользователь с id: 9999'
+                errors: 'Не найден элемент с id: 9999'
             });
         });
     });

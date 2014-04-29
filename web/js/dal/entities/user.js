@@ -96,6 +96,9 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
         if (!this.isSite()) {
             itemData.site = null;
         }
+        if (this.isDealer()) {
+            itemData.dealer.id = itemData.id;
+        };
         return itemData;
     };
 
@@ -223,7 +226,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
         var self = this;
         return userApi.query(queryParams).then(function(respond) {
             if (!directories) {
-                return this.loadDirectories().then(function(directories) {
+                return self.loadDirectories().then(function(directories) {
                     return _.extend(directories, {users: self.makeCollection(respond.users, respond.params, directories)});
                 });
             } else {
