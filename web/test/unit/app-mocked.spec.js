@@ -2,12 +2,14 @@
 
 describe('app-mocked', function() {
     var $httpBackend,
-        $http,
-        $rootScope,
         usersLoader,
         User,
         Users,
         Group;
+
+    try {
+        var ngMock = angular.module('ngMock');
+    } catch(err) {}
 
     function getDeepValue(item, field) {
         var value = item[field.shift()];
@@ -19,22 +21,59 @@ describe('app-mocked', function() {
     }
 
     beforeEach(function() {
-        module('max.dal.entities.user');
+        var modules = ['ng', 'max.dal.entities.user'];
+        if (ngMock) {
+            modules.push('ngMock');
+        }
+        var injector = angular.injector(modules);
 
-        inject(function(_$httpBackend_, _$http_, _$rootScope_, _usersLoader_, _User_, _Users_, _Group_) {
-            $httpBackend = _$httpBackend_;
-            $http = _$http_;
-            $rootScope = _$rootScope_;
-            usersLoader = _usersLoader_;
-            User = _User_;
-            Users = _Users_;
-            Group = _Group_;
-        });
+        usersLoader = injector.get('usersLoader');
+        User = injector.get('User');
+        Users = injector.get('Users');
+        Group = injector.get('Group');
 
-        setHttpMock($httpBackend, usersLoader, User, Users);
+        if (ngMock) {
+            $httpBackend = injector.get('$httpBackend');
+            setHttpMock($httpBackend, usersLoader, User, Users);
+        } else {
+            $httpBackend = {};
+            $httpBackend.flush = function() {}
+        }
     });
 
-    describe('Методы query должны', function() {
+    it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
+        var actualSuccess,
+            actualError;
+        var directories;
+
+        var params = {
+            filters: [
+                { type: 'equal', fields: ['status'], value: 'active' }
+            ]
+        }
+
+        runs(function() {
+            usersLoader.loadItems(params).then(function(respond) {
+                directories = respond;
+            }, function(respond) {
+                actualError = respond;
+            });
+            $httpBackend.flush();
+        });
+
+        waitsFor(function() {
+          return directories || actualError;
+        });
+
+        runs(function() {
+            expect(_.every(directories.users.getItems(), function(value) {
+                var status = String(value.status.id);
+                return (status === 'active');
+            })).toBeTruthy();
+        });
+    });
+
+    xdescribe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
@@ -753,7 +792,7 @@ describe('app-mocked', function() {
         });
     });
 
-    describe('Методы CRUD должны', function() {
+    xdescribe('Методы CRUD должны', function() {
         it('post - сохранять данные нового пользователя', function() {
             var data = {
                     email: 'new@maxposter.ru',
