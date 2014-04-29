@@ -543,90 +543,25 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
         return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
     });
-
     var regexDealerSitesPost = /^\/api2\/dealersites\/new$/;
     $httpBackend.whenPOST(regexDealerSitesPost).respond(function(method, url, data) {
-        try {
-            var dealerSite = new DealerSite((angular.fromJson(data)).dealerSite, {
-                dealers: dealers,
-                sites: sites,
-                dealerSiteStatuses: dealerSiteStatuses
-            });
-        } catch (err) {
-            return [400, {
-                status: 'error',
-                message: 'Ошибка при создании',
-                errors: err.message
-            }];
-        }
-
-        var items = dealerSites.getItems();
-        dealerSite.id = 1 + _.max(items, function(item) {
-            return item.id;
-        }).id;
-        items.push(dealerSite);
-        return [200, {
-            status: 'success',
-            data: {
-                dealerSite: dealerSite.serialize()
-            }
-        }];
+        return processPost(data, dealerSites, 'dealerSite', DealerSite, {
+            dealers: dealers,
+            sites: sites,
+            dealerSiteStatuses: dealerSiteStatuses
+        });
     });
-
     var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenPUT(regexDealerSitesPut).respond(function(method, url, data) {
-        var id = parseInt(url.replace(regexDealerSitesPut,'$1'));
-        var items = dealerSites.getItems();
-        var idx = _.findIndex(items, {id: id});
-        if (idx === -1) {
-            return [404, {
-                status: 'error',
-                message: 'Ошибка при обновлении',
-                errors: 'Не найден элемент с id: ' + id
-            }];
-        }
-
-        try {
-            var dealerSite = new DealerSite((angular.fromJson(data)).dealerSite, {
-                dealers: dealers,
-                sites: sites,
-                dealerSiteStatuses: dealerSiteStatuses
-            });
-        } catch (err) {
-            return [400, {
-                status: 'error',
-                message: 'Ошибка при обновлении',
-                errors: err.message
-            }];
-        }
-
-        items[idx] = dealerSite;
-        return [200, {
-            status: 'success',
-            data: {
-                dealerSite: dealerSite.serialize()
-            }
-        }];
+        return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
+            dealers: dealers,
+            sites: sites,
+            dealerSiteStatuses: dealerSiteStatuses
+        });
     });
-
     var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexDealerSitesDelete).respond(function(method, url, data) {
-        var id = parseInt(url.replace(regexDealerSitesDelete,'$1'));
-        var items = dealerSites.getItems();
-        var idx = _.findIndex(items, {id: id});
-        if (idx !== -1) {
-            items.splice(idx, 1);
-            return [200, {
-                status: 'success',
-                data: null
-            }];
-        } else {
-            return [404, {
-                status: 'error',
-                message: 'Ошибка при удалении',
-                errors: 'Не найден элемент с id: ' + id
-            }];
-        }
+        return processDelete(url, regexDealerSitesDelete, dealerSites);
     });
 
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
