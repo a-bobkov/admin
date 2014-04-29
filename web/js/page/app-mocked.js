@@ -609,6 +609,26 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         }];
     });
 
+    var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexDealerSitesDelete).respond(function(method, url, data) {
+        var id = parseInt(url.replace(regexDealerSitesDelete,'$1'));
+        var items = dealerSites.getItems();
+        var idx = _.findIndex(items, {id: id});
+        if (idx !== -1) {
+            items.splice(idx, 1);
+            return [200, {
+                status: 'success',
+                data: null
+            }];
+        } else {
+            return [404, {
+                status: 'error',
+                message: 'Ошибка при удалении',
+                errors: 'Не найден элемент с id: ' + id
+            }];
+        }
+    });
+
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
         return processQueryUrl(url, regexDealerSiteLoginsQuery, dealerSiteLogins.getItems(), 'dealerSiteLogins', DealerSiteLogins);

@@ -257,14 +257,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
 
         confirmMessage = 'Удалить регистрацию';
         noticeMessage = 'Удалена регистрация';
-        var dealerSiteInfo = ' салона "' + dealerSite.dealer.company_name + '" на сайте "' + dealerSite.site.name + '"';
+        var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
         if (confirm(confirmMessage + dealerSiteInfo + '?')) {
             dealerSite.remove().then(function() {
-                // dealerSites.getAll().then(function(dealerSitesArray) {
-                //     $scope.dealerSites = dealerSitesArray;
-                //     $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
-                //     $scope.onPatternChange();
-                // });
+                $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
+                $location.path('/dealersitelist?');
             });
         }
     };
