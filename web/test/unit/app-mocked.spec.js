@@ -1146,9 +1146,16 @@ describe('app-mocked', function() {
             var directories;
             var user;
 
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
             runs(function() {
                 directories = actualError = undefined;
-                usersLoader.loadItems().then(function(respond) {
+                usersLoader.loadItems(params).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
                     actualError = respond;
@@ -1160,9 +1167,8 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                user = directories.users.get(1);
-                user.email = 'new@mail.ru';
-                user.group = directories.groups.get(3);
+                user = directories.users.getItems()[0];
+                user.email = String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru';
 
                 actualSuccess = actualError = undefined;
                 user.save(directories).then(function(respond) {
@@ -1178,7 +1184,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 directories = actualError = undefined;
-                usersLoader.loadItems().then(function(respond) {
+                usersLoader.loadItems(params).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
                     actualError = respond;
@@ -1190,9 +1196,8 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                var savedUser = directories.users.get(1);
-                expect(savedUser.email).toBe(user.email);
-                expect(savedUser.group).toEqual(user.group);
+                var changedUser = directories.users.get(user.id);
+                expect(changedUser.email).toEqual(user.email);
             });
         });
 
@@ -1273,9 +1278,16 @@ describe('app-mocked', function() {
             var directories;
             var len;
 
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
             runs(function() {
                 directories = actualError = undefined;
-                usersLoader.loadItems().then(function(respond) {
+                usersLoader.loadItems(params).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
                     actualError = respond;
@@ -1287,11 +1299,11 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                var items = directories.users.getItems();
+                var item = directories.users.getItems()[0];
                 len = directories.users.getParams().pager.total;
 
                 actualSuccess = actualError = undefined;
-                items[items.length-1].remove().then(function(respond) {
+                item.remove().then(function(respond) {
                     actualSuccess = respond;
                 }, function(respond) {
                     actualError = respond;
@@ -1304,7 +1316,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 directories = actualError = undefined;
-                usersLoader.loadItems().then(function(respond) {
+                usersLoader.loadItems(params).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
                     actualError = respond;
