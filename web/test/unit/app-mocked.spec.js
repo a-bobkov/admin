@@ -131,9 +131,9 @@ describe('app-mocked', function() {
 
             runs(function() {
                 expect(_.every(directories.users.getItems(), function(value) {
-                    var companyName = String(value.dealer.companyName);
+                    var companyName = String(value.dealer.companyName).toLowerCase();
                     var group = String(value.group.id);
-                    return (companyName === 'Демокомпания' || group === 'Демокомпания');
+                    return (companyName === 'демокомпания' || group === 'Демокомпания');
                 })).toBeTruthy();
             });
         });
@@ -257,9 +257,9 @@ describe('app-mocked', function() {
 
             runs(function() {
                 expect(_.every(directories.users.getItems(), function(value) {
-                    var companyName = value.dealer && String(value.dealer.companyName);
+                    var companyName = value.dealer && String(value.dealer.companyName).toLowerCase();
                     var group = String(value.group.id);
-                    return (companyName === 'Свет' || companyName === '3' || group === 'Свет' || group === '3');
+                    return (companyName === 'свет' || companyName === '3' || group === 'Свет' || group === '3');
                 })).toBeTruthy();
             });
         });
@@ -351,7 +351,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 expect(_.every(directories.users.getItems(), function(value) {
-                    var email = String(value.email);
+                    var email = String(value.email).toLowerCase();
                     var status = String(value.status.id);
                     return (email.indexOf('act') !== -1 || status.indexOf('act') !== -1);
                 })).toBeTruthy();
@@ -383,8 +383,8 @@ describe('app-mocked', function() {
 
             runs(function() {
                 expect(_.every(directories.users.getItems(), function(value) {
-                    var email = String(value.email);
-                    var companyName = String(value.dealer.companyName);
+                    var email = String(value.email).toLowerCase();
+                    var companyName = String(value.dealer.companyName).toLowerCase();
                     return (email.indexOf('компания') !== -1 || companyName.indexOf('компания') !== -1);
                 })).toBeTruthy();
             });
@@ -449,8 +449,8 @@ describe('app-mocked', function() {
             runs(function() {
                 expect(_.every(directories.users.getItems(), function(value) {
                     var id = String(value.id);
-                    var email = String(value.email);
-                    var companyName = String(value.dealer.companyName);
+                    var email = String(value.email).toLowerCase();
+                    var companyName = String(value.dealer.companyName).toLowerCase();
                     var status = String(value.status.id);
                     var manager = String(value.dealer.manager.id);
                     return ((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || companyName.indexOf('1') !== -1) 
@@ -689,70 +689,6 @@ describe('app-mocked', function() {
             runs(function() {
                 var usersDates = _.pluck(directories.users.getItems(), 'lastLogin');
                 expect(usersDates).toBeSorted('DescendingDates');
-            });
-        });
-
-        it('order - сортировать данные пользователей по возрастанию поля вложенного объекта', function() {
-            var actualSuccess,
-                actualError;
-            var directories;
-
-            var params = {
-                order: {
-                    order_field: 'dealer.companyName',
-                    order_direction: 'asc'
-                }
-            }
-
-            runs(function() {
-                usersLoader.loadItems(params).then(function(respond) {
-                    directories = respond;
-                }, function(respond) {
-                    actualError = respond;
-                });
-                $httpBackend.flush();
-            });
-            waitsFor(function() {
-                return directories || actualError;
-            });
-
-            runs(function() {
-                var usersCompany_name = _.invoke(directories.users.getItems(), function() {
-                    return getDeepValue(this, params.order.order_field.split('.'));
-                });
-                expect(usersCompany_name).toBeSorted('AscendingStrings');
-            });
-        });
-
-        it('order - сортировать данные пользователей по убыванию поля вложенного объекта', function() {
-            var actualSuccess,
-                actualError;
-            var directories;
-
-            var params = {
-                order: {
-                    order_field: 'dealer.companyName',
-                    order_direction: 'desc'
-                }
-            }
-
-            runs(function() {
-                usersLoader.loadItems(params).then(function(respond) {
-                    directories = respond;
-                }, function(respond) {
-                    actualError = respond;
-                });
-                $httpBackend.flush();
-            });
-            waitsFor(function() {
-                return directories || actualError;
-            });
-
-            runs(function() {
-                var usersCompany_name = _.invoke(directories.users.getItems(), function() {
-                    return getDeepValue(this, params.order.order_field.split('.'));
-                });
-                expect(usersCompany_name).toBeSorted('DescendingStrings');
             });
         });
 

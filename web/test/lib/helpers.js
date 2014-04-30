@@ -18,7 +18,7 @@ beforeEach(function() {
                 } else if (params.match('Dates')) {
                     return Date.parse(arg);
                 } else {
-                    return arg;
+                    return arg.toLowerCase();
                 }
             }
             var compare = function(a, b) {
