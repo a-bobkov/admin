@@ -41,39 +41,7 @@ describe('app-mocked', function() {
         }
     });
 
-    it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
-        var actualSuccess,
-            actualError;
-        var directories;
-
-        var params = {
-            filters: [
-                { type: 'equal', fields: ['status'], value: 'active' }
-            ]
-        }
-
-        runs(function() {
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
-            });
-            $httpBackend.flush();
-        });
-
-        waitsFor(function() {
-          return directories || actualError;
-        });
-
-        runs(function() {
-            expect(_.every(directories.users.getItems(), function(value) {
-                var status = String(value.status.id);
-                return (status === 'active');
-            })).toBeTruthy();
-        });
-    });
-
-    xdescribe('Методы query должны', function() {
+    describe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
@@ -86,18 +54,24 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var status = String(value.status.id);
-                return (status === 'active');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var status = String(value.status.id);
+                    return (status === 'active');
+                })).toBeTruthy();
+            });
         });
 
         it('equal - фильтровать данные пользователей по равенству в нескольких полях', function() {
@@ -111,19 +85,25 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var status = String(value.status.id);
-                var group = String(value.group.id);
-                return (status === '3' || group === '3');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var status = String(value.status.id);
+                    var group = String(value.group.id);
+                    return (status === '3' || group === '3');
+                })).toBeTruthy();
+            });
         });
 
         it('equal - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
@@ -137,19 +117,25 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var companyName = String(value.dealer.companyName);
-                var group = String(value.group.id);
-                return (companyName === 'Демокомпания' || group === 'Демокомпания');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var companyName = String(value.dealer.companyName);
+                    var group = String(value.group.id);
+                    return (companyName === 'Демокомпания' || group === 'Демокомпания');
+                })).toBeTruthy();
+            });
         });
 
         it('equal - значение фильтра может быть числом', function() {
@@ -163,18 +149,24 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var id = String(value.id);
-                return (id === '1');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var id = String(value.id);
+                    return (id === '1');
+                })).toBeTruthy();
+            });
         });
 
         it('in - фильтровать данные пользователей по равенству в одном поле', function() {
@@ -188,18 +180,24 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var status = String(value.status.id);
-                return (status === 'inactive' || status === 'blocked');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var status = String(value.status.id);
+                    return (status === 'inactive' || status === 'blocked');
+                })).toBeTruthy();
+            });
         });
 
         it('in - фильтровать данные пользователей по равенству в нескольких поле', function() {
@@ -213,19 +211,25 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var status = String(value.status.id);
-                var group = String(value.group.id);
-                return (status === 'blocked' || status === '2' || group === 'blocked' || group === '2');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var status = String(value.status.id);
+                    var group = String(value.group.id);
+                    return (status === 'blocked' || status === '2' || group === 'blocked' || group === '2');
+                })).toBeTruthy();
+            });
         });
 
         it('in - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
@@ -239,19 +243,25 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var companyName = value.dealer && String(value.dealer.companyName);
-                var group = String(value.group.id);
-                return (companyName === 'Свет' || companyName === '3' || group === 'Свет' || group === '3');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var companyName = value.dealer && String(value.dealer.companyName);
+                    var group = String(value.group.id);
+                    return (companyName === 'Свет' || companyName === '3' || group === 'Свет' || group === '3');
+                })).toBeTruthy();
+            });
         });
 
         it('in - значение фильтра может быть массивом чисел', function() {
@@ -265,18 +275,24 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var id = String(value.id);
-                return (id === '1' || id === '2');
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var id = String(value.id);
+                    return (id === '1' || id === '2');
+                })).toBeTruthy();
+            });
         });
 
         it('contain - фильтровать данные пользователей по подстроке в одном поле', function() {
@@ -290,18 +306,24 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var lastLogin = String(value.lastLogin);
-                return (lastLogin.indexOf('2000') !== -1);
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var lastLogin = String(value.lastLogin);
+                    return (lastLogin.indexOf('2000') !== -1);
+                })).toBeTruthy();
+            });
         });
 
         it('contain - фильтровать данные пользователей по подстроке в нескольких полях', function() {
@@ -315,19 +337,25 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var email = String(value.email);
-                var status = String(value.status.id);
-                return (email.indexOf('act') !== -1 || status.indexOf('act') !== -1);
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var email = String(value.email);
+                    var status = String(value.status.id);
+                    return (email.indexOf('act') !== -1 || status.indexOf('act') !== -1);
+                })).toBeTruthy();
+            });
         });
 
         it('contain - фильтровать данные пользователей по подстроке в полях во вложенных объектах', function() {
@@ -341,19 +369,25 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var email = String(value.email);
-                var companyName = String(value.dealer.companyName);
-                return (email.indexOf('компания') !== -1 || companyName.indexOf('компания') !== -1);
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var email = String(value.email);
+                    var companyName = String(value.dealer.companyName);
+                    return (email.indexOf('компания') !== -1 || companyName.indexOf('компания') !== -1);
+                })).toBeTruthy();
+            });
         });
 
         it('contain - значение фильтра может быть числом', function() {
@@ -367,18 +401,24 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var lastLogin = String(value.lastLogin);
-                return (lastLogin.indexOf('2000') !== -1);
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var lastLogin = String(value.lastLogin);
+                    return (lastLogin.indexOf('2000') !== -1);
+                })).toBeTruthy();
+            });
         });
 
         it('filters - комбинация трех разных фильтров', function() {
@@ -394,23 +434,29 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(_.every(directories.users.getItems(), function(value) {
-                var id = String(value.id);
-                var email = String(value.email);
-                var companyName = String(value.dealer.companyName);
-                var status = String(value.status.id);
-                var manager = String(value.dealer.manager.id);
-                return ((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || companyName.indexOf('1') !== -1) 
-                    && (status === 'active') && (manager === '2'));
-            })).toBeTruthy();
+            runs(function() {
+                expect(_.every(directories.users.getItems(), function(value) {
+                    var id = String(value.id);
+                    var email = String(value.email);
+                    var companyName = String(value.dealer.companyName);
+                    var status = String(value.status.id);
+                    var manager = String(value.dealer.manager.id);
+                    return ((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || companyName.indexOf('1') !== -1) 
+                        && (status === 'active') && (manager === '2'));
+                })).toBeTruthy();
+            });
         });
 
         it('если параметр filters в запросе указан, то в ответе filters должен быть таким же', function() {
@@ -424,33 +470,46 @@ describe('app-mocked', function() {
                 ]
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var pars = directories.users.getParams();
-            expect(pars.filters).toEqual(params.filters);
+            runs(function() {
+                var pars = directories.users.getParams();
+                expect(pars.filters).toEqual(params.filters);
+            });
         });
 
         it('если параметр filters в запросе НЕ указан, то в ответе filters должен быть пустым массивом', function() {
             var actualSuccess,
                 actualError;
-            var directories;
+            var directories,
+                params;
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var params = directories.users.getParams();
-            expect(params.filters).toEqual([]);
+            runs(function() {
+                params = directories.users.getParams();
+                expect(params.filters).toEqual([]);
+            });
         });
 
         it('order - сортировать данные пользователей по возрастанию id', function() {
@@ -465,16 +524,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersId = _.pluck(directories.users.getItems(), 'id');
-            expect(usersId).toBeSorted('AscendingNumbers');
+            runs(function() {
+                var usersId = _.pluck(directories.users.getItems(), 'id');
+                expect(usersId).toBeSorted('AscendingNumbers');
+            });
         });
 
         it('order - сортировать данные пользователей по убыванию id', function() {
@@ -489,16 +554,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersId = _.pluck(directories.users.getItems(), 'id');
-            expect(usersId).toBeSorted('DescendingNumbers');
+            runs(function() {
+                var usersId = _.pluck(directories.users.getItems(), 'id');
+                expect(usersId).toBeSorted('DescendingNumbers');
+            });
         });
 
         it('order - сортировать данные пользователей по возрастанию email', function() {
@@ -513,16 +584,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersEmail = _.pluck(directories.users.getItems(), 'email');
-            expect(usersEmail).toBeSorted('AscendingStrings');
+            runs(function() {
+                var usersEmail = _.pluck(directories.users.getItems(), 'email');
+                expect(usersEmail).toBeSorted('AscendingStrings');
+            });
         });
 
         it('order - сортировать данные пользователей по убыванию email', function() {
@@ -537,16 +614,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersEmail = _.pluck(directories.users.getItems(), 'email');
-            expect(usersEmail).toBeSorted('DescendingStrings');
+            runs(function() {
+                var usersEmail = _.pluck(directories.users.getItems(), 'email');
+                expect(usersEmail).toBeSorted('DescendingStrings');
+            });
         });
 
         it('order - сортировать данные пользователей по возрастанию даты', function() {
@@ -561,16 +644,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersDates = _.pluck(directories.users.getItems(), 'lastLogin');
-            expect(usersDates).toBeSorted('AscendingDates');
+            runs(function() {
+                var usersDates = _.pluck(directories.users.getItems(), 'lastLogin');
+                expect(usersDates).toBeSorted('AscendingDates');
+            });
         });
 
         it('order - сортировать данные пользователей по убыванию даты', function() {
@@ -585,16 +674,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersDates = _.pluck(directories.users.getItems(), 'lastLogin');
-            expect(usersDates).toBeSorted('DescendingDates');
+            runs(function() {
+                var usersDates = _.pluck(directories.users.getItems(), 'lastLogin');
+                expect(usersDates).toBeSorted('DescendingDates');
+            });
         });
 
         it('order - сортировать данные пользователей по возрастанию поля вложенного объекта', function() {
@@ -609,18 +704,24 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersCompany_name = _.invoke(directories.users.getItems(), function() {
-                return getDeepValue(this, params.order.order_field.split('.'));
+            runs(function() {
+                var usersCompany_name = _.invoke(directories.users.getItems(), function() {
+                    return getDeepValue(this, params.order.order_field.split('.'));
+                });
+                expect(usersCompany_name).toBeSorted('AscendingStrings');
             });
-            expect(usersCompany_name).toBeSorted('AscendingStrings');
         });
 
         it('order - сортировать данные пользователей по убыванию поля вложенного объекта', function() {
@@ -635,18 +736,24 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var usersCompany_name = _.invoke(directories.users.getItems(), function() {
-                return getDeepValue(this, params.order.order_field.split('.'));
+            runs(function() {
+                var usersCompany_name = _.invoke(directories.users.getItems(), function() {
+                    return getDeepValue(this, params.order.order_field.split('.'));
+                });
+                expect(usersCompany_name).toBeSorted('DescendingStrings');
             });
-            expect(usersCompany_name).toBeSorted('DescendingStrings');
         });
 
         it('если параметр order в запросе указан, то в ответе order должен быть таким же, но без order', function() {
@@ -661,19 +768,25 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var pars = directories.users.getParams();
-            expect(pars.order).toEqual({
+            runs(function() {
+                var pars = directories.users.getParams();
+                expect(pars.order).toEqual({
                     field: 'id',
                     direction: 'asc'
                 });
+            });
         });
 
         it('если параметр order в запросе НЕ указан, то в ответе order должен быть по-умолчанию', function() {
@@ -683,18 +796,24 @@ describe('app-mocked', function() {
 
             var params = {}
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var pars = directories.users.getParams();
-            expect(pars.order).toEqual({
-                field: 'id',
-                direction: 'asc'
+            runs(function() {
+                var pars = directories.users.getParams();
+                expect(pars.order).toEqual({
+                    field: 'id',
+                    direction: 'asc'
+                });
             });
         });
 
@@ -709,16 +828,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var users = directories.users.getItems();
-            expect(users.length).toBe(10);
+            runs(function() {
+                var users = directories.users.getItems();
+                expect(users.length).toBe(10);
+            });
         });
 
         it('если параметр per_page в запросе НЕ указан, то в ответе per_page должен быть 100', function() {
@@ -732,16 +857,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var pars = directories.users.getParams();
-            expect(pars.pager.per_page).toEqual(100);
+            runs(function() {
+                var pars = directories.users.getParams();
+                expect(pars.pager.per_page).toEqual(100);
+            });
         });
 
         it('если параметр per_page в запросе указан больше 100, то в ответе per_page должен быть 100', function() {
@@ -756,16 +887,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var pars = directories.users.getParams();
-            expect(pars.pager.per_page).toEqual(100);
+            runs(function() {
+                var pars = directories.users.getParams();
+                expect(pars.pager.per_page).toEqual(100);
+            });
         });
 
         it('если параметр page в запросе НЕ указан, то в ответе page должен быть 1', function() {
@@ -779,16 +916,22 @@ describe('app-mocked', function() {
                 }
             }
 
-            usersLoader.loadItems(params).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var pars = directories.users.getParams();
-            expect(pars.pager.page).toEqual(1);
+            runs(function() {
+                var pars = directories.users.getParams();
+                expect(pars.pager.page).toEqual(1);
+            });
         });
     });
 
