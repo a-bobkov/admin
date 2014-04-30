@@ -69,6 +69,18 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
 
     _.extend(User.prototype, Item.prototype);
 
+    User.prototype.isValid = function() {
+        return _.every(this, function(value, key) {
+            if (key === 'dealer' && value) {
+                return value.isValid();
+            } else if (value && value.id) {    // ссылки пропускаем
+                return true;
+            } else {              // todo: валидация значений полей 
+                return true;
+            }
+        });
+    };
+
     User.prototype.isDealer = function() {
         return (this.group && this.group.id == 2);
     };

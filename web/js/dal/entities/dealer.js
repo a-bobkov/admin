@@ -37,6 +37,21 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
 
     _.extend(Dealer.prototype, Item.prototype);
 
+    Dealer.prototype.isValid = function() {
+        return _.every(this, function(value, key) {
+            if (value && value.id) {    // ссылки пропускаем
+                return true;
+            } else {
+                if (key === 'fax') {
+                    var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
+                    return value.match(regexpPhoneNumber);
+                } else {
+                    return true;
+                }
+            }
+        });
+    };
+
     return Dealer;
 })
 

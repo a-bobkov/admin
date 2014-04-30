@@ -251,6 +251,13 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             }];
         }
 
+        if (!item.isValid()) {
+            return [400, {
+                status: 'error',
+                message: 'Validation Failed'
+            }];
+        }
+
         item.id = 1 + _.max(items, function(item) {
             return item.id;
         }).id;

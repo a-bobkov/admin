@@ -942,6 +942,55 @@ describe('app-mocked', function() {
             expect(newLen).toEqual(len+1);
         });
 
+        it('post - выдавать ошибку валидации пользователя при неправильном значении в поле fax', function() {
+            var data = {
+                    email: 'new@maxposter.ru',
+                    status: 'active',
+                    group: {id: 2},
+                    dealer: {
+                        companyName: 'Новая компания',
+                        city: {id: 1},
+                        address: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123',
+                        manager: {id: 4}
+                    }
+                },
+                actualSuccess,
+                actualError;
+            var directories;
+            var savedUser;
+            var len;
+
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var user = new User(data, directories);
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError.data.message).toEqual('Validation Failed');
+            });
+        });
+
         it('post - возвращать ошибку при попытке сохранения пользователя со ссылками на объекты, не существующие в БД', function() {
             var dataUser = {
                     email: 'new@maxposter.ru',
