@@ -3,8 +3,8 @@ beforeEach(function() {
         toEqualData: function(expected) {
             var notText = this.isNot ? " not" : "";
             this.message = function() {
-                return "Expected '" + angular.mock.dump(expected) + "'" +
-                        notText + " to equal '" + angular.mock.dump(this.actual) + "'.";
+                return "Expected '" + angular.toJson(expected) + "'" +
+                        notText + " to equal '" + angular.toJson(this.actual) + "'.";
             };
             return angular.equals(this.actual, expected);
         },

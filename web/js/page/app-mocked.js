@@ -233,7 +233,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         } else {
             return [404, {
                 status: 'error',
-                message: 'Ошибка при получении',
+                message: 'Not Found',
                 errors: 'Не найден ' + itemName + ' с id: ' + id
             }];
         }
@@ -278,7 +278,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         if (idx === -1) {
             return [404, {
                 status: 'error',
-                message: 'Ошибка при обновлении',
+                message: 'Not Found',
                 errors: 'Не найден элемент с id: ' + id
             }];
         }
@@ -316,7 +316,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         } else {
             return [404, {
                 status: 'error',
-                message: 'Ошибка при удалении',
+                message: 'Not Found',
                 errors: 'Не найден элемент с id: ' + id
             }];
         }

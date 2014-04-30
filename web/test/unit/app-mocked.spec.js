@@ -872,6 +872,7 @@ describe('app-mocked', function() {
     });
 
     describe('Методы CRUD должны', function() {
+
         it('post - сохранять данные нового пользователя', function() {
             var data = {
                     email: 'new@maxposter.ru',
@@ -1095,7 +1096,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var user = directories.user;
-                expect(user.dealer.contactName).toEqual('Аверин Константин Петрович');
+                expect(user.dealer.contactName).toBeDefined();
             });
         });
 
@@ -1117,11 +1118,7 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                expect(actualError.data).toEqualData({
-                    status: 'error',
-                    message: 'Ошибка при получении',
-                    errors: 'Не найден user с id: 9999'
-                });
+                expect(actualError.data.message).toEqual('Not Found');
             });
         });
 
@@ -1224,7 +1221,7 @@ describe('app-mocked', function() {
             });
         });
 
-        it('put - возвращать ошибку при попытке сохранения пользователя со ссылками на объекты, не существующие в БД', function() {
+        it('put - возвращать ошибку при попытке сохранения несуществующего пользователя', function() {
             var actualSuccess,
                 actualError;
             var directories;
@@ -1243,11 +1240,7 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                expect(actualError.data).toEqualData({
-                    status: 'error',
-                    message: 'Ошибка при обновлении',
-                    errors: 'Не найден элемент с id: 9999'
-                });
+                expect(actualError.data.message).toEqual('Not Found');
             });
         });
 
@@ -1271,9 +1264,9 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var items = directories.users.getItems();
-                len = items.length;
+                len = directories.users.getParams().pager.total;
 
-                items[len-1].remove().then(function(respond) {
+                items[items.length-1].remove().then(function(respond) {
                     actualSuccess = respond;
                 }, function(respond) {
                     actualError = respond;
@@ -1297,8 +1290,8 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                var items = directories.users.getItems();
-                expect(items.length).toBe(len-1);
+                var newLen = directories.users.getParams().pager.total;
+                expect(newLen).toBe(len-1);
             });
         });
 
@@ -1321,11 +1314,7 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                expect(actualError.data).toEqualData({
-                    status: 'error',
-                    message: 'Ошибка при удалении',
-                    errors: 'Не найден элемент с id: 9999'
-                });
+                expect(actualError.data.message).toEqual('Not Found');
             });
         });
     });
