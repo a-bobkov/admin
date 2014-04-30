@@ -37,11 +37,11 @@ describe('app-mocked', function() {
             setHttpMock($httpBackend, usersLoader, User, Users);
         } else {
             $httpBackend = {};
-            $httpBackend.flush = function() {}
+            $httpBackend.flush = function() {};
         }
     });
 
-    describe('Методы query должны', function() {
+    xdescribe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
@@ -871,7 +871,7 @@ describe('app-mocked', function() {
         });
     });
 
-    xdescribe('Методы CRUD должны', function() {
+    describe('Методы CRUD должны', function() {
         it('post - сохранять данные нового пользователя', function() {
             var data = {
                     email: 'new@maxposter.ru',
@@ -880,21 +880,21 @@ describe('app-mocked', function() {
                     group: {id: 2},
                     dealer: {
                         companyName: 'Новая компания',
-                        city: {id: 5},
-                        market: {id: 8},
+                        city: {id: 1},
+                        market: {id: 4},
                         metro: {id: 10},
                         address: '191040, Ленинский проспект, 150, оф.505',
-                        fax: '+7-812-232-4123',
-                        dealer_email: 'demo@demo.ru',
-                        site: 'http://www.w3schools.com',
+                        fax: '+7(812)232-4123',
+                        email: 'demo@demo.ru',
+                        url: 'http://www.w3schools.com',
                         contactName: 'Аверин Константин Петрович',
-                        phone: '+7-812-232-4123',
+                        phone: '+7(812)232-4123',
                         phoneFrom: '10',
                         phoneTo: '20',
-                        phone2: '+7-812-232-4124',
+                        phone2: '+7(812)232-4124',
                         phone2From: '11',
                         phone2To: '21',
-                        phone3: '+7-812-232-4125',
+                        phone3: '+7(812)232-4125',
                         phone3From: '7',
                         phone3To: '15',
                         companyInfo: 'Здесь может быть произвольный текст...',
@@ -904,42 +904,54 @@ describe('app-mocked', function() {
                 actualSuccess,
                 actualError;
             var directories;
+            var savedUser;
+            var len;
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
-
-            var len = directories.users.getItems().length;
-
-            var user = new User(data, directories);
-            user.save(directories).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond){
-                actualError = respond;
+            waitsFor(function() {
+                return directories || actualError;
             });
 
-            $httpBackend.flush();
-            $rootScope.$digest();
-
-            var savedUser = actualSuccess;
-
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                len = directories.users.getItems().length;
+                var user = new User(data, directories);
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
 
-            var newUser = directories.users.get(savedUser.id);
-            var newLen = directories.users.getItems().length;
+            runs(function() {
+                savedUser = actualSuccess;
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(newUser).toEqual(savedUser);
-            expect(newLen).toEqual(len+1);
+            runs(function() {
+                var newUser = directories.users.get(savedUser.id);
+                var newLen = directories.users.getItems().length;
+                expect(newUser).toEqual(savedUser);
+                expect(newLen).toEqual(len+1);
+            });
         });
 
         it('post - выдавать ошибку валидации пользователя при неправильном значении в поле fax', function() {
@@ -999,21 +1011,21 @@ describe('app-mocked', function() {
                     group: {id: 2},
                     dealer: {
                         companyName: 'Новая компания',
-                        city: {id: 5},
-                        market: {id: 8},
+                        city: {id: 1},
+                        market: {id: 4},
                         metro: {id: 10},
                         address: '191040, Ленинский проспект, 150, оф.505',
-                        fax: '+7-812-232-4123',
-                        dealer_email: 'demo@demo.ru',
-                        site: 'http://www.w3schools.com',
+                        fax: '+7(812)232-4123',
+                        email: 'demo@demo.ru',
+                        url: 'http://www.w3schools.com',
                         contactName: 'Аверин Константин Петрович',
-                        phone: '+7-812-232-4123',
+                        phone: '+7(812)232-4123',
                         phoneFrom: '10',
                         phoneTo: '20',
-                        phone2: '+7-812-232-4124',
+                        phone2: '+7(812)232-4124',
                         phone2From: '11',
                         phone2To: '21',
-                        phone3: '+7-812-232-4125',
+                        phone3: '+7(812)232-4125',
                         phone3From: '7',
                         phone3To: '15',
                         companyInfo: 'Здесь может быть произвольный текст...',
@@ -1027,31 +1039,40 @@ describe('app-mocked', function() {
                 actualError;
             var directories;
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
-
-            var newUser = new User(dataUser, directories);
-            var newGroup = new Group(dataGroup);
-            newUser.group = newGroup;
-
-            newUser.save(directories).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond){
-                actualError = respond;
+            waitsFor(function() {
+                return directories || actualError;
             });
 
-            $httpBackend.flush();
-            $rootScope.$digest();
+            runs(function() {
+                var newUser = new User(dataUser, directories);
+                var newGroup = new Group(dataGroup);
+                newUser.group = newGroup;
 
-            expect(actualError.data).toEqualData({
-                status: 'error',
-                message: 'Ошибка при создании',
-                errors: 'Не найден элемент по ссылке group: {"id":99}'
+                newUser.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError.data).toEqualData({
+                    status: 'error',
+                    message: 'Ошибка при создании',
+                    errors: 'Не найден элемент по ссылке group: {"id":99}'
+                });
             });
         });
 
@@ -1060,16 +1081,22 @@ describe('app-mocked', function() {
                 actualError;
             var directories;
 
-            usersLoader.loadItem(5).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItem(5).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            var user = directories.user;
-            expect(user.dealer.contactName).toEqual('Аверин Константин Петрович');
+            runs(function() {
+                var user = directories.user;
+                expect(user.dealer.contactName).toEqual('Аверин Константин Петрович');
+            });
         });
 
         it('get - возвращать ошибку, если пользователь не найден', function() {
@@ -1077,18 +1104,24 @@ describe('app-mocked', function() {
                 actualError;
             var directories;
 
-            usersLoader.loadItem(9999).then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItem(9999).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(actualError.data).toEqualData({
-                status: 'error',
-                message: 'Ошибка при получении',
-                errors: 'Не найден user с id: 9999'
+            runs(function() {
+                expect(actualError.data).toEqualData({
+                    status: 'error',
+                    message: 'Ошибка при получении',
+                    errors: 'Не найден user с id: 9999'
+                });
             });
         });
 
@@ -1097,38 +1130,53 @@ describe('app-mocked', function() {
                 actualError;
 
             var directories;
+            var user;
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
-
-            var user = directories.users.get(1);
-            user.email = 'new@mail.ru';
-            user.group = directories.groups.get(3);
-
-            user.save(directories).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond){
-                actualError = respond;
+            waitsFor(function() {
+                return directories || actualError;
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                user = directories.users.get(1);
+                user.email = 'new@mail.ru';
+                user.group = directories.groups.get(3);
+
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
 
-            var savedUser = directories.users.get(1);
-            expect(savedUser.email).toBe(user.email);
-            expect(savedUser.group).toEqual(user.group);
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var savedUser = directories.users.get(1);
+                expect(savedUser.email).toBe(user.email);
+                expect(savedUser.group).toEqual(user.group);
+            });
         });
 
         it('put - возвращать ошибку при попытке сохранения пользователя со ссылками на объекты, не существующие в БД', function() {
@@ -1139,31 +1187,40 @@ describe('app-mocked', function() {
                 actualError;
             var directories;
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
-
-            var user = directories.users.get(1);
-            var newGroup = new Group(dataGroup);
-            user.group = newGroup;
-
-            user.save(directories).then(function(respond) {
-                actualSuccess = respond;
-            }, function(respond){
-                actualError = respond;
+            waitsFor(function() {
+                return directories || actualError;
             });
 
-            $httpBackend.flush();
-            $rootScope.$digest();
+            runs(function() {
+                var user = directories.users.get(1);
+                var newGroup = new Group(dataGroup);
+                user.group = newGroup;
 
-            expect(actualError.data).toEqualData({
-                status: 'error',
-                message: 'Ошибка при обновлении',
-                errors: 'Не найден элемент по ссылке group: {"id":99}'
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError.data).toEqualData({
+                    status: 'error',
+                    message: 'Ошибка при обновлении',
+                    errors: 'Не найден элемент по ссылке group: {"id":99}'
+                });
             });
         });
 
@@ -1172,20 +1229,25 @@ describe('app-mocked', function() {
                 actualError;
             var directories;
 
-            var user = new User({id: 9999});
-
-            user.save().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                var user = new User({id: 9999});
+                user.save().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(actualError.data).toEqualData({
-                status: 'error',
-                message: 'Ошибка при обновлении',
-                errors: 'Не найден элемент с id: 9999'
+            runs(function() {
+                expect(actualError.data).toEqualData({
+                    status: 'error',
+                    message: 'Ошибка при обновлении',
+                    errors: 'Не найден элемент с id: 9999'
+                });
             });
         });
 
@@ -1193,34 +1255,51 @@ describe('app-mocked', function() {
             var actualSuccess,
                 actualError;
             var directories;
+            var len;
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
-
-            var items = directories.users.getItems();
-            var len = items.length;
-
-            items[0].remove().then(function(respond) {
-                actualSuccess = respond;
+            waitsFor(function() {
+                return directories || actualError;
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
 
-            usersLoader.loadItems().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                var items = directories.users.getItems();
+                len = items.length;
+
+                items[len-1].remove().then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return actualSuccess !== undefined || actualError;
+            });
 
-            var items = directories.users.getItems();
-            expect(items.length).toBe(len-1);
+            runs(function() {
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var items = directories.users.getItems();
+                expect(items.length).toBe(len-1);
+            });
         });
 
         it('remove - возвращать ошибку, если пользователь не найден', function() {
@@ -1228,20 +1307,25 @@ describe('app-mocked', function() {
                 actualError;
             var directories;
 
-            var user = new User({id: 9999});
-
-            user.remove().then(function(respond) {
-                directories = respond;
-            }, function(respond) {
-                actualError = respond;
+            runs(function() {
+                var user = new User({id: 9999});
+                user.remove().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
             });
-            $httpBackend.flush();
-            $rootScope.$digest();
+            waitsFor(function() {
+                return directories || actualError;
+            });
 
-            expect(actualError.data).toEqualData({
-                status: 'error',
-                message: 'Ошибка при удалении',
-                errors: 'Не найден элемент с id: 9999'
+            runs(function() {
+                expect(actualError.data).toEqualData({
+                    status: 'error',
+                    message: 'Ошибка при удалении',
+                    errors: 'Не найден элемент с id: 9999'
+                });
             });
         });
     });

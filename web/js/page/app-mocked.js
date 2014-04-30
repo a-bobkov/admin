@@ -23,20 +23,21 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             {id: 0, name: ''}
         ],
         cities: [
-            {id: 5, name: 'Питер'},
-            {id: 6, name: 'Москва'}
+            {id: 1, name: 'Москва'},
+            {id: 2, name: 'Питер'},
+            {id: 6, name: 'Екатеринбург'}
         ],
         markets: [
-            {id: 6, name: 'Рынок один в москве', city: {id: 6}},
-            {id: 7, name: 'Рынок два в москве', city: {id: 6}},
-            {id: 8, name: 'Рынок один в питере', city: {id: 5}},
-            {id: 9, name: 'Рынок два в питере', city: {id: 5}}
+            {id: 4, name: 'Рынок один в москве', city: {id: 1}},
+            {id: 7, name: 'Рынок два в москве', city: {id: 1}},
+            {id: 8, name: 'Рынок один в питере', city: {id: 2}},
+            {id: 9, name: 'Рынок два в питере', city: {id: 2}}
         ],
         metros: [
-            {id: 8, name: 'Метро один в москве', city: {id: 6}},
-            {id: 9, name: 'Метро два в москве', city: {id: 6}},
-            {id: 10, name: 'Метро один в питере', city: {id: 5}},
-            {id: 11, name: 'Метро два в питере', city: {id: 5}}
+            {id: 8, name: 'Метро один в москве', city: {id: 1}},
+            {id: 9, name: 'Метро два в москве', city: {id: 1}},
+            {id: 10, name: 'Метро один в питере', city: {id: 2}},
+            {id: 11, name: 'Метро два в питере', city: {id: 2}}
         ],
         sites: [
             {id: 11, name: 'Сайт один'},
@@ -54,7 +55,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
             dealer: {
                 id: 5,
                 companyName: 'Демокомпания',
-                city: {id: 5},
+                city: {id: 2},
                 market: {id: 8},
                 metro: {id: 10},
                 address: '191040, Лиговский проспект, 150, оф.505',
