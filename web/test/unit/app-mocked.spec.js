@@ -875,7 +875,8 @@ describe('app-mocked', function() {
 
         it('post - сохранять данные нового пользователя', function() {
             var data = {
-                    email: 'new@maxposter.ru',
+                    email: String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru',
+                    password: '1',
                     lastLogin: '2013-12-01',
                     status: 'active',
                     group: {id: 2},
@@ -908,8 +909,16 @@ describe('app-mocked', function() {
             var savedUser;
             var len;
 
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
             runs(function() {
-                usersLoader.loadItems().then(function(respond) {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
                     actualError = respond;
@@ -921,7 +930,8 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                len = directories.users.getItems().length;
+                actualSuccess = actualError = undefined;
+                len = directories.users.getParams().pager.total;
                 var user = new User(data, directories);
                 user.save(directories).then(function(respond) {
                     actualSuccess = respond;
@@ -936,7 +946,8 @@ describe('app-mocked', function() {
 
             runs(function() {
                 savedUser = actualSuccess;
-                usersLoader.loadItems().then(function(respond) {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
                     actualError = respond;
@@ -949,7 +960,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var newUser = directories.users.get(savedUser.id);
-                var newLen = directories.users.getItems().length;
+                var newLen = directories.users.getParams().pager.total;
                 expect(newUser).toEqual(savedUser);
                 expect(newLen).toEqual(len+1);
             });
@@ -975,6 +986,7 @@ describe('app-mocked', function() {
             var len;
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItems().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -988,6 +1000,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var user = new User(data, directories);
+                actualSuccess = actualError = undefined;
                 user.save(directories).then(function(respond) {
                     actualSuccess = respond;
                 }, function(respond){
@@ -1041,6 +1054,7 @@ describe('app-mocked', function() {
             var directories;
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItems().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1057,6 +1071,7 @@ describe('app-mocked', function() {
                 var newGroup = new Group(dataGroup);
                 newUser.group = newGroup;
 
+                actualSuccess = actualError = undefined;
                 newUser.save(directories).then(function(respond) {
                     actualSuccess = respond;
                 }, function(respond){
@@ -1083,6 +1098,7 @@ describe('app-mocked', function() {
             var directories;
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItem(5).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1106,6 +1122,7 @@ describe('app-mocked', function() {
             var directories;
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItem(9999).then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1130,6 +1147,7 @@ describe('app-mocked', function() {
             var user;
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItems().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1146,6 +1164,7 @@ describe('app-mocked', function() {
                 user.email = 'new@mail.ru';
                 user.group = directories.groups.get(3);
 
+                actualSuccess = actualError = undefined;
                 user.save(directories).then(function(respond) {
                     actualSuccess = respond;
                 }, function(respond){
@@ -1158,6 +1177,7 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItems().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1185,6 +1205,7 @@ describe('app-mocked', function() {
             var directories;
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItems().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1201,6 +1222,7 @@ describe('app-mocked', function() {
                 var newGroup = new Group(dataGroup);
                 user.group = newGroup;
 
+                actualSuccess = actualError = undefined;
                 user.save(directories).then(function(respond) {
                     actualSuccess = respond;
                 }, function(respond){
@@ -1228,6 +1250,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var user = new User({id: 9999});
+                directories = actualError = undefined;
                 user.save().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1251,6 +1274,7 @@ describe('app-mocked', function() {
             var len;
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItems().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1266,6 +1290,7 @@ describe('app-mocked', function() {
                 var items = directories.users.getItems();
                 len = directories.users.getParams().pager.total;
 
+                actualSuccess = actualError = undefined;
                 items[items.length-1].remove().then(function(respond) {
                     actualSuccess = respond;
                 }, function(respond) {
@@ -1278,6 +1303,7 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
+                directories = actualError = undefined;
                 usersLoader.loadItems().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
@@ -1302,6 +1328,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var user = new User({id: 9999});
+                directories = actualError = undefined;
                 user.remove().then(function(respond) {
                     directories = respond;
                 }, function(respond) {
