@@ -28,8 +28,7 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
                 }   // todo: проверить, что в ответе на запрос query всегда есть секция params (+юнит-тест)
 
                 if (errorMessage) {
-                    $log.error(errorMessage);
-                    return $q.reject({response: response, errorMessage: errorMessage});
+                    throw _.assign(new Error(errorMessage), {response: response});
                 }
 
                 return response;
