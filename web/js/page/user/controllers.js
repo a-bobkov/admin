@@ -68,9 +68,9 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     $scope.$watch('patterns', $scope.onPatternChange, true);
 
     $scope.sortableColumns = [
-        {id: "id", name: "Код"},
-        {id: "email", name: "Email"},
-        {id: "lastLogin", name: "Был на сайте"}
+        {id: "id", name: "Код", width: '10%'},
+        {id: "email", name: "Email", width: '50%'},
+        {id: "lastLogin", name: "Был на сайте", width: '20%'}
     ];
 
     $scope.sortingMark = function(column) {
