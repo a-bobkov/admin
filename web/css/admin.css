@@ -5,3 +5,7 @@ a {cursor: pointer}
     width: 100%;
     height: 400px;
 }
+
+table.parameters th {
+	width: 20%;
+}

@@ -3,7 +3,7 @@
 <form name="formUser" autocomplete="off" novalidate>
 	<fieldset class="span-24">
 	    <legend>Пользователь</legend>
-	    <table>
+	    <table class='parameters'>
 	        <tr>
 	            <th><label for="user_email">Email</label></th>
 	            <td>
@@ -37,7 +37,7 @@
 
 	<fieldset class="span-24">
 	    <legend>Права</legend>
-	    <table>
+	    <table class='parameters'>
 	        <tr>
 	            <th><label for="user_status">Статус</label></th>
 	            <td>
@@ -64,7 +64,7 @@
 
 	<fieldset class="span-24" ng-show='userEdited.isDealer()'>
 	    <legend>Тэг автосалона</legend>
-	    <table>
+	    <table class='parameters'>
 	        <tr>
 	            <th><label for="user_dealer_manager">Тэг</label></th>
 	            <td>
@@ -81,7 +81,7 @@
 
 	<fieldset class="span-24" ng-show='userEdited.isDealer()'>
 	    <legend>Профиль автосалона</legend>
-	    <table>
+	    <table class='parameters'>
 	        <tr>
 	            <th><label for="user_dealer_company_name">Название компании</label></th>
 	            <td>
@@ -186,7 +186,7 @@
 
 	<fieldset class="span-24" ng-show='userEdited.isSite()'>
 	  	<legend>Профиль сайта</legend>
-	  		<table>
+	  		<table class='parameters'>
 	    		<tbody><tr>
 	  				<th><label for="user_sites_list">Сайт</label></th>
 	  				<td>
