@@ -41,7 +41,7 @@ describe('app-mocked', function() {
         }
     });
 
-    xdescribe('Методы query должны', function() {
+    describe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
@@ -966,7 +966,7 @@ describe('app-mocked', function() {
             });
         });
 
-        it('post - выдавать ошибку валидации пользователя при неправильном значении в поле fax', function() {
+        it('post - выбрасывать ошибку валидации пользователя при неправильном значении в поле fax', function() {
             var data = {
                     email: 'new@maxposter.ru',
                     status: 'active',
@@ -980,7 +980,8 @@ describe('app-mocked', function() {
                     }
                 },
                 actualSuccess,
-                actualError;
+                actualError,
+                thrownErr;
             var directories;
             var savedUser;
             var len;
@@ -999,21 +1000,25 @@ describe('app-mocked', function() {
             });
 
             runs(function() {
-                var user = new User(data, directories);
-                actualSuccess = actualError = undefined;
-                user.save(directories).then(function(respond) {
-                    actualSuccess = respond;
-                }, function(respond){
-                    actualError = respond;
-                });
-                $httpBackend.flush();
+                try {
+                    var user = new User(data, directories);
+                    actualSuccess = actualError = thrownErr = undefined;
+                    user.save(directories).then(function(respond) {
+                        actualSuccess = respond;
+                    }, function(respond){
+                        actualError = respond;
+                    });
+                    $httpBackend.flush();
+                } catch(err) {
+                    thrownErr = err;
+                }
             });
             waitsFor(function() {
-                return actualSuccess || actualError;
+                return actualSuccess || actualError || thrownErr;
             });
 
             runs(function() {
-                expect(actualError.data.message).toEqual('Validation Failed');
+                expect(thrownErr.message).toEqual('Validation Failed');
             });
         });
 

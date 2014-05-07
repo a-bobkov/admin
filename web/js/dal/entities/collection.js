@@ -57,9 +57,12 @@ var inherit = function(child, parent) {
     return child;
 };
 
-var CollectionError = function(message) {
+var CollectionError = function(message, response) {
     this.message = message || "Неопределенная ошибка";
     this.stack = (new Error()).stack;
+    if (response) {
+        this.response = response;
+    }
     // console.log(this.message);
 }
 CollectionError.prototype = new Error();
