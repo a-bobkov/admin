@@ -42,10 +42,10 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
             if (value && value.id) {    // ссылки пропускаем
                 return true;
             } else {
-                if (key === 'fax') {
+                if (key === 'fax' && value) {
                     var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
                     return value.match(regexpPhoneNumber);
-                } else {
+                } else {              // todo: валидация значений полей, кроме ссылок
                     return true;
                 }
             }

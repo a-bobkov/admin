@@ -243,8 +243,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         var items = collection.getItems();
         try {
             var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
-            // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
-        } catch (err) {
+        } catch (err) {     // ошибка ссылочной целостности
             return [400, {
                 status: 'error',
                 message: 'Ошибка при создании',
@@ -285,12 +284,18 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
 
         try {
             var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
-            // todo: проверять данные в соответствии с форматом полей таблиц и требованиями ссылочной целостности
-        } catch (err) {
+        } catch (err) {     // ошибка ссылочной целостности
             return [400, {
                 status: 'error',
                 message: 'Ошибка при обновлении',
                 errors: err.message
+            }];
+        }
+
+        if (!item.isValid()) {
+            return [400, {
+                status: 'error',
+                message: 'Validation Failed'
             }];
         }
 

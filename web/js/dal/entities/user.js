@@ -75,7 +75,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
                 return value.isValid();
             } else if (value && value.id) {    // ссылки пропускаем
                 return true;
-            } else {              // todo: валидация значений полей 
+            } else {              // todo: валидация значений полей, кроме ссылок
                 return true;
             }
         });
