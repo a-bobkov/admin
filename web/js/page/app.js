@@ -21,7 +21,7 @@ angular.module('RootApp', ['UsersApp'])
 				'_trackEvent',
 				errorObj.message, 
 				errorObj.stack,
-				'',
+				(errorObj.response) ? angular.toJson(errorObj.response) : '',
 				0, true
 			]);
 		}
@@ -41,11 +41,12 @@ angular.module('RootApp', ['UsersApp'])
 })
 
 .factory('$exceptionHandler', function ($log) {
-    return function (exception, cause) {
-    	$log.error(exception);
+    return function (errorObj, cause) {
+    	$log.error(errorObj);
 	    document.getElementById('content_frame').style.display = 'none';
-	    document.getElementById('javascriptErrorMessage').innerHTML = exception.message;
-	    document.getElementById('javascriptErrorStack').innerHTML = exception.stack.replace( /\n/g ,'<br>');
+	    document.getElementById('javascriptErrorMessage').innerHTML = errorObj.message;
+	    document.getElementById('javascriptErrorStack').innerHTML = errorObj.stack.replace( /\n/g ,'<br>');
+	    document.getElementById('javascriptErrorResponse').innerHTML = (errorObj.response) ? '<h5>Ответ сервера:</h5>' + angular.toJson(errorObj.response) : '';
 	    document.getElementById('javascriptError').style.display = 'block';
     };
 })
