@@ -19,7 +19,7 @@ angular.module('max.dal.api', [])
          * @returns {Promise}
          */
         var errorHandler = function(response) {
-            return $q.reject(response);
+            throw _.assign(new Error(response.data.message), {response: response});
         };
 
         var responseHandler = function(response) {
@@ -37,8 +37,7 @@ angular.module('max.dal.api', [])
             }
 
             if (errorMessage) {
-                $log.error(errorMessage);
-                return $q.reject({response: response, errorMessage: errorMessage});
+                throw _.assign(new Error(errorMessage), {response: response});
             }
 
             return response.data.data;
