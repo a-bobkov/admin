@@ -18,7 +18,12 @@
     <script src="js/page/setupga.js"></script>
 </head>
 
-<body ng-app="RootApp-mocked">
+<body ng-app="RootApp">
+    <script>
+    if (window.location.hostname === '127.0.0.1') {
+        document.body.setAttribute('ng-app', 'RootApp-mocked');
+    }
+    </script>
 <div class="container" id="container">
 
 <div id="top">
