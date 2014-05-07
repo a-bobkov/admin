@@ -351,25 +351,46 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     };
 })
 
+.directive('uiPhoneNumber', function(){
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        scope: {
+            _number: '=ngModel'
+        },
+        link: function (scope, elem, attrs, ctrl) {
+            var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
+            function validatePhoneNumber(newValue) {
+                if ((!newValue) || (newValue.match(regexpPhoneNumber))) {
+                    ctrl.$setValidity('number', true);
+                } else {
+                    ctrl.$setValidity('number', false);
+                }
+            }
+
+            scope.$watch('userEdited.isDealer()', function (newValue) {
+                if (newValue) {
+                    validatePhoneNumber(scope._number);
+                } else {
+                    ctrl.$setValidity('number', true);
+                }
+            });
+
+            scope.$watch('_number', validatePhoneNumber);
+        }
+    };
+})
+
 .directive('uiPhoneFields', function(){
     return {
         restrict: 'A',
         require: 'ngModel',
         link: function (scope, elem, attrs, ctrl) {
-            var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
             function validatePhonePeriod(newValue) {
                 if (newValue.phoneFrom && newValue.phoneTo && (newValue.phoneFrom >= newValue.phoneTo)) {
                     ctrl.$setValidity('period', false);
                 } else {
                     ctrl.$setValidity('period', true);
-                }
-            }
-
-            function validatePhoneNumber(newValue) {
-                if ((!newValue.phoneNumber) || (newValue.phoneNumber.match(regexpPhoneNumber))) {
-                    ctrl.$setValidity('number', true);
-                } else {
-                    ctrl.$setValidity('number', false);
                 }
             }
 
@@ -385,18 +406,15 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             scope.$watch('userEdited.isDealer()', function (otherModelValue) {
                 if (scope.userEdited.isDealer()) {
                     validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
-                    validatePhoneNumber(scope.$eval(attrs.uiPhoneFields));
                     validatePhonePeriod(scope.$eval(attrs.uiPhoneFields));
                 } else {
                     ctrl.$setValidity('period', true);
-                    ctrl.$setValidity('number', true);
                     ctrl.$setValidity('consistent', true);
                 }
             });
 
             scope.$watch(attrs.uiPhoneFields, function (otherModelValue) {
                 validatePhoneFields(scope.$eval(attrs.uiPhoneFields));
-                validatePhoneNumber(scope.$eval(attrs.uiPhoneFields));
                 validatePhonePeriod(scope.$eval(attrs.uiPhoneFields));
             }, true);
         }
