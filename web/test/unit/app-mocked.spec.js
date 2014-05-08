@@ -41,7 +41,68 @@ describe('app-mocked', function() {
         }
     });
 
-    describe('Методы query должны', function() {
+        it('post - выбрасывать ошибку валидации пользователя при неправильном значении в поле fax', function() {
+            var data = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        companyName: 'Новая компания',
+                        city: {id: 1},
+                        address: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123',
+                        manager: {id: 4}
+                    }
+                },
+                actualSuccess,
+                actualError,
+                thrownErr;
+            var directories;
+            var savedUser;
+            var len;
+
+            runs(function() {
+                directories = actualError = undefined;
+                usersLoader.loadItems().then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                try {
+                    var user = new User(data, directories);
+                    actualSuccess = actualError = thrownErr = undefined;
+                    user.save(directories).then(function(respond) {
+                        actualSuccess = respond;
+                    }, function(respond){
+                        actualError = respond;
+                    });
+                    $httpBackend.flush();
+                } catch(err) {
+                    console.log(err);
+                    thrownErr = err;
+                }
+            });
+
+            waitsFor(function() {
+                return actualSuccess || actualError || thrownErr;
+            });
+
+            runs(function() {
+                console.log(actualSuccess);
+                console.log(actualError);
+                console.log(thrownErr);
+                expect(thrownErr.message).toEqual('Validation Failed');
+            });
+        });
+
+    xdescribe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
@@ -871,7 +932,7 @@ describe('app-mocked', function() {
         });
     });
 
-    describe('Методы CRUD должны', function() {
+    xdescribe('Методы CRUD должны', function() {
 
         it('post - сохранять данные нового пользователя', function() {
             var data = {
@@ -968,8 +1029,8 @@ describe('app-mocked', function() {
 
         it('post - выбрасывать ошибку валидации пользователя при неправильном значении в поле fax', function() {
             var data = {
-                    email: 'new@maxposter.ru',
-                    status: 'active',
+                    email: String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru',
+                    password: '1',
                     group: {id: 2},
                     dealer: {
                         companyName: 'Новая компания',
@@ -1013,6 +1074,7 @@ describe('app-mocked', function() {
                     thrownErr = err;
                 }
             });
+
             waitsFor(function() {
                 return actualSuccess || actualError || thrownErr;
             });
