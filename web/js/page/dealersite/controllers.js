@@ -255,12 +255,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         var confirmMessage,
             noticeMessage;
 
-        confirmMessage = 'Удалить регистрацию';
-        noticeMessage = 'Удалена регистрация';
-        var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
+        confirmMessage = 'Вы действительно хотите отменить экспорт';
+        noticeMessage = 'Удалена регистрация '+ dealerSite.id;
+        var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайт "' + dealerSite.site.name + '"';
         if (confirm(confirmMessage + dealerSiteInfo + '?')) {
             dealerSite.remove().then(function() {
-                $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
+                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
                 $location.path('/dealersitelist?');
             });
         }
