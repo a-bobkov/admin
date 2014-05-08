@@ -297,7 +297,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     $window.scrollTo(0,0);
 
     function makeDealerSiteCopy() {
-        $scope.actionName = "Редактирование";
+        $scope.actionName = "Изменение";
         $scope.dealerSiteEdited = new DealerSite;
         angular.extend($scope.dealerSiteEdited, $scope.dealerSite);
     }
