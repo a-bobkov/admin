@@ -39,6 +39,16 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
 
     _.extend(DealerSite.prototype, Item.prototype);
 
+    DealerSite.prototype.isValid = function() {
+        return _.every(this, function(value, key) {
+            if (value && value.id) {    // ссылки пропускаем
+                return true;
+            } else {              // todo: валидация значений полей, кроме ссылок
+                return true;
+            }
+        });
+    };
+
     DealerSite.prototype.serialize = function() {
         var itemData = {};
         _.forEach(this, function(value, key){
