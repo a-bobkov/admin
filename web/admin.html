@@ -20,7 +20,7 @@
 
 <body ng-app="RootApp">
     <script>
-    if (window.location.hostname === '127.0.0.1') {
+    if (!window.location.hostname.match(/maxposter.ru$/)) {
         document.body.setAttribute('ng-app', 'RootApp-mocked');
     }
     </script>
