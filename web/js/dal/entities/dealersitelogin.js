@@ -33,6 +33,16 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
 
     _.extend(DealerSiteLogin.prototype, Item.prototype);
 
+    DealerSiteLogin.prototype.isValid = function() {
+        return _.every(this, function(value, key) {
+            if (value && value.id) {    // ссылки пропускаем
+                return true;
+            } else {              // todo: валидация значений полей, кроме ссылок
+                return true;
+            }
+        });
+    };
+
     DealerSiteLogin.prototype.save = function(directories) {
         if (this.id) {
             return dealerSiteLoginApi.update(this.serialize()).then(function(respond) {
