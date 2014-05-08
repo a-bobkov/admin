@@ -70,7 +70,7 @@
 	        <tr>
 	            <th><label for="dealerSiteLoginFtpLogin">Логин для ftp</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteLoginFtpLogin" id="dealerSiteLoginFtpLogin" ng-model='dealerSiteLoginsEdited.ftp.login' ng-required='formConfig[dealerSiteEdited.site.id]["ftp"]'>
+	                <input class="span-8" type="text" name="dealerSiteLoginFtpLogin" id="dealerSiteLoginFtpLogin" ng-model='dealerSiteLoginsEdited.ftp.login' ng-required='formConfig[dealerSiteEdited.site.id]["ftp"]' ng-readonly='!formConfig[dealerSiteEdited.site.id]["ftp"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteLoginFtpLogin.$invalid'>
 					    <li id='dealerSiteLoginFtpLoginErrorRequired' ng-show="formDealerSite.dealerSiteLoginFtpLogin.$error.required">Необходимо ввести логин.</li>
 					</ul>
@@ -79,7 +79,7 @@
 	        <tr>
 	            <th><label for="dealerSiteLoginFtpPassword">Пароль для ftp</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteLoginFtpPassword" id="dealerSiteLoginFtpPassword" ng-model='dealerSiteLoginsEdited.ftp.password' ng-required='formConfig[dealerSiteEdited.site.id]["ftp"]'>
+	                <input class="span-8" type="text" name="dealerSiteLoginFtpPassword" id="dealerSiteLoginFtpPassword" ng-model='dealerSiteLoginsEdited.ftp.password' ng-required='formConfig[dealerSiteEdited.site.id]["ftp"]' ng-readonly='!formConfig[dealerSiteEdited.site.id]["ftp"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteLoginFtpPassword.$invalid'>
 					    <li id='dealerSiteLoginFtpPasswordErrorRequired' ng-show="formDealerSite.dealerSiteLoginFtpPassword.$error.required">Необходимо ввести пароль.</li>
 					</ul>
