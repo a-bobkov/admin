@@ -109,7 +109,9 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
             itemData.site = null;
         }
         if (this.isDealer()) {
-            itemData.dealer.id = itemData.id;
+            if (itemData.dealer) {
+                itemData.dealer.id = itemData.id;
+            }
         };
         return itemData;
     };
