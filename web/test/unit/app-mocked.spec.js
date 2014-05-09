@@ -1716,9 +1716,12 @@ describe('app-mocked', function() {
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
-                        phone3: '+7-812-232-4123',
-                        phone3From: 10,
-                        phone3To: 20
+                        phone2: '+7(812)232-4123',
+                        phone2From: 11,
+                        phone2To: 21,
+                        phone3: '+77777777',
+                        phone3From: 12,
+                        phone3To: 22
                     }
                 },
                 actualSuccess,
@@ -1776,6 +1779,9 @@ describe('app-mocked', function() {
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
+                        phone2: '+7(812)232-4123',
+                        phone2From: 11,
+                        phone2To: 21,
                         phone3: '+7(812)123-34-43'
                     }
                 },
@@ -1834,6 +1840,9 @@ describe('app-mocked', function() {
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
+                        phone2: '+7(812)232-4123',
+                        phone2From: 11,
+                        phone2To: 21,
                         phone3: '+7(812)-123-3443',
                         phone3From: 99
                     }
@@ -1893,6 +1902,9 @@ describe('app-mocked', function() {
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
+                        phone2: '+7(812)232-4123',
+                        phone2From: 11,
+                        phone2To: 21,
                         phone3: '+7(812)123-34-43'
                     }
                 },
@@ -1951,6 +1963,9 @@ describe('app-mocked', function() {
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
+                        phone2: '+7(812)232-4123',
+                        phone2From: 11,
+                        phone2To: 21,
                         phone3: '+7(812)123-34-43',
                         phone3To: 99
                     }
@@ -2010,6 +2025,9 @@ describe('app-mocked', function() {
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
+                        phone2: '+7(812)232-4123',
+                        phone2From: 11,
+                        phone2To: 21,
                         phone3: '+7(812)123-34-43',
                         phone3From: 23,
                         phone3To: 23
