@@ -2642,6 +2642,61 @@ describe('app-mocked', function() {
         });
     });
 
+    describe('Методы post должны проверять в site', function() {
+
+        it('обязательность значения id', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 3},
+                    site: {}
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.site.children.id.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+    });
+
     xdescribe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
