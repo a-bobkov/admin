@@ -6,6 +6,10 @@ describe('app-mocked', function() {
         User,
         Users,
         UserStatus,
+        Manager,
+        City,
+        Metro,
+        Market,
         Group;
 
     try {
@@ -33,6 +37,10 @@ describe('app-mocked', function() {
         Users = injector.get('Users');
         UserStatus = injector.get('UserStatus');
         Group = injector.get('Group');
+        Manager = injector.get('Manager');
+        City = injector.get('City');
+        Metro = injector.get('Metro');
+        Market = injector.get('Market');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
@@ -103,6 +111,1241 @@ describe('app-mocked', function() {
                 expect(thrownErr.message).toEqual('Validation Failed');
             });
         });
+
+    xdescribe('Методы post должны проверять в dealer', function() {
+
+        it('обязательность значения manager', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        city: {
+                            id: 1
+                        }
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.manager.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('соответствие значения manager справочнику', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        city: {
+                            id: 1
+                        }
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                user.dealer.manager = new Manager({id: 9999});
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.manager.errors).toEqual(['Значение недопустимо.']);
+            });
+        });
+
+        it('обязательность значения city', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.city.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('соответствие значения city справочнику', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                user.dealer.city = new City({id: 9999});
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.city.errors).toEqual(['Значение недопустимо.']);
+            });
+        });
+
+        it('соответствие значения metro справочнику', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                user.dealer.metro = new Metro({id: 9999});
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.metro.errors).toEqual(['Значение недопустимо.']);
+            });
+        });
+
+        it('соответствие значения metro значению city', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        city: {id: 1},
+                        metro: {id: 174}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.metro.errors).toEqual(['Значение недопустимо.']);
+            });
+        });
+
+        it('соответствие значения market справочнику', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                user.dealer.market = new Market({id: 9999});
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.market.errors).toEqual(['Значение недопустимо.']);
+            });
+        });
+
+        it('соответствие значения market значению city', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        city: {id: 1},
+                        market: {id: 7}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.market.errors).toEqual(['Значение недопустимо.']);
+            });
+        });
+
+        it('обязательность значения companyName', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        city: {id: 1}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.companyName.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('размер значения companyName <= 100', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        city: {id: 1},
+                        companyName: '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.companyName.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+            });
+        });
+
+        it('обязательность значения address', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.address.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('размер значения address <= 255', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        city: {id: 1},
+                        address: '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF'
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.address.errors).toEqual(['Значение слишком длинное. Должно быть равно 255 символам или меньше.']);
+            });
+        });
+
+        it('соответствие значения fax формату', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 4},
+                        city: {id: 1},
+                        companyName: 'Новая компания',
+                        address: '191040, Ленинский проспект, 150, оф.505',
+                        fax: '+7-812-232-4123'
+                    }
+                },
+                actualSuccess,
+                actualError,
+                directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.fax.errors).toEqual(['Неверный формат номера телефона.']);
+            });
+        });
+
+        it('соответствие значения email формату', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 4},
+                        city: {id: 1},
+                        companyName: 'Новая компания',
+                        address: '191040, Ленинский проспект, 150, оф.505',
+                        email: 'jasmine@'
+                    }
+                },
+                actualSuccess,
+                actualError,
+                directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.email.errors).toEqual(['Значение адреса электронной почты недопустимо.']);
+            });
+        });
+
+        it('соответствие значения url формату', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 4},
+                        city: {id: 1},
+                        companyName: 'Новая компания',
+                        address: '191040, Ленинский проспект, 150, оф.505',
+                        url: 'www'
+                    }
+                },
+                actualSuccess,
+                actualError,
+                directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.url.errors).toEqual(['Значение не является допустимым URL.']);
+            });
+        });
+
+        it('обязательность значения phone', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1}
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('соответствие значения phone формату', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 4},
+                        city: {id: 1},
+                        companyName: 'Новая компания',
+                        address: '191040, Ленинский проспект, 150, оф.505',
+                        phone: '+7-812-232-4123',
+                        phoneFrom: 10,
+                        phoneTo: 20
+                    }
+                },
+                actualSuccess,
+                actualError,
+                directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone.errors).toEqual(['Неверный формат номера телефона.']);
+            });
+        });
+
+        it('обязательность значения phoneFrom при заполненном phone', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)123-34-43'
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+            });
+        });
+
+        it('соответствие значения phoneFrom перечню допустимых значений', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)-123-3443',
+                        phoneFrom: 99
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phoneFrom.errors).toEqual(['Значение должно быть 23 или меньше.']);
+            });
+        });
+
+        it('обязательность значения phoneTo при заполненном phone', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)123-34-43'
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+            });
+        });
+
+        it('соответствие значения phoneTo перечню допустимых значений', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)123-34-43',
+                        phoneTo: 99
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phoneTo.errors).toEqual(['Значение должно быть 23 или меньше.']);
+            });
+        });
+
+        it('значение phoneFrom строго меньше phoneTo', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)123-34-43',
+                        phoneFrom: 23,
+                        phoneTo: 23
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+            });
+        });
+    });
 
     xdescribe('Методы post должны проверять в user', function() {
 
@@ -308,6 +1551,57 @@ describe('app-mocked', function() {
             });
         });
 
+        it('размер значения password <= 128', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0',
+                    group: {id: 1}
+                },
+                actualSuccess,
+                actualError,
+                directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.password.errors).toEqual(['Значение слишком длинное. Должно быть равно 128 символам или меньше.']);
+            });
+        });
+
         it('соответствие status перечню', function() {
             var userData = {
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
@@ -341,7 +1635,6 @@ describe('app-mocked', function() {
                 var directories = actualSuccess;
                 var user = new User(userData, directories);
                 user.status = new UserStatus({id: 'unknown'});
-                console.log(user.status);
 
                 actualSuccess = actualError = undefined;
                 user.save(directories).then(function(respond) {
@@ -615,6 +1908,7 @@ describe('app-mocked', function() {
                 expect(actualError.response.data.errors.children.site.errors).toEqual(['Значение не должно быть пустым.']);
             });
         });
+    });
 
     xdescribe('Методы query должны', function() {
 
