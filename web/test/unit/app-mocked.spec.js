@@ -1356,6 +1356,9 @@ describe('app-mocked', function() {
                         city: {id: 1},
                         companyName: 'Новая компания',
                         address: '191040, Ленинский проспект, 150, оф.505',
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         phone2: '+7-812-232-4123',
                         phone2From: 10,
                         phone2To: 20
@@ -1413,6 +1416,9 @@ describe('app-mocked', function() {
                     group: {id: 2},
                     dealer: {
                         manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         phone2: '+7(812)123-34-43'
                     }
                 },
@@ -1468,6 +1474,9 @@ describe('app-mocked', function() {
                     group: {id: 2},
                     dealer: {
                         manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         phone2: '+7(812)-123-3443',
                         phone2From: 99
                     }
@@ -1524,6 +1533,9 @@ describe('app-mocked', function() {
                     group: {id: 2},
                     dealer: {
                         manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         phone2: '+7(812)123-34-43'
                     }
                 },
@@ -1579,6 +1591,9 @@ describe('app-mocked', function() {
                     group: {id: 2},
                     dealer: {
                         manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         phone2: '+7(812)123-34-43',
                         phone2To: 99
                     }
@@ -1635,6 +1650,9 @@ describe('app-mocked', function() {
                     group: {id: 2},
                     dealer: {
                         manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         phone2: '+7(812)123-34-43',
                         phone2From: 23,
                         phone2To: 23
