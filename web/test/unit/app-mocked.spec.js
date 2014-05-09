@@ -1702,6 +1702,363 @@ describe('app-mocked', function() {
                 expect(actualError.response.data.errors.children.dealer.children.phone2.errors).toEqual(['Неверно указано время для звонка на телефон.']);
             });
         });
+
+        it('соответствие значения phone3 формату', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 4},
+                        city: {id: 1},
+                        companyName: 'Новая компания',
+                        address: '191040, Ленинский проспект, 150, оф.505',
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
+                        phone3: '+7-812-232-4123',
+                        phone3From: 10,
+                        phone3To: 20
+                    }
+                },
+                actualSuccess,
+                actualError,
+                directories;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                directories = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    directories = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return directories || actualError;
+            });
+
+            runs(function() {
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone3.errors).toEqual(['Неверный формат номера телефона.']);
+            });
+        });
+
+        it('обязательность значения phone3From при заполненном phone3', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
+                        phone3: '+7(812)123-34-43'
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone3.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+            });
+        });
+
+        it('соответствие значения phone3From перечню допустимых значений', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
+                        phone3: '+7(812)-123-3443',
+                        phone3From: 99
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone3From.errors).toEqual(['Значение должно быть 23 или меньше.']);
+            });
+        });
+
+        it('обязательность значения phone3To при заполненном phone3', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
+                        phone3: '+7(812)123-34-43'
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone3.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+            });
+        });
+
+        it('соответствие значения phone3To перечню допустимых значений', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
+                        phone3: '+7(812)123-34-43',
+                        phone3To: 99
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone3To.errors).toEqual(['Значение должно быть 23 или меньше.']);
+            });
+        });
+
+        it('значение phone3From строго меньше phone3To', function() {
+            var userData = {
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 2},
+                    dealer: {
+                        manager: {id: 1},
+                        phone: '+7(812)232-4124',
+                        phoneFrom: 10,
+                        phoneTo: 20,
+                        phone3: '+7(812)123-34-43',
+                        phone3From: 23,
+                        phone3To: 23
+                    }
+                },
+                actualSuccess,
+                actualError;
+
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            }
+
+            runs(function() {
+                actualSuccess = actualError = undefined;
+                usersLoader.loadItems(params).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                var directories = actualSuccess;
+                var user = new User(userData, directories);
+                actualSuccess = actualError = undefined;
+                user.save(directories).then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond){
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            });
+            waitsFor(function() {
+                return actualSuccess || actualError;
+            });
+
+            runs(function() {
+                expect(actualError).toBeDefined();
+                expect(actualError.response.data.message).toEqual('Validation Failed');
+                expect(actualError.response.data.errors.children.dealer.children.phone3.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+            });
+        });
     });
 
     xdescribe('Методы post должны проверять в user', function() {
