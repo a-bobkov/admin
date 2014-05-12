@@ -521,11 +521,10 @@ describe('app-mocked', function() {
             });
         });
 
-        it('соответствие group перечню', function() {
+        it('соответствие group справочнику', function() {
             var userData = {
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 99}
+                    password: '1'
                 },
                 actualSuccess,
                 actualError,
@@ -553,6 +552,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var user = new User(userData, directories);
+                user.group = new Group({id: 9999});
                 actualSuccess = actualError = undefined;
                 user.save(directories).then(function(respond) {
                     actualSuccess = respond;
@@ -567,8 +567,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 expect(actualError).toBeDefined();
-                expect(actualError.response.data.message).toEqual('Validation Failed');
-                expect(actualError.response.data.errors.children.group.errors).toEqual(['Значение должно быть допустимым.']);
+                expect(actualError.response.data.message).toEqual('Пользователю необходимо назначить группу');
             });
         });
 
@@ -2697,7 +2696,7 @@ describe('app-mocked', function() {
         });
     });
 
-    xdescribe('Методы query должны', function() {
+    describe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
             var actualSuccess,
