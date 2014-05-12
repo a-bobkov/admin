@@ -63,8 +63,8 @@
                 <tr>
                     <th><label for="sf_guard_user_filters_status">Статус</label></th>
                     <td>
-                        <select ng-model="patterns.status" multiple ng-options='opt.namePlural for opt in userstatuses' id="sf_guard_user_filters_status">
-                        </select>
+                        <div ui-checkboxgroup="userstatuses" ui-checkboxgroup-selected="patterns.status">
+                        </div>
                     </td>
                 </tr>
                 <tr>

@@ -351,6 +351,43 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     };
 })
 
+.directive("uiCheckboxgroup", function($document){
+    return {
+        restrict: 'A',
+        replace: true,
+        template:
+            '<ul class="checkbox-group"">' +
+            '    <li ng-repeat="item in _items">'+
+            '        <input type="checkbox" id="checkbox_group_{{$index}}" ng-model=_selected[item.id] ng-change="updateSelectedItems()">' +
+            '        <label for="checkbox_group_{{$index}}">{{item.namePlural}}</label>' +
+            '    </li>' +
+            '</ul>',
+        scope: {
+            _items: '=uiCheckboxgroup',
+            _selectedItems: '=uiCheckboxgroupSelected'
+        },
+        controller: ['$scope', function($scope) {
+
+                $scope._selected = {};
+
+                $scope.updateSelectedItems = function() {
+                    $scope._selectedItems = _.filter($scope._items, function(value) {
+                        return $scope._selected[value.id];
+                    });
+                };
+
+                $scope.updateSelected = function(newValue, oldValue) {
+                    _.forEach($scope._items, function(value, key) {
+                        $scope._selected[value.id] = !!_.find(newValue, {id: value.id});
+                    })
+                }
+
+                $scope.$watch('_selectedItems', $scope.updateSelected, true);
+            }
+        ]
+    };
+})
+
 .directive('uiPhoneNumber', function(){
     return {
         restrict: 'A',

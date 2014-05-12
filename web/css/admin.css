@@ -9,3 +9,7 @@ a {cursor: pointer}
 table.parameters th {
 	width: 20%;
 }
+
+.checkbox-group {
+	margin: 0;
+}
