@@ -66,26 +66,30 @@ describe('app-mocked', function() {
                 },
                 actualSuccess,
                 actualError,
-                thrownErr;
+                thrownErr,
+                respond;
             var directories;
-            var savedUser;
-            var len;
 
             runs(function() {
-                directories = actualError = undefined;
-                usersLoader.loadItems().then(function(respond) {
-                    directories = respond;
-                }, function(respond) {
-                    actualError = respond;
-                });
-                $httpBackend.flush();
+                try {
+                    actualSuccess = actualError = thrownErr = undefined;
+                    usersLoader.loadItems().then(function(respond) {
+                        actualSuccess = respond;
+                    }, function(respond) {
+                        actualError = respond;
+                    });
+                    $httpBackend.flush();
+                } catch(err) {
+                    thrownErr = err;
+                }
             });
             waitsFor(function() {
-                return directories || actualError;
+                return respond = actualSuccess || actualError || thrownErr;
             });
 
             runs(function() {
                 try {
+                    directories = actualSuccess;
                     var user = new User(data, directories);
                     actualSuccess = actualError = thrownErr = undefined;
                     user.save(directories).then(function(respond) {
@@ -95,20 +99,15 @@ describe('app-mocked', function() {
                     });
                     $httpBackend.flush();
                 } catch(err) {
-                    console.log(err);
                     thrownErr = err;
                 }
             });
-
             waitsFor(function() {
-                return actualSuccess || actualError || thrownErr;
+                return respond = actualSuccess || actualError || thrownErr;
             });
 
             runs(function() {
-                console.log(actualSuccess);
-                console.log(actualError);
-                console.log(thrownErr);
-                expect(thrownErr.message).toEqual('Validation Failed');
+                expect(respond.message).toEqual('Validation Failed');
             });
         });
 
