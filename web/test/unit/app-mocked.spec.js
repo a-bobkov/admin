@@ -1675,7 +1675,7 @@ describe('app-mocked', function() {
                 expect(users.length).toBeTruthy();
                 expect(_.every(users, function(value) {
                     var lastLogin = String(value.lastLogin);
-                    return (lastLogin.indexOf('2000') !== -1);
+                    return (lastLogin.indexOf('2010') !== -1);
                 })).toBeTruthy();
             });
         });
