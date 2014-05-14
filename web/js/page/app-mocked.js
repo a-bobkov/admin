@@ -84,9 +84,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef) 
         {id: 4, email: 'a-bobkov@act.com', lastLogin: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 12}},
         {id: 6, email: 'a-bobkov@abe.com', lastLogin: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
             id: 6, companyName: 'Крутая компания', manager: {id: 2}}},
-        {id: 7, email: 'a-bobkov@abf.com', lastLogin: '2000-01-12', status: 'inactive', group: {id: 2}, dealer: {
-            id: 7, companyName: 'Супер-салон', manager: {id: 2}}},
-        {id: 8, email: 'a-bobkov@abg.com', lastLogin: '2000-08-07', status: 'active', group: {id: 1}},
+        {id: 7, email: 'a-bobkov@abf.com', lastLogin: '2010-01-12', status: 'inactive', group: {id: 2}, dealer: {
+            id: 7, companyName: 'Auto', manager: {id: 2}}},
+        {id: 8, email: 'a-bobkov@abg.com', lastLogin: '2010-08-07', status: 'active', group: {id: 1}},
         {id: 9, email: 'a-bobkov@abh.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
             id: 9, companyName: 'Битые корыта', manager: {id: 1}}},
         {id: 10, email: 'a-bobkov@abi.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {

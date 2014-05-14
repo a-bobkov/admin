@@ -230,7 +230,7 @@ describe('app-mocked', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.status.errors).toEqual(['Значение должно соответствовать перечню.']);
+                expect(errorResponse.errors.children.status.errors).toEqual(['Выбранное Вами значение недопустимо.']);
             });
         });
 
@@ -277,8 +277,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.group.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.message).toEqual('Пользователю необходимо назначить группу');
             });
         });
 
@@ -326,8 +325,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.message).toEqual('Значение поля dealer не должно быть пустым');
             });
         });
 
@@ -351,8 +349,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.message).toEqual('Значение поля site не должно быть пустым');
             });
         });
     });
@@ -787,6 +784,9 @@ describe('app-mocked', function() {
                         city: {id: 1},
                         companyName: 'Новая компания',
                         address: '191040, Ленинский проспект, 150, оф.505',
+                        phone: '+7(812)232-4123',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         url: 'www'
                     }
                 };
@@ -1527,7 +1527,7 @@ describe('app-mocked', function() {
             var answer = {};
             var params = {
                 filters: [
-                    { type: 'equal', fields: ['dealer.companyName', 'group'], value: 'Демокомпания' }
+                    { type: 'equal', fields: ['dealer.companyName', 'group'], value: 'Auto' }
                 ]
             };
 
@@ -1540,8 +1540,8 @@ describe('app-mocked', function() {
                 expect(users.length).toBeTruthy();
                 expect(_.every(users, function(value) {
                     var companyName = String(value.dealer.companyName).toLowerCase();
-                    var group = String(value.group.id);
-                    return (companyName === 'демокомпания' || group === 'Демокомпания');
+                    var group = String(value.group.id).toLowerCase();
+                    return (companyName === 'auto' || group === 'auto');
                 })).toBeTruthy();
             });
         });
@@ -1630,8 +1630,8 @@ describe('app-mocked', function() {
                 expect(users.length).toBeTruthy();
                 expect(_.every(users, function(value) {
                     var companyName = value.dealer && String(value.dealer.companyName).toLowerCase();
-                    var group = String(value.group.id);
-                    return (companyName === 'свет' || companyName === '3' || group === 'Свет' || group === '3');
+                    var group = String(value.group.id).toLowerCase();
+                    return (companyName === 'auto' || companyName === '3' || group === 'auto' || group === '3');
                 })).toBeTruthy();
             });
         });
@@ -1662,7 +1662,7 @@ describe('app-mocked', function() {
             var answer = {};
             var params = {
                 filters: [
-                    { type: 'contain', fields: ['lastLogin'], value: ['2000'] }
+                    { type: 'contain', fields: ['lastLogin'], value: ['2010'] }
                 ]
             };
 
@@ -1730,7 +1730,7 @@ describe('app-mocked', function() {
             var answer = {};
             var params = {
                 filters: [
-                    { type: 'contain', fields: ['lastLogin'], value: 2000 }
+                    { type: 'contain', fields: ['lastLogin'], value: 2010 }
                 ]
             };
 
@@ -1743,7 +1743,7 @@ describe('app-mocked', function() {
                 expect(users.length).toBeTruthy();
                 expect(_.every(users, function(value) {
                     var lastLogin = String(value.lastLogin);
-                    return (lastLogin.indexOf('2000') !== -1);
+                    return (lastLogin.indexOf('2010') !== -1);
                 })).toBeTruthy();
             });
         });
@@ -2192,12 +2192,7 @@ describe('app-mocked', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                // expect(errorResponse.message).toEqual('Пользователю необходимо назначить группу');
-                expect(errorResponse).toEqualData({
-                    status: 'error',
-                    message: 'Ошибка при обновлении',
-                    errors: 'Не найден элемент по ссылке group: {"id":99}'
-                });
+                expect(errorResponse.message).toEqual('Пользователю необходимо назначить группу');
             });
         });
 
