@@ -51,7 +51,30 @@ describe('app-mocked', function() {
         }
     });
 
+    function runSync(answer, asyncFn) {
+        var actualSuccess;
+        var actualError;
+        var thrownErr;
+
+        runs(function() {
+            try {
+                asyncFn().then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            } catch(err) {
+                thrownErr = err;
+            }
+        });
+        waitsFor(function() {
+            return answer.respond = actualSuccess || actualError || thrownErr;
+        });
+    }
+
         it('post - выбрасывать ошибку валидации пользователя при неправильном значении в поле fax', function() {
+            var answer = {};
             var data = {
                     email: String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru',
                     password: '1',
@@ -63,51 +86,20 @@ describe('app-mocked', function() {
                         fax: '+7-812-232-4123',
                         manager: {id: 4}
                     }
-                },
-                actualSuccess,
-                actualError,
-                thrownErr,
-                respond;
-            var directories;
+                };
 
-            runs(function() {
-                try {
-                    actualSuccess = actualError = thrownErr = undefined;
-                    usersLoader.loadItems().then(function(respond) {
-                        actualSuccess = respond;
-                    }, function(respond) {
-                        actualError = respond;
-                    });
-                    $httpBackend.flush();
-                } catch(err) {
-                    thrownErr = err;
-                }
+            runSync(answer, function() {
+                return usersLoader.loadItems();
             });
-            waitsFor(function() {
-                return respond = actualSuccess || actualError || thrownErr;
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var user = new User(data, directories);
+                return user.save(directories);
             });
 
             runs(function() {
-                try {
-                    directories = actualSuccess;
-                    var user = new User(data, directories);
-                    actualSuccess = actualError = thrownErr = undefined;
-                    user.save(directories).then(function(respond) {
-                        actualSuccess = respond;
-                    }, function(respond){
-                        actualError = respond;
-                    });
-                    $httpBackend.flush();
-                } catch(err) {
-                    thrownErr = err;
-                }
-            });
-            waitsFor(function() {
-                return respond = actualSuccess || actualError || thrownErr;
-            });
-
-            runs(function() {
-                expect(respond.message).toEqual('Validation Failed');
+                expect(answer.respond.message).toEqual('Validation Failed');
             });
         });
 
