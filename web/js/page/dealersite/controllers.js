@@ -349,7 +349,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     function makeDealerSiteNew() {
         $scope.actionName = "Создание";
         $scope.dealerSiteEdited = new DealerSite;
-        $scope.dealerSiteEdited.isActive = _.find($scope.dealerSiteStatuses.getItems(), {id: false});
+        $scope.dealerSiteEdited.isActive = _.find($scope.dealerSiteStatuses.getItems(), {id: true});
     }
 
     $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
