@@ -34,7 +34,7 @@
 	        <tr>
 	            <th><label for="dealerSiteExternalId">Код салона на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteExternalId" id="dealerSiteExternalId" ng-model='dealerSiteEdited.externalId' ng-required='formConfig[dealerSiteEdited.site.id]["externalId"]'>
+	                <input class="span-8" type="text" name="dealerSiteExternalId" id="dealerSiteExternalId" ng-model='dealerSiteEdited.externalId' ng-required='requiredFields[dealerSiteEdited.site.id]["externalId"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteExternalId.$invalid'>
 					    <li id='dealerSiteExternalIdErrorRequired' ng-show="formDealerSite.dealerSiteExternalId.$error.required">Необходимо ввести значение.</li>
 					</ul>
@@ -43,7 +43,7 @@
 	        <tr>
 	            <th><label for="dealerSitePublicUrl">Страница на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.publicUrl' ng-required='formConfig[dealerSiteEdited.site.id]["publicUrl"]'>
+	                <input class="span-8" type="text" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.publicUrl' ng-required='requiredFields[dealerSiteEdited.site.id]["publicUrl"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSitePublicUrl.$invalid'>
 					    <li id='dealerSitePublicUrlErrorRequired' ng-show="formDealerSite.dealerSitePublicUrl.$error.required">Необходимо ввести значение.</li>
 					</ul>
@@ -52,7 +52,7 @@
 	        <tr>
 	            <th><label for="dealerSiteLoginSiteLogin">Логин на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteLoginSiteLogin" id="dealerSiteLoginSiteLogin" ng-model='dealerSiteLoginsEdited.site.login' ng-required='formConfig[dealerSiteEdited.site.id]["site"]'>
+	                <input class="span-8" type="text" name="dealerSiteLoginSiteLogin" id="dealerSiteLoginSiteLogin" ng-model='dealerSiteLoginsEdited.site.login' ng-required='requiredFields[dealerSiteEdited.site.id]["site"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteLoginSiteLogin.$invalid'>
 					    <li id='dealerSiteLoginSiteLoginErrorRequired' ng-show="formDealerSite.dealerSiteLoginSiteLogin.$error.required">Необходимо ввести логин.</li>
 					</ul>
@@ -61,7 +61,7 @@
 	        <tr>
 	            <th><label for="dealerSiteLoginSitePassword">Пароль на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteLoginSitePassword" id="dealerSiteLoginSitePassword" ng-model='dealerSiteLoginsEdited.site.password' ng-required='formConfig[dealerSiteEdited.site.id]["site"]'>
+	                <input class="span-8" type="text" name="dealerSiteLoginSitePassword" id="dealerSiteLoginSitePassword" ng-model='dealerSiteLoginsEdited.site.password' ng-required='requiredFields[dealerSiteEdited.site.id]["site"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteLoginSitePassword.$invalid'>
 					    <li id='dealerSiteLoginSitePasswordErrorRequired' ng-show="formDealerSite.dealerSiteLoginSitePassword.$error.required">Необходимо ввести пароль.</li>
 					</ul>
@@ -70,7 +70,7 @@
 	        <tr>
 	            <th><label for="dealerSiteLoginFtpLogin">Логин для ftp</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteLoginFtpLogin" id="dealerSiteLoginFtpLogin" ng-model='dealerSiteLoginsEdited.ftp.login' ng-required='formConfig[dealerSiteEdited.site.id]["ftp"]' ng-readonly='!formConfig[dealerSiteEdited.site.id]["ftp"]'>
+	                <input class="span-8" type="text" name="dealerSiteLoginFtpLogin" id="dealerSiteLoginFtpLogin" ng-model='dealerSiteLoginsEdited.ftp.login' ng-required='requiredFields[dealerSiteEdited.site.id]["ftp"]' ng-readonly='!requiredFields[dealerSiteEdited.site.id]["ftp"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteLoginFtpLogin.$invalid'>
 					    <li id='dealerSiteLoginFtpLoginErrorRequired' ng-show="formDealerSite.dealerSiteLoginFtpLogin.$error.required">Необходимо ввести логин.</li>
 					</ul>
@@ -79,7 +79,7 @@
 	        <tr>
 	            <th><label for="dealerSiteLoginFtpPassword">Пароль для ftp</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteLoginFtpPassword" id="dealerSiteLoginFtpPassword" ng-model='dealerSiteLoginsEdited.ftp.password' ng-required='formConfig[dealerSiteEdited.site.id]["ftp"]' ng-readonly='!formConfig[dealerSiteEdited.site.id]["ftp"]'>
+	                <input class="span-8" type="text" name="dealerSiteLoginFtpPassword" id="dealerSiteLoginFtpPassword" ng-model='dealerSiteLoginsEdited.ftp.password' ng-required='requiredFields[dealerSiteEdited.site.id]["ftp"]' ng-readonly='!requiredFields[dealerSiteEdited.site.id]["ftp"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteLoginFtpPassword.$invalid'>
 					    <li id='dealerSiteLoginFtpPasswordErrorRequired' ng-show="formDealerSite.dealerSiteLoginFtpPassword.$error.required">Необходимо ввести пароль.</li>
 					</ul>

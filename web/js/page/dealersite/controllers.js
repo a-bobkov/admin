@@ -280,12 +280,19 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
-    $scope.formConfig = {
-        1:  {                 publicUrl: 1 },
-        5:  { externalId: 1, publicUrl: 1, site: 1 },
-        6:  { externalId: 1, publicUrl: 1, site: 1, ftp: 1 },
-        13: { externalId: 1 },
-        14: {                                site: 1 }
+    $scope.requiredFields = {
+        1:  {                   publicUrl: true },
+        2:  {                   publicUrl: true, site: true },
+        4:  { externalId: true, publicUrl: true },
+        5:  { externalId: true, publicUrl: true, site: true },
+        6:  { externalId: true, publicUrl: true, site: true, ftp: true },
+        7:  {                   publicUrl: true },
+        9:  {                   publicUrl: true },
+        11: {                   publicUrl: true },
+        13: { externalId: true },
+        14: {                                    site: true },
+        16: {                   publicUrl: true },
+        17: {                   publicUrl: true }
     };
 
     if (data.dealerSite) {
