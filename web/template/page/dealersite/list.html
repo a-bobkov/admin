@@ -21,13 +21,12 @@
         </thead>
         <tbody id="DealerSiteListTable">
             <tr ng-repeat='dealerSite in dealerSites' ng-class='{"uneditableRow": dealerSite.status !== "active"}'>
-                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.id}}</a></td>
-                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.dealer.id}}</a></td>
-                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.dealer.companyName}}</a></td>
-                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.site.name}}</a></td>
-                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.externalId}}</a></td>
-                <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.publicUrl}}</a></td>
-                <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.isActive.name}}</a></td>
+                <td class="text">{{dealerSite.id}}</td>
+                <td class="text">{{dealerSite.dealer.id}}: {{dealerSite.dealer.companyName}}</td>
+                <td class="text">{{dealerSite.site.id}}: {{dealerSite.site.name}}</td>
+                <td class="text">{{dealerSite.externalId}}</td>
+                <td class="text">{{dealerSite.publicUrl}}</td>
+                <td class="text">{{dealerSite.isActive.name}}</td>
                 <td>
                     <ul class="actions">
                         <li class="edit"><a ng-click='editDealerSite(dealerSite)'>изменить</a></li>

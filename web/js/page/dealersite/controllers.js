@@ -126,8 +126,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     $scope.sortableColumns = [
         {id: "id", name: "Код"},
         {id: "dealer.id", name: "Салон"},
-        {id: "dealer.name", name: "Название салона"},
-        {id: "site.name", name: "Сайт"},
+        {id: "site.id", name: "Сайт"},
         {id: "externalId", name: "Код на сайте"},
         {id: "publicUrl", name: "Страница на сайте"},
         {id: "isActive.name", name: "Статус"}
