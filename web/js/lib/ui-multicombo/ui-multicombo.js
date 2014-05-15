@@ -85,10 +85,13 @@ angular.module("ui.multicombo", [])
 
             $scope.onFilterChange = function(newValue, oldValue) {
                 var filters = _.invoke($scope._search.split(' '), function() {
-                    return { type: 'contain', fields: ['id', $scope._choiceName], value: this };
+                    var idName = ($scope._choiceName === 'companyName') ? 'user.id' : 'id';
+                    return { type: 'contain', fields: [idName, $scope._choiceName], value: this };
                 });
+                var fieldsName = ($scope._choiceName === 'companyName') ? 'dealer_list_name' : '';
                 var queryParams = {
                     filters: filters,
+                    fields: [fieldsName],
                     pager: {
                         per_page: 10
                     }

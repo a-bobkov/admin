@@ -128,7 +128,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
             }
             var dealerQueryParams = {
                 filters: [
-                    { type: 'in', fields: ['id'], value: dealerIds }
+                    { type: 'in', fields: ['user.id'], value: dealerIds }
                 ],
                 fields: [ 'dealer_list_name' ]
             };
