@@ -264,6 +264,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             });
         }
     };
+    
+    $scope.referenceText = function(dealerSite) {
+        if (dealerSite.publicUrl) {
+            return 'Ссылка';
+        }
+    }
 
     $scope.editDealerSite = function(dealerSite) {
         if (dealerSite.isActive.id === true) {

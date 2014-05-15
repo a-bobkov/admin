@@ -8,7 +8,7 @@
     <input id='DealerSiteListAddDealerSiteUp' type="submit" value="Добавить запись" ng-click='clickNewDealerSite()'/>
 </div>
 
-<div class="span-17">
+<div class="span-16">
     <div class="notice" ng-show='savedDealerSiteListNotice'>{{savedDealerSiteListNotice}}</div>
     <table class="list">
         <thead>
@@ -25,7 +25,7 @@
                 <td class="text">{{dealerSite.dealer.id}}: {{dealerSite.dealer.companyName}}</td>
                 <td class="text">{{dealerSite.site.id}}: {{dealerSite.site.name}}</td>
                 <td class="text">{{dealerSite.externalId}}</td>
-                <td class="text">{{dealerSite.publicUrl}}</td>
+                <td class="text"><a href="{{dealerSite.publicUrl}}">{{referenceText(dealerSite)}}</a></td>
                 <td class="text">{{dealerSite.isActive.name}}</td>
                 <td>
                     <ul class="actions">
