@@ -26,7 +26,7 @@
                 <td class="text">{{dealerSite.site.id}}: {{dealerSite.site.name}}</td>
                 <td class="text">{{dealerSite.externalId}}</td>
                 <td class="text"><a href="{{dealerSite.publicUrl}}">{{referenceText(dealerSite)}}</a></td>
-                <td class="text">{{dealerSite.isActive.name}}</td>
+                <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
                         <li class="edit"><a ng-click='editDealerSite(dealerSite)' ng-show='dealerSite.isActive'>изменить</a></li>
