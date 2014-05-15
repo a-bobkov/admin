@@ -163,7 +163,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
         return dealerSiteApi.get(id).then(function(dealerSiteData) {
             var dealerQueryParams = {
                 filters: [
-                    { type: 'equal', fields: ['id'], value: dealerSiteData.dealerSite.dealer.id }
+                    { type: 'equal', fields: ['user.id'], value: dealerSiteData.dealerSite.dealer.id }
                 ],
                 fields: [ 'dealer_list_name' ]
             };
