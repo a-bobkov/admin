@@ -91,10 +91,10 @@ angular.module("ui.multicombo", [])
                     var idName = ($scope._choiceName === 'companyName') ? 'user.id' : 'id';
                     return { type: 'contain', fields: [idName, $scope._choiceName], value: this };
                 });
-                var fieldsName = ($scope._choiceName === 'companyName') ? 'dealer_list_name' : '';
+                var fieldNames = ($scope._choiceName === 'companyName') ? ['dealer_list_name'] : [];
                 var queryParams = {
                     filters: filters,
-                    fields: [fieldsName],
+                    fields: fieldNames,
                     pager: {
                         per_page: 10
                     }
