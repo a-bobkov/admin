@@ -124,8 +124,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     $scope.$watch('patterns', $scope.onPatternChange, true);
 
     $scope.sortableColumns = [
-        {id: "id", name: "Код записи"},
-        {id: "dealer.id", name: "Код салона"},
+        {id: "id", name: "Код"},
+        {id: "dealer.id", name: "Салон"},
         {id: "dealer.name", name: "Название салона"},
         {id: "site.name", name: "Сайт"},
         {id: "externalId", name: "Код на сайте"},
