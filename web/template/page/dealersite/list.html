@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody id="DealerSiteListTable">
-            <tr ng-repeat='dealerSite in dealerSites' ng-class='{"uneditableRow": dealerSite.status !== "active"}'>
+            <tr ng-repeat='dealerSite in dealerSites' ng-class-odd="'odd'" ng-class-even="'even'">
                 <td class="text">{{dealerSite.id}}</td>
                 <td class="text">{{dealerSite.dealer.id}}: {{dealerSite.dealer.companyName}}</td>
                 <td class="text">{{dealerSite.site.id}}: {{dealerSite.site.name}}</td>
