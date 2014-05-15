@@ -128,8 +128,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         {id: "dealer.id", name: "Код салона"},
         {id: "dealer.name", name: "Название салона"},
         {id: "site.name", name: "Сайт"},
-        {id: "external_id", name: "Код на сайте"},
-        {id: "public_url", name: "Страница на сайте"},
+        {id: "externalId", name: "Код на сайте"},
+        {id: "publicUrl", name: "Страница на сайте"},
         {id: "status.name", name: "Статус"}
     ];
 
@@ -281,10 +281,10 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     $scope.sitesLoader = sitesLoader;
 
     $scope.formConfig = {
-        1:  {                 public_url: 1 },
-        5:  { external_id: 1, public_url: 1, site: 1 },
-        6:  { external_id: 1, public_url: 1, site: 1, ftp: 1 },
-        13: { external_id: 1 },
+        1:  {                 publicUrl: 1 },
+        5:  { externalId: 1, publicUrl: 1, site: 1 },
+        6:  { externalId: 1, publicUrl: 1, site: 1, ftp: 1 },
+        13: { externalId: 1 },
         14: {                                site: 1 }
     };
 

@@ -34,7 +34,7 @@
 	        <tr>
 	            <th><label for="dealerSiteExternalId">Код салона на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteExternalId" id="dealerSiteExternalId" ng-model='dealerSiteEdited.external_id' ng-required='formConfig[dealerSiteEdited.site.id]["external_id"]'>
+	                <input class="span-8" type="text" name="dealerSiteExternalId" id="dealerSiteExternalId" ng-model='dealerSiteEdited.externalId' ng-required='formConfig[dealerSiteEdited.site.id]["externalId"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteExternalId.$invalid'>
 					    <li id='dealerSiteExternalIdErrorRequired' ng-show="formDealerSite.dealerSiteExternalId.$error.required">Необходимо ввести значение.</li>
 					</ul>
@@ -43,7 +43,7 @@
 	        <tr>
 	            <th><label for="dealerSitePublicUrl">Страница на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.public_url' ng-required='formConfig[dealerSiteEdited.site.id]["public_url"]'>
+	                <input class="span-8" type="text" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.publicUrl' ng-required='formConfig[dealerSiteEdited.site.id]["publicUrl"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSitePublicUrl.$invalid'>
 					    <li id='dealerSitePublicUrlErrorRequired' ng-show="formDealerSite.dealerSitePublicUrl.$error.required">Необходимо ввести значение.</li>
 					</ul>

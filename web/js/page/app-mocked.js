@@ -413,22 +413,22 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             id: 1,
             dealer: {id: 1},
             site: {id: 1},
-            public_url: 'http://www.drom.ru/1.html',
+            publicUrl: 'http://www.drom.ru/1.html',
             status: 'active'
         },
         {
             id: 2,
             dealer: {id: 1},
             site: {id: 5},
-            external_id: '1109238',
-            public_url: 'http://www.auto.mail.ru/1109238.html',
+            externalId: '1109238',
+            publicUrl: 'http://www.auto.mail.ru/1109238.html',
             status: 'active'
         },
         {
             id: 3,
             dealer: {id: 1},
             site: {id: 13},
-            external_id: '1109',
+            externalId: '1109',
             status: 'blocked'
         },
         {
@@ -441,22 +441,22 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             id: 5,
             dealer: {id: 2},
             site: {id: 1},
-            public_url: 'http://www.drom.ru/2.html',
+            publicUrl: 'http://www.drom.ru/2.html',
             status: 'active'
         },
         {
             id: 6,
             dealer: {id: 2},
             site: {id: 5},
-            external_id: '11983248',
-            public_url: 'http://www.auto.mail.ru/11983248.html',
+            externalId: '11983248',
+            publicUrl: 'http://www.auto.mail.ru/11983248.html',
             status: 'blocked'
         },
         {
             id: 7,
             dealer: {id: 2},
             site: {id: 13},
-            external_id: '1110',
+            externalId: '1110',
             status: 'active'
         },
         {
@@ -469,8 +469,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             id: 9,
             dealer: {id: 1},
             site: {id: 6},
-            external_id: '119832',
-            public_url: 'http://www.irr.ru/pages/119832.html',
+            externalId: '119832',
+            publicUrl: 'http://www.irr.ru/pages/119832.html',
             status: 'active'
         }
     ], multiplyUsersCoef), null, {dealerSiteStatuses: dealerSiteStatuses, dealers: dealers, sites: sites});
