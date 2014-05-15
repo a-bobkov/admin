@@ -28,7 +28,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                 if (!newValue) {
                     throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
                 }
-            } else if (key === 'status') {
+            } else if (key === 'isActive') {
                 newValue = directories.dealerSiteStatuses.get(value);
             } else {
                 newValue = value;
@@ -52,7 +52,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     DealerSite.prototype.serialize = function() {
         var itemData = {};
         _.forEach(this, function(value, key){
-            if (key === 'status') {
+            if (key === 'isActive') {
                 itemData[key] = value.id;
             } else if (_.isObject(value)) {
                 itemData[key] = {id: value.id};
@@ -227,8 +227,8 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     this.loadItems = function() {
         var self = this;
         return $q.when({dealerSiteStatuses: self.makeCollection([
-            { id: 'active', name: 'Акт' },
-            { id: 'blocked', name: 'Бло' }
+            { id: true, name: 'Акт' },
+            { id: false, name: 'Бло' }
         ])});
     };
 });

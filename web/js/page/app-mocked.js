@@ -135,13 +135,13 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
 
     function filterItem(item, filter) {
 
-        if (!filter.value) {
+        if (filter.value === undefined) {
             return true;
         }
 
         var itemValues = _.invoke(filter.fields, function() {
             var value = getDeepValue(item, this.split('.'));
-            if (_.isObject(value) && value.id) {
+            if (_.isObject(value) && (value.id !== undefined)) {
                 return String(value.id);
             } else {
                 return String(value);
@@ -404,8 +404,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     ]);
 
     var dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
-        { 'id': 'active', 'name': 'Акт' },
-        { 'id': 'blocked', 'name': 'Бло' }
+        { 'id': true, 'name': 'Акт' },
+        { 'id': false, 'name': 'Бло' }
     ]);
 
     var dealerSites = dealerSitesLoader.makeCollection(multiplyArr([
@@ -414,7 +414,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             dealer: {id: 1},
             site: {id: 1},
             publicUrl: 'http://www.drom.ru/1.html',
-            status: 'active'
+            isActive: true
         },
         {
             id: 2,
@@ -422,27 +422,27 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             site: {id: 5},
             externalId: '1109238',
             publicUrl: 'http://www.auto.mail.ru/1109238.html',
-            status: 'active'
+            isActive: true
         },
         {
             id: 3,
             dealer: {id: 1},
             site: {id: 13},
             externalId: '1109',
-            status: 'blocked'
+            isActive: false
         },
         {
             id: 4,
             dealer: {id: 1},
             site: {id: 14},
-            status: 'active'
+            isActive: true
         },
         {
             id: 5,
             dealer: {id: 2},
             site: {id: 1},
             publicUrl: 'http://www.drom.ru/2.html',
-            status: 'active'
+            isActive: true
         },
         {
             id: 6,
@@ -450,20 +450,20 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             site: {id: 5},
             externalId: '11983248',
             publicUrl: 'http://www.auto.mail.ru/11983248.html',
-            status: 'blocked'
+            isActive: false
         },
         {
             id: 7,
             dealer: {id: 2},
             site: {id: 13},
             externalId: '1110',
-            status: 'active'
+            isActive: true
         },
         {
             id: 8,
             dealer: {id: 2},
             site: {id: 14},
-            status: 'blocked'
+            isActive: false
         },
         {
             id: 9,
@@ -471,7 +471,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             site: {id: 6},
             externalId: '119832',
             publicUrl: 'http://www.irr.ru/pages/119832.html',
-            status: 'active'
+            isActive: true
         }
     ], multiplyUsersCoef), null, {dealerSiteStatuses: dealerSiteStatuses, dealers: dealers, sites: sites});
 

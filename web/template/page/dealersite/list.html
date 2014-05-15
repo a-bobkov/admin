@@ -27,7 +27,7 @@
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.site.name}}</a></td>
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.externalId}}</a></td>
                 <td class="text"><a ng-click='editDealerSite(dealerSite)'>{{dealerSite.publicUrl}}</a></td>
-                <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.status.name}}</a></td>
+                <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
                         <li class="edit"><a ng-click='editDealerSite(dealerSite)'>изменить</a></li>
@@ -75,7 +75,7 @@
             <tr>
                 <th><label for="sf_guard_dealerSite_filters_status">Статус</label></th>
                 <td>
-                    <select ng-model='patterns.status' ng-options='opt.name for opt in dealerSiteStatuses' id='sf_guard_dealerSite_filters_status' >
+                    <select ng-model='patterns.isActive' ng-options='opt.name for opt in dealerSiteStatuses' id='sf_guard_dealerSite_filters_status' >
                         <option value='' selected="selected">Все</option>
                     </select>
                 </td>

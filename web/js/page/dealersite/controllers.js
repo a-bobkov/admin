@@ -31,11 +31,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
                     value: ls.sites.split(';')
                 });
             }
-            if (ls.status) {
+            if (ls.isActive !== undefined) {
                 queryParams.filters.push({
                     type: 'equal',
-                    fields: ['status'],
-                    value: ls.status
+                    fields: ['isActive'],
+                    value: ls.isActive
                 });
             }
             return queryParams;
@@ -111,7 +111,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         $scope.patterns = {
             dealers: [],
             sites: [],
-            status: null
+            isActive: null
         };
     }
 
@@ -130,7 +130,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         {id: "site.name", name: "Сайт"},
         {id: "externalId", name: "Код на сайте"},
         {id: "publicUrl", name: "Страница на сайте"},
-        {id: "status.name", name: "Статус"}
+        {id: "isActive.name", name: "Статус"}
     ];
 
     $scope.sortingMark = function(column) {
@@ -180,7 +180,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         sites: _.invoke(getFilterFieldsValue(params.filters, ['site']), function() {
                 return _.find($scope.sites, {id: _.parseInt(this)})
             }),
-        status: _.find($scope.dealerSiteStatuses, {id: getFilterFieldsValue(params.filters, ['status'])})
+        isActive: _.find($scope.dealerSiteStatuses, {id: getFilterFieldsValue(params.filters, ['isActive'])})
     };
     $scope.sorting = {
         column: params.order.field,
@@ -230,20 +230,20 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             noticeMessage,
             newStatus;
 
-        if (dealerSite.status.id === 'active') {
+        if (dealerSite.isActive.id === true) {
             confirmMessage = 'Блокировать регистрацию';
             noticeMessage = 'Блокирована регистрация';
-            newStatus = _.find($scope.dealerSiteStatuses, {id: 'blocked'});
+            newStatus = _.find($scope.dealerSiteStatuses, {id: false});
         } else {
             confirmMessage = 'Разблокировать регистрацию';
             noticeMessage = 'Разблокирована регистрация';
-            newStatus = _.find($scope.dealerSiteStatuses, {id: 'active'});
+            newStatus = _.find($scope.dealerSiteStatuses, {id: true});
         }
         var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
         if (confirm(confirmMessage + dealerSiteInfo + '?')) {
             var dealerSiteEdited = new DealerSite;
             angular.extend(dealerSiteEdited, dealerSite);
-            dealerSiteEdited.status = newStatus;
+            dealerSiteEdited.isActive = newStatus;
             dealerSiteEdited.save(data).then(function() {
                 $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
                 $location.path('/dealersitelist?');
@@ -267,7 +267,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     };
 
     $scope.editDealerSite = function(dealerSite) {
-        if (dealerSite.status.id === 'active') {
+        if (dealerSite.isActive.id === true) {
             $location.path('/dealersites/' + dealerSite.id + '/edit');
         }
     };
@@ -342,7 +342,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     function makeDealerSiteNew() {
         $scope.actionName = "Создание";
         $scope.dealerSiteEdited = new DealerSite;
-        $scope.dealerSiteEdited.status = _.find($scope.dealerSiteStatuses.getItems(), {id: 'blocked'});
+        $scope.dealerSiteEdited.isActive = _.find($scope.dealerSiteStatuses.getItems(), {id: false});
     }
 
     $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
