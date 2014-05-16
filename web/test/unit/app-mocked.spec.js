@@ -107,6 +107,697 @@ describe('app-mocked', function() {
         });
     }
 
+describe('dealersite, dealersitelogin', function() {
+
+    describe('Методы query должны фильтровать dealersite', function() {
+
+        it('equal - по равенству dealer заданному значению', function() {
+            var answer = {};
+            var dealer;
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                dealer = answer.respond.dealerSites.getItems()[0].dealer;
+                var params = {
+                    filters: [
+                        { fields: ['dealer'], type: 'equal', value: dealer.id }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                expect(_.every(dealerSites, function(value) {
+                    var dealerId = String(value.dealer.id);
+                    return (dealerId === String(dealer.id));
+                })).toBeTruthy();
+            });
+        });
+
+        it('in - по равенству dealer одному из заданных значений', function() {
+            var answer = {};
+            var dealersId;
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                var dealers = _.uniq(_.pluck(answer.respond.dealerSites.getItems(), 'dealer')).slice(0, 3);
+                dealersId = _.pluck(dealers, 'id');
+                var params = {
+                    filters: [
+                        { fields: ['dealer'], type: 'in', value: dealersId }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                expect(_.every(dealerSites, function(value) {
+                    var dealerId = value.dealer.id;
+                    return (dealersId.indexOf(dealerId) !== -1);
+                })).toBeTruthy();
+            });
+        });
+
+        it('equal - по равенству site заданному значению', function() {
+            var answer = {};
+            var site;
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                site = answer.respond.dealerSites.getItems()[0].site;
+                var params = {
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: site.id }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                expect(_.every(dealerSites, function(value) {
+                    var siteId = String(value.site.id);
+                    return (siteId === String(site.id));
+                })).toBeTruthy();
+            });
+        });
+
+        it('in - по равенству site одному из заданных значений', function() {
+            var answer = {};
+            var sitesId;
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                var sites = _.uniq(_.pluck(answer.respond.dealerSites.getItems(), 'site')).slice(0, 3);
+                sitesId = _.pluck(sites, 'id');
+                var params = {
+                    filters: [
+                        { fields: ['site'], type: 'in', value: sitesId }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                expect(_.every(dealerSites, function(value) {
+                    var siteId = value.site.id;
+                    return (sitesId.indexOf(siteId) !== -1);
+                })).toBeTruthy();
+            });
+        });
+
+        it('equal - по равенству isActive = true', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                var params = {
+                    filters: [
+                        { type: 'equal', fields: ['isActive'], value: true }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                expect(_.every(dealerSites, function(value) {
+                    return (value.isActive.id === true);
+                })).toBeTruthy();
+            });
+        });
+
+        it('equal - по равенству isActive = false', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                var params = {
+                    filters: [
+                        { type: 'equal', fields: ['isActive'], value: false }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                expect(_.every(dealerSites, function(value) {
+                    return (value.isActive.id === false);
+                })).toBeTruthy();
+            });
+        });
+    });
+
+    describe('Методы query должны сортировать dealersite', function() {
+
+        it('по возрастанию id', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'asc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesId = _.pluck(dealerSites, 'id');
+                expect(dealerSitesId).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('по убыванию id', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'id',
+                    order_direction: 'desc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesId = _.pluck(dealerSites, 'id');
+                expect(dealerSitesId).toBeSorted('DescendingNumbers');
+            });
+        });
+
+        it('по возрастанию dealer', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'dealer',
+                    order_direction: 'asc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesDealerId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
+                expect(dealerSitesDealerId).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('по убыванию dealer', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'dealer',
+                    order_direction: 'desc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesDealerId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
+                expect(dealerSitesDealerId).toBeSorted('DescendingNumbers');
+            });
+        });
+
+        it('по возрастанию site', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'site',
+                    order_direction: 'asc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesSiteId = _.pluck(_.pluck(dealerSites, 'site'), 'id');
+                expect(dealerSitesSiteId).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('по убыванию site', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'site',
+                    order_direction: 'desc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesSiteId = _.pluck(_.pluck(dealerSites, 'site'), 'id');
+                expect(dealerSitesSiteId).toBeSorted('DescendingNumbers');
+            });
+        });
+
+        it('по возрастанию externalId', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'externalId',
+                    order_direction: 'asc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesExternalId = _.pluck(dealerSites, 'externalId');
+                expect(dealerSitesExternalId).toBeSorted('AscendingStrings');
+            });
+        });
+
+        it('по убыванию externalId', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'externalId',
+                    order_direction: 'desc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesExternalId = _.pluck(dealerSites, 'externalId');
+                expect(dealerSitesExternalId).toBeSorted('DescendingStrings');
+            });
+        });
+
+        it('по возрастанию publicUrl', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'publicUrl',
+                    order_direction: 'asc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesPublicUrl = _.pluck(dealerSites, 'publicUrl');
+                expect(dealerSitesPublicUrl).toBeSorted('AscendingStrings');
+            });
+        });
+
+        it('по убыванию publicUrl', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'publicUrl',
+                    order_direction: 'desc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesPublicUrl = _.pluck(dealerSites, 'publicUrl');
+                expect(dealerSitesPublicUrl).toBeSorted('DescendingStrings');
+            });
+        });
+
+        it('по возрастанию isActive', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'isActive',
+                    order_direction: 'asc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesIsActive = _.pluck(dealerSites, 'isActive');
+                expect(dealerSitesIsActive).toBeSorted('AscendingBooleans');
+            });
+        });
+
+        it('по убыванию isActive', function() {
+            var answer = {};
+            var params = {
+                order: {
+                    order_field: 'isActive',
+                    order_direction: 'desc'
+                }
+            };
+
+            runSync(answer, function() {
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runs(function() {
+                var dealerSites = answer.respond.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                var dealerSitesIsActive = _.pluck(dealerSites, 'isActive');
+                expect(dealerSitesIsActive).toBeSorted('DescendingBooleans');
+            });
+        });
+    });
+
+    describe('Методы post должны', function() {
+
+        it('post - сохранять новый dealersite', function() {
+            var answer = {};
+            var directories = {};
+            var sites;
+            var dealers;
+            var freeDealerId;
+
+            runSync(answer, function() {
+                return dealerSiteStatusesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond); 
+                return sitesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond); 
+                sites = answer.respond.sites.getItems();
+                var dealerQueryParams = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    },
+                    fields: ['dealer_list_name']
+                };
+                return dealersLoader.loadItems(dealerQueryParams);
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond);
+                dealers = answer.respond.dealers.getItems();
+                var dealersId = _.pluck(dealers, 'id');
+                var params = {
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: sites[1].id },
+                        { fields: ['dealer'], type: 'in', value: dealersId }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params).then(function(directory) {
+                    var dealerSites = directory.dealerSites.getItems();
+                    var dealerSitesDealersId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
+                    return _.difference(dealersId, dealerSitesDealersId);
+                });
+            });
+
+            runSync(answer, function() {
+                freeDealerId = answer.respond;
+                var newDealerSite = new DealerSite({
+                        dealer: {id: freeDealerId[0]},
+                        site: {id: sites[1].id},
+                        externalId: '1109238',
+                        publicUrl: 'http://www.auto.mail.ru/1109238.html',
+                        isActive: true
+                    }, directories);
+                return newDealerSite.save(directories);
+            });
+
+            runSync(answer, function() {
+                var newDealerSite = answer.respond;
+                return dealerSitesLoader.loadItem(newDealerSite.id);
+            });
+
+            runs(function() {
+                var newDealerSite = answer.respond.dealerSite;
+                expect(newDealerSite.dealer.id).toEqual(freeDealerId[0]);
+                expect(newDealerSite.site).toEqual(sites[1]);
+                expect(newDealerSite.externalId).toEqual('1109238');
+                expect(newDealerSite.publicUrl).toEqual('http://www.auto.mail.ru/1109238.html');
+                expect(newDealerSite.isActive.id).toEqual(true);
+            });
+        });
+
+        it('post - выдавать ошибку, если такая комбинация dealer, site уже есть', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                var dealerSite = dealerSites[0];
+                var dealerSiteCopy = new DealerSite({
+                    dealer: dealerSite.dealer,
+                    site: dealerSite.site
+                }, directories);
+                return dealerSiteCopy.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+            });
+        });
+
+        it('put - сохранять изменения атрибутов dealersite', function() {
+            var answer = {};
+            var dealerSite;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                dealerSite = dealerSites[0];
+                dealerSite.externalId = String(Math.floor(Math.random() * 1000000));
+                dealerSite.publicUrl = 'http://www.jasmine.ru/' + String(Math.floor(Math.random() * 1000000));
+                return dealerSite.save(directories);
+            });
+
+            runSync(answer, function() {
+                var savedDealerSite = answer.respond;
+                return dealerSitesLoader.loadItem(savedDealerSite.id);
+            });
+
+            runs(function() {
+                var savedDealerSite = answer.respond.dealerSite;
+                expect(savedDealerSite.externalId).toEqual(dealerSite.externalId);
+                expect(savedDealerSite.publicUrl).toEqual(dealerSite.publicUrl);
+            });
+        });
+
+        it('put - изменять dealer, если нет записи с такой комбинацией dealer, site', function() {
+            var answer = {};
+            var directories = {};
+            var sites;
+            var dealers;
+            var dealerSite;
+            var freeDealerId;
+
+            runSync(answer, function() {
+                return dealerSiteStatusesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond); 
+                return sitesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond); 
+                sites = answer.respond.sites.getItems();
+                var dealerQueryParams = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    },
+                    fields: ['dealer_list_name']
+                };
+                return dealersLoader.loadItems(dealerQueryParams);
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond);
+                dealers = answer.respond.dealers.getItems();
+                var dealersId = _.pluck(dealers, 'id');
+                var params = {
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: sites[1].id },
+                        { fields: ['dealer'], type: 'in', value: dealersId }
+                    ]
+                };
+                return dealerSitesLoader.loadItems(params).then(function(directory) {
+                    var dealerSites = directory.dealerSites.getItems();
+                    dealerSite = dealerSites[0];
+                    var dealerSitesDealersId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
+                    return _.difference(dealersId, dealerSitesDealersId);
+                });
+            });
+
+            runSync(answer, function() {
+                freeDealerId = answer.respond;
+                dealerSite.dealer = _.find(dealers, {id: freeDealerId[0]});
+                return dealerSite.save(directories);
+            });
+
+            runSync(answer, function() {
+                var savedDealerSite = answer.respond;
+                return dealerSitesLoader.loadItem(savedDealerSite.id);
+            });
+
+            runs(function() {
+                var savedDealerSite = answer.respond.dealerSite;
+                expect(savedDealerSite.dealer.id).toEqual(freeDealerId[0]);
+            });
+        });
+
+        it('put - выдавать ошибку, если такая комбинация dealer, site уже есть', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                var dealerSite = dealerSites[0];
+                var dealerSiteCopy = dealerSites[1];
+                dealerSiteCopy.dealer = dealerSite.dealer;
+                dealerSiteCopy.site = dealerSite.site;
+                return dealerSiteCopy.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+            });
+        });
+
+        it('remove - удалять dealersite', function() {
+            var answer = {};
+            var dealerSite;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                dealerSite = dealerSites[0];
+                return dealerSite.remove();
+            });
+
+            runs(function() {
+                expect(answer.respond).toEqual(null);
+            });
+
+            runSync(answer, function() {
+                var savedDealerSite = answer.respond;
+                return dealerSitesLoader.loadItem(dealerSite.id);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Not Found');
+            });
+        });
+    });
+});
+
+describe('user, dealer', function() {
     describe('Методы post должны проверять в user', function() {
 
         it('обязательность email', function() {
@@ -2303,4 +2994,5 @@ describe('app-mocked', function() {
             });
         });
     });
+});
 });

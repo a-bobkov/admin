@@ -17,8 +17,13 @@ beforeEach(function() {
                     return parseInt(arg, 10);
                 } else if (params.match('Dates')) {
                     return Date.parse(arg);
-                } else {
-                    return arg.toLowerCase();
+                } else if (params.match('Booleans')) {
+                    return !!arg;
+                } else if (params.match('Strings')) {
+                    if (arg) {
+                        return arg.toLowerCase();
+                    }
+                    return arg;
                 }
             }
             var compare = function(a, b) {
