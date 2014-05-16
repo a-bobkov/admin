@@ -122,7 +122,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                 }
             }
 
-            var dealerIds = getFilterFieldsValue(queryParams.filters, ['dealer'])
+            var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
             if (_.isEmpty(dealerIds)) {
                 dealerIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'dealer'), 'id');
             }
@@ -133,7 +133,7 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                 fields: [ 'dealer_list_name' ]
             };
 
-            var siteIds = getFilterFieldsValue(queryParams.filters, ['site'])
+            var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
             if (_.isEmpty(siteIds)) {
                 siteIds = _.pluck(_.pluck(dealerSitesData.dealerSites, 'site'), 'id');
             }
