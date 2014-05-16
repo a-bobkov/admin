@@ -231,11 +231,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
 
         if (dealerSite.isActive.id === true) {
             confirmMessage = 'Блокировать регистрацию';
-            noticeMessage = 'Блокирована регистрация';
+            noticeMessage = 'Блокирована регистрация ' + dealerSite.id;
             newStatus = _.find($scope.dealerSiteStatuses, {id: false});
         } else {
             confirmMessage = 'Разблокировать регистрацию';
-            noticeMessage = 'Разблокирована регистрация';
+            noticeMessage = 'Разблокирована регистрация ' + dealerSite.id;
             newStatus = _.find($scope.dealerSiteStatuses, {id: true});
         }
         var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
@@ -244,7 +244,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             angular.extend(dealerSiteEdited, dealerSite);
             dealerSiteEdited.isActive = newStatus;
             dealerSiteEdited.save(data).then(function() {
-                $scope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
+                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
                 $location.path('/dealersitelist?');
             });
         }
