@@ -136,4 +136,36 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
             return {dealerSiteLogins: self.makeCollection(dealerSiteLoginsData.dealerSiteLogins, dealerSiteLoginsData.params, directories)};
         });
     };
+
+    this.loadItem = function(id, directories) {
+        var self = this;
+        return dealerSiteLoginApi.get(id).then(function(dealerSiteLoginData) {
+            var dealerSiteLogin = dealerSiteLoginData.dealerSiteLogin;
+            if (directories) {
+                return {dealerSiteLogin: new DealerSiteLogin(dealerSiteLogin, directories)};
+            }
+            var dealerQueryParams = {
+                filters: [
+                    { fields: ['user.id'], type: 'equal', value: dealerSiteLogin.dealer.id }
+                ],
+                fields: [ 'dealer_list_name' ]
+            };
+            var siteQueryParams = {
+                filters: [
+                    { fields: ['id'], type: 'equal', value: dealerSiteLogin.site.id }
+                ]
+            };
+            return $q.all({
+                dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
+                    return respond.dealers;
+                }),
+                sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
+                    return respond.sites;
+                })
+            }).then(function(directories) {
+                directories.dealerSiteLogin = new DealerSiteLogin(dealerSiteLogin, directories);
+                return directories;
+            });
+        });
+    };
 });
