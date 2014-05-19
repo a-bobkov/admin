@@ -34,6 +34,7 @@ angular.module("ui.multicombo", [])
             _choiceName: '=uiMcomboName'
         },
         controller: ['$scope', '$filter', function($scope, $filter) {
+                    console.log($scope._choices);
             $scope._searchElem = null;
             if (_.isArray($scope._selected)) {
                 $scope._selectedChoices = $scope._selected;
