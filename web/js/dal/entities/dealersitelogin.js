@@ -76,7 +76,7 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
     return DealerSiteLogins;
 })
 
-.service('dealerSiteLoginsLoader', function(dealerSiteLoginApi, DealerSiteLogin, DealerSiteLogins, $q) {
+.service('dealerSiteLoginsLoader', function(dealerSiteLoginApi, DealerSiteLogin, DealerSiteLogins, dealersLoader, sitesLoader, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {
@@ -94,6 +94,45 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
     this.loadItems = function(queryParams, directories) {
         var self = this;
         return dealerSiteLoginApi.query(queryParams).then(function(dealerSiteLoginsData) {
+            if (!directories) {
+                var getFilterFieldsValue = function(filters, fields) {
+                    var filter = _.find(filters, {fields: fields});
+                    if (filter) {
+                        return filter.value;
+                    }
+                }
+
+                var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
+                if (_.isEmpty(dealerIds)) {
+                    dealerIds = _.pluck(_.pluck(dealerSiteLoginsData.dealerSiteLogins, 'dealer'), 'id');
+                }
+                var dealerQueryParams = {
+                    filters: [
+                        { type: 'in', fields: ['user.id'], value: dealerIds }
+                    ],
+                    fields: [ 'dealer_list_name' ]
+                };
+
+                var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
+                if (_.isEmpty(siteIds)) {
+                    siteIds = _.pluck(_.pluck(dealerSiteLoginsData.dealerSiteLogins, 'site'), 'id');
+                }
+                var siteQueryParams = {
+                    filters: [
+                        { type: 'in', fields: ['id'], value: siteIds }
+                    ]
+                };
+                return $q.all({
+                    dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
+                        return respond.dealers;
+                    }),
+                    sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
+                        return respond.sites;
+                    })
+                }).then(function(directories) {
+                    return _.extend(directories, {dealerSiteLogins: self.makeCollection(dealerSiteLoginsData.dealerSiteLogins, dealerSiteLoginsData.params, directories)});
+                });
+            }
             return {dealerSiteLogins: self.makeCollection(dealerSiteLoginsData.dealerSiteLogins, dealerSiteLoginsData.params, directories)};
         });
     };
