@@ -109,6 +109,181 @@ describe('app-mocked', function() {
 
 describe('dealersite, dealersitelogin', function() {
 
+    describe('dealersitelogin', function() {
+
+        it('equal - по равенству dealer и site заданным значениям', function() {
+            var answer = {};
+            var dealer;
+            var site;
+
+            runSync(answer, function() {
+                return dealerSiteLoginsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealer = dealerSiteLogin.dealer;
+                site = dealerSiteLogin.site;
+                var params = {
+                    filters: [
+                        { fields: ['dealer'], type: 'equal', value: dealer.id },
+                        { fields: ['site'], type: 'equal', value: site.id }
+                    ]
+                };
+                return dealerSiteLoginsLoader.loadItems(params, directories);
+            });
+
+            runs(function() {
+                var dealerSiteLogins = answer.respond.dealerSiteLogins.getItems();
+                expect(dealerSiteLogins.length).toBeTruthy();
+                console.log(dealerSiteLogins);
+                expect(_.every(dealerSiteLogins, function(value) {
+                    var dealerId = String(value.dealer.id);
+                    var siteId = String(value.site.id);
+                    return ((dealerId === String(dealer.id)) && (siteId === String(site.id)));
+                })).toBeTruthy();
+            });
+        });
+
+        it('post - сохранять новый dealersitelogin', function() {
+            var answer = {};
+            var directories = {};
+            var sites;
+            var dealers;
+            var freeDealerId;
+
+            runSync(answer, function() {
+                return sitesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond); 
+                sites = answer.respond.sites.getItems();
+                var dealerQueryParams = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    },
+                    fields: ['dealer_list_name']
+                };
+                return dealersLoader.loadItems(dealerQueryParams);
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond);
+                dealers = answer.respond.dealers.getItems();
+                var dealersId = _.pluck(dealers, 'id');
+                var params = {
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: sites[1].id },
+                        { fields: ['dealer'], type: 'in', value: dealersId }
+                    ]
+                };
+                return dealerSiteLoginsLoader.loadItems(params, directories).then(function(directory) {
+                    var dealerSiteLogins = directory.dealerSiteLogins.getItems();
+                    var dealerSiteLoginsDealersId = _.pluck(_.pluck(dealerSiteLogins, 'dealer'), 'id');
+                    return _.difference(dealersId, dealerSiteLoginsDealersId);
+                });
+            });
+
+            runSync(answer, function() {
+                freeDealerId = answer.respond[0];
+                var newDealerSiteLogin = new DealerSiteLogin({
+                        dealer: {id: freeDealerId},
+                        site: {id: sites[1].id},
+                        type: 'site',
+                        login: 'a11111',
+                        password: 'p22222'
+                    }, directories);
+                return newDealerSiteLogin.save(directories);
+            });
+
+            runSync(answer, function() {
+                var newDealerSiteLogin = answer.respond;
+                return dealerSiteLoginsLoader.loadItem(newDealerSiteLogin.id);
+            });
+
+            runs(function() {
+                var newDealerSiteLogin = answer.respond.dealerSiteLogin;
+                expect(newDealerSiteLogin.dealer.id).toEqual(freeDealerId);
+                expect(newDealerSiteLogin.site).toEqual(sites[1]);
+                expect(newDealerSiteLogin.type).toEqual('site');
+                expect(newDealerSiteLogin.login).toEqual('a11111');
+                expect(newDealerSiteLogin.password).toEqual('p22222');
+            });
+        });
+
+        it('put - сохранять изменения атрибутов dealersitelogin', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+                return dealerSiteLogin.save(directories);
+            });
+
+            runSync(answer, function() {
+                var savedDealerSiteLogin = answer.respond;
+                return dealerSiteLoginsLoader.loadItem(savedDealerSiteLogin.id);
+            });
+
+            runs(function() {
+                var savedDealerSiteLogin = answer.respond.dealerSiteLogin;
+                expect(savedDealerSiteLogin.login).toEqual(dealerSiteLogin.login);
+                expect(savedDealerSiteLogin.password).toEqual(dealerSiteLogin.password);
+            });
+        });
+
+        it('remove - удалять dealersitelogin', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                return dealerSiteLogin.remove();
+            });
+
+            runs(function() {
+                expect(answer.respond).toEqual(null);
+            });
+
+            runSync(answer, function() {
+                var savedDealerSiteLogin = answer.respond;
+                return dealerSiteLoginsLoader.loadItem(dealerSiteLogin.id);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Not Found');
+            });
+        });
+    });
+
     describe('Методы query должны фильтровать dealersite', function() {
 
         it('equal - по равенству dealer заданному значению', function() {
@@ -523,7 +698,7 @@ describe('dealersite, dealersitelogin', function() {
         });
     });
 
-    describe('Методы post должны', function() {
+    describe('Методы CRUD должны', function() {
 
         it('post - сохранять новый dealersite', function() {
             var answer = {};
