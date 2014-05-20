@@ -120,6 +120,7 @@ angular.module("ui.multicombo", [])
                 event.preventDefault();
                 event.stopPropagation();
 
+                scope._search = '';
                 scope.onFilterChange('', undefined);
 
                 if (openElement) {
@@ -137,7 +138,6 @@ angular.module("ui.multicombo", [])
                         element.removeClass('mcombo-container-active');
                         close = null;
                         openElement = null;
-                        scope._search = '';
                         scope._searchElem.value = '';
                     }
                     $document.bind('click', close);
