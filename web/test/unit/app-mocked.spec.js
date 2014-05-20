@@ -839,6 +839,44 @@ describe('dealersite, dealersitelogin', function() {
             });
         });
 
+        it('put - сохранять изменение атрибута dealersite.isActive с true на false', function() {
+            var answer = {};
+            var dealerSite;
+
+            runSync(answer, function() {
+                var params = {
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ],
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                expect(dealerSites.length).toBeTruthy();
+                dealerSite = dealerSites[0];
+                expect(dealerSite.isActive.id).toBe(true);
+                dealerSite.isActive = false;
+                return dealerSite.save(directories);
+            });
+
+            runSync(answer, function() {
+                var savedDealerSite = answer.respond;
+                return dealerSitesLoader.loadItem(savedDealerSite.id);
+            });
+
+            runs(function() {
+                var savedDealerSite = answer.respond.dealerSite;
+                expect(savedDealerSite.isActive.id).toEqual(dealerSite.isActive);
+            });
+        });
+
         it('put - изменять dealer, если нет записи с такой комбинацией dealer, site', function() {
             var answer = {};
             var directories = {};
