@@ -173,12 +173,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     var params = $scope.dealerSites.getParams();
     $scope.patterns = {
         dealers: _.invoke(getFilterFieldsValue(params.filters, ['dealer']), function() {
-                return $scope.dealers.getItem(_.parseInt(this));
+                return $scope.dealers.get(_.parseInt(this));
             }),
         sites: _.invoke(getFilterFieldsValue(params.filters, ['site']), function() {
-                return $scope.sites.getItem(_.parseInt(this));
+                return $scope.sites.get(_.parseInt(this));
             }),
-        isActive: $scope.dealerSiteStatuses.getItem(getFilterFieldsValue(params.filters, ['isActive']))
+        isActive: $scope.dealerSiteStatuses.get(getFilterFieldsValue(params.filters, ['isActive']))
     };
     $scope.sorting = {
         column: params.order.field,
@@ -231,11 +231,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         if (dealerSite.isActive.id === true) {
             confirmMessage = 'Блокировать регистрацию';
             noticeMessage = 'Блокирована регистрация ' + dealerSite.id;
-            newStatus = $scope.dealerSiteStatuses.getItem(false);
+            newStatus = $scope.dealerSiteStatuses.get(false);
         } else {
             confirmMessage = 'Разблокировать регистрацию';
             noticeMessage = 'Разблокирована регистрация ' + dealerSite.id;
-            newStatus = $scope.dealerSiteStatuses.getItem(true);
+            newStatus = $scope.dealerSiteStatuses.get(true);
         }
         var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
         if (confirm(confirmMessage + dealerSiteInfo + '?')) {
