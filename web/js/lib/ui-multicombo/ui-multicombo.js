@@ -48,7 +48,7 @@ angular.module("ui.multicombo", [])
 
             var filterChoices = function() {
                 var selectedIds = _.pluck($scope._selectedChoices, 'id');
-                $scope._filteredChoices = _.filter($scope._choices, function(value) {
+                $scope._filteredChoices = _.filter($scope._choices.getItems(), function(value) {
                     return (selectedIds.indexOf(value.id) === -1);
                 });
             }
@@ -100,7 +100,7 @@ angular.module("ui.multicombo", [])
                     }
                 };
                 $scope._choicesLoader.loadItems(queryParams).then(function(respond) {
-                    $scope._choices = respond[_.keys(respond)[0]].getItems();
+                    $scope._choices = respond[_.keys(respond)[0]];
                     filterChoices();
                 });
             }

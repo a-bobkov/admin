@@ -90,9 +90,10 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
 }])
 
 .controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, DealerSite, dealersLoader, sitesLoader) {
-    _.forOwn(data, function(collection, key) {
-        $scope[key] = collection.getItems();
-    });
+    // _.forOwn(data, function(collection, key) {
+    //     $scope[key] = collection.getItems();
+    // });
+    _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
@@ -100,8 +101,6 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         $scope.savedDealerSiteListNotice = $rootScope.savedDealerSiteListNotice;
         delete $rootScope.savedDealerSiteListNotice;
     }
-
-    var filteredDealerSites = [];
 
     $scope.clickNewDealerSite = function() {
         $location.path('/dealersitenew');
@@ -171,15 +170,15 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         }
     }
 
-    var params = data.dealerSites.getParams();
+    var params = $scope.dealerSites.getParams();
     $scope.patterns = {
         dealers: _.invoke(getFilterFieldsValue(params.filters, ['dealer']), function() {
-                return _.find($scope.dealers, {id: _.parseInt(this)})
+                return $scope.dealers.getItem(_.parseInt(this));
             }),
         sites: _.invoke(getFilterFieldsValue(params.filters, ['site']), function() {
-                return _.find($scope.sites, {id: _.parseInt(this)})
+                return $scope.sites.getItem(_.parseInt(this));
             }),
-        isActive: _.find($scope.dealerSiteStatuses, {id: getFilterFieldsValue(params.filters, ['isActive'])})
+        isActive: $scope.dealerSiteStatuses.getItem(getFilterFieldsValue(params.filters, ['isActive']))
     };
     $scope.sorting = {
         column: params.order.field,
@@ -232,11 +231,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         if (dealerSite.isActive.id === true) {
             confirmMessage = 'Блокировать регистрацию';
             noticeMessage = 'Блокирована регистрация ' + dealerSite.id;
-            newStatus = _.find($scope.dealerSiteStatuses, {id: false});
+            newStatus = $scope.dealerSiteStatuses.getItem(false);
         } else {
             confirmMessage = 'Разблокировать регистрацию';
             noticeMessage = 'Разблокирована регистрация ' + dealerSite.id;
-            newStatus = _.find($scope.dealerSiteStatuses, {id: true});
+            newStatus = $scope.dealerSiteStatuses.getItem(true);
         }
         var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
         if (confirm(confirmMessage + dealerSiteInfo + '?')) {

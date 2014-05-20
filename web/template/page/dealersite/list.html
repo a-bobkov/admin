@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody id="DealerSiteListTable">
-            <tr ng-repeat='dealerSite in dealerSites' ng-class-odd="'odd'" ng-class-even="'even'">
+            <tr ng-repeat='dealerSite in dealerSites.getItems()' ng-class-odd="'odd'" ng-class-even="'even'">
                 <td class="text">{{dealerSite.id}}</td>
                 <td class="text">{{dealerSite.dealer.id}}: {{dealerSite.dealer.companyName}}</td>
                 <td class="text">{{dealerSite.site.id}}: {{dealerSite.site.name}}</td>
@@ -74,7 +74,7 @@
             <tr>
                 <th><label for="sf_guard_dealerSite_filters_status">Статус</label></th>
                 <td>
-                    <select ng-model='patterns.isActive' ng-options='opt.name for opt in dealerSiteStatuses' id='sf_guard_dealerSite_filters_status' >
+                    <select ng-model='patterns.isActive' ng-options='opt.name for opt in dealerSiteStatuses.getItems()' id='sf_guard_dealerSite_filters_status' >
                         <option value='' selected="selected">Все</option>
                     </select>
                 </td>
