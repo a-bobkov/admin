@@ -84,9 +84,6 @@ angular.module("ui.multicombo", [])
             };
 
             $scope.onFilterChange = function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
                 var filters = _.invoke($scope._search.split(' '), function() {
                     var idName = ($scope._choiceName === 'companyName') ? 'user.id' : 'id';
                     return { type: 'contain', fields: [idName, $scope._choiceName], value: this };
