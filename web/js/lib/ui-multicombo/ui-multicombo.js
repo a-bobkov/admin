@@ -48,6 +48,9 @@ angular.module("ui.multicombo", [])
 
             var filterChoices = function() {
                 var selectedIds = _.pluck($scope._selectedChoices, 'id');
+                if ($scope._choices.constructor.name === 'Sites') {
+                    selectedIds.push(0, 12, 15);    // нельзя выбирать эти сайты
+                }
                 $scope._filteredChoices = _.filter($scope._choices.getItems(), function(value) {
                     return (selectedIds.indexOf(value.id) === -1);
                 });

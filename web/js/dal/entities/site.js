@@ -18,7 +18,7 @@ angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal
 
 .factory('Sites', function(Collection) {
     var Sites = (function() {
-        var Sites = function(itemsData, queryParams) {
+        function Sites(itemsData, queryParams) {
             Collection.call(this, itemsData, queryParams);
         };
         angular.extend(Sites.prototype, Collection.prototype);
