@@ -3,11 +3,14 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin) {
+    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader) {
+
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-        DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin);
+        DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
+        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader);
 });
 
 /**
@@ -15,7 +18,9 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
  */
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin) {
+    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader) {
+
     var userDirectories = usersLoader.makeDirectories({
         groups: [
             {id: 1, name: 'admin', description: 'Администратор'},
@@ -639,4 +644,163 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
         return processPostQuery(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
+
+    var tariffs = tariffsLoader.makeCollection([
+        {
+            id: 1,
+            site: {id: 1},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: 50,
+            isActive: true,
+            delay: 3,
+            groupName: 'Текущие'
+        },
+        {
+            id: 2,
+            site: {id: 1},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: 75,
+            isActive: true,
+            delay: 3,
+            groupName: 'Текущие'
+        },
+        {
+            id: 3,
+            site: {id: 5},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: 50,
+            isActive: true,
+            delay: 3,
+            groupName: 'Текущие'
+        },
+        {
+            id: 4,
+            site: {id: 6},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: 75,
+            isActive: true,
+            delay: 3,
+            groupName: 'Текущие'
+        }
+    ], null, {sites: sites});
+
+    var regexTariffsQuery = /^\/api2\/tariffs(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexTariffsQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexTariffsQuery, tariffs.getItems(), 'tariffs', Tariffs);
+    });
+    $httpBackend.whenPOST(regexTariffsQuery).respond(function(method, url, data) {
+        return processPostQuery(url, regexTariffsQuery, data, tariffs, 'tariffs', Tariffs);
+    });
+    var regexTariffsGet = /^\/api2\/tariffs\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexTariffsGet).respond(function(method, url, data) {
+        return processGet(url, regexTariffsGet, tariffs, 'tariff');
+    });
+
+    var saleTypes = saleTypesLoader.makeCollection([
+        { id: 'card', name: 'Осн' },
+        { id: 'addcard', name: 'Расш' },
+        { id: 'extra', name: 'Доп' }
+    ]);
+
+    var saleStatuses = saleStatusesLoader.makeCollection([
+        { id: true, name: 'Акт' },
+        { id: false, name: 'Бло' }
+    ]);
+
+    var sales = salesLoader.makeCollection([
+        {
+            id: 1,
+            type: 'card',
+            cardId: 1,
+            dealer: {id: 1},
+            site: {id: 1},
+            tariff: {id: 1},
+            cardAmount: 19999.95,
+            count: 50,
+            activeFrom: 2014-04-01,
+            activeTo: 2014-04-30,
+            isActive: true,
+            date: 2014-03-25,
+            amount: 19999.97,
+            siteAmount: 14999.97,
+            info: 'Основная карточка'
+        },
+        {
+            id: 2,
+            type: 'addcard',
+            cardId: 2,
+            dealer: {id: 1},
+            site: {id: 1},
+            tariff: {id: 2},
+            parentId: 1,
+            cardAmount: 29999.95,
+            count: 75,
+            activeFrom: 2014-04-01,
+            activeTo: 2014-04-30,
+            isActive: true,
+            date: 2014-04-10,
+            amount: 29999.97,
+            siteAmount: 24999.97,
+            info: 'Расширение до 75 объявлений'
+        },
+        {
+            id: 3,
+            type: 'extra',
+            cardId: 1,
+            dealer: {id: 1},
+            site: {id: 1},
+            activeFrom: 2014-04-01,
+            activeTo: 2014-04-30,
+            isActive: true,
+            date: 2014-04-10,
+            amount: 3000.00,
+            siteAmount: 2000.00,
+            info: 'Выделение рамкой'
+        }
+    ], null, {dealers: dealers, sites: sites, tariffs: tariffs, saleTypes: saleTypes, saleStatuses: saleStatuses});
+
+    var regexSalesQuery = /^\/api2\/sales(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexSalesQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexSalesQuery, sales.getItems(), 'sales', Sales);
+    });
+    $httpBackend.whenPOST(regexSalesQuery).respond(function(method, url, data) {
+        return processPostQuery(url, regexSalesQuery, data, sales, 'sales', Sales);
+    });
+    var regexSalesGet = /^\/api2\/sales\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexSalesGet).respond(function(method, url, data) {
+        return processGet(url, regexSalesGet, sales, 'sale');
+    });
+    var regexSalesPost = /^\/api2\/sales\/new$/;
+    $httpBackend.whenPOST(regexSalesPost).respond(function(method, url, data) {
+        return processPost(data, sales, 'sale', Sale, {
+            dealers: dealers,
+            sites: sites,
+            tariffs: tariffs,
+            saleStatuses: saleStatuses,
+            saleTypes: saleTypes
+        });
+    });
+    var regexSalesPut = /^\/api2\/sales\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexSalesPut).respond(function(method, url, data) {
+        return processPut(url, regexSalesPut, data, sales, 'sale', Sale, {
+            dealers: dealers,
+            sites: sites,
+            tariffs: tariffs,
+            saleStatuses: saleStatuses,
+            saleTypes: saleTypes
+        });
+    });
+    var regexSalesDelete = /^\/api2\/sales\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexSalesDelete).respond(function(method, url, data) {
+        return processDelete(url, regexSalesDelete, sales);
+    });
+
 };

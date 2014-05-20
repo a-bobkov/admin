@@ -20,9 +20,9 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
             if (value && value.id) {    // ссылка
                 if (key === 'dealer') {
                     newValue = directories.dealers.get(value.id);
-                if (key === 'site') {
+                } else if (key === 'site') {
                     newValue = directories.sites.get(value.id);
-                if (key === 'tariff') {
+                } else if (key === 'tariff') {
                     newValue = directories.tariffs.get(value.id);
                 } else {
                     throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' +angular.toJson(value));

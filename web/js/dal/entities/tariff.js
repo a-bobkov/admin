@@ -19,15 +19,11 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
                 if (key === 'site') {
                     newValue = directories.sites.get(value.id);
                 } else {
-                    throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' +angular.toJson(value));
+                    throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' + angular.toJson(value));
                 }
                 if (!newValue) {
-                    throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
+                    throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' + angular.toJson(value));
                 }
-            } else if (key === 'type') {
-                newValue = directories.tariffTypes.get(value);
-            } else if (key === 'periodUnit') {
-                newValue = directories.tariffPeriodUnits.get(value);
             } else {
                 newValue = value;
             }
@@ -50,9 +46,7 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
     Tariff.prototype.serialize = function() {
         var itemData = {};
         _.forEach(this, function(value, key){
-            if (key === 'type' || key === 'periodUnit') {
-                itemData[key] = value.id;
-            } else if (_.isObject(value)) {
+            if (_.isObject(value)) {
                 itemData[key] = {id: value.id};
             } else {
                 itemData[key] = value;
@@ -75,8 +69,7 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
     return Tariffs;
 })
 
-.service('tariffsLoader', function(tariffApi, Tariff, Tariffs, tariffTypesLoader, tariffStatusesLoader,
-    sitesLoader, $q) {
+.service('tariffsLoader', function(tariffApi, Tariff, Tariffs, sitesLoader, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {
@@ -90,90 +83,60 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
         });
         return new Tariffs(items, queryParams);
     };
-})
 
-.factory('TariffType', function(Item) {
-    var TariffType = function(itemData, directories) {
-        _.extend(this, itemData);
-    };
-    _.extend(TariffType.prototype, Item.prototype);
-    return TariffType;
-})
-
-.factory('TariffTypes', function(Collection) {
-    var TariffTypes = (function() {
-        var TariffTypes = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(TariffTypes.prototype, Collection.prototype);
-        return TariffTypes;
-    }());
-    return TariffTypes;
-})
-
-.service('tariffTypesLoader', function(TariffType, TariffTypes, $q) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new TariffType(itemData, directories);
-        });
-        return new TariffTypes(items, queryParams);
-    };
-
-    this.loadItems = function() {
+    this.loadItems = function(queryParams, directories) {
         var self = this;
-        return $q.when({saleTypes: self.makeCollection([
-            { id: 'daily', name: 'Подневный' },
-            { id: 'periodical', name: 'Периодический' }
-        ])});
-    };
-})
-
-.factory('TariffPeriodUnit', function(Item) {
-    var TariffPeriodUnit = function(itemData, directories) {
-        _.extend(this, itemData);
-    };
-    _.extend(TariffPeriodUnit.prototype, Item.prototype);
-    return TariffPeriodUnit;
-})
-
-.factory('TariffPeriodUnits', function(Collection) {
-    var TariffPeriodUnits = (function() {
-        var TariffPeriodUnits = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(TariffPeriodUnits.prototype, Collection.prototype);
-        return TariffPeriodUnits;
-    }());
-    return TariffPeriodUnits;
-})
-
-.service('tariffPeriodUnitsLoader', function(TariffPeriodUnit, TariffPeriodUnits, $q) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
+        return tariffApi.query(queryParams).then(function(tariffsData) {
+            var tariffs = tariffsData.tariffs;
+            if (directories) {
+                return {tariffs: self.makeCollection(tariffs, tariffsData.params, directories)};
             }
-            return new TariffPeriodUnit(itemData, directories);
+            var getFilterFieldsValue = function(filters, fields) {
+                var filter = _.find(filters, {fields: fields});
+                if (filter) {
+                    return filter.value;
+                }
+            }
+
+            var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
+            if (_.isEmpty(siteIds)) {
+                siteIds = _.pluck(_.pluck(tariffs, 'site'), 'id');
+            }
+            var siteQueryParams = {
+                filters: [
+                    { fields: ['id'], type: 'in', value: siteIds }
+                ]
+            };
+            return $q.all({
+                sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
+                    return respond.sites;
+                })
+            }).then(function(directories) {
+                return _.extend(directories, {tariffs: self.makeCollection(tariffs, tariffsData.params, directories)});
+            });
         });
-        return new TariffPeriodUnits(items, queryParams);
     };
 
-    this.loadItems = function() {
+    this.loadItem = function(id, directories) {
         var self = this;
-        return $q.when({tariffPeriodUnits: self.makeCollection([
-            { id: 'day', name: 'День' },
-            { id: 'month', name: 'Месяц' }
-        ])});
+        return tariffApi.get(id).then(function(tariffData) {
+            var tariff = tariffData.tariff;
+            if (directories) {
+                return {tariff: new Tariff(tariff, directories)};
+            }
+            var siteQueryParams = {
+                filters: [
+                    { fields: ['id'], type: 'equal', value: tariff.site.id }
+                ]
+            };
+            return $q.all({
+                sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
+                    return respond.sites;
+                })
+            }).then(function(directories) {
+                directories.tariff = new Tariff(tariff, directories);
+                return directories;
+            });
+        });
     };
 });
