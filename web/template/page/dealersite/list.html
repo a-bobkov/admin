@@ -13,7 +13,7 @@
     <table class="list">
         <thead>
             <tr>
-				<th ng-repeat='column in sortableColumns' id="DealerSiteListTableHeader" ng-class='{"active": sorting.column === column.id}'>
+				<th ng-repeat='column in sortableColumns' id="DealerSiteListTableHeader" ng-class='{"active": sorting.column === column.id}' ng-style='{width: column.width}'>
             		<a ng-click='changeSorting(column.id)' id="DealerSiteListTableHeaderRef">{{column.name}}</a><span id="DealerSiteListTableHeaderDir">{{sortingMark(column.id)}}</span>
                 </th>
                 <th>Действия</th>
@@ -21,7 +21,6 @@
         </thead>
         <tbody id="DealerSiteListTable">
             <tr ng-repeat='dealerSite in dealerSites.getItems()' ng-class-odd="'odd'" ng-class-even="'even'">
-                <td class="text">{{dealerSite.id}}</td>
                 <td class="text">{{dealerSite.dealer.id}}: {{dealerSite.dealer.companyName}}</td>
                 <td class="text">{{dealerSite.site.id}}: {{dealerSite.site.name}}</td>
                 <td class="text">{{dealerSite.externalId}}</td>

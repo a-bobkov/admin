@@ -123,12 +123,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     $scope.$watch('patterns', $scope.onPatternChange, true);
 
     $scope.sortableColumns = [
-        {id: "id", name: "Код"},
-        {id: "dealer", name: "Салон"},
-        {id: "site", name: "Сайт"},
-        {id: "externalId", name: "Код на сайте"},
-        {id: "publicUrl", name: "Страница на сайте"},
-        {id: "isActive", name: "Статус"}
+        {id: "dealer", name: "Салон", width: '30%'},
+        {id: "site", name: "Сайт", width: '20%'},
+        {id: "externalId", name: "Код на сайте", width: '10%'},
+        {id: "publicUrl", name: "Страница на сайте", width: '12.5%'},
+        {id: "isActive", name: "Статус", width: '12.5%'}
     ];
 
     $scope.sortingMark = function(column) {
