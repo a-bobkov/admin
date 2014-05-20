@@ -87,6 +87,9 @@ angular.module("ui.multicombo", [])
             };
 
             $scope.onFilterChange = function(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
                 var filters = _.invoke($scope._search.split(' '), function() {
                     var idName = ($scope._choiceName === 'companyName') ? 'user.id' : 'id';
                     return { type: 'contain', fields: [idName, $scope._choiceName], value: this };
@@ -117,6 +120,8 @@ angular.module("ui.multicombo", [])
                 event.preventDefault();
                 event.stopPropagation();
 
+                scope.onFilterChange('', undefined);
+
                 if (openElement) {
                     close();
                 }
@@ -132,6 +137,8 @@ angular.module("ui.multicombo", [])
                         element.removeClass('mcombo-container-active');
                         close = null;
                         openElement = null;
+                        scope._search = '';
+                        scope._searchElem.value = '';
                     }
                     $document.bind('click', close);
                 }
