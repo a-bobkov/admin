@@ -90,9 +90,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
 }])
 
 .controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, DealerSite, dealersLoader, sitesLoader) {
-    // _.forOwn(data, function(collection, key) {
-    //     $scope[key] = collection.getItems();
-    // });
+
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
@@ -228,21 +226,20 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             newStatus;
 
         if (dealerSite.isActive.id === true) {
-            confirmMessage = 'Блокировать регистрацию';
-            noticeMessage = 'Блокирована регистрация ' + dealerSite.id;
+            confirmMessage = 'Блокировать регистрацию ';
+            noticeMessage = 'Блокирована регистрация ';
             newStatus = $scope.dealerSiteStatuses.get(false);
         } else {
-            confirmMessage = 'Разблокировать регистрацию';
-            noticeMessage = 'Разблокирована регистрация ' + dealerSite.id;
+            confirmMessage = 'Разблокировать регистрацию ';
+            noticeMessage = 'Разблокирована регистрация ';
             newStatus = $scope.dealerSiteStatuses.get(true);
         }
-        var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайте "' + dealerSite.site.name + '"';
-        if (confirm(confirmMessage + dealerSiteInfo + '?')) {
+        if (confirm(confirmMessage + dealerSite.name() + '?')) {
             var dealerSiteEdited = new DealerSite;
             angular.extend(dealerSiteEdited, dealerSite);
             dealerSiteEdited.isActive = newStatus;
             dealerSiteEdited.save(data).then(function() {
-                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
+                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
                 $location.path('/dealersitelist?');
             });
         }
@@ -252,12 +249,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         var confirmMessage,
             noticeMessage;
 
-        confirmMessage = 'Вы действительно хотите отменить экспорт';
-        noticeMessage = 'Удалена регистрация '+ dealerSite.id;
-        var dealerSiteInfo = ' салона "' + dealerSite.dealer.companyName + '" на сайт "' + dealerSite.site.name + '"';
-        if (confirm(confirmMessage + dealerSiteInfo + '?')) {
+        confirmMessage = 'Вы действительно хотите отменить экспорт ';
+        noticeMessage = 'Удалена регистрация ';
+        if (confirm(confirmMessage + dealerSite.name() + '?')) {
             dealerSite.remove().then(function() {
-                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSiteInfo;
+                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
                 $location.path('/dealersitelist?');
             });
         }
@@ -359,18 +355,18 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
 
     function saveDealerSiteEdited() {
         $scope.dealerSiteEdited.save($scope).then(function(dealerSite) {
-            $rootScope.savedDealerSiteListNotice = 'Сохранено разрешение с идентификатором: ' + dealerSite.id;
+            $rootScope.savedDealerSiteListNotice = 'Сохранена регистрация ' + dealerSite.name();
         });
     }
 
     function saveRemoveDealerSiteLogin(dealerSiteLogin) {
         if (dealerSiteLogin.login) {
             dealerSiteLogin.save($scope).then(function(dealerSiteLogin) {
-                $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ с идентификатором: ' + dealerSiteLogin.id;
+                $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ ' + dealerSiteLogin.name();
             });
         } else if (dealerSiteLogin.id) {
             dealerSiteLogin.remove($scope).then(function() {
-                $rootScope.savedDealerSiteListNotice += '.\nУдалён доступ с идентификатором: ' + dealerSiteLogin.id;
+                $rootScope.savedDealerSiteListNotice += '.\nУдалён доступ ' + dealerSiteLogin.name();
             });
         }
     }

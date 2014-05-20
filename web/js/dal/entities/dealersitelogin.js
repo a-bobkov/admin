@@ -62,6 +62,10 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
         throw new CollectionError('Попытка удалить элемент без id');
     };
 
+    DealerSiteLogin.prototype.name = function() {
+        return 'типа ' + this.type + ' салона "' + this.dealer.companyName + '" на сайте "' + this.site.name + '"';
+    }
+
     return DealerSiteLogin;
 })
 

@@ -82,6 +82,10 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
         throw new CollectionError('Попытка удалить элемент без id');
     };
 
+    DealerSite.prototype.name = function() {
+        return 'салона "' + this.dealer.companyName + '" на сайте "' + this.site.name + '"';
+    }
+
     return DealerSite;
 })
 
