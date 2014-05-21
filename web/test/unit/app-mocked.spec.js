@@ -839,6 +839,36 @@ describe('dealersite, dealersitelogin', function() {
             });
         });
 
+        it('put - выдавать ошибку при неправильном формате publicUrl', function() {
+            var answer = {};
+            var dealerSite;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                dealerSite = dealerSites[0];
+                dealerSite.externalId = String(Math.floor(Math.random() * 1000000));
+                dealerSite.publicUrl = '22222';
+                return dealerSite.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.publicUrl.errors).toEqual(['Значение не является допустимым URL.']);
+            });
+        });
+
         it('put - сохранять изменение атрибута dealersite.isActive с true на false', function() {
             var answer = {};
             var dealerSite;
