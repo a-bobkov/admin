@@ -43,9 +43,10 @@
 	        <tr>
 	            <th><label for="dealerSitePublicUrl">Страница на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.publicUrl' ng-required='requiredFields[dealerSiteEdited.site.id]["publicUrl"]'>
+	                <input class="span-8" type="url" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.publicUrl' ng-required='requiredFields[dealerSiteEdited.site.id]["publicUrl"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSitePublicUrl.$invalid'>
 					    <li id='dealerSitePublicUrlErrorRequired' ng-show="formDealerSite.dealerSitePublicUrl.$error.required">Необходимо ввести значение.</li>
+					    <li id='dealerSitePublicUrlErrorUrl' ng-show="formDealerSite.dealerSitePublicUrl.$error.url">Адрес страницы должен быть вида: http://aaa.bbb.cc</li>
 					</ul>
 	           </td>
 	        </tr>
