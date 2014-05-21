@@ -214,6 +214,38 @@ describe('dealersite, dealersitelogin', function() {
             });
         });
 
+        it('post - выдавать ошибку, если такая комбинация dealer, site, type уже есть', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSiteLogins = directories.dealerSiteLogins.getItems();
+                var dealerSiteLogin = dealerSiteLogins[0];
+                var dealerSiteLoginCopy = new DealerSiteLogin({
+                    dealer: dealerSiteLogin.dealer,
+                    site: dealerSiteLogin.site,
+                    type: dealerSiteLogin.type
+                }, directories);
+                return dealerSiteLoginCopy.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+            });
+        });
+
         it('put - сохранять изменения атрибутов dealersitelogin', function() {
             var answer = {};
             var dealerSiteLogin;
