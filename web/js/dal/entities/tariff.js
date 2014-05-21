@@ -112,7 +112,8 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
                     return respond.sites;
                 })
             }).then(function(directories) {
-                return _.extend(directories, {tariffs: self.makeCollection(tariffs, tariffsData.params, directories)});
+                _.assign(directories, {tariffs: self.makeCollection(tariffs, tariffsData.params, directories)});
+                return directories;
             });
         });
     };

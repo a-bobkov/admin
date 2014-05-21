@@ -27,7 +27,8 @@ describe('app-mocked', function() {
         Tariffs,
         salesLoader,
         saleTypesLoader,
-        saleStatusesLoader;
+        saleStatusesLoader,
+        Sales;
 
     try {
         var ngMock = angular.module('ngMock');
@@ -75,13 +76,14 @@ describe('app-mocked', function() {
         salesLoader = injector.get('salesLoader');
         saleTypesLoader = injector.get('saleTypesLoader');
         saleStatusesLoader = injector.get('saleStatusesLoader');
+        Sales = injector.get('Sales');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, usersLoader, User, Users, null,
                 dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
                 DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-                tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader);
+                tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
@@ -120,31 +122,47 @@ describe('app-mocked', function() {
         });
     }
 
-        it('загружать значения тарифов', function() {
-            var answer = {};
-            var directories;
+describe('sales, tariffs', function() {
+    
+    it('загружать значения тарифов', function() {
+        var answer = {};
+        var directories;
 
-            runSync(answer, function() {
-                return sitesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond); 
-                return tariffsLoader.loadItems(undefined, directories);
-            });
-
-            runSync(answer, function() {
-                var tariffs = answer.respond.tariffs.getItems();
-                expect(tariffs.length).toBeTruthy();
-                var tariff = tariffs[0];
-                return tariffsLoader.loadItem(tariff.id, directories);
-            });
-
-            runs(function() {
-                var tariff = answer.respond.tariff;
-                expect(tariff).toBeTruthy();
-            });
+        runSync(answer, function() {
+            return tariffsLoader.loadItems();
         });
+
+        runSync(answer, function() {
+            var tariffs = answer.respond.tariffs.getItems();
+            expect(tariffs.length).toBeTruthy();
+            var sites = answer.respond.sites.getItems();
+            expect(sites.length).toBeTruthy();
+            var tariff = tariffs[0];
+            return tariffsLoader.loadItem(tariff.id, directories);
+        });
+
+        runs(function() {
+            var tariff = answer.respond.tariff;
+            expect(tariff).toBeTruthy();
+        });
+    });
+
+    it('загружать значения продаж', function() {
+        var answer = {};
+        var directories;
+
+        runSync(answer, function() {
+            return salesLoader.loadItems();
+        });
+
+        runs(function() {
+            var sales = answer.respond.sales;
+            expect(sales).toBeTruthy();
+            var salesAdd = answer.respond.salesAdd;
+            expect(salesAdd).toBeTruthy();
+        });
+    });
+});
 
 xdescribe('dealersite, dealersitelogin', function() {
 

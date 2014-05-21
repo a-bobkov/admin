@@ -4,13 +4,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader) {
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
         DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader);
+        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales);
 });
 
 /**
@@ -19,7 +19,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader) {
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales) {
 
     var userDirectories = usersLoader.makeDirectories({
         groups: [

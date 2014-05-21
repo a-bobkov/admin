@@ -101,7 +101,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
 })
 
 .service('salesLoader', function(saleApi, Sale, Sales, saleTypesLoader, saleStatusesLoader,
-    dealersLoader, sitesLoader, $q) {
+    dealersLoader, tariffsLoader, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {
@@ -114,6 +114,72 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
             return new Sale(itemData, directories);
         });
         return new Sales(items, queryParams);
+    };
+
+    this.loadItems = function(queryParams) {
+        var self = this;
+        return saleApi.query(queryParams).then(function(salesData) {
+            var sales = salesData.sales;
+
+            var cards = _.filter(sales, function(value) {
+                return (value.type === 'card' || value.type === 'addcard');
+            });
+            var cardIds = _.pluck(cards, 'cardId');
+
+            var addSaleQueryParams = {
+                filters: [
+                    { fields: ['type'], type: 'equal', value: 'addcard' },
+                    { fields: ['parentId'], type: 'in', value: cardIds }
+                ]
+            };
+            return saleApi.query(addSaleQueryParams).then(function(salesDataAdd) {
+                function getFilterFieldsValue(filters, fields) {
+                    var filter = _.find(filters, {fields: fields});
+                    if (filter) {
+                        return filter.value;
+                    }
+                }
+
+                var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
+                if (_.isEmpty(dealerIds)) {
+                    dealerIds = _.pluck(_.pluck(sales, 'dealer'), 'id');
+                }
+                var dealerQueryParams = {
+                    filters: [
+                        { fields: ['id'], type: 'in', value: dealerIds }
+                    ],
+                    fields: ['dealer_list_name']
+                };
+
+                var tariffIds = _.pluck(_.pluck(cards, 'tariff'), 'id');
+                var tariffQueryParams = {
+                    filters: [
+                        { fields: ['id'], type: 'in', value: tariffIds }
+                    ]
+                };
+
+                return $q.all({
+                    dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
+                        return respond.dealers;
+                    }),
+                    tariffs_sites: tariffsLoader.loadItems(tariffQueryParams).then(function(respond) {
+                        return respond;
+                    }),
+                    saleTypes: saleTypesLoader.loadItems().then(function(respond) {
+                        return respond.saleTypes;
+                    }),
+                    saleStatuses: saleStatusesLoader.loadItems().then(function(respond) {
+                        return respond.saleStatuses;
+                    })
+                }).then(function(directories) {
+                    directories.tariffs = directories.tariffs_sites.tariffs;
+                    directories.sites = directories.tariffs_sites.sites;
+                    _.assign(directories, {sales: self.makeCollection(salesData.sales, salesData.params, directories)});
+                    _.assign(directories, {salesAdd: self.makeCollection(salesDataAdd.sales, salesDataAdd.params, directories)});
+                    return directories;
+                });
+            });
+        });
     };
 })
 
