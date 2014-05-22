@@ -366,7 +366,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
             });
         } else if (dealerSiteLogin.id) {
             dealerSiteLogin.remove($scope).then(function() {
-                $rootScope.savedDealerSiteListNotice += '.\nУдалён доступ ' + dealerSiteLogin.name();
+                // $rootScope.savedDealerSiteListNotice += '.\nУдалён доступ ' + dealerSiteLogin.name();
             });
         }
     }
