@@ -165,8 +165,11 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             return _.any(itemValues, function(value) {
                 return (value.toLowerCase().indexOf(String(filter.value).toLowerCase()) !== -1);
             });
+        } else if (filter.type === 'greaterOrEqual') {
+            return _.any(itemValues, function(value) {
+                return (value >= filter.value);
+            });
         }
-
         return true;
     }
 
