@@ -362,7 +362,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
     function saveRemoveDealerSiteLogin(dealerSiteLogin) {
         if (dealerSiteLogin.login) {
             dealerSiteLogin.save($scope).then(function(dealerSiteLogin) {
-                $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ ' + dealerSiteLogin.name();
+                // $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ ' + dealerSiteLogin.name();
             });
         } else if (dealerSiteLogin.id) {
             dealerSiteLogin.remove($scope).then(function() {
