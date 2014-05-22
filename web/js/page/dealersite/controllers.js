@@ -259,7 +259,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.b
         }
     };
     
-    $scope.referenceText = function(dealerSite) {
+    $scope.publicUrlText = function(dealerSite) {
         if (dealerSite.publicUrl) {
             return 'Ссылка';
         }

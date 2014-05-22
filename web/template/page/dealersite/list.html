@@ -24,11 +24,11 @@
                 <td class="text">{{dealerSite.dealer.id}}: {{dealerSite.dealer.companyName}}</td>
                 <td class="text">{{dealerSite.site.id}}: {{dealerSite.site.name}}</td>
                 <td class="text">{{dealerSite.externalId}}</td>
-                <td class="text"><a href="{{dealerSite.publicUrl}}">{{referenceText(dealerSite)}}</a></td>
+                <td class="text"><a href="{{dealerSite.publicUrl}}">{{publicUrlText(dealerSite)}}</a></td>
                 <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
-                        <li class="edit" ng-show='dealerSite.isActive.id'><a ng-click='editDealerSite(dealerSite)'>изменить</a></li>
+                        <li class="edit" id='DealerSiteListRowEdit' ng-show='dealerSite.isActive.id'><a ng-click='editDealerSite(dealerSite)'>изменить</a></li>
                         <li class="delete"><a ng-click='removeDealerSite(dealerSite)'>удалить</a></li>
                     </ul>
                 </td>
@@ -57,23 +57,23 @@
         </tfoot>
         <tbody>
             <tr>
-                <th><label for="sf_guard_dealerSite_filters_dealer">Салоны</label></th>
+                <th><label for="DealerSiteListFilterDealers">Салоны</label></th>
                 <td>
-                    <div id="sf_guard_dealerSite_filters_dealer" ng-model="patterns.dealers" ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader">
+                    <div id="DealerSiteListFilterDealers" ng-model="patterns.dealers" ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader">
                     </div>
                 </td>
             </tr>
             <tr>
-                <th><label for="sf_guard_dealerSite_filters_site">Cайты</label></th>
+                <th><label for="DealerSiteListFilterSites">Cайты</label></th>
                 <td>
-                    <div id="sf_guard_dealerSite_filters_site" ng-model="patterns.sites" ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader">
+                    <div id="DealerSiteListFilterSites" ng-model="patterns.sites" ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader">
                     </div>
                 </td>
             </tr>
             <tr>
-                <th><label for="sf_guard_dealerSite_filters_status">Статус</label></th>
+                <th><label for="DealerSiteListFilterStatus">Статус</label></th>
                 <td>
-                    <select ng-model='patterns.isActive' ng-options='opt.name for opt in dealerSiteStatuses.getItems()' id='sf_guard_dealerSite_filters_status' >
+                    <select ng-model='patterns.isActive' ng-options='opt.name for opt in dealerSiteStatuses.getItems()' id='DealerSiteListFilterStatus' >
                         <option value='' selected="selected">Все</option>
                     </select>
                 </td>

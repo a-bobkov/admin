@@ -128,6 +128,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         var value = item[field.shift()];
         if (field.length && value) {
             return getDeepValue(value, field);
+        } else if (_.isObject(value) && value.id !== undefined) {
+            return value.id;
         } else {
             return value;
         }

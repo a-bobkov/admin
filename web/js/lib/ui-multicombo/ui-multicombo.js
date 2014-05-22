@@ -15,12 +15,12 @@ angular.module("ui.multicombo", [])
             '            <a class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
             '        </li>' +
             '        <li class="search-field" ng-hide="hide">' +
-            '            <input type="text" placeholder="Фильтр с выбором" autocomplete="off" ng-model="_search">' +
+            '            <input type="text" id="McomboSearchInput" placeholder="Фильтр с выбором" autocomplete="off" ng-model="_search">' +
             '        </li>' +
             '    </ul>' +
             '    <div class="mcombo-drop" ng-hide="hide">' +
             '        <ul class="choices">' +
-            '            <li class="item" ng-repeat="choice in _filteredChoices" ng-click="moveToSelected(choice, $event)">' +
+            '            <li class="item" id="McomboDropChoiceItem" ng-repeat="choice in _filteredChoices" ng-click="moveToSelected(choice, $event)">' +
             '                {{choice.id}}: {{choice[_choiceName]}}' +
             '            </li>' +
             '            <li class="no-results" ng-show="_search && _filteredChoices.length == 0">Нет подходящих значений</li>' +
