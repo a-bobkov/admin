@@ -105,7 +105,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
 })
 
 .service('salesLoader', function(saleApi, Sale, Sales, saleTypesLoader, saleStatusesLoader,
-    dealersLoader, tariffsLoader, $q) {
+    dealersLoader, sitesLoader, tariffsLoader, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
         if (!_.isArray(itemsData)) {
@@ -120,12 +120,9 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
         return new Sales(items, queryParams);
     };
 
-    this.loadItems = function(queryParams, directories) {
+    this.loadItems = function(queryParams, oldDirectories) {
         var self = this;
         return saleApi.query(queryParams).then(function(salesData) {
-            if (directories) {
-                return {sales: self.makeCollection(salesData.sales, salesData.params, directories)};
-            }
 
             function getFilterFieldsValue(filters, fields) {
                 var filter = _.find(filters, {fields: fields});
@@ -134,32 +131,57 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                 }
             }
 
-            var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
-            if (_.isEmpty(dealerIds)) {
-                dealerIds = _.pluck(_.pluck(salesData.sales, 'dealer'), 'id');
+            var toResolve = [];
+            if (!oldDirectories.saleTypes) {
+                toResolve.push(saleTypesLoader.loadItems());
             }
-            var dealerQueryParams = {
-                filters: [
-                    { fields: ['id'], type: 'in', value: dealerIds }
-                ],
-                fields: ['dealer_list_name']
-            };
+            if (!oldDirectories.saleStatuses) {
+                toResolve.push(saleStatusesLoader.loadItems());
+            }
+            if (!oldDirectories.dealers) {
+                var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
+                if (_.isEmpty(dealerIds)) {
+                    dealerIds = _.pluck(_.pluck(salesData.sales, 'dealer'), 'id');
+                }
+                var dealerQueryParams = {
+                    filters: [
+                        { fields: ['id'], type: 'in', value: dealerIds }
+                    ],
+                    fields: ['dealer_list_name']
+                };
+                toResolve.push(dealersLoader.loadItems(dealerQueryParams));
+            }
+            if (!oldDirectories.sites) {
+                var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
+                if (_.isEmpty(siteIds)) {
+                    siteIds = _.pluck(_.pluck(salesData.sales, 'site'), 'id');
+                }
+                var siteQueryParams = {
+                    filters: [
+                        { fields: ['id'], type: 'in', value: siteIds }
+                    ]
+                };
+                toResolve.push(sitesLoader.loadItems(siteQueryParams));
+            }
+            if (!oldDirectories.tariffs) {
+                var tariffIds = _.pluck(_.compact(_.pluck(salesData.sales, 'tariff')), 'id');
+                if (!_.isEmpty(tariffIds)) {
+                    var tariffQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: tariffIds }
+                        ]
+                    };
+                    toResolve.push(tariffsLoader.loadItems(tariffQueryParams));
+                }
+            }
 
-            var tariffIds = _.pluck(_.compact(_.pluck(salesData.sales, 'tariff')), 'id');
-            var tariffQueryParams = {
-                filters: [
-                    { fields: ['id'], type: 'in', value: tariffIds }
-                ]
-            };
-
-            return $q.all([
-                dealersLoader.loadItems(dealerQueryParams),
-                tariffsLoader.loadItems(tariffQueryParams),
-                saleTypesLoader.loadItems(),
-                saleStatusesLoader.loadItems()
-            ]).then(function(directoriesArr) {
-                var directories = _.assign({}, directoriesArr[0], directoriesArr[1], directoriesArr[2], directoriesArr[3]);
-                return _.assign(directories, {sales: self.makeCollection(salesData.sales, salesData.params, directories)});;
+            return $q.all(toResolve).then(function(directoriesArr) {
+                var newDirectories = {};
+                _.forEach(directoriesArr, function(directory) {
+                    _.assign(newDirectories, directory)
+                });
+                var directories = _.assign({}, oldDirectories, newDirectories);
+                return _.assign(newDirectories, {sales: self.makeCollection(salesData.sales, salesData.params, directories)});
             });
         });
     };

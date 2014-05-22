@@ -119,8 +119,10 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
         });
         $rootScope.savedSaleListLocationSearch = toLocationSearch(searchParams);
         $location.search($rootScope.savedSaleListLocationSearch);
-        salesLoader.loadItems(makeQueryParams($rootScope.savedSaleListLocationSearch)).then(function(directories) {
-            _.assign($scope, directories);
+        var queryParams = makeQueryParams($rootScope.savedSaleListLocationSearch);
+        var staticDirectories = _.pick($scope, ['saleTypes', 'saleStatuses']);
+        salesLoader.loadItems(queryParams, staticDirectories).then(function(newDirectories) {
+            _.assign($scope, newDirectories);
             $scope.totalItems = $scope.sales.getParams().pager.total;
             var topSaleList = document.getElementById('SaleListAddSaleUp').getBoundingClientRect().top;
             if (topSaleList < 0) {
@@ -137,6 +139,7 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
                     { fields: ['parentId'], type: 'in', value: cardIds }
                 ]
             };
+            var directories = _.assign({}, staticDirectories, _.pick(newDirectories, ['dealers', 'sites']));
             return salesLoader.loadItems(addSaleQueryParams, directories).then(function(collection) {
                 $scope.sales_add = collection.sales;
             });
@@ -144,7 +147,7 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
     };
 
     $scope.isAddable = function(sale) {
-        return $scope.sales_add && !_.find($scope.sales_add.getItems(), {parentId: sale.cardId});
+        return sale.isCard() && $scope.sales_add && !_.find($scope.sales_add.getItems(), {parentId: sale.cardId});
     }
 
     var ls = $location.search();
@@ -159,9 +162,9 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
             sites: ls.sites && _.invoke(ls.sites.split(';'), function() {
                 return $scope.sites.get(_.parseInt(this));
             }),
-            isActive: $scope.saleStatuses.get(!!ls.isActive),
+            isActive: $scope.saleStatuses.get((ls.isActive === 'true') ? true : (ls.isActive === 'false') ? false : null),
             type: $scope.saleTypes.get(ls.type),
-            archive: ls.archive
+            archive: !!ls.archive
         };
         $scope.sorting = {
             column: ls.column,
@@ -210,16 +213,14 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
                     value: ls.sites.split(';')
                 });
             }
-        console.log(ls.isActive);
-            if (ls.isActive === true || ls.isActive === false) {
+            if (ls.isActive === 'true' || ls.isActive === 'false') {
                 queryParams.filters.push({
                     fields: ['isActive'],
                     type: 'equal',
-                    value: ls.isActive
+                    value: (ls.isActive === 'true') ? true : false
                 });
             }
-        console.log(queryParams.filters);
-            if (_.isEmpty(ls.type)) {
+            if (!_.isEmpty(ls.type)) {
                 queryParams.filters.push({
                     fields: ['type'],
                     type: 'equal',
