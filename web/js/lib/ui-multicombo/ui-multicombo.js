@@ -99,7 +99,7 @@ angular.module("ui.multicombo", [])
                     filters: filters,
                     fields: fieldNames,
                     pager: {
-                        per_page: 10
+                        per_page: 9
                     }
                 };
                 $scope._choicesLoader.loadItems(queryParams).then(function(respond) {
