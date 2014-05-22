@@ -29,7 +29,7 @@ describe('MaxPoster frontend app', function() {
 
     describe('Список пользователей', function() {
         beforeEach(function() {
-            browser.get('admin.html');
+            browser.get('admin.html#/userlist');
             expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
 
             this.addMatchers({
@@ -185,7 +185,7 @@ describe('MaxPoster frontend app', function() {
         it('накладывает фильтры и инициализирует фильтры', function() {
             if (test_maxposter_ru) {
                 element(by.model('patterns.complex')).sendKeys('1 2');
-                setSelect(element(by.select('patterns.status')), 0);
+                element(by.id('checkbox_group_0')).click();
                 setSelect(element(by.select('patterns.manager')), 1);
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 47$/);
 
@@ -193,7 +193,7 @@ describe('MaxPoster frontend app', function() {
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 310$/);
             } else {
                 element(by.model('patterns.complex')).sendKeys('1 2');
-                setSelect(element(by.select('patterns.status')), 0);
+                element(by.id('checkbox_group_0')).click();
                 setSelect(element(by.select('patterns.manager')), 1);
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 72$/);
 
