@@ -200,23 +200,25 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
                 queryParams.filters.push({
                     fields: ['dealer'],
                     type: 'in',
-                    value: ls.dealer.split(';')
+                    value: ls.dealers.split(';')
                 });
             }
-            if (!_.isEmpty(ls.site)) {
+            if (!_.isEmpty(ls.sites)) {
                 queryParams.filters.push({
                     fields: ['site'],
                     type: 'in',
-                    value: ls.site.split(';')
+                    value: ls.sites.split(';')
                 });
             }
-            if (ls.isActive === 'true' || ls.isActive === 'false') {
+        console.log(ls.isActive);
+            if (ls.isActive === true || ls.isActive === false) {
                 queryParams.filters.push({
                     fields: ['isActive'],
                     type: 'equal',
-                    value: !!ls.isActive
+                    value: ls.isActive
                 });
             }
+        console.log(queryParams.filters);
             if (_.isEmpty(ls.type)) {
                 queryParams.filters.push({
                     fields: ['type'],
@@ -251,14 +253,14 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
             }).join(';');
         } else if (_.isObject(value)) {
             if (value.id !== undefined) {
-                return value.id;
+                return toLocationSearch(value.id);
             } else {
                 return _.mapValues(value, function(value) {
                     return toLocationSearch(value);
                 });
             }
         } else {
-            return value;
+            return String(value);
         }
     }
 });

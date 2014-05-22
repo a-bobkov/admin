@@ -764,7 +764,24 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             amount: 3000.00,
             siteAmount: 2000.00,
             info: 'Выделение рамкой'
-        }
+        },
+        {
+            id: 4,
+            type: 'card',
+            cardId: 3,
+            dealer: {id: 2},
+            site: {id: 6},
+            tariff: {id: 4},
+            cardAmount: 19999.95,
+            count: 50,
+            activeFrom: '2014-04-01',
+            activeTo: '2014-04-30',
+            isActive: false,
+            date: '2014-03-25',
+            amount: 19999.97,
+            siteAmount: 14999.97,
+            info: 'Основная карточка'
+        },
     ], null, {dealers: dealers, sites: sites, tariffs: tariffs, saleTypes: saleTypes, saleStatuses: saleStatuses});
 
     var regexSalesQuery = /^\/api2\/sales(?:\?([\w_=&.]*))?$/;
