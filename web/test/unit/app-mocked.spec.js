@@ -280,7 +280,119 @@ describe('dealersite, dealersitelogin', function() {
             });
         });
 
-        it('put - выдавать ошибку при длине значения login больше 100', function() {  // todo: тесты на пустой логин и на пустой пароль
+        it('put - выдавать ошибку если нет значения в поле dealer', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.dealer = null;
+                return dealerSiteLogin.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.dealer.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('put - выдавать ошибку если нет значения в поле site', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.site = null;
+                return dealerSiteLogin.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.site.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('put - выдавать ошибку если нет значения в поле type', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.type = null;
+                return dealerSiteLogin.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.type.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('put - выдавать ошибку если нет значения в поле login', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+                return dealerSiteLogin.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.login.errors).toEqual(['Значение не должно быть пустым.']);
+            });
+        });
+
+        it('put - выдавать ошибку при длине значения login больше 100', function() {
             var answer = {};
             var dealerSiteLogin;
 
@@ -306,6 +418,34 @@ describe('dealersite, dealersitelogin', function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
                 expect(errorResponse.errors.children.login.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+            });
+        });
+
+        it('put - выдавать ошибку если нет значения в поле password', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+                return dealerSiteLogin.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.password.errors).toEqual(['Значение не должно быть пустым.']);
             });
         });
 
