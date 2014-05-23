@@ -11,7 +11,7 @@ angular.module("ui.multicombo", [])
             '<div class="mcombo-container mcombo-container-multi">' +
             '    <ul class="mcombo-selected-choices">' +
             '        <li class="selected-choice" ng-repeat="choice in _selectedChoices">'+
-            '            <span>{{choice.id}}: {{choice[_choiceName]}}</span>' +
+            '            <span id="McomboSelectedItem_{{$index}}">{{choice.id}}: {{choice[_choiceName]}}</span>' +
             '            <a class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
             '        </li>' +
             '        <li class="search-field" ng-hide="hide">' +

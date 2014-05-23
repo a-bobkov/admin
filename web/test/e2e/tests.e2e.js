@@ -934,6 +934,132 @@ describe('DealerSite App', function() {
         });
     });
 
+    describe('Редактирование регистрации', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/dealersitelist');
+            element.all(by.id('McomboSearchInput')).get(1).click();
+            element.all(by.id('McomboSearchInput')).get(1).sendKeys('6');
+            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            setSelect(element(by.select('patterns.isActive')), 1);
+            element.all(by.id('DealerSiteListRowEdit')).get(0).click();
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Изменение /);
+        });
+
+        it('выводит выбранного дилера', function() {
+            expect(element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(/^\d+:/);
+        });
+
+        it('выводит выбранный сайт', function() {
+            expect(element.all(by.id('McomboSelectedItem_0')).get(1).getText()).toMatch(/^\d+:/);
+        });
+
+        it('выводит значение externalId', function() {
+            expect(element(by.model('dealerSiteEdited.externalId')).getAttribute('value')).toBeTruthy();
+        });
+
+        it('выводит ошибку, если externalId пустой', function() {
+            element(by.model('dealerSiteEdited.externalId')).clear();
+            expect(element(by.id('dealerSiteExternalIdErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не позволяет ввести в externalId больше 10 символов', function() {
+            var maxValue = '1234567890';
+            element(by.model('dealerSiteEdited.externalId')).clear();
+            element(by.model('dealerSiteEdited.externalId')).sendKeys(maxValue + '1');
+            expect(element(by.model('dealerSiteEdited.externalId')).getAttribute('value')).toBe(maxValue);
+        });
+
+        it('выводит значение publicUrl', function() {
+            expect(element(by.model('dealerSiteEdited.publicUrl')).getAttribute('value')).toBeTruthy();
+        });
+
+        it('выводит ошибку, если publicUrl пустой', function() {
+            element(by.model('dealerSiteEdited.publicUrl')).clear();
+            expect(element(by.id('dealerSitePublicUrlErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если publicUrl не соответствует формату', function() {
+            element(by.model('dealerSiteEdited.publicUrl')).clear();
+            element(by.model('dealerSiteEdited.publicUrl')).sendKeys('@@@');
+            expect(element(by.id('dealerSitePublicUrlErrorUrl')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не позволяет ввести в publicUrl больше 255 символов', function() {
+            var maxValue = '1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF';
+            element(by.model('dealerSiteEdited.publicUrl')).clear();
+            element(by.model('dealerSiteEdited.publicUrl')).sendKeys(maxValue + '1');
+            expect(element(by.model('dealerSiteEdited.publicUrl')).getAttribute('value')).toBe(maxValue);
+        });
+
+        it('выводит значение логина на сайте', function() {
+            expect(element(by.model('dealerSiteLoginsEdited.site.login')).getAttribute('value')).toBeTruthy();
+        });
+
+        it('выводит ошибку, если логин на сайте пустой', function() {
+            element(by.model('dealerSiteLoginsEdited.site.login')).clear();
+            expect(element(by.id('dealerSiteLoginSiteLoginErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не позволяет ввести в логин на сайте больше 100 символов', function() {
+            var maxValue = '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+            element(by.model('dealerSiteLoginsEdited.site.login')).clear();
+            element(by.model('dealerSiteLoginsEdited.site.login')).sendKeys(maxValue + '1');
+            expect(element(by.model('dealerSiteLoginsEdited.site.login')).getAttribute('value')).toBe(maxValue);
+        });
+
+        it('выводит значение пароля на сайте', function() {
+            expect(element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value')).toBeTruthy();
+        });
+
+        it('выводит ошибку, если пароль на сайте пустой', function() {
+            element(by.model('dealerSiteLoginsEdited.site.password')).clear();
+            expect(element(by.id('dealerSiteLoginSitePasswordErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не позволяет ввести в пароль на сайте больше 100 символов', function() {
+            var maxValue = '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+            element(by.model('dealerSiteLoginsEdited.site.password')).clear();
+            element(by.model('dealerSiteLoginsEdited.site.password')).sendKeys(maxValue + '1');
+            expect(element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value')).toBe(maxValue);
+        });
+
+        it('выводит значение логина на ftp', function() {
+            expect(element(by.model('dealerSiteLoginsEdited.ftp.login')).getAttribute('value')).toBeTruthy();
+        });
+
+        it('выводит ошибку, если логин на ftp пустой', function() {
+            element(by.model('dealerSiteLoginsEdited.ftp.login')).clear();
+            expect(element(by.id('dealerSiteLoginFtpLoginErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не позволяет ввести в логин на ftp больше 100 символов', function() {
+            var maxValue = '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+            element(by.model('dealerSiteLoginsEdited.ftp.login')).clear();
+            element(by.model('dealerSiteLoginsEdited.ftp.login')).sendKeys(maxValue + '1');
+            expect(element(by.model('dealerSiteLoginsEdited.ftp.login')).getAttribute('value')).toBe(maxValue);
+        });
+
+        it('выводит значение пароля на ftp', function() {
+            expect(element(by.model('dealerSiteLoginsEdited.ftp.password')).getAttribute('value')).toBeTruthy();
+        });
+
+        it('выводит ошибку, если пароль на ftp пустой', function() {
+            element(by.model('dealerSiteLoginsEdited.ftp.password')).clear();
+            expect(element(by.id('dealerSiteLoginFtpPasswordErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не позволяет ввести в пароль на ftp больше 100 символов', function() {
+            var maxValue = '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
+            element(by.model('dealerSiteLoginsEdited.ftp.password')).clear();
+            element(by.model('dealerSiteLoginsEdited.ftp.password')).sendKeys(maxValue + '1');
+            expect(element(by.model('dealerSiteLoginsEdited.ftp.password')).getAttribute('value')).toBe(maxValue);
+        });
+
+    });
+
     describe('Сценарии использования', function() {
         beforeEach(function() {
             browser.get('admin.html#/dealersitelist');

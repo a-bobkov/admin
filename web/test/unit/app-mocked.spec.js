@@ -280,6 +280,64 @@ describe('dealersite, dealersitelogin', function() {
             });
         });
 
+        it('put - выдавать ошибку при длине значения login больше 100', function() {  // todo: тесты на пустой логин и на пустой пароль
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.login = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
+                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+                return dealerSiteLogin.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.login.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+            });
+        });
+
+        it('put - выдавать ошибку при длине значения password больше 100', function() {
+            var answer = {};
+            var dealerSiteLogin;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSiteLoginsLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+                dealerSiteLogin.password = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
+                return dealerSiteLogin.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.password.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+            });
+        });
+
         it('remove - удалять dealersitelogin', function() {
             var answer = {};
             var dealerSiteLogin;
@@ -927,6 +985,35 @@ describe('dealersite, dealersitelogin', function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
                 expect(errorResponse.errors.children.externalId.errors).toEqual(['Значение слишком длинное. Должно быть равно 10 символам или меньше.']);
+            });
+        });
+
+        it('put - выдавать ошибку при длине значения publicUrl больше 255', function() {
+            var answer = {};
+            var dealerSite;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                dealerSite = dealerSites[0];
+                dealerSite.publicUrl = 'http://www.www.ru/34567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1';
+                return dealerSite.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.publicUrl.errors).toEqual(['Значение слишком длинное. Должно быть равно 255 символам или меньше.']);
             });
         });
 
