@@ -901,6 +901,35 @@ describe('dealersite, dealersitelogin', function() {
             });
         });
 
+        it('put - выдавать ошибку при длине значения externalId больше 10', function() {
+            var answer = {};
+            var dealerSite;
+
+            runSync(answer, function() {
+                var params = {
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    }
+                };
+                return dealerSitesLoader.loadItems(params);
+            });
+
+            runSync(answer, function() {
+                var directories = answer.respond;
+                var dealerSites = directories.dealerSites.getItems();
+                dealerSite = dealerSites[0];
+                dealerSite.externalId = '01234567890';
+                return dealerSite.save(directories);
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.externalId.errors).toEqual(['Значение слишком длинное. Должно быть равно 10 символам или меньше.']);
+            });
+        });
+
         it('put - сохранять изменение атрибута dealersite.isActive с true на false', function() {
             var answer = {};
             var dealerSite;

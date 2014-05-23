@@ -34,7 +34,7 @@
 	        <tr>
 	            <th><label for="dealerSiteExternalId">Код салона на сайте</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="dealerSiteExternalId" id="dealerSiteExternalId" ng-model='dealerSiteEdited.externalId' ng-required='requiredFields[dealerSiteEdited.site.id]["externalId"]'>
+	                <input class="span-8" type="text" name="dealerSiteExternalId" id="dealerSiteExternalId" ng-model='dealerSiteEdited.externalId' maxlength='10' ng-required='requiredFields[dealerSiteEdited.site.id]["externalId"]'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteExternalId.$invalid'>
 					    <li id='dealerSiteExternalIdErrorRequired' ng-show="formDealerSite.dealerSiteExternalId.$error.required">Необходимо ввести значение.</li>
 					</ul>
