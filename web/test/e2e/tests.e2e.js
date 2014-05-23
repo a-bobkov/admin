@@ -962,10 +962,9 @@ describe('DealerSite App', function() {
 
             element(by.id('dealerSiteExternalId')).sendKeys('8495555');
             element(by.id('dealerSitePublicUrl')).sendKeys('http://www.protractor.ru');
-
             element(by.id('dealerSiteEditSave')).click();
 
-            expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(1);
+            expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Сохранена регистрация/);
         });
 
         it('Удаление разрешения на экспорт', function() {
@@ -981,6 +980,7 @@ describe('DealerSite App', function() {
             element(by.id('DealerSiteListRowDelete')).click();
             browser.switchTo().alert().accept();
 
+            expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Удалена регистрация/);
             expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(0);
         });
 
@@ -1004,6 +1004,15 @@ describe('DealerSite App', function() {
             element(by.id('dealerSiteEditSave')).click();
 
             expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Сохранена регистрация/);
+
+            browser.get('admin.html#/dealersitelist');
+            element.all(by.id('McomboSearchInput')).get(0).click();
+            element.all(by.id('McomboSearchInput')).get(0).sendKeys('14');
+            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            element.all(by.id('McomboSearchInput')).get(1).click();
+            element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
+            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+
             expect(element(by.repeater('dealerSite in dealerSites').row(0).column('externalId')).getText()).toMatch(newExternalId);
             expect(element(by.repeater('dealerSite in dealerSites').row(0).column('publicUrl')).getAttribute('href')).toMatchOrEmpty(newPublicUrl);
         });
