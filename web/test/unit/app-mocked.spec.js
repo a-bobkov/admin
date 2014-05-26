@@ -381,6 +381,7 @@ describe('dealersite, dealersitelogin', function() {
             runSync(answer, function() {
                 var directories = answer.respond;
                 dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin.login = null;
                 dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
                 return dealerSiteLogin.save(directories);
             });
@@ -439,6 +440,7 @@ describe('dealersite, dealersitelogin', function() {
                 var directories = answer.respond;
                 dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
                 dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+                dealerSiteLogin.password = null;
                 return dealerSiteLogin.save(directories);
             });
 
