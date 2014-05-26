@@ -164,7 +164,6 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                     toResolve.push(tariffsLoader.loadItems(tariffQueryParams));
                 }
             }
-
             return $q.all(toResolve).then(function(directoriesArr) {
                 var newDirectories = {};
                 _.forEach(directoriesArr, function(directory) {

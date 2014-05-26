@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pagination'])
+angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'max.dal.entities.dealertariff', 'ui.bootstrap.pagination'])
 
 .config(['$routeProvider', function($routeProvider) {
 
@@ -295,7 +295,7 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
 })
 
 .controller('SaleEditCtrl', function($scope, $rootScope, $location, $window, data, Sale,
-    dealersLoader, sitesLoader, tariffsLoader) {
+    dealersLoader, sitesLoader, tariffsLoader, dealerTariffsLoader) {
 
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
@@ -317,7 +317,7 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
 
     $scope.onSiteChange = function (newValue, oldValue) {
         if (newValue !== oldValue) {
-            if ($scope.saleEdited.site) {
+            if ($scope.saleEdited.dealer && $scope.saleEdited.site) {
                 var tariffQueryParams = {
                     filters: [
                         { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
@@ -326,7 +326,21 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
                 var oldDirectories = _.pick($scope, 'sites');
                 tariffsLoader.loadItems(tariffQueryParams, oldDirectories).then(function(newDirectories) {
                     _.assign($scope, newDirectories);
-                    $scope.saleEdited.tariff = null;    // todo: грузить тариф по-умолчанию из параметров салона
+                    var dealerTariffsQueryParams = {
+                        filters: [
+                            { fields: ['dealer'], type: 'equal', value: $scope.saleEdited.dealer.id },
+                            { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
+                        ]
+                    };
+                    var directories = _.pick($scope, ['dealers', 'sites', 'tariffs']);
+                    dealerTariffsLoader.loadItems(dealerTariffsQueryParams, directories).then(function(newDirectories) {
+                        var dealerTariffs = newDirectories.dealerTariffs.getItems();
+                        if (dealerTariffs.length) {
+                            $scope.saleEdited.tariff = newDirectories.dealerTariffs.getItems()[0].tariff;
+                        } else {
+                            $scope.saleEdited.tariff = null;
+                        }
+                    });
                 });
             } else {
                 $scope.saleEdited.tariff = null;
@@ -334,6 +348,6 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
         }
     };
 
-    $scope.$watch('saleEdited.site', $scope.onSiteChange);
+    $scope.$watch('[saleEdited.dealer, saleEdited.site]', $scope.onSiteChange, true);
 })
 ;

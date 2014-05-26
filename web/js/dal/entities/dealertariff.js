@@ -30,8 +30,6 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
                 if (!newValue) {
                     throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
                 }
-            } else if (key === 'renew') {
-                newValue = directories.dealerTariffRenew.get(value);
             } else {
                 newValue = value;
             }
@@ -54,9 +52,7 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
     DealerTariff.prototype.serialize = function() {
         var itemData = {};
         _.forEach(this, function(value, key){
-            if (key === 'renew') {
-                itemData[key] = value.id;
-            } else if (_.isObject(value)) {
+            if (_.isObject(value)) {
                 itemData[key] = {id: value.id};
             } else {
                 itemData[key] = value;
@@ -79,7 +75,7 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
     return DealerTariffs;
 })
 
-.service('dealerTariffsLoader', function(dealerTariffApi, DealerTariff, DealerTariffs, dealerTariffRenewsLoader,
+.service('dealerTariffsLoader', function(dealerTariffApi, DealerTariff, DealerTariffs,
     dealersLoader, sitesLoader, tariffsLoader, $q) {
 
     this.makeCollection = function(itemsData, queryParams, directories) {
@@ -94,50 +90,54 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
         });
         return new DealerTariffs(items, queryParams);
     };
-})
 
-.factory('DealerTariffRenew', function(Item) {
-    var DealerTariffRenew = function(itemData, directories) {
-        _.extend(this, itemData);
-    };
-    _.extend(DealerTariffRenew.prototype, Item.prototype);
-    return DealerTariffRenew;
-})
-
-.factory('DealerTariffRenews', function(Collection) {
-    var DealerTariffRenews = (function() {
-        var DealerTariffRenews = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(DealerTariffRenews.prototype, Collection.prototype);
-        return DealerTariffRenews;
-    }());
-    return DealerTariffRenews;
-})
-
-.service('dealerTariffRenewsLoader', function(DealerTariffRenew, DealerTariffRenews, $q) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new DealerTariffRenew(itemData, directories);
-        });
-        return new DealerTariffRenews(items, queryParams);
-    };
-
-    this.loadItems = function() {
+    this.loadItems = function(queryParams, oldDirectories) {
         var self = this;
-        return $q.when({dealerTariffRenews: self.makeCollection([
-            { id: '0', name: 'Нет' },
-            { id: '10', name: '10%' },
-            { id: '20', name: '20%' },
-            { id: '30', name: '30%' },
-            { id: '100', name: '100%' }
-        ])});
+        return dealerTariffApi.query(queryParams).then(function(dealerTariffsData) {
+            var toResolve = [];
+            if (!oldDirectories || !oldDirectories.dealers) {
+                var dealerIds = _.pluck(_.compact(_.pluck(dealerTariffsData.dealerTariffs, 'dealer')), 'id');
+                if (!_.isEmpty(dealerIds)) {
+                    var dealerQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: dealerIds }
+                        ]
+                    };
+                    toResolve.push(dealersLoader.loadItems(dealerQueryParams));
+                }
+            }
+            if (!oldDirectories || !oldDirectories.sites) {
+                var siteIds = _.pluck(_.compact(_.pluck(dealerTariffsData.dealerTariffs, 'site')), 'id');
+                if (!_.isEmpty(siteIds)) {
+                    var siteQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: siteIds }
+                        ]
+                    };
+                    toResolve.push(sitesLoader.loadItems(siteQueryParams));
+                }
+            }
+            return $q.all(toResolve).then(function(directoriesArr) {
+                var newDirectories = _.transform(directoriesArr, _.assign, {});
+                var toResolve = [];
+                if (!oldDirectories || !oldDirectories.tariffs) {
+                    var tariffIds = _.pluck(_.compact(_.pluck([saleData.sale], 'tariff')), 'id');
+                    if (!_.isEmpty(tariffIds)) {
+                        var tariffQueryParams = {
+                            filters: [
+                                { fields: ['id'], type: 'in', value: tariffIds }
+                            ]
+                        };
+                        toResolve.push(tariffsLoader.loadItems(tariffQueryParams, newDirectories));
+                    }
+                    toResolve.push(tariffsLoader.loadItems(tariffQueryParams, newDirectories));
+                }
+                return $q.all(toResolve).then(function(directoriesArr) {
+                    _.transform(directoriesArr, _.assign, newDirectories);
+                    var directories = _.assign({}, oldDirectories, newDirectories);
+                    return _.assign(newDirectories, {dealerTariffs: self.makeCollection(dealerTariffsData.dealerTariffs, dealerTariffsData.params, directories)});
+                });
+            });
+        });
     };
 });

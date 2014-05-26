@@ -4,13 +4,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales) {
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, dealerTariffsLoader, DealerTariffs) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
         DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales);
+        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, dealerTariffsLoader, DealerTariffs);
 });
 
 /**
@@ -19,7 +19,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales) {
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, dealerTariffsLoader, DealerTariffs) {
 
     var userDirectories = usersLoader.makeDirectories({
         groups: [
@@ -823,4 +823,42 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         return processDelete(url, regexSalesDelete, sales);
     });
 
+    var dealerTariffs = dealerTariffsLoader.makeCollection([
+        {
+            id: 1,
+            dealer: {id: 1},
+            site: {id: 1},
+            tariff: {id: 1},
+            autoProlong: true,
+            renew: '0'
+        },
+        {
+            id: 1,
+            dealer: {id: 2},
+            site: {id: 1},
+            tariff: {id: 2},
+            autoProlong: true,
+            renew: '0'
+        },
+        {
+            id: 1,
+            dealer: {id: 1},
+            site: {id: 5},
+            tariff: {id: 3},
+            autoProlong: true,
+            renew: '0'
+        }
+    ], null, {dealers: dealers, sites: sites, tariffs: tariffs});
+
+    var regexDealerTariffsQuery = /^\/api2\/dealertariffs(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealerTariffsQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexDealerTariffsQuery, dealerTariffs.getItems(), 'dealerTariffs', DealerTariffs);
+    });
+    $httpBackend.whenPOST(regexDealerTariffsQuery).respond(function(method, url, data) {
+        return processPostQuery(url, regexDealerTariffsQuery, data, dealerTariffs, 'dealerTariffs', DealerTariffs);
+    });
+    var regexDealerTariffsGet = /^\/api2\/dealertariffs\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexDealerTariffsGet).respond(function(method, url, data) {
+        return processGet(url, regexDealerTariffsGet, dealerTariffs, 'dealerTariff');
+    });
 };
