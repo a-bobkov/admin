@@ -1,0 +1,128 @@
+<h1>{{actionName}} продажи</h1>
+
+<form name="formSale" autocomplete="off" novalidate>
+	<fieldset class="span-24">
+	    <legend>Ключевые поля</legend>
+	    <table class='parameters' ng-form='formSaleKey'>
+	        <tr>
+	            <th><label for="saleDealer">Салон</label></th>
+	            <td>
+                    <div id="saleDealer" name="saleDealer" ng-model='saleEdited.dealer' ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader" required>
+                    </div>
+					<ul class="error_list" ng-show='formSaleKey.saleDealer.$invalid'>
+					    <li id='saleEditDealerErrorRequired' ng-show="formSaleKey.saleDealer.$error.required">Необходимо выбрать салон.</li>
+					</ul>
+	            </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleSite">Сайт</label></th>
+	            <td>
+                    <div id="saleSite" name="saleSite" ng-model='saleEdited.site' ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader" required>
+                    </div>
+					<ul class="error_list" ng-show='formSaleKey.saleSite.$invalid'>
+					    <li id='saleEditSiteErrorRequired' ng-show="formSaleKey.saleSite.$error.required">Необходимо выбрать сайт.</li>
+					</ul>
+	            </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleTariff">Тариф</label></th>
+	            <td>
+		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name() for opt in tariffs.getItems()' ng-disabled='!saleEdited.site' required>
+		            </select>
+					<ul class="error_list" ng-show='formSaleKey.saleTariff.$invalid'>
+					    <li id='saleEditTariffErrorRequired' ng-show="formSaleKey.saleTariff.$error.required">Необходимо выбрать тариф.</li>
+					</ul>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+
+	<fieldset class="span-24">
+	    <legend>Атрибуты</legend>
+	    <table class='parameters'>
+	        <tr>
+	            <th><label for="saleCount">Количество машин</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="saleCount" id="saleCount" ng-model='saleEdited.count' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleCount.$invalid'>
+					    <li id='saleCountErrorRequired' ng-show="formSale.saleCount.$error.required">Необходимо ввести количество.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleActiveFrom">С</label></th>
+	            <td>
+	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleActiveFrom.$invalid'>
+					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.required">Необходимо ввести дату.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleActiveTo">По</label></th>
+	            <td>
+	                <input class="span-8" type="date" name="saleActiveTo" id="saleActiveTo" ng-model='saleEdited.activeTo' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleActiveTo.$invalid'>
+					    <li id='saleActiveToErrorRequired' ng-show="formSale.saleActiveTo.$error.required">Необходимо ввести дату.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleCardAmount">Цена по тарифу</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleCardAmount.$invalid'>
+					    <li id='saleCardAmountErrorRequired' ng-show="formSale.saleCardAmount.$error.required">Необходимо ввести цену по тарифу.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleAmount">Стоимость</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleAmount.$invalid'>
+					    <li id='saleAmountErrorRequired' ng-show="formSale.saleAmount.$error.required">Необходимо ввести стоимость.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleSiteAmount">Себестоимость</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleSiteAmount.$invalid'>
+					    <li id='saleSiteAmountErrorRequired' ng-show="formSale.saleSiteAmount.$error.required">Необходимо ввести себестоимость.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="saleInfo">Комментарий</label></th>
+	            <td>
+	                <input class="span-8" type="text" name="saleInfo" id="saleInfo" ng-model='saleEdited.info' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleInfo.$invalid'>
+					    <li id='saleInfoErrorRequired' ng-show="formSale.saleInfo.$error.required">Необходимо ввести комментарий.</li>
+					</ul>
+	           </td>
+	        </tr>
+	    </table>
+	</fieldset>
+
+	<fieldset class="span-24">
+	    <legend>Статус</legend>
+	    <table class='parameters'>
+	        <tr>
+	            <th><label for="saleStatus">Статус</label></th>
+	            <td>
+	                <select id="saleStatus" name="saleStatus" ng-model='saleEdited.isActive' ng-options='opt.name for opt in saleStatuses.getItems()' ng-disabled='formSaleKey.$invalid'>
+	                </select>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+
+	<div class="span-10 prepend-top clear">
+	    <ul class="actions row">
+	        <li class="list"><a href="#/salelist">Отменить</a></li>
+	        <li class="save"><input id='saleEditSave' type="submit" value="Сохранить" ng-disabled='formSale.$invalid' ng-click='saveSaleEdited()'></li>
+	    </ul>
+	</div>
+</form>

@@ -123,47 +123,37 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
     this.loadItems = function(queryParams, oldDirectories) {
         var self = this;
         return saleApi.query(queryParams).then(function(salesData) {
-
-            function getFilterFieldsValue(filters, fields) {
-                var filter = _.find(filters, {fields: fields});
-                if (filter) {
-                    return filter.value;
-                }
-            }
-
             var toResolve = [];
-            if (!oldDirectories.saleTypes) {
+            if (!oldDirectories || !oldDirectories.saleTypes) {
                 toResolve.push(saleTypesLoader.loadItems());
             }
-            if (!oldDirectories.saleStatuses) {
+            if (!oldDirectories || !oldDirectories.saleStatuses) {
                 toResolve.push(saleStatusesLoader.loadItems());
             }
-            if (!oldDirectories.dealers) {
-                var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
-                if (_.isEmpty(dealerIds)) {
-                    dealerIds = _.pluck(_.pluck(salesData.sales, 'dealer'), 'id');
+            if (!oldDirectories || !oldDirectories.dealers) {
+                var dealerIds = _.pluck(_.compact(_.pluck(salesData.sales, 'dealer')), 'id');
+                if (!_.isEmpty(dealerIds)) {
+                    var dealerQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: dealerIds }
+                        ],
+                        fields: ['dealer_list_name']
+                    };
+                    toResolve.push(dealersLoader.loadItems(dealerQueryParams));
                 }
-                var dealerQueryParams = {
-                    filters: [
-                        { fields: ['id'], type: 'in', value: dealerIds }
-                    ],
-                    fields: ['dealer_list_name']
-                };
-                toResolve.push(dealersLoader.loadItems(dealerQueryParams));
             }
-            if (!oldDirectories.sites) {
-                var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
-                if (_.isEmpty(siteIds)) {
-                    siteIds = _.pluck(_.pluck(salesData.sales, 'site'), 'id');
+            if (!oldDirectories || !oldDirectories.sites) {
+                var siteIds = _.pluck(_.compact(_.pluck(salesData.sales, 'site')), 'id');
+                if (!_.isEmpty(siteIds)) {
+                    var siteQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: siteIds }
+                        ]
+                    };
+                    toResolve.push(sitesLoader.loadItems(siteQueryParams));
                 }
-                var siteQueryParams = {
-                    filters: [
-                        { fields: ['id'], type: 'in', value: siteIds }
-                    ]
-                };
-                toResolve.push(sitesLoader.loadItems(siteQueryParams));
             }
-            if (!oldDirectories.tariffs) {
+            if (!oldDirectories || !oldDirectories.tariffs) {
                 var tariffIds = _.pluck(_.compact(_.pluck(salesData.sales, 'tariff')), 'id');
                 if (!_.isEmpty(tariffIds)) {
                     var tariffQueryParams = {
@@ -182,6 +172,63 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                 });
                 var directories = _.assign({}, oldDirectories, newDirectories);
                 return _.assign(newDirectories, {sales: self.makeCollection(salesData.sales, salesData.params, directories)});
+            });
+        });
+    };
+
+    this.loadItem = function(id, oldDirectories) {
+        var self = this;
+        return saleApi.get(id).then(function(saleData) {
+            var toResolve = [];
+            if (!oldDirectories.saleTypes) {
+                toResolve.push(saleTypesLoader.loadItems());
+            }
+            if (!oldDirectories.saleStatuses) {
+                toResolve.push(saleStatusesLoader.loadItems());
+            }
+            if (!oldDirectories.dealers) {
+                var dealerIds = _.pluck(_.compact(_.pluck([saleData.sale], 'dealer')), 'id');
+                if (!_.isEmpty(dealerIds)) {
+                    var dealerQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: dealerIds }
+                        ],
+                        fields: ['dealer_list_name']
+                    };
+                    toResolve.push(dealersLoader.loadItems(dealerQueryParams));
+                }
+            }
+            if (!oldDirectories.sites) {
+                var siteIds = _.pluck(_.compact(_.pluck([saleData.sale], 'site')), 'id');
+                if (!_.isEmpty(siteIds)) {
+                    var siteQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: siteIds }
+                        ]
+                    };
+                    toResolve.push(sitesLoader.loadItems(siteQueryParams));
+                }
+            }
+            return $q.all(toResolve).then(function(directoriesArr) {
+                var newDirectories = _.transform(directoriesArr, _.assign, {});
+                var toResolve = [];
+                if (!oldDirectories.tariffs) {
+                    var tariffIds = _.pluck(_.compact(_.pluck([saleData.sale], 'tariff')), 'id');
+                    if (!_.isEmpty(tariffIds)) {
+                        var tariffQueryParams = {
+                            filters: [
+                                { fields: ['site'], type: 'in', value: siteIds }
+                            ]
+                        };
+                        toResolve.push(tariffsLoader.loadItems(tariffQueryParams, newDirectories));
+                    }
+                    toResolve.push(tariffsLoader.loadItems(tariffQueryParams, newDirectories));
+                }
+                return $q.all(toResolve).then(function(directoriesArr) {
+                    _.transform(directoriesArr, _.assign, newDirectories);
+                    var directories = _.assign({}, oldDirectories, newDirectories);
+                    return _.assign(newDirectories, {sale: new Sale(saleData.sale, directories)});
+                });
             });
         });
     };

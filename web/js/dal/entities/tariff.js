@@ -55,6 +55,10 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
         return itemData;
     };
 
+    Tariff.prototype.name = function() {
+        return this.id + ': ' + this.count + ' за ' + this.period + '  ' + this.periodUnit;
+    }
+
     return Tariff;
 })
 
@@ -84,36 +88,25 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
         return new Tariffs(items, queryParams);
     };
 
-    this.loadItems = function(queryParams, directories) {
+    this.loadItems = function(queryParams, oldDirectories) {
         var self = this;
         return tariffApi.query(queryParams).then(function(tariffsData) {
-            var tariffs = tariffsData.tariffs;
-            if (directories) {
-                return {tariffs: self.makeCollection(tariffs, tariffsData.params, directories)};
-            }
-            var getFilterFieldsValue = function(filters, fields) {
-                var filter = _.find(filters, {fields: fields});
-                if (filter) {
-                    return filter.value;
+            var toResolve = [];
+            if (!oldDirectories || !oldDirectories.sites) {
+                var siteIds = _.pluck(_.compact(_.pluck(tariffsData.tariffs, 'site')), 'id');
+                if (!_.isEmpty(siteIds)) {
+                    var siteQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: siteIds }
+                        ]
+                    };
+                    toResolve.push(sitesLoader.loadItems(siteQueryParams));
                 }
             }
-
-            var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
-            if (_.isEmpty(siteIds)) {
-                siteIds = _.pluck(_.pluck(tariffs, 'site'), 'id');
-            }
-            var siteQueryParams = {
-                filters: [
-                    { fields: ['id'], type: 'in', value: siteIds }
-                ]
-            };
-            return $q.all({
-                sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
-                    return respond.sites;
-                })
-            }).then(function(directories) {
-                _.assign(directories, {tariffs: self.makeCollection(tariffs, tariffsData.params, directories)});
-                return directories;
+            return $q.all(toResolve).then(function(directoriesArr) {
+                var newDirectories = _.transform(directoriesArr, _.assign, {});
+                var directories = _.assign({}, oldDirectories, newDirectories);
+                return _.assign(newDirectories, {tariffs: self.makeCollection(tariffsData.tariffs, tariffsData.params, directories)});
             });
         });
     };

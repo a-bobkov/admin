@@ -44,6 +44,28 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
                 return $q.all(toResolve);
             }
         }
+    })
+    .when('/sales/:id/edit', {
+        templateUrl: 'template/page/sale/edit.html',
+        controller: 'SaleEditCtrl',
+        resolve: {
+            data: function(saleStatusesLoader, saleTypesLoader, salesLoader, $location, $q) {
+                var toResolve = {
+                    saleTypes: saleTypesLoader.loadItems().then(function(respond) {
+                        return respond.saleTypes;
+                    }),
+                    saleStatuses: saleStatusesLoader.loadItems().then(function(respond) {
+                        return respond.saleStatuses;
+                    })
+                };
+                return $q.all(toResolve).then(function(directories) {
+                    var id = parseInt($location.$$path.replace(/^\/sales\/(?:([^\/]+))\/edit$/,'$1'));
+                    return salesLoader.loadItem(id, directories).then(function(directory) {
+                        return _.assign(directories, directory);
+                    });
+                });
+            }
+        }
     });
 }])
 
@@ -119,6 +141,7 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
         });
         $rootScope.savedSaleListLocationSearch = toLocationSearch(searchParams);
         $location.search($rootScope.savedSaleListLocationSearch);
+
         var queryParams = makeQueryParams($rootScope.savedSaleListLocationSearch);
         var staticDirectories = _.pick($scope, ['saleTypes', 'saleStatuses']);
         salesLoader.loadItems(queryParams, staticDirectories).then(function(newDirectories) {
@@ -264,4 +287,53 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'ui.bootstrap.pag
             return String(value);
         }
     }
-});
+
+    $scope.editSale = function(sale) {
+        $location.search('');
+        $location.path('/sales/' + sale.id + '/edit');
+    };
+})
+
+.controller('SaleEditCtrl', function($scope, $rootScope, $location, $window, data, Sale,
+    dealersLoader, sitesLoader, tariffsLoader) {
+
+    _.assign($scope, data);
+    $scope.dealersLoader = dealersLoader;
+    $scope.sitesLoader = sitesLoader;
+
+    if ($scope.sale) {
+        makeSaleCopy();
+    } else {
+        makeSaleNew();
+    }
+
+    $window.scrollTo(0,0);
+
+    function makeSaleCopy() {
+        $scope.actionName = "Изменение";
+        $scope.saleEdited = new Sale;
+        angular.extend($scope.saleEdited, $scope.sale);
+    }
+
+    $scope.onSiteChange = function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+            if ($scope.saleEdited.site) {
+                var tariffQueryParams = {
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
+                    ]
+                };
+                var oldDirectories = _.pick($scope, 'sites');
+                tariffsLoader.loadItems(tariffQueryParams, oldDirectories).then(function(newDirectories) {
+                    _.assign($scope, newDirectories);
+                    $scope.saleEdited.tariff = null;    // todo: грузить тариф по-умолчанию из параметров салона
+                });
+            } else {
+                $scope.saleEdited.tariff = null;
+            }
+        }
+    };
+
+    $scope.$watch('saleEdited.site', $scope.onSiteChange);
+})
+;
