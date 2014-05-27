@@ -32,6 +32,9 @@
 					<ul class="error_list" ng-show='formSaleKey.saleTariff.$invalid'>
 					    <li id='saleEditTariffErrorRequired' ng-show="formSaleKey.saleTariff.$error.required">Необходимо выбрать тариф.</li>
 					</ul>
+					<ul class="warning_list" ng-show='saleEditTariffWarningNoDefaultTariff'>
+					    <li id='saleEditTariffWarningNoDefaultTariff' ng-show="saleEditTariffWarningNoDefaultTariff">У салона не включен экспорт на сайт.</li>
+					</ul>
 	            </td>
 	        </tr>
 	    </table>
@@ -43,9 +46,13 @@
 	        <tr>
 	            <th><label for="saleCount">Количество машин</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="saleCount" id="saleCount" ng-model='saleEdited.count' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" name="saleCount" id="saleCount" ng-model='saleEdited.count' required min='0' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCount.$invalid'>
 					    <li id='saleCountErrorRequired' ng-show="formSale.saleCount.$error.required">Необходимо ввести количество.</li>
+					    <li id='saleCountErrorMin' ng-show="formSale.saleCount.$error.min">Количество должно быть неотрицательным.</li>
+					</ul>
+					<ul class="warning_list" ng-show='saleEdited.count - saleEdited.tariff.count'>
+					    <li id='saleEditCountWarningDifferent' ng-show="saleEdited.count - saleEdited.tariff.count">Количество отличается от тарифа.</li>
 					</ul>
 	           </td>
 	        </tr>
@@ -61,36 +68,46 @@
 	        <tr>
 	            <th><label for="saleActiveTo">По</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="saleActiveTo" id="saleActiveTo" ng-model='saleEdited.activeTo' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="date" name="saleActiveTo" id="saleActiveTo" ng-model='saleEdited.activeTo' required ui-greater="saleEdited.activeFrom" ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleActiveTo.$invalid'>
 					    <li id='saleActiveToErrorRequired' ng-show="formSale.saleActiveTo.$error.required">Необходимо ввести дату.</li>
+					    <li id='saleActiveToErrorGreater' ng-show="formSale.saleActiveTo.$error.greater">Необходимо ввести дату больше чем "C".</li>
 					</ul>
 	           </td>
 	        </tr>
 	        <tr>
 	            <th><label for="saleCardAmount">Цена по тарифу</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' required min='0' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCardAmount.$invalid'>
 					    <li id='saleCardAmountErrorRequired' ng-show="formSale.saleCardAmount.$error.required">Необходимо ввести цену по тарифу.</li>
+					    <li id='saleCardAmountErrorMin' ng-show="formSale.saleCardAmount.$error.min">Цена должна быть неотрицательной.</li>
 					</ul>
 	           </td>
 	        </tr>
 	        <tr>
 	            <th><label for="saleAmount">Стоимость</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required min='0' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleAmount.$invalid'>
 					    <li id='saleAmountErrorRequired' ng-show="formSale.saleAmount.$error.required">Необходимо ввести стоимость.</li>
+					    <li id='saleAmountErrorMin' ng-show="formSale.saleAmount.$error.min">Стоимость должна быть неотрицательной.</li>
+					</ul>
+					<ul class="warning_list" ng-show='saleEdited.amount < saleEdited.cardAmount'>
+					    <li id='saleEditAmountWarningLessCard' ng-show="saleEdited.amount < saleEdited.cardAmount">Стоимость меньше цены по тарифу.</li>
 					</ul>
 	           </td>
 	        </tr>
 	        <tr>
 	            <th><label for="saleSiteAmount">Себестоимость</label></th>
 	            <td>
-	                <input class="span-8" type="text" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required min='0' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleSiteAmount.$invalid'>
 					    <li id='saleSiteAmountErrorRequired' ng-show="formSale.saleSiteAmount.$error.required">Необходимо ввести себестоимость.</li>
+					    <li id='saleSiteAmountErrorMin' ng-show="formSale.saleSiteAmount.$error.min">Себестоимость должна быть неотрицательной.</li>
+					</ul>
+					<ul class="warning_list" ng-show='saleEdited.siteAmount >= saleEdited.amount'>
+					    <li id='saleEditSiteAmountWarningGreaterAmount' ng-show="saleEdited.siteAmount >= saleEdited.amount">Себестоимость больше стоимости.</li>
 					</ul>
 	           </td>
 	        </tr>

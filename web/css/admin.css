@@ -13,3 +13,13 @@ table.parameters th {
 .checkbox-group {
 	margin: 0;
 }
+
+UL.warning_list {
+    margin: 0;
+}
+
+.warning_list LI {
+	list-style: none;
+	color: blue;
+}
+

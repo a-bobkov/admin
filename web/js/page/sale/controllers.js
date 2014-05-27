@@ -340,9 +340,11 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                     dealerTariffsLoader.loadItems(dealerTariffsQueryParams, directories).then(function(newDirectories) {
                         var dealerTariffs = newDirectories.dealerTariffs.getItems();
                         if (dealerTariffs.length) {
-                            $scope.saleEdited.tariff = newDirectories.dealerTariffs.getItems()[0].tariff;
+                            $scope.saleEdited.tariff = dealerTariffs[0].tariff;
+                            $scope.saleEditTariffWarningNoDefaultTariff = false;
                         } else {
                             $scope.saleEdited.tariff = null;
+                            $scope.saleEditTariffWarningNoDefaultTariff = true;
                         }
                     });
                 });
@@ -444,5 +446,21 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.$watch('[saleEdited.tariff, saleEdited.dealer]', $scope.onTariffChange, true);
 
+})
+
+.directive('uiGreater', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        scope: {
+            _oneValue: '=ngModel',
+            _otherValue: '=uiGreater'
+        },
+        link: function (scope, elem, attrs, ctrl) {
+            scope.$watch('[_oneValue, _otherValue]', function() {
+                ctrl.$setValidity('greater', scope._oneValue > scope._otherValue);
+            }, true);
+        }
+    };
 })
 ;
