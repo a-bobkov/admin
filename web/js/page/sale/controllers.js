@@ -1,6 +1,10 @@
 'use strict';
 
-angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'max.dal.entities.dealertariff', 'ui.bootstrap.pagination'])
+angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
+        'max.dal.entities.sale',
+        'max.dal.entities.dealertariff',
+        'max.dal.entities.tariffrate'
+    ])
 
 .config(['$routeProvider', function($routeProvider) {
 
@@ -294,8 +298,8 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'max.dal.entities
     };
 })
 
-.controller('SaleEditCtrl', function($scope, $rootScope, $location, $window, data, Sale,
-    dealersLoader, sitesLoader, tariffsLoader, dealerTariffsLoader) {
+.controller('SaleEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
+    dealersLoader, sitesLoader, salesLoader, tariffsLoader, usersLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
@@ -349,5 +353,96 @@ angular.module('SaleApp', ['ngRoute', 'max.dal.entities.sale', 'max.dal.entities
     };
 
     $scope.$watch('[saleEdited.dealer, saleEdited.site]', $scope.onSiteChange, true);
+
+    function getLastActiveCard(dealer, site) {
+        var queryParams = {
+            filters: [
+                { fields: ['dealer'], type: 'equal', value: dealer },
+                { fields: ['site'], type: 'equal', value: site },
+                { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
+                { fields: ['activeTo'], type: 'greaterOrEqual', value: $filter('date')(new Date(), 'yyyy-MM-dd') }
+            ],
+            order: {
+                order_field: 'activeTo',
+                order_direction: 'desc'
+            }
+        };
+        var oldDirectories = _.pick($scope, ['saleTypes', 'saleStatuses', 'dealers', 'sites', 'tariffs']);
+        return salesLoader.loadItems(queryParams, oldDirectories).then(function(newDirectories) {
+            return newDirectories.sales.getItems()[0];
+        });
+    }
+
+    function getLastDealerTariffRate(dealer, tariff) {
+        return usersLoader.loadDirectories().then(function(userDirectories) {
+            var queryParams = {
+                filters: [
+                    { fields: ['id'], type: 'equal', value: dealer.id }
+                ]
+            };
+            return dealersLoader.loadItems(queryParams, userDirectories).then(function(dealerDirectories) {
+                var dealer = dealerDirectories.dealers.getItems()[0];
+                var tariffRateQueryParams = {
+                    filters: [
+                        { fields: ['tariff'], type: 'equal', value: tariff.id },
+                        { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
+                    ],
+                    order: {
+                        order_field: 'city',
+                        order_direction: 'desc'
+                    }
+                };
+                var directories = _.pick($scope, ['tariffs']);
+                _.assign(directories, userDirectories);
+                return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
+                    var tariffRates = tariffRateDirectories.tariffRates.getItems();
+                    if (tariffRates[0].city) {      // если есть тарифы для конкретного города, то учитываем только их
+                        tariffRates = _.filter(tariffRates, {city: tariffRates[0].city.id});
+                    }
+                    tariffRates = _.sortBy(tariffRates, 'activeFrom');
+                    return tariffRates[tariffRates.length - 1];    // используем тариф с позднейшей датой начала действия
+                });
+            });
+        });
+    }
+
+    $scope.onTariffChange = function (newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        if (!$scope.saleEdited.tariff) {
+            return;
+        }
+        $scope.saleEdited.count = $scope.saleEdited.tariff.count;
+        $scope.saleEdited.info = 'Оплата на сайте ' + $scope.saleEdited.site.name + ' размещения ' + $scope.saleEdited.count + ' объявлений в течение ' + $scope.saleEdited.tariff.period + ' ' + $scope.saleEdited.tariff.periodUnit;
+        getLastActiveCard($scope.saleEdited.dealer, $scope.saleEdited.site).then(function(sale) {
+            if (sale) {
+                $scope.saleEdited.activeFrom = sale.activeTo;
+            } else {
+                $scope.saleEdited.activeFrom = new Date();
+            }
+            $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
+            $scope.saleEdited.activeTo = angular.copy($scope.saleEdited.activeFrom);
+            if ($scope.saleEdited.tariff.periodUnit === 'day') {
+                $scope.saleEdited.activeTo.setDate($scope.saleEdited.activeTo.getDate() + $scope.saleEdited.tariff.period - 1);
+            } else if ($scope.saleEdited.tariff.periodUnit === 'month') {
+                $scope.saleEdited.activeTo.setMonth($scope.saleEdited.activeTo.getMonth() + $scope.saleEdited.tariff.period - 1);
+            }
+        });
+        getLastDealerTariffRate($scope.saleEdited.dealer, $scope.saleEdited.tariff).then(function(tariffRate) {
+            if (tariffRate) {
+                $scope.saleEdited.cardAmount = tariffRate.rate;
+                $scope.saleEdited.amount = tariffRate.rate;
+                $scope.saleEdited.siteAmount = tariffRate.siteRate;
+            } else {
+                $scope.saleEdited.cardAmount = 0;
+                $scope.saleEdited.amount = 0;
+                $scope.saleEdited.siteAmount = 0;
+            }
+        });
+    };
+
+    $scope.$watch('[saleEdited.tariff, saleEdited.dealer]', $scope.onTariffChange, true);
+
 })
 ;

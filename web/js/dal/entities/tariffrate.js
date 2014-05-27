@@ -58,7 +58,7 @@ angular.module('max.dal.entities.tariffrate', ['max.dal.entities.collection', 'm
         return itemData;
     };
 
-    return Tariff;
+    return TariffRate;
 })
 
 .factory('TariffRates', function(Collection) {
@@ -86,5 +86,28 @@ angular.module('max.dal.entities.tariffrate', ['max.dal.entities.collection', 'm
             return new TariffRate(itemData, directories);
         });
         return new TariffRates(items, queryParams);
+    };
+
+    this.loadItems = function(queryParams, oldDirectories) {
+        var self = this;
+        return tariffRateApi.query(queryParams).then(function(tariffRatesData) {
+            var toResolve = [];
+            if (!oldDirectories || !oldDirectories.tariffs) {
+                var tariffIds = _.pluck(_.compact(_.pluck(tariffRatesData.tariffRates, 'tariff')), 'id');
+                if (!_.isEmpty(tariffIds)) {
+                    var tariffQueryParams = {
+                        filters: [
+                            { fields: ['id'], type: 'in', value: tariffIds }
+                        ]
+                    };
+                    toResolve.push(tariffsLoader.loadItems(tariffQueryParams));
+                }
+            }
+            return $q.all(toResolve).then(function(directoriesArr) {
+                var newDirectories = _.transform(directoriesArr, _.assign, {});
+                var directories = _.assign({}, oldDirectories, newDirectories);
+                return _.assign(newDirectories, {tariffRates: self.makeCollection(tariffRatesData.tariffRates, tariffRatesData.params, directories)});
+            });
+        });
     };
 });

@@ -4,13 +4,15 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, dealerTariffsLoader, DealerTariffs) {
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, 
+    dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
         DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, dealerTariffsLoader, DealerTariffs);
+        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, 
+        dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates);
 });
 
 /**
@@ -19,7 +21,8 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, dealerTariffsLoader, DealerTariffs) {
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, 
+    dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates) {
 
     var userDirectories = usersLoader.makeDirectories({
         groups: [
@@ -391,9 +394,10 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     });
 
     var dealers = dealersLoader.makeCollection([
-        {id: 1, companyName: 'Дилер-авто'},
-        {id: 2, companyName: 'Дилер-мото'}
-    ]);
+        {id: 1, companyName: 'Дилер-авто', city: {id: 1}},
+        {id: 2, companyName: 'Дилер-мото', city: {id: 2}},
+        {id: 3, companyName: 'Региональный', city: {id: 6}}
+    ], null, {cities: userDirectories.cities});
 
     var sites = sitesLoader.makeCollection([
         {id: 1, name: 'Дром'},
@@ -652,8 +656,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         {
             id: 1,
             site: {id: 1},
-            type: 'daily',
-            period: 1,
+            type: 'periodical',
+            period: 10,
             periodUnit: 'day',
             count: 50,
             isActive: true,
@@ -663,9 +667,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         {
             id: 2,
             site: {id: 1},
-            type: 'daily',
+            type: 'periodical',
             period: 1,
-            periodUnit: 'day',
+            periodUnit: 'month',
             count: 75,
             isActive: true,
             delay: 3,
@@ -674,9 +678,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         {
             id: 3,
             site: {id: 5},
-            type: 'daily',
+            type: 'periodical',
             period: 1,
-            periodUnit: 'day',
+            periodUnit: 'month',
             count: 50,
             isActive: true,
             delay: 3,
@@ -685,9 +689,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         {
             id: 4,
             site: {id: 6},
-            type: 'daily',
-            period: 1,
-            periodUnit: 'day',
+            type: 'periodical',
+            period: 3,
+            periodUnit: 'month',
             count: 75,
             isActive: false,
             delay: 3,
@@ -860,5 +864,83 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     var regexDealerTariffsGet = /^\/api2\/dealertariffs\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerTariffsGet).respond(function(method, url, data) {
         return processGet(url, regexDealerTariffsGet, dealerTariffs, 'dealerTariff');
+    });
+
+    var tariffRates = tariffRatesLoader.makeCollection([
+        {
+            id: 1,
+            tariff: {id: 1},
+            city: {id: 1},
+            activeFrom: '2014-01-01',
+            rate: 10000,
+            siteRate: 7000,
+            info: 'Помесячный за 50 в Москве'
+        },
+        {
+            id: 2,
+            tariff: {id: 1},
+            city: {id: 1},
+            activeFrom: '2014-01-01',
+            rate: 7000,
+            siteRate: 5000,
+            info: 'Помесячный за 50 в Питере'
+        },
+        {
+            id: 3,
+            tariff: {id: 1},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 5000,
+            siteRate: 3000,
+            info: 'Помесячный за 50 общий'
+        },
+        {
+            id: 4,
+            tariff: {id: 2},
+            city: {id: 1},
+            activeFrom: '2014-01-01',
+            rate: 15000,
+            siteRate: 10000,
+            info: 'Помесячный за 75 в Москве'
+        },
+        {
+            id: 5,
+            tariff: {id: 2},
+            city: {id: 1},
+            activeFrom: '2014-01-01',
+            rate: 10000,
+            siteRate: 7500,
+            info: 'Помесячный за 75 в Питере'
+        },
+        {
+            id: 6,
+            tariff: {id: 2},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 7000,
+            siteRate: 5000,
+            info: 'Помесячный за 75 общий'
+        },
+        {
+            id: 7,
+            tariff: {id: 3},
+            city: null,
+            activeFrom: '2014-06-30',
+            rate: 7000,
+            siteRate: 5000,
+            info: 'Только общая'
+        }
+    ], null, {tariffs: tariffs, cities: userDirectories.cities});
+
+    var regexTariffRatesQuery = /^\/api2\/tariffrates(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexTariffRatesQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexTariffRatesQuery, tariffRates.getItems(), 'tariffRates', TariffRates);
+    });
+    $httpBackend.whenPOST(regexTariffRatesQuery).respond(function(method, url, data) {
+        return processPostQuery(url, regexTariffRatesQuery, data, tariffRates, 'tariffRates', TariffRates);
+    });
+    var regexTariffRatesGet = /^\/api2\/tariffrates\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexTariffRatesGet).respond(function(method, url, data) {
+        return processGet(url, regexTariffRatesGet, tariffRates, 'tariffRate');
     });
 };
