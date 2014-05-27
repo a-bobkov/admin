@@ -258,7 +258,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 queryParams.filters.push({
                     fields: ['activeTo'],
                     type: 'greaterOrEqual',
-                    value: $filter('date')(new Date(), 'yyyy-MM-dd')
+                    value: new Date().toISOString().slice(0, 10)
                 });
             }
             return queryParams;
@@ -423,12 +423,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             } else {
                 $scope.saleEdited.activeFrom = new Date();
             }
-            $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
             $scope.saleEdited.activeTo = angular.copy($scope.saleEdited.activeFrom);
+            $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
             if ($scope.saleEdited.tariff.periodUnit === 'day') {
-                $scope.saleEdited.activeTo.setDate($scope.saleEdited.activeTo.getDate() + $scope.saleEdited.tariff.period - 1);
+                $scope.saleEdited.activeTo.setDate($scope.saleEdited.activeTo.getDate() + $scope.saleEdited.tariff.period);
             } else if ($scope.saleEdited.tariff.periodUnit === 'month') {
-                $scope.saleEdited.activeTo.setMonth($scope.saleEdited.activeTo.getMonth() + $scope.saleEdited.tariff.period - 1);
+                $scope.saleEdited.activeTo.setMonth($scope.saleEdited.activeTo.getMonth() + $scope.saleEdited.tariff.period);
             }
         });
         getLastDealerTariffRate($scope.saleEdited.dealer, $scope.saleEdited.tariff).then(function(tariffRate) {
@@ -446,6 +446,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.$watch('[saleEdited.tariff, saleEdited.dealer]', $scope.onTariffChange, true);
 
+    $scope.saveSaleEdited = function() {
+        $scope.saleEdited.save($scope).then(function(sale) {
+            $rootScope.savedSaleListNotice = 'Сохранена карточка с идентификатором ' + sale.id;
+            $location.path('/salelist');
+        });
+    };
 })
 
 .directive('uiGreater', function() {

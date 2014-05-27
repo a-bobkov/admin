@@ -26,7 +26,8 @@
             return null;
         }
 
-        return new Date(year, (month - 1), day);
+        // return new Date(year, (month - 1), day);
+        return new Date(dateString);
     }
 
     /**

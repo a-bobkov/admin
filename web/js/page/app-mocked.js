@@ -4,14 +4,14 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, usersLoader, User, Users, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, 
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
     dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, usersLoader, User, Users, 100, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
         DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, 
+        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
         dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates);
 });
 
@@ -21,7 +21,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, 
+    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
     dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates) {
 
     var userDirectories = usersLoader.makeDirectories({
@@ -153,6 +153,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             var value = getDeepValue(item, this.split('.'));
             if (_.isObject(value) && (value.id !== undefined)) {
                 return String(value.id);
+            } else if (_.isDate(value)) {
+                return value.toISOString().slice(0, 10);
             } else {
                 return String(value);
             }
