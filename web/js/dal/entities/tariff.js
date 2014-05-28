@@ -55,8 +55,25 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
         return itemData;
     };
 
-    Tariff.prototype.name = function() {
-        return this.id + ': ' + this.count + ' за ' + this.period + '  ' + this.periodUnit;
+    Tariff.prototype.getLastRate = function(dealer, tariffRates) {
+            var thisTariffRates = _.filter(tariffRates, {tariff: this});
+            var thisTariffRatesCity = _.filter(thisTariffRates, {city: dealer.city});
+            if (thisTariffRatesCity.length) {
+                _.sortBy(thisTariffRatesCity, 'activeFrom');
+                return  thisTariffRatesCity[thisTariffRatesCity.length - 1];
+            }
+            var thisTariffRatesNull = _.filter(thisTariffRates, {city: null});
+            if (thisTariffRatesNull.length) {
+                _.sortBy(thisTariffRatesNull, 'activeFrom');
+                return  thisTariffRatesNull[thisTariffRatesNull.length - 1];
+            }
+        }
+
+    Tariff.prototype.name = function(dealer, tariffRates) {
+        var tariffRate = this.getLastRate(dealer, tariffRates);
+        var rate = (tariffRate) ? tariffRate.rate : '???';
+        return this.id + ': ' + rate + ' руб. за ' + this.period + '  ' + this.periodUnit + ', до ' + this.count + ' объявлений';
+
     }
 
     return Tariff;

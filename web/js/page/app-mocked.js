@@ -54,8 +54,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             {id: 11, name: 'Метро два в питере', city: {id: 2}}
         ],
         sites: [
-            {id: 11, name: 'Сайт один'},
-            {id: 12, name: 'Сайт два'}
+            {id: 1, name: 'Дром'},
+            {id: 5, name: 'Ауто'},
+            {id: 6, name: 'ИРР'}
         ]
     });
 
@@ -92,10 +93,10 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         },
         {id: 1, email: 'a-bobkov@ab.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
             id: 1, companyName: 'Ещё одна компания', manager: {id: 2}}},
-        {id: 2, email: 'a-bobkov@abb.com', lastLogin: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 11}},
+        {id: 2, email: 'a-bobkov@abb.com', lastLogin: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 1}},
         {id: 3, email: 'a-bobkov@abc.com', lastLogin: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
             id: 3, companyName: 'Другая компания', manager: {id: 1}}},
-        {id: 4, email: 'a-bobkov@act.com', lastLogin: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 12}},
+        {id: 4, email: 'a-bobkov@act.com', lastLogin: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 5}},
         {id: 6, email: 'a-bobkov@abe.com', lastLogin: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
             id: 6, companyName: 'Крутая компания', manager: {id: 2}}},
         {id: 7, email: 'a-bobkov@abf.com', lastLogin: '2010-01-12', status: 'inactive', group: {id: 2}, dealer: {
@@ -105,13 +106,13 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             id: 9, companyName: 'Битые корыта', manager: {id: 1}}},
         {id: 10, email: 'a-bobkov@abi.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
             id: 10, companyName: 'Два в одном', manager: {id: 2}}},
-        {id: 11, email: 'a-bobkov@abj.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 11}},
+        {id: 11, email: 'a-bobkov@abj.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 1}},
         {id: 12, email: 'a-bobkov@abk.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
             id: 12, companyName: 'Авто-мото', manager: {id: 0}}},
         {id: 13, email: 'a-bobkov@abl.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
             id: 13, companyName: 'Свет', manager: {id: 4}}},
-        {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 12}},
-        {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 11}}
+        {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 6}},
+        {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
     ], multiplyUsersCoef), null, userDirectories);
     
     function multiplyArr(arr, coef) {
@@ -740,7 +741,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             date: '2014-03-25',
             amount: 19999.97,
             siteAmount: 14999.97,
-            info: 'Основная карточка'
+            info: 'Основная карточка, потом расширенная'
         },
         {
             id: 2,
@@ -791,6 +792,23 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             siteAmount: 14999.97,
             info: 'Основная карточка'
         },
+        {
+            id: 5,
+            type: 'card',
+            cardId: 4,
+            dealer: {id: 1},
+            site: {id: 1},
+            tariff: {id: 1},
+            cardAmount: 19999.95,
+            count: 50,
+            activeFrom: '2014-06-01',
+            activeTo: '2014-06-30',
+            isActive: true,
+            date: '2014-03-25',
+            amount: 19999.97,
+            siteAmount: 14999.97,
+            info: 'Нерасширенная карточка'
+        }
     ], null, {dealers: dealers, sites: sites, tariffs: tariffs, saleTypes: saleTypes, saleStatuses: saleStatuses});
 
     var regexSalesQuery = /^\/api2\/sales(?:\?([\w_=&.]*))?$/;
@@ -834,7 +852,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             id: 1,
             dealer: {id: 1},
             site: {id: 1},
-            tariff: {id: 1},
+            tariff: {id: 2},
             autoProlong: true,
             renew: '0'
         },

@@ -183,7 +183,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
         });
     };
 
-    this.loadItem = function(id, oldDirectories) {
+    this.loadItem = function(id, oldDirectories, dealerFieldGroups) {
         var self = this;
         return saleApi.get(id).then(function(saleData) {
             var toResolve = [];
@@ -200,9 +200,9 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                         filters: [
                             { fields: ['id'], type: 'in', value: dealerIds }
                         ],
-                        fields: ['dealer_list_name']
+                        fields: dealerFieldGroups
                     };
-                    toResolve.push(dealersLoader.loadItems(dealerQueryParams));
+                    toResolve.push(dealersLoader.loadItems(dealerQueryParams, oldDirectories));
                 }
             }
             if (!oldDirectories.sites) {
@@ -218,18 +218,18 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
             }
             return $q.all(toResolve).then(function(directoriesArr) {
                 var newDirectories = _.transform(directoriesArr, _.assign, {});
+                var directories = _.assign({}, oldDirectories, newDirectories);
                 var toResolve = [];
                 if (!oldDirectories.tariffs) {
                     var tariffIds = _.pluck(_.compact(_.pluck([saleData.sale], 'tariff')), 'id');
                     if (!_.isEmpty(tariffIds)) {
                         var tariffQueryParams = {
                             filters: [
-                                { fields: ['site'], type: 'in', value: siteIds }
+                                { fields: ['site'], type: 'equal', value: saleData.sale.site.id }
                             ]
                         };
-                        toResolve.push(tariffsLoader.loadItems(tariffQueryParams, newDirectories));
+                        toResolve.push(tariffsLoader.loadItems(tariffQueryParams, directories));
                     }
-                    toResolve.push(tariffsLoader.loadItems(tariffQueryParams, newDirectories));
                 }
                 return $q.all(toResolve).then(function(directoriesArr) {
                     _.transform(directoriesArr, _.assign, newDirectories);

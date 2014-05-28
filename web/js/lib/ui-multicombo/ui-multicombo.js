@@ -31,7 +31,8 @@ angular.module("ui.multicombo", [])
             _choicesLoader: '=uiMcomboLoader',
             _choices: '=uiMcomboChoices',
             _selected: '=ngModel',
-            _choiceName: '=uiMcomboName'
+            _choiceName: '=uiMcomboName',
+            _disabled: '=ngDisabled'
         },
         controller: ['$scope', '$filter', function($scope, $filter) {
             $scope._searchElem = null;
@@ -74,6 +75,9 @@ angular.module("ui.multicombo", [])
             };
 
             $scope.removeFromSelected = function(choice) {
+                if ($scope._disabled) {
+                    return;
+                }
                 $scope._selectedChoices.splice($scope._selectedChoices.indexOf(choice), 1);
                 if (_.isArray($scope._selected)) {
                     $scope._selected = $scope._selectedChoices;

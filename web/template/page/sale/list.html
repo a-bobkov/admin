@@ -5,7 +5,7 @@
 </div>
 
 <div class="append-bottom">
-    <input id='SaleListAddSaleUp' type="submit" value="Добавить запись" ng-click='clickNewSale()'/>
+    <input id='SaleListAddSaleUp' type="submit" value="Добавить запись" ng-click='newSaleCard()'/>
 </div>
 
 <div class="span-16">
@@ -31,7 +31,7 @@
                 <td class="text"><a ng-click='toggleSaleStatus(sale)'>{{sale.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
-                        <li class="edit" ng-show='isAddable(sale)'><a ng-click='newAddSale(sale)'>расширить</a></li>
+                        <li class="edit" ng-show='isAddable(sale)'><a ng-click='newSaleAddcard(sale)'>расширить</a></li>
                         <li class="edit"><a ng-click='newExtraSale(sale)'>доплатить</a></li>
                         <li class="edit" ng-show='sale.isActive.id'><a ng-click='editSale(sale)'>изменить</a></li>
                         <li class="delete"><a ng-click='removeSale(sale)'>удалить</a></li>
@@ -42,7 +42,7 @@
     </table>
     <div pagination on-select-page='onSelectPage(page)' total-items="totalItems" page="paging.currentPage" items-per-page="paging.itemsPerPage" max-size='maxSizePaging' boundary-links="true"></div>
     <div class="append-bottom">
-        <input id='SaleListAddSaleDown' type="submit" value="Добавить запись" ng-click='clickNewSale()'/>
+        <input id='SaleListAddSaleDown' type="submit" value="Добавить запись" ng-click='newSaleCard()'/>
     </div>
 </div>
 <fieldset class="span-8 last">
