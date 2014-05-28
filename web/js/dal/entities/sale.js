@@ -94,6 +94,10 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
         throw new CollectionError('Попытка удалить элемент без id');
     };
 
+    Sale.prototype.name = function() {
+        return 'салона "' + this.dealer.companyName + '" на сайте "' + this.site.name + '"';
+    }
+
     return Sale;
 })
 
@@ -274,7 +278,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
     this.loadItems = function() {
         var self = this;
         return $q.when({saleStatuses: self.makeCollection([
-            { id: true, name: 'Акт' },
+            { id: true, name: 'А' },
             { id: false, name: 'Н/А' }
         ])});
     };

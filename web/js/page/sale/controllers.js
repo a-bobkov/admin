@@ -91,7 +91,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 }])
 
 .controller('SaleListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, 
-    salesLoader, dealersLoader, sitesLoader) {
+    salesLoader, dealersLoader, sitesLoader, Sale) {
 
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
@@ -155,7 +155,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }
 
     $scope.onSelectPage = function(page) {
-        $scope.paging.currentPage = page;
+        if (page) {
+            $scope.paging.currentPage = page;
+        }
 
         var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
             return value;
@@ -312,6 +314,31 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $scope.editSale = function(sale) {
         $location.search('');
         $location.path('/sales/' + sale.id + '/edit');
+    };
+
+    $scope.toggleSaleStatus = function(sale) {
+        var confirmMessage,
+            noticeMessage,
+            newStatus;
+
+        if (sale.isActive.id === true) {
+            confirmMessage = 'Дезактивировать продажу ';
+            noticeMessage = 'Дезактивирована продажа ';
+            newStatus = $scope.saleStatuses.get(false);
+        } else {
+            confirmMessage = 'Активировать продажу ';
+            noticeMessage = 'Активирована продажа ';
+            newStatus = $scope.saleStatuses.get(true);
+        }
+        if (confirm(confirmMessage + sale.name() + '?')) {
+            var saleEdited = new Sale;
+            angular.extend(saleEdited, sale);
+            saleEdited.isActive = newStatus;
+            saleEdited.save($scope).then(function() {
+                $scope.savedSaleListNotice = noticeMessage + sale.name();
+                $scope.onSelectPage();
+            });
+        }
     };
 })
 
@@ -475,7 +502,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {
-            $rootScope.savedSaleListNotice = 'Сохранена карточка с кодом ' + sale.id;
+            $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
             $location.path('/salelist');
         });
     };
