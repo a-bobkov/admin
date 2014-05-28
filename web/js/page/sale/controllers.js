@@ -70,6 +70,23 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 });
             }
         }
+    })
+    .when('/salenew', {
+        templateUrl: 'template/page/sale/edit.html',
+        controller: 'SaleEditCtrl',
+        resolve: {
+            data: function(saleStatusesLoader, saleTypesLoader, salesLoader, $location, $q) {
+                var toResolve = {
+                    saleTypes: saleTypesLoader.loadItems().then(function(respond) {
+                        return respond.saleTypes;
+                    }),
+                    saleStatuses: saleStatusesLoader.loadItems().then(function(respond) {
+                        return respond.saleStatuses;
+                    })
+                };
+                return $q.all(toResolve);
+            }
+        }
     });
 }])
 
@@ -319,12 +336,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         angular.extend($scope.saleEdited, $scope.sale);
     }
 
+    function makeSaleNew() {
+        $scope.actionName = "Создание";
+        $scope.saleEdited = new Sale ({
+            type: 'card',
+            date: new Date,
+            isActive: false
+        }, $scope);
+    }
+
     $scope.onSiteChange = function (newValue, oldValue) {
         if (newValue !== oldValue) {
             if ($scope.saleEdited.dealer && $scope.saleEdited.site) {
                 var tariffQueryParams = {
                     filters: [
-                        { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
+                        { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id },
+                        { fields: ['type'], type: 'equal', value: 'periodical' }
                     ]
                 };
                 var oldDirectories = _.pick($scope, 'sites');
@@ -359,10 +386,10 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     function getLastActiveCard(dealer, site) {
         var queryParams = {
             filters: [
-                { fields: ['dealer'], type: 'equal', value: dealer },
-                { fields: ['site'], type: 'equal', value: site },
+                { fields: ['dealer'], type: 'equal', value: dealer.id },
+                { fields: ['site'], type: 'equal', value: site.id },
                 { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
-                { fields: ['activeTo'], type: 'greaterOrEqual', value: $filter('date')(new Date(), 'yyyy-MM-dd') }
+                { fields: ['activeTo'], type: 'greaterOrEqual', value: new Date().toISOString().slice(0, 10) }
             ],
             order: {
                 order_field: 'activeTo',
@@ -448,7 +475,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {
-            $rootScope.savedSaleListNotice = 'Сохранена карточка с идентификатором ' + sale.id;
+            $rootScope.savedSaleListNotice = 'Сохранена карточка с кодом ' + sale.id;
             $location.path('/salelist');
         });
     };

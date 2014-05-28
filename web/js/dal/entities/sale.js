@@ -34,7 +34,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                 newValue = directories.saleTypes.get(value);
             } else if (key === 'isActive') {
                 newValue = directories.saleStatuses.get(value);
-            } else if (key === 'activeFrom' || key === 'activeTo') {
+            } else if (key === 'activeFrom' || key === 'activeTo' || key === 'date') {
                 newValue = new Date(value);
             } else {
                 newValue = value;
@@ -64,7 +64,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
         _.forEach(this, function(value, key){
             if (key === 'isActive' || key === 'type') {
                 itemData[key] = value.id;
-            } else if (key === 'activeFrom' || key === 'activeTo') {
+            } else if (_.isDate(value)) {
                 itemData[key] = value.toISOString().slice(0, 10);
             } else if (_.isObject(value)) {
                 itemData[key] = {id: value.id};
@@ -275,7 +275,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
         var self = this;
         return $q.when({saleStatuses: self.makeCollection([
             { id: true, name: 'Акт' },
-            { id: false, name: 'Бло' }
+            { id: false, name: 'Н/А' }
         ])});
     };
 })
