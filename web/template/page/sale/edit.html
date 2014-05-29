@@ -25,9 +25,9 @@
 	            </td>
 	        </tr>
 	        <tr ng-show='saleEdited.type.id === "addcard"'>
-	            <th><label for="saleOldTariff">Старый тариф</label></th>
+	            <th><label for="saleTariffParent">Старый тариф</label></th>
 	            <td>
-		            <select class="span-8" id="saleOldTariff" name="saleOldTariff" ng-model='tariffOld' ng-options='opt.name(saleEdited.dealer, tariffRates.getItems()) for opt in tariffs.getItems()' ng-required='saleEdited.type.id === "addcard"' disabled>
+		            <select class="span-8" id="saleTariffParent" name="saleTariffParent" ng-model='tariffParent' ng-options='opt.name(saleEdited.dealer, tariffRates.getItems()) for opt in tariffs.getItems()' ng-required='saleEdited.type.id === "addcard"' disabled>
 		            </select>
 	            </td>
 	        </tr>

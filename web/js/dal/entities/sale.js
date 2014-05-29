@@ -145,9 +145,9 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                         filters: [
                             { fields: ['id'], type: 'in', value: dealerIds }
                         ],
-                        fields: ['dealer_list_name']
+                        fields: (oldDirectories.cities) ? [] : ['dealer_list_name']
                     };
-                    toResolve.push(dealersLoader.loadItems(dealerQueryParams));
+                    toResolve.push(dealersLoader.loadItems(dealerQueryParams, oldDirectories));
                 }
             }
             if (!oldDirectories || !oldDirectories.sites) {
@@ -158,32 +158,34 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                             { fields: ['id'], type: 'in', value: siteIds }
                         ]
                     };
-                    toResolve.push(sitesLoader.loadItems(siteQueryParams));
-                }
-            }
-            if (!oldDirectories || !oldDirectories.tariffs) {
-                var tariffIds = _.pluck(_.compact(_.pluck(salesData.sales, 'tariff')), 'id');
-                if (!_.isEmpty(tariffIds)) {
-                    var tariffQueryParams = {
-                        filters: [
-                            { fields: ['id'], type: 'in', value: tariffIds }
-                        ]
-                    };
-                    toResolve.push(tariffsLoader.loadItems(tariffQueryParams));
+                    toResolve.push(sitesLoader.loadItems(siteQueryParams, oldDirectories));
                 }
             }
             return $q.all(toResolve).then(function(directoriesArr) {
-                var newDirectories = {};
-                _.forEach(directoriesArr, function(directory) {
-                    _.assign(newDirectories, directory)
-                });
+                var newDirectories = _.transform(directoriesArr, _.assign, {});
                 var directories = _.assign({}, oldDirectories, newDirectories);
-                return _.assign(newDirectories, {sales: self.makeCollection(salesData.sales, salesData.params, directories)});
+                var toResolve = [];
+                if (!oldDirectories.tariffs) {
+                    var tariffIds = _.pluck(_.compact(_.pluck(salesData.sales, 'tariff')), 'id');
+                    if (!_.isEmpty(tariffIds)) {
+                        var tariffQueryParams = {
+                            filters: [
+                                { fields: ['id'], type: 'in', value: tariffIds }
+                            ]
+                        };
+                        toResolve.push(tariffsLoader.loadItems(tariffQueryParams, directories));
+                    }
+                }
+                return $q.all(toResolve).then(function(directoriesArr) {
+                    _.transform(directoriesArr, _.assign, newDirectories);
+                    var directories = _.assign({}, oldDirectories, newDirectories);
+                    return _.assign(newDirectories, {sales: self.makeCollection(salesData.sales, salesData.params, directories)});
+                });
             });
         });
     };
 
-    this.loadItem = function(id, oldDirectories, dealerFieldGroups) {
+    this.loadItem = function(id, oldDirectories) {
         var self = this;
         return saleApi.get(id).then(function(saleData) {
             var toResolve = [];
@@ -200,7 +202,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                         filters: [
                             { fields: ['id'], type: 'in', value: dealerIds }
                         ],
-                        fields: dealerFieldGroups
+                        fields: (oldDirectories.cities) ? [] : ['dealer_list_name']
                     };
                     toResolve.push(dealersLoader.loadItems(dealerQueryParams, oldDirectories));
                 }
@@ -213,7 +215,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                             { fields: ['id'], type: 'in', value: siteIds }
                         ]
                     };
-                    toResolve.push(sitesLoader.loadItems(siteQueryParams));
+                    toResolve.push(sitesLoader.loadItems(siteQueryParams, oldDirectories));
                 }
             }
             return $q.all(toResolve).then(function(directoriesArr) {
@@ -225,7 +227,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                     if (!_.isEmpty(tariffIds)) {
                         var tariffQueryParams = {
                             filters: [
-                                { fields: ['site'], type: 'equal', value: saleData.sale.site.id }
+                                { fields: ['id'], type: 'in', value: tariffIds }
                             ]
                         };
                         toResolve.push(tariffsLoader.loadItems(tariffQueryParams, directories));
