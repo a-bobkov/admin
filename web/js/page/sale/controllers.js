@@ -75,16 +75,15 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         templateUrl: 'template/page/sale/edit.html',
         controller: 'SaleEditCtrl',
         resolve: {
-            data: function(saleStatusesLoader, saleTypesLoader, salesLoader, $location, $q) {
-                var toResolve = {
-                    saleTypes: saleTypesLoader.loadItems().then(function(respond) {
-                        return respond.saleTypes;
-                    }),
-                    saleStatuses: saleStatusesLoader.loadItems().then(function(respond) {
-                        return respond.saleStatuses;
-                    })
-                };
-                return $q.all(toResolve);
+            data: function(saleStatusesLoader, saleTypesLoader, usersLoader, $q) {
+                var toResolve = [
+                    saleTypesLoader.loadItems(),
+                    saleStatusesLoader.loadItems(),
+                    usersLoader.loadDirectories()
+                ];
+                return $q.all(toResolve).then(function(directoriesArr) {
+                    return _.transform(directoriesArr, _.assign, {});
+                });
             }
         }
     })
@@ -381,7 +380,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 })
 
 .controller('SaleEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
-    dealersLoader, sitesLoader, salesLoader, tariffsLoader, usersLoader, dealerTariffsLoader, tariffRatesLoader) {
+    dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
 
@@ -411,49 +410,100 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }, $scope);
     }
 
-    $scope.onSiteChange = function (newValue, oldValue) {
-        if (newValue !== oldValue) {
-            if ($scope.saleEdited.dealer && $scope.saleEdited.site) {
-                var tariffQueryParams = {
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id },
-                        { fields: ['type'], type: 'equal', value: 'periodical' }
-                    ]
-                };
-                var oldDirectories = _.pick($scope, 'sites');
-                tariffsLoader.loadItems(tariffQueryParams, oldDirectories).then(function(newDirectories) {
-                    _.assign($scope, newDirectories);
-                    var dealerTariffsQueryParams = {
-                        filters: [
-                            { fields: ['dealer'], type: 'equal', value: $scope.saleEdited.dealer.id },
-                            { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
-                        ]
-                    };
-                    var directories = _.pick($scope, ['dealers', 'sites', 'tariffs']);
-                    dealerTariffsLoader.loadItems(dealerTariffsQueryParams, directories).then(function(newDirectories) {
-                        var dealerTariff = newDirectories.dealerTariffs.getItems()[0];
-                        if (dealerTariff) {
-                            $scope.saleEdited.tariff = dealerTariff.tariff;
-                            $scope.saleEditTariffWarningNoDefaultTariff = false;
-                        } else {
-                            $scope.saleEdited.tariff = null;
-                            $scope.saleEditTariffWarningNoDefaultTariff = true;
-                        }
-                    });
-                });
+    $scope.$watch('saleEdited.site', function loadTariffs(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        if (!$scope.saleEdited.site) {
+            return;
+        }
+        var tariffQueryParams = {
+            filters: [
+                { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id },
+                { fields: ['type'], type: 'equal', value: 'periodical' }
+            ]
+        };
+        var oldDirectories = _.pick($scope, 'sites');
+        tariffsLoader.loadItems(tariffQueryParams, oldDirectories).then(function(tariffsDirectories) {
+            _.assign($scope, tariffsDirectories);
+        });
+    });
+
+    $scope.$watch('saleEdited.dealer', function loadCity(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        if (!$scope.saleEdited.dealer) {
+            return;
+        }
+        var dealerQueryParams = {
+            filters: [
+                { fields: ['id'], type: 'equal', value: $scope.saleEdited.dealer.id }
+            ]
+        };
+        var oldDirectories = _.pick($scope, ['cities', 'markets', 'metros', 'managers']);
+        dealersLoader.loadItems(dealerQueryParams, oldDirectories).then(function(dealerDirectories) {
+            var dealer = dealerDirectories.dealers.getItems()[0];
+            $scope.city = dealer.city;
+        });
+    });
+
+    $scope.$watch('[city, tariffs]', function loadTariffRates(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        if (!$scope.city || _.isEmpty($scope.tariffs)) {
+            return;
+        }
+        var tariffRateQueryParams = {
+            filters: [
+                { fields: ['tariff'], type: 'in', value: _.pluck($scope.tariffs.getItems(), 'id') },
+                { fields: ['city'], type: 'in', value: [$scope.city.id, null] }
+            ]
+        };
+        var oldDirectories = _.pick($scope, ['cities', 'tariffs']);
+        tariffRatesLoader.loadItems(tariffRateQueryParams, oldDirectories).then(function(tariffRateDirectories) {
+            _.assign($scope, tariffRateDirectories);
+        });
+    }, true);
+
+    $scope.$watch('[saleEdited.dealer, tariffs]', function loadDealerTariff(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        if (!$scope.saleEdited.dealer || _.isEmpty($scope.tariffs)) {
+            return;
+        }
+        var dealerTariffsQueryParams = {
+            filters: [
+                { fields: ['dealer'], type: 'equal', value: $scope.saleEdited.dealer.id },
+                { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
+            ]
+        };
+        var oldDirectories = _.pick($scope, ['dealers', 'sites', 'tariffs']);
+        dealerTariffsLoader.loadItems(dealerTariffsQueryParams, oldDirectories).then(function(dealerTariffsDirectories) {
+            var dealerTariff = dealerTariffsDirectories.dealerTariffs.getItems()[0];
+            if (dealerTariff) {
+                $scope.saleEdited.tariff = dealerTariff.tariff;
+                $scope.saleEditTariffWarningNoDefaultTariff = false;
             } else {
                 $scope.saleEdited.tariff = null;
+                $scope.saleEditTariffWarningNoDefaultTariff = true;
             }
+        });
+    }, true);
+
+    $scope.$watch('[saleEdited.dealer, tariffs]', function loadLastActiveCard(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
         }
-    };
-
-    $scope.$watch('[saleEdited.dealer, saleEdited.site]', $scope.onSiteChange, true);
-
-    function getLastActiveCard(dealer, site) {
+        if (!$scope.saleEdited.dealer || _.isEmpty($scope.tariffs)) {
+            return;
+        }
         var queryParams = {
             filters: [
-                { fields: ['dealer'], type: 'equal', value: dealer.id },
-                { fields: ['site'], type: 'equal', value: site.id },
+                { fields: ['dealer'], type: 'equal', value: $scope.saleEdited.dealer.id },
+                { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id },
                 { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
                 { fields: ['activeTo'], type: 'greaterOrEqual', value: new Date().toISOString().slice(0, 10) }
             ],
@@ -463,81 +513,61 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             }
         };
         var oldDirectories = _.pick($scope, ['saleTypes', 'saleStatuses', 'dealers', 'sites', 'tariffs']);
-        return salesLoader.loadItems(queryParams, oldDirectories).then(function(newDirectories) {
-            return newDirectories.sales.getItems()[0];
+        salesLoader.loadItems(queryParams, oldDirectories).then(function(newDirectories) {
+            $scope.lastActiveCard = newDirectories.sales.getItems()[0];
         });
-    }
+    }, true);
 
-    function getLastDealerTariffRate(dealer, tariff) {
-        return usersLoader.loadDirectories().then(function(userDirectories) {
-            var queryParams = {
-                filters: [
-                    { fields: ['id'], type: 'equal', value: dealer.id }
-                ]
-            };
-            return dealersLoader.loadItems(queryParams, userDirectories).then(function(dealerDirectories) {
-                var dealer = dealerDirectories.dealers.getItems()[0];
-                var tariffRateQueryParams = {
-                    filters: [
-                        { fields: ['tariff'], type: 'equal', value: tariff.id },
-                        { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
-                    ],
-                    order: {
-                        order_field: 'city',
-                        order_direction: 'desc'
-                    }
-                };
-                var directories = _.pick($scope, ['tariffs']);
-                _.assign(directories, userDirectories);
-                return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
-                    var tariffRates = tariffRateDirectories.tariffRates.getItems();
-                    if (tariffRates[0].city) {      // если есть тарифы для конкретного города, то учитываем только их
-                        tariffRates = _.filter(tariffRates, {city: tariffRates[0].city.id});
-                    }
-                    tariffRates = _.sortBy(tariffRates, 'activeFrom');
-                    return tariffRates[tariffRates.length - 1];    // используем тариф с позднейшей датой начала действия
-                });
-            });
-        });
-    }
-
-    $scope.onDealerOrTariffChange = function(newValue, oldValue) {
+    $scope.$watch('[lastActiveCard, saleEdited.tariff]', function fillActiveDates(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
         }
-        if (!$scope.saleEdited.dealer || !$scope.saleEdited.tariff) {
+        if (!$scope.saleEdited.tariff) {
+            return;
+        }
+        if ($scope.lastActiveCard) {
+            $scope.saleEdited.activeFrom = angular.copy($scope.lastActiveCard.activeTo);
+        } else {
+            $scope.saleEdited.activeFrom = new Date();
+        }
+        $scope.saleEdited.activeTo = angular.copy($scope.saleEdited.activeFrom);
+        $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
+        if ($scope.saleEdited.tariff.periodUnit === 'day') {
+            $scope.saleEdited.activeTo.setDate($scope.saleEdited.activeTo.getDate() + $scope.saleEdited.tariff.period);
+        } else if ($scope.saleEdited.tariff.periodUnit === 'month') {
+            $scope.saleEdited.activeTo.setMonth($scope.saleEdited.activeTo.getMonth() + $scope.saleEdited.tariff.period);
+        }
+    }, true);
+
+    $scope.$watch('saleEdited.tariff', function fillCountAndSums(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        if (!$scope.saleEdited.tariff) {
             return;
         }
         $scope.saleEdited.count = $scope.saleEdited.tariff.count;
-        $scope.saleEdited.info = 'Оплата на сайте ' + $scope.saleEdited.site.name + ' размещения ' + $scope.saleEdited.count + ' объявлений в течение ' + $scope.saleEdited.tariff.period + ' ' + $scope.saleEdited.tariff.periodUnit;
-        getLastActiveCard($scope.saleEdited.dealer, $scope.saleEdited.site).then(function(sale) {
-            if (sale) {
-                $scope.saleEdited.activeFrom = sale.activeTo;
-            } else {
-                $scope.saleEdited.activeFrom = new Date();
-            }
-            $scope.saleEdited.activeTo = angular.copy($scope.saleEdited.activeFrom);
-            $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
-            if ($scope.saleEdited.tariff.periodUnit === 'day') {
-                $scope.saleEdited.activeTo.setDate($scope.saleEdited.activeTo.getDate() + $scope.saleEdited.tariff.period);
-            } else if ($scope.saleEdited.tariff.periodUnit === 'month') {
-                $scope.saleEdited.activeTo.setMonth($scope.saleEdited.activeTo.getMonth() + $scope.saleEdited.tariff.period);
-            }
-        });
-        getLastDealerTariffRate($scope.saleEdited.dealer, $scope.saleEdited.tariff).then(function(tariffRate) {
-            if (tariffRate) {
-                $scope.saleEdited.cardAmount = tariffRate.rate;
-                $scope.saleEdited.amount = tariffRate.rate;
-                $scope.saleEdited.siteAmount = tariffRate.siteRate;
-            } else {
-                $scope.saleEdited.cardAmount = 0;
-                $scope.saleEdited.amount = 0;
-                $scope.saleEdited.siteAmount = 0;
-            }
-        });
-    };
+        var tariffRate = $scope.saleEdited.tariff.getLastRate($scope.saleEdited.dealer, $scope.tariffRates.getItems());
+        if (tariffRate) {
+            $scope.saleEdited.cardAmount = tariffRate.rate;
+            $scope.saleEdited.amount = tariffRate.rate;
+            $scope.saleEdited.siteAmount = tariffRate.siteRate;
+        } else {
+            $scope.saleEdited.cardAmount = 0;
+            $scope.saleEdited.amount = 0;
+            $scope.saleEdited.siteAmount = 0;
+        }
+    });
 
-    $scope.$watch('[saleEdited.tariff, saleEdited.dealer]', $scope.onDealerOrTariffChange, true);
+    $scope.$watch('[saleEdited.site, saleEdited.count, saleEdited.tariff]', function fillInfo(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        if (!$scope.saleEdited.site || !$scope.saleEdited.tariff) {
+            return;
+        }
+        $scope.saleEdited.info = 'Оплата на сайте ' + $scope.saleEdited.site.name + ' размещения ' + $scope.saleEdited.count + ' объявлений в течение ' + $scope.saleEdited.tariff.period + ' ' + $scope.saleEdited.tariff.periodUnit;
+    }, true);
 
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {
@@ -596,7 +626,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             }
         });
         $scope.saleEdited.activeFrom = new Date();
-        if ($scope.saleEdited.site.id !== 1 && $scope.saleEdited.site.id !== 5) {
+        if ($scope.saleEdited.site.id !== 1 && $scope.saleEdited.site.id !== 5) {   // Дром и Ауто.ру
             $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
         }
         $scope.saleEdited.activeTo = $scope.saleOld.activeTo;
