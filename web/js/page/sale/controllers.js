@@ -554,7 +554,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         });
     }, true);
 
-    $scope.$watch('[lastActiveCard, saleEdited.tariff]', function fillActiveDates(newValue, oldValue) {
+    $scope.$watch('[lastActiveCard, saleEdited.tariff]', function setActiveDates(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
         }
@@ -575,7 +575,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }
     }, true);
 
-    $scope.$watch('saleEdited.tariff', function fillCountAndSums(newValue, oldValue) {
+    $scope.$watch('saleEdited.tariff', function setCountAndSums(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
         }
@@ -595,7 +595,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }
     });
 
-    $scope.$watch('[saleEdited.site, saleEdited.count, saleEdited.tariff]', function fillInfo(newValue, oldValue) {
+    $scope.$watch('[saleEdited.site, saleEdited.count, saleEdited.tariff]', function setInfo(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
         }
@@ -670,7 +670,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.saleEdited.activeTo = $scope.saleParent.activeTo;
     }
 
-    $scope.onTariffChange = function (newValue, oldValue) {
+    $scope.$watch('saleEdited.tariff', function setCount(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
         }
@@ -682,12 +682,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         } else {
             $scope.saleEdited.count = null;
         }
-        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за размещение ' + $scope.saleEdited.count + ' объявлений.';
-    };
+    });
 
-    $scope.$watch('saleEdited.tariff', $scope.onTariffChange);
-
-    $scope.onTariffOrActiveFromChange = function (newValue, oldValue) {
+    $scope.$watch('[saleEdited.tariff, saleEdited.activeFrom]', function setSums(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
         }
@@ -704,9 +701,11 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.saleEdited.cardAmount = Math.ceil((rateNew.rate - rateParent.rate) * k * 100) / 100;
         $scope.saleEdited.amount = $scope.saleEdited.cardAmount;
         $scope.saleEdited.siteAmount = Math.ceil((rateNew.siteRate - rateParent.siteRate) * k * 100) / 100;
-    };
+    }, true);
 
-    $scope.$watch('[saleEdited.tariff, saleEdited.activeFrom]', $scope.onTariffOrActiveFromChange, true);
+    $scope.$watch('saleEdited.count', function setInfo(newValue, oldValue) {
+        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за размещение ' + $scope.saleEdited.count + ' объявлений.';
+    });
 
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {
