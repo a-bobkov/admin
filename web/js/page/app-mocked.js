@@ -261,7 +261,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         }
     }
 
-    var processPost = function(data, collection, itemName, itemConstuctor, directories) {
+    var processPost = function(data, collection, itemName, itemConstuctor, directories, processId) {
         var items = collection.getItems();
         try {
             var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
@@ -283,6 +283,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         item.id = 1 + _.max(items, function(item) {
             return item.id;
         }).id;
+        if (processId) {
+            processId.call(item);
+        }
         items.push(item);
         var respond = [200, {
             status: 'success',
@@ -830,6 +833,10 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             tariffs: tariffs,
             saleStatuses: saleStatuses,
             saleTypes: saleTypes
+        }, function processId() {
+            if (this.type.id === 'card' || this.type.id === 'addcard') {
+                this.cardId = this.id;
+            }
         });
     });
     var regexSalesPut = /^\/api2\/sales\/(?:([^\/]+))$/;

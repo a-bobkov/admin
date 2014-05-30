@@ -14,7 +14,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         controller: 'SaleListCtrl',
         reloadOnSearch: false,
         resolve: {
-            data: function(saleStatusesLoader, saleTypesLoader, dealersLoader, sitesLoader, $location, $q) {
+            data: function(saleStatusesLoader, saleTypesLoader, dealersLoader, sitesLoader, $rootScope, $location, $q) {
                 var toResolve = {
                     saleTypes: saleTypesLoader.loadItems().then(function(respond) {
                         return respond.saleTypes;
@@ -23,6 +23,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                         return respond.saleStatuses;
                     })
                 };
+                if (_.isEmpty($location.search()) && !_.isEmpty($rootScope.savedSaleListLocationSearch)) {
+                    $location.search($rootScope.savedSaleListLocationSearch);
+                }
                 var ls = $location.search();
                 if (!_.isEmpty(ls.dealers)) {
                     var dealerQueryParams = {
@@ -49,45 +52,53 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             }
         }
     })
-    .when('/sales/:id/edit', {
+    .when('/sale/card', {       // ?id=new - создание новой карточки; ?id=5 - редактирование карточки 5
         templateUrl: 'template/page/sale/edit.html',
-        controller: 'SaleEditCtrl',
+        controller: 'SaleCardEditCtrl',
         resolve: {
-            data: function(saleStatusesLoader, saleTypesLoader, salesLoader, $location, $q) {
-                var toResolve = {
-                    saleTypes: saleTypesLoader.loadItems().then(function(respond) {
-                        return respond.saleTypes;
-                    }),
-                    saleStatuses: saleStatusesLoader.loadItems().then(function(respond) {
-                        return respond.saleStatuses;
-                    })
-                };
-                return $q.all(toResolve).then(function(directories) {
-                    var id = parseInt($location.$$path.replace(/^\/sales\/(?:([^\/]+))\/edit$/,'$1'));
-                    return salesLoader.loadItem(id, directories).then(function(directory) {
-                        return _.assign(directories, directory);
-                    });
-                });
-            }
-        }
-    })
-    .when('/salenew/card', {
-        templateUrl: 'template/page/sale/edit.html',
-        controller: 'SaleEditCtrl',
-        resolve: {
-            data: function(saleStatusesLoader, saleTypesLoader, usersLoader, $q) {
+            data: function(saleStatusesLoader, saleTypesLoader, usersLoader, salesLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
                 var toResolve = [
                     saleTypesLoader.loadItems(),
                     saleStatusesLoader.loadItems(),
                     usersLoader.loadDirectories()
                 ];
                 return $q.all(toResolve).then(function(directoriesArr) {
-                    return _.transform(directoriesArr, _.assign, {});
+                    var directories = _.transform(directoriesArr, _.assign, {});
+                    var ls = $location.search();
+                    if (ls.id === 'new') {
+                        return $q.when(directories);
+                    } else {
+                        var id = _.parseInt(ls.id);
+                        return salesLoader.loadItem(id, directories).then(function(salesDirectories) {
+                            _.assign(directories, salesDirectories);
+                            var tariffQueryParams = {
+                                filters: [
+                                    { fields: ['site'], type: 'equal', value: directories.sale.site.id },
+                                    { fields: ['type'], type: 'equal', value: 'periodical' }
+                                ]
+                            };
+                            return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
+                                _.assign(directories, tariffsDirectories);
+                                directories.sale.tariff = tariffsDirectories.tariffs.get(directories.sale.tariff.id);
+                                var tariffs = tariffsDirectories.tariffs.getItems();
+                                var dealer = directories.dealers.getItems()[0];
+                                var tariffRateQueryParams = {
+                                    filters: [
+                                        { fields: ['tariff'], type: 'in', value: _.pluck(tariffs, 'id') },
+                                        { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
+                                    ]
+                                };
+                                return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
+                                    return _.assign(directories, tariffRateDirectories);
+                                });
+                            });
+                        });
+                    }
                 });
             }
         }
     })
-    .when('/sale/addcard', {       // ?id=new&cardId=4 - создание расширения для карточки 4; ?id=5 - редактирование расширения 5
+    .when('/sale/addcard', {    // ?id=new&cardId=4 - создание расширения для карточки 4; ?id=5 - редактирование расширения 5
         templateUrl: 'template/page/sale/edit.html',
         controller: 'SaleAddcardEditCtrl',
         resolve: {
@@ -118,9 +129,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             ]
                         };
                         return salesLoader.loadItems(saleQueryParams, directories).then(function(salesDirectories) {
+                            directories.saleParent = salesDirectories.sales.getItems()[0];
+                            delete salesDirectories.sales;
                             _.assign(directories, salesDirectories);
-                            delete directories.tariffs;
-                            directories.saleParent = directories.sales.getItems()[0];
                             var tariffQueryParams = {
                                 filters: [
                                     { fields: ['site'], type: 'equal', value: directories.saleParent.site.id },
@@ -146,11 +157,51 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                                 });
                             });
                         });
-                    })
+                    });
                 });
             }
         }
-    });
+    })
+    .when('/sale/extra', {      // ?id=new&cardId=4 - создание новой доп.продажи к карточке 4; ?id=5 - редактирование доп.продажи 5
+        templateUrl: 'template/page/sale/edit.html',
+        controller: 'SaleExtraEditCtrl',
+        resolve: {
+            data: function(saleStatusesLoader, saleTypesLoader, salesLoader, $location, $q) {
+                var toResolve = [
+                    saleTypesLoader.loadItems(),
+                    saleStatusesLoader.loadItems()
+                ];
+                return $q.all(toResolve).then(function(directoriesArr) {
+                    var directories = _.transform(directoriesArr, _.assign, {});
+                    var ls = $location.search();
+                    if (ls.id === 'new') {
+                        toResolve = $q.when(_.parseInt(ls.cardId));
+                    } else {
+                        var id = _.parseInt(ls.id);
+                        toResolve = salesLoader.loadItem(id, directories).then(function(salesDirectories) {
+                            _.assign(directories, salesDirectories);
+                            return salesDirectories.sale.cardId;
+                        });
+                    }
+                    return toResolve.then(function(cardId) {
+                        var saleQueryParams = {
+                            filters: [
+                                { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
+                                { fields: ['cardId'], type: 'equal', value: cardId }
+                            ]
+                        };
+                        return salesLoader.loadItems(saleQueryParams, directories).then(function(salesDirectories) {
+                            directories.saleParent = salesDirectories.sales.getItems()[0];
+                            delete salesDirectories.sales;
+                            _.assign(directories, salesDirectories);
+                            return directories;
+                        });
+                    });
+                });
+            }
+        }
+    })
+;
 }])
 
 .controller('SaleListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, 
@@ -235,7 +286,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             }
 
             var cards = _.filter($scope.sales.getItems(), function(sale) {
-                return sale.isCard();
+                return sale.isCard() || sale.isAddcard();
             });
             var cardIds = _.pluck(cards, 'cardId');
             var addSaleQueryParams = {
@@ -252,13 +303,10 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 
     $scope.isAddable = function(sale) {
-        return sale.isCard() && $scope.sales_add && !_.find($scope.sales_add.getItems(), {parentId: sale.cardId});
+        return (sale.isCard() || sale.isAddcard()) && $scope.sales_add && !_.find($scope.sales_add.getItems(), {parentId: sale.cardId});
     }
 
     var ls = $location.search();
-    if (_.isEmpty(ls)) {
-        ls =  $rootScope.savedSaleListLocationSearch;
-    }
     if (_.size(ls)) {
         $scope.patterns = {
             dealers: ls.dealers && _.invoke(ls.dealers.split(';'), function() {
@@ -396,26 +444,41 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 
     $scope.newSaleCard = function() {
-        $location.path('/salenew/card');
-    }
+        $location.search('id=new');
+        $location.path('/sale/card');
+    };
 
     $scope.newSaleAddcard = function(sale) {
         $location.search('id=new&cardId=' + sale.cardId);
         $location.path('/sale/addcard');
-    }
+    };
+
+    $scope.newSaleExtra = function(sale) {
+        $location.search('id=new&cardId=' + sale.cardId);
+        $location.path('/sale/extra');
+    };
 
     $scope.editSale = function(sale) {
-        if (sale.type.id === 'addcard') {
-            $location.search('id=' + sale.id);
-            $location.path('/sale/addcard');
-        } else {
-            $location.search('');
-            $location.path('/sales/' + sale.id + '/edit');
+        $location.search('id=' + sale.id);
+        $location.path('/sale/' + sale.type.id);
+    };
+
+    $scope.removeSale = function(sale) {
+        var confirmMessage,
+            noticeMessage;
+
+        confirmMessage = 'Вы действительно хотите удалить продажу ';
+        noticeMessage = 'Удалена продажа ';
+        if (confirm(confirmMessage + sale.name() + '?')) {
+            sale.remove().then(function() {
+                $scope.savedSaleListNotice = noticeMessage + sale.name();
+                $scope.onSelectPage();
+            });
         }
     };
 })
 
-.controller('SaleEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
+.controller('SaleCardEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
     dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
@@ -432,13 +495,13 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $window.scrollTo(0,0);
 
     function makeSaleCopy() {
-        $scope.actionName = "Изменение";
+        $scope.actionName = "Изменение карточки";
         $scope.saleEdited = new Sale();
         angular.extend($scope.saleEdited, $scope.sale);
     }
 
     function makeSaleNew() {
-        $scope.actionName = "Создание";
+        $scope.actionName = "Создание карточки";
         $scope.saleEdited = new Sale ({
             type: 'card',
             date: new Date,
@@ -503,7 +566,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         });
     }, true);
 
-    $scope.$watch('[saleEdited.dealer, tariffs]', function loadDealerTariff(newValue, oldValue) {
+    $scope.$watch('[saleEdited.dealer, tariffRates]', function loadDealerTariff(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
         }
@@ -608,6 +671,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {
             $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
+            $location.search('');
             $location.path('/salelist');
         });
     };
@@ -624,7 +688,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     if ($scope.sale) {
         makeSaleCopy();
     } else {
-        makeSaleNew($scope.newSaleType);
+        makeSaleNew();
     }
 
     $window.scrollTo(0,0);
@@ -637,7 +701,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }
 
     function makeSaleNew() {
-        $scope.actionName = "Расширение";
+        $scope.actionName = "Создание расширения";
         $scope.saleEdited = new Sale ({
             type: 'addcard',
             parentId: $scope.saleParent.cardId,
@@ -710,6 +774,52 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {
             $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
+            $location.search('');
+            $location.path('/salelist');
+        });
+    };
+})
+
+.controller('SaleExtraEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
+    dealersLoader, sitesLoader) {
+
+    _.assign($scope, data);
+    $scope.dealersLoader = dealersLoader;
+    $scope.sitesLoader = sitesLoader;
+
+    if ($scope.sale) {
+        makeSaleCopy();
+    } else {
+        makeSaleNew();
+    }
+
+    $window.scrollTo(0,0);
+
+    function makeSaleCopy() {
+        $scope.actionName = "Изменение доплаты";
+        $scope.saleEdited = new Sale();
+        angular.extend($scope.saleEdited, $scope.sale);
+    }
+
+    function makeSaleNew() {
+        $scope.actionName = "Создание доплаты";
+        $scope.saleEdited = new Sale ({
+            type: 'extra',
+            cardId: $scope.saleParent.cardId,
+            date: new Date,
+            activeFrom: $scope.saleParent.activeFrom,
+            activeTo: $scope.saleParent.activeTo,
+            isActive: false
+        }, $scope);
+        $scope.saleEdited.dealer = $scope.saleParent.dealer;
+        $scope.saleEdited.site = $scope.saleParent.site;
+        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за ';
+    }
+
+    $scope.saveSaleEdited = function() {
+        $scope.saleEdited.save($scope).then(function(sale) {
+            $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
+            $location.search('');
             $location.path('/salelist');
         });
     };
@@ -721,11 +831,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         require: 'ngModel',
         scope: {
             _oneValue: '=ngModel',
-            _otherValue: '=uiGreater'
+            _otherValue: '=uiGreater',
+            _required: '=ngRequired'
         },
         link: function (scope, elem, attrs, ctrl) {
             scope.$watch('[_oneValue, _otherValue]', function() {
-                ctrl.$setValidity('greater', scope._oneValue > scope._otherValue);
+                ctrl.$setValidity('greater', !scope._required || scope._oneValue > scope._otherValue);
             }, true);
         }
     };

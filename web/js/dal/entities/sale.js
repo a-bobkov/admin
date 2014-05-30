@@ -56,7 +56,15 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
     };
 
     Sale.prototype.isCard = function() {
-        return (this.type && (this.type.id == 'card' || this.type.id === 'addcard'));
+        return (this.type && this.type.id === 'card');
+    };
+
+    Sale.prototype.isAddcard = function() {
+        return (this.type && this.type.id === 'addcard');
+    };
+
+    Sale.prototype.isExtra = function() {
+        return (this.type && this.type.id === 'extra');
     };
 
     Sale.prototype.serialize = function() {

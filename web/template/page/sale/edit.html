@@ -1,4 +1,4 @@
-<h1>{{actionName}} продажи</h1>
+<h1>{{actionName}}</h1>
 
 <form name="formSale" autocomplete="off" novalidate>
 	<fieldset class="span-24">
@@ -7,7 +7,7 @@
 	        <tr>
 	            <th><label for="saleDealer">Салон</label></th>
 	            <td>
-                    <div id="saleDealer" name="saleDealer" ng-model='saleEdited.dealer' ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader" required ng-disabled='saleEdited.type.id === "addcard"'>
+                    <div id="saleDealer" name="saleDealer" ng-model='saleEdited.dealer' ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader" required ng-disabled='!saleEdited.isCard()'>
                     </div>
 					<ul class="error_list" ng-show='formSaleKey.saleDealer.$invalid'>
 					    <li id='saleEditDealerErrorRequired' ng-show="formSaleKey.saleDealer.$error.required">Необходимо выбрать салон.</li>
@@ -17,24 +17,24 @@
 	        <tr>
 	            <th><label for="saleSite">Сайт</label></th>
 	            <td>
-                    <div id="saleSite" name="saleSite" ng-model='saleEdited.site' ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader" required ng-disabled='saleEdited.type.id === "addcard"'>
+                    <div id="saleSite" name="saleSite" ng-model='saleEdited.site' ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader" required ng-disabled='!saleEdited.isCard()'>
                     </div>
 					<ul class="error_list" ng-show='formSaleKey.saleSite.$invalid'>
 					    <li id='saleEditSiteErrorRequired' ng-show="formSaleKey.saleSite.$error.required">Необходимо выбрать сайт.</li>
 					</ul>
 	            </td>
 	        </tr>
-	        <tr ng-show='saleEdited.type.id === "addcard"'>
+	        <tr ng-show='saleEdited.isAddcard()'>
 	            <th><label for="saleTariffParent">Старый тариф</label></th>
 	            <td>
-		            <select class="span-8" id="saleTariffParent" name="saleTariffParent" ng-model='tariffParent' ng-options='opt.name(saleEdited.dealer, tariffRates.getItems()) for opt in tariffs.getItems()' ng-required='saleEdited.type.id === "addcard"' disabled>
+		            <select class="span-8" id="saleTariffParent" name="saleTariffParent" ng-model='tariffParent' ng-options='opt.name(city, tariffRates.getItems()) for opt in tariffs.getItems()' ng-required='saleEdited.isAddcard()' disabled>
 		            </select>
 	            </td>
 	        </tr>
-	        <tr>
+	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleTariff">Тариф</label></th>
 	            <td>
-		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(saleEdited.dealer, tariffRates.getItems()) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site' required>
+		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates.getItems()) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site' ng-required='!saleEdited.isExtra()'>
 		            </select>
 					<ul class="error_list" ng-show='formSaleKey.saleTariff.$invalid'>
 					    <li id='saleEditTariffErrorRequired' ng-show="formSaleKey.saleTariff.$error.required">Необходимо выбрать тариф.</li>
@@ -50,42 +50,42 @@
 	<fieldset class="span-24">
 	    <legend>Атрибуты</legend>
 	    <table class='parameters'>
-	        <tr>
+	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleCount">Количество машин</label></th>
 	            <td>
-	                <input class="span-8" type="number" name="saleCount" id="saleCount" ng-model='saleEdited.count' required min='0' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" name="saleCount" id="saleCount" ng-model='saleEdited.count' min='0' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCount.$invalid'>
 					    <li id='saleCountErrorRequired' ng-show="formSale.saleCount.$error.required">Необходимо ввести количество.</li>
 					    <li id='saleCountErrorMin' ng-show="formSale.saleCount.$error.min">Количество должно быть неотрицательным.</li>
 					</ul>
-					<ul class="warning_list" ng-show='saleEdited.type.id === "card"'>
+					<ul class="warning_list" ng-show='saleEdited.isCard()'>
 					    <li id='saleEditCountWarningDifferent' ng-show='saleEdited.count - saleEdited.tariff.count'>Количество отличается от тарифа.</li>
 					</ul>
 	           </td>
 	        </tr>
-	        <tr>
+	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleActiveFrom">С</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleActiveFrom.$invalid'>
 					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.required">Необходимо ввести дату.</li>
 					</ul>
 	           </td>
 	        </tr>
-	        <tr>
+	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleActiveTo">По</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="saleActiveTo" id="saleActiveTo" ng-model='saleEdited.activeTo' required ui-greater="saleEdited.activeFrom" ng-disabled='formSaleKey.$invalid || saleEdited.type.id === "addcard"'>
+	                <input class="span-8" type="date" name="saleActiveTo" id="saleActiveTo" ng-model='saleEdited.activeTo' ng-required='!saleEdited.isExtra()' ui-greater="saleEdited.activeFrom" ng-disabled='formSaleKey.$invalid || saleEdited.isAddcard()'>
 					<ul class="error_list" ng-show='formSale.saleActiveTo.$invalid'>
 					    <li id='saleActiveToErrorRequired' ng-show="formSale.saleActiveTo.$error.required">Необходимо ввести дату.</li>
 					    <li id='saleActiveToErrorGreater' ng-show="formSale.saleActiveTo.$error.greater && !formSale.saleActiveTo.$error.required">Необходимо ввести дату больше чем "C".</li>
 					</ul>
 	           </td>
 	        </tr>
-	        <tr>
+	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleCardAmount">Цена по тарифу</label></th>
 	            <td>
-	                <input class="span-8" type="number" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' required min='0' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' ng-required='!saleEdited.isExtra()' min='0' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCardAmount.$invalid'>
 					    <li id='saleCardAmountErrorRequired' ng-show="formSale.saleCardAmount.$error.required">Необходимо ввести цену по тарифу.</li>
 					    <li id='saleCardAmountErrorMin' ng-show="formSale.saleCardAmount.$error.min">Цена должна быть неотрицательной.</li>
