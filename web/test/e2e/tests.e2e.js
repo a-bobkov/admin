@@ -24,6 +24,8 @@ if (browser.baseUrl.match(/maxposter.ru/)) {
     passwordInput.sendKeys('protractor\n');
 }
 
+var regexpInt = /^\d+$/
+var regexpDate = /^\d{2}.\d{2}.\d{2}$/
 var regexpEmail = /^[\w-]+@[\w\.-]+$/;
 var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
@@ -650,7 +652,99 @@ xdescribe('User App', function() {
     });
 });
 
-describe('DealerSite App', function() {
+describe('Sale App', function() {
+    describe('Список регистраций', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist');
+        });
+
+        xit('показывает количество продаж', function() {
+            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(regexpInt);
+        });
+
+        xit('переходит по верхней кнопке создания карточки', function() {
+            element.all(by.id('SaleListAddSaleUp')).get(0).click();
+            expect(browser.getCurrentUrl()).toMatch(/#\/sale\/card\?id=new$/);
+        });
+
+        xit('переходит по нижней кнопке создания карточки', function() {
+            element.all(by.id('SaleListAddSaleDown')).get(0).click();
+            expect(browser.getCurrentUrl()).toMatch(/#\/sale\/card\?id=new$/);
+        });
+
+        xit('показывает сортируемые колонки заголовка таблицы продаж - количество', function() {
+            var sortableColumns = element.all(by.id('SaleListTableHeader'));
+            expect(sortableColumns.count()).toBe(8);
+        });
+
+        xit('показывает сортируемые колонки заголовка таблицы продаж - ссылки', function() {
+            var sortableColumnsRef = element.all(by.id('SaleListTableHeaderRef'));
+            expect(sortableColumnsRef.get(0).getText()).toBeTruthy();
+        });
+
+        xit('показывает сортируемые колонки заголовка таблицы продаж - знак сортировки', function() {
+            var sortableColumnsRef = element.all(by.id('SaleListTableHeaderRef'));
+            var sortableColumnsDir = element.all(by.id('SaleListTableHeaderDir'));
+            expect(sortableColumnsDir.get(0).getText()).toBe('↓');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(0).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('↑');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(1).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('↓');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(1).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('↑');
+            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
+
+            expect(sortableColumnsRef.get(2).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('↓');
+
+            expect(sortableColumnsRef.get(2).click());
+            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
+            expect(sortableColumnsDir.get(2).getText()).toBe('↑');
+        });
+
+        xit('показывает реквизиты продаж', function() {
+            element.all(by.repeater('sale in sales')).count().then(function(count) {
+                for(var i = count; i--; ) {
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.id')).getText()).toMatch(regexpInt);
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.type')).getText()).toMatch(/^Осн$|^Расш$|^Доп$/);
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.date')).getText()).toMatch(regexpDate);
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.dealer')).getText()).toMatch(/^\d+:/);
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.site')).getText()).toMatch(/^\d+:/);
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.activeFrom')).getText()).toMatch(regexpDate);
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.activeTo')).getText()).toMatch(regexpDate);
+                    expect(element(by.repeater('sale in sales').row(i).column('sale.isActive')).getText()).toMatch(/^А$|^Н\/А$/);
+                    expect(element(by.repeater('sale in sales').row(i)).getText()).toMatch(/(Осн(?=[\s\S]+доплатить))|(Расш(?![\s\S]+доплатить))|(Доп(?![\s\S]+доплатить))/);
+                    expect(element(by.repeater('sale in sales').row(i)).getText()).toMatch(/(Осн)|(Расш)|(Доп(?![\s\S]+расширить))/);
+                }
+            });
+        });
+
+        it('переходит к редактированию продажи по ссылке в "изменить"', function() {
+            // element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
+            element.all(by.repeater('sale in sales').column('sale.type')).then(function(data) {
+                console.log(data);
+                // for(var i = count; i--; ) {
+                // element.all(by.id('SaleListRowEdit')).get(0).click();
+                // expect(browser.getCurrentUrl()).toMatch(/#\/sales\/\d+\/edit/);
+            });
+        });
+    });
+});
+
+xdescribe('DealerSite App', function() {
 
     describe('Список регистраций', function() {
         beforeEach(function() {
@@ -1057,7 +1151,6 @@ describe('DealerSite App', function() {
             element(by.model('dealerSiteLoginsEdited.ftp.password')).sendKeys(maxValue + '1');
             expect(element(by.model('dealerSiteLoginsEdited.ftp.password')).getAttribute('value')).toBe(maxValue);
         });
-
     });
 
     describe('Сценарии использования', function() {
