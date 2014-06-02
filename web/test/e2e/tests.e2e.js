@@ -658,88 +658,203 @@ describe('Sale App', function() {
             browser.get('admin.html#/salelist');
         });
 
-        xit('показывает количество продаж', function() {
-            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(regexpInt);
+        it('показывает количество продаж', function() {
+            expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/\d+$/);
         });
 
-        xit('переходит по верхней кнопке создания карточки', function() {
+        it('переходит по верхней кнопке создания карточки', function() {
             element.all(by.id('SaleListAddSaleUp')).get(0).click();
             expect(browser.getCurrentUrl()).toMatch(/#\/sale\/card\?id=new$/);
         });
 
-        xit('переходит по нижней кнопке создания карточки', function() {
+        it('переходит по нижней кнопке создания карточки', function() {
             element.all(by.id('SaleListAddSaleDown')).get(0).click();
             expect(browser.getCurrentUrl()).toMatch(/#\/sale\/card\?id=new$/);
         });
 
-        xit('показывает сортируемые колонки заголовка таблицы продаж - количество', function() {
+        it('показывает сортируемые колонки заголовка таблицы продаж - количество', function() {
             var sortableColumns = element.all(by.id('SaleListTableHeader'));
-            expect(sortableColumns.count()).toBe(8);
+            expect(sortableColumns.count()).toBe(10);
         });
 
-        xit('показывает сортируемые колонки заголовка таблицы продаж - ссылки', function() {
+        it('показывает сортируемые колонки заголовка таблицы продаж - ссылки', function() {
             var sortableColumnsRef = element.all(by.id('SaleListTableHeaderRef'));
             expect(sortableColumnsRef.get(0).getText()).toBeTruthy();
         });
 
-        xit('показывает сортируемые колонки заголовка таблицы продаж - знак сортировки', function() {
+        it('показывает сортируемые колонки заголовка таблицы продаж - знак сортировки', function() {
+            var pattern = ['','','','','','','','','',''];
+
+            function patternSet(what, where) {
+                var copy = pattern.slice(0, 10);
+                copy.splice(where, 1, what);
+                return copy;
+            }
+
             var sortableColumnsRef = element.all(by.id('SaleListTableHeaderRef'));
             var sortableColumnsDir = element.all(by.id('SaleListTableHeaderDir'));
-            expect(sortableColumnsDir.get(0).getText()).toBe('↓');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(0).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('↑');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(1).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('↓');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(1).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('↑');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(2).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('↓');
-
-            expect(sortableColumnsRef.get(2).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('↑');
+            expect(mapText(sortableColumnsDir)).toEqual(pattern);
+            _.forEach(pattern, function(value, idx) {
+                sortableColumnsRef.get(idx).click();
+                expect(mapText(sortableColumnsDir)).toEqual(patternSet('↓', idx));
+                sortableColumnsRef.get(idx).click();
+                expect(mapText(sortableColumnsDir)).toEqual(patternSet('↑', idx));
+            })
         });
 
-        xit('показывает реквизиты продаж', function() {
-            element.all(by.repeater('sale in sales')).count().then(function(count) {
+        it('показывает реквизиты продаж', function() {
+            var sales = by.repeater('sale in sales');
+            element.all(sales).count().then(function(count) {
                 for(var i = count; i--; ) {
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.id')).getText()).toMatch(regexpInt);
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.type')).getText()).toMatch(/^Осн$|^Расш$|^Доп$/);
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.date')).getText()).toMatch(regexpDate);
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.dealer')).getText()).toMatch(/^\d+:/);
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.site')).getText()).toMatch(/^\d+:/);
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.activeFrom')).getText()).toMatch(regexpDate);
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.activeTo')).getText()).toMatch(regexpDate);
-                    expect(element(by.repeater('sale in sales').row(i).column('sale.isActive')).getText()).toMatch(/^А$|^Н\/А$/);
-                    expect(element(by.repeater('sale in sales').row(i)).getText()).toMatch(/(Осн(?=[\s\S]+доплатить))|(Расш(?![\s\S]+доплатить))|(Доп(?![\s\S]+доплатить))/);
-                    expect(element(by.repeater('sale in sales').row(i)).getText()).toMatch(/(Осн)|(Расш)|(Доп(?![\s\S]+расширить))/);
+                    var sale = sales.row(i);
+                    expect(element(sale.column('sale.type')).getText()).toMatch(/^Осн$|^Расш$|^Доп$/);
+                    expect(element(sale.column('sale.date')).getText()).toMatch(regexpDate);
+                    expect(element(sale.column('sale.dealer.id')).getText()).toMatch(/^\d+:/);
+                    expect(element(sale.column('sale.site.id')).getText()).toMatch(/^\d+:/);
+                    expect(element(sale.column('sale.activeFrom')).getText()).toMatch(regexpDate);
+                    expect(element(sale.column('sale.activeTo')).getText()).toMatch(regexpDate);
+                    expect(element(sale.column('sale.isActive')).getText()).toMatch(/^А$|^Н\/А$/);
+                    expect(element(sale).getText()).toMatch(/(Осн(?=[\s\S]+доплатить))|(Расш(?![\s\S]+доплатить))|(Доп(?![\s\S]+доплатить))/);
+                    expect(element(sale).getText()).toMatch(/(Осн)|(Расш)|(Доп(?![\s\S]+расширить))/);
                 }
             });
         });
 
-        it('переходит к редактированию продажи по ссылке в "изменить"', function() {
-            // element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-            element.all(by.repeater('sale in sales').column('sale.type')).then(function(data) {
-                console.log(data);
-                // for(var i = count; i--; ) {
-                // element.all(by.id('SaleListRowEdit')).get(0).click();
-                // expect(browser.getCurrentUrl()).toMatch(/#\/sales\/\d+\/edit/);
+        it('переходит к url изменения продажи по ссылке в "изменить"', function() {
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+            expect(browser.getCurrentUrl()).toMatch(/#\/sale\//);
+        });
+
+        it('показывает постраничку', function() {
+            expect(element.all(by.id('paginationFirst')).count()).toBe(1);
+            expect(element.all(by.id('paginationPrev')).count()).toBe(1);
+            expect(element.all(by.id('paginationNext')).count()).toBe(1);
+            expect(element.all(by.id('paginationLast')).count()).toBe(1);
+            expect(element.all(by.id('paginationPages')).count()).toBeTruthy();
+        });
+
+        it('накладывает фильтр по дилеру', function() {
+            var searchElem = element.all(by.id('McomboSearchInput')).get(0);
+            searchElem.click();
+            searchElem.sendKeys('1');
+            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            dropElem.getText().then(function(selectedValue) {
+                dropElem.click();
+                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+                mapText(element.all(by.repeater('sale in sales').column('sale.dealer.id'))).then(function(data) {
+                    _.forEach(data, function(value) {
+                        expect(value).toBe(selectedValue);
+                    });
+                });
             });
+        });
+
+        it('накладывает фильтр по сайту', function() {
+            var searchElem = element.all(by.id('McomboSearchInput')).get(1);
+            searchElem.click();
+            searchElem.sendKeys('1');
+            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            dropElem.getText().then(function(selectedValue) {
+                dropElem.click();
+                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+                mapText(element.all(by.repeater('sale in sales').column('sale.site.id'))).then(function(data) {
+                    expect(data.length).toBeTruthy();
+                    _.forEach(data, function(value) {
+                        expect(value).toBe(selectedValue);
+                    });
+                });
+            });
+        });
+
+        it('накладывает фильтр по статусу true', function() {
+            var setElem = element(by.select('patterns.isActive'));
+            setSelect(setElem, 1);
+            setElem.element(by.css('option:checked')).getText().then(function(selectedValue) {
+                mapText(element.all(by.repeater('sale in sales').column('sale.isActive'))).then(function(data) {
+                    expect(data.length).toBeTruthy();
+                    _.forEach(data, function(value) {
+                        expect(value).toBe(selectedValue);
+                    });
+                });
+            });
+        });
+
+        it('накладывает фильтр по статусу false', function() {
+            var setElem = element(by.select('patterns.isActive'));
+            setSelect(setElem, 2);
+            setElem.element(by.css('option:checked')).getText().then(function(selectedValue) {
+                mapText(element.all(by.repeater('sale in sales').column('sale.isActive'))).then(function(data) {
+                    expect(data.length).toBeTruthy();
+                    _.forEach(data, function(value) {
+                        expect(value).toBe(selectedValue);
+                    });
+                });
+            });
+        });
+
+        it('накладывает фильтр по типу', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 1);
+            setElem.element(by.css('option:checked')).getText().then(function(selectedValue) {
+                mapText(element.all(by.repeater('sale in sales').column('sale.type'))).then(function(data) {
+                    expect(data.length).toBeTruthy();
+                    _.forEach(data, function(value) {
+                        expect(value).toBe(selectedValue);
+                    });
+                });
+            });
+        });
+
+        it('накладывает фильтр по архиву', function() {
+            var archive = element(by.model('patterns.archive'));
+            archive.click();
+            expect(archive.isSelected()).toBeTruthy();
+            mapText(element.all(by.repeater('sale in sales').column('sale.activeTo'))).then(function(data) {
+                expect(data.length).toBeTruthy();
+                var today = new Date().toISOString().slice(0, 10);
+                expect(_.any(data, function(value) {
+                    var date = value.replace(/(\d+)\.(\d+)\.(\d+)/, '20$3-$2-$1');
+                    return date < today;
+                })).toBeTruthy();
+            });
+        });
+
+        it('сбрасывает фильтры по кнопке', function() {
+            var searchDealer = element.all(by.id('McomboSearchInput')).get(0);
+            searchDealer.click();
+            searchDealer.sendKeys('1');
+            var dropDealer = element.all(by.id('McomboDropChoiceItem')).get(0);
+            dropDealer.getText().then(function(selectedValue) {
+                dropDealer.click();
+                expect(element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
+            });
+
+            var searchSite = element.all(by.id('McomboSearchInput')).get(1);
+            searchSite.click();
+            searchSite.sendKeys('1');
+            var dropSite = element.all(by.id('McomboDropChoiceItem')).get(0);
+            dropSite.getText().then(function(selectedValue) {
+                dropSite.click();
+                expect(element.all(by.id('McomboSelectedItem_0')).get(1).getText()).toBe(selectedValue);
+            });
+
+            var status = element(by.select('patterns.isActive'));
+            setSelect(status, 1);
+            expect(status.element(by.css('option:checked')).getText()).toBeTruthy();
+
+            var type = element(by.select('patterns.type'));
+            setSelect(type, 1);
+            expect(type.element(by.css('option:checked')).getText()).toBeTruthy();
+
+            var archive = element(by.model('patterns.archive'));
+            archive.click();
+            expect(archive.isSelected()).toBeTruthy();
+
+            element(by.id('SaleListFilterSetDefault')).click();
+            expect(element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
+            expect(status.element(by.css('option:checked')).getText()).toBeFalsy();
+            expect(type.element(by.css('option:checked')).getText()).toBeFalsy();
+            expect(archive.isSelected()).toBeFalsy();
         });
     });
 });

@@ -33,10 +33,10 @@
                 <td class="text"><a ng-click='toggleSaleStatus(sale)'>{{sale.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
-                        <li class="edit" ng-show='isAddable(sale)'><a ng-click='newSaleAddcard(sale)'>расширить</a></li>
-                        <li class="edit" ng-show='sale.isCard()'><a ng-click='newSaleExtra(sale)'>доплатить</a></li>
-                        <li class="edit"><a ng-click='editSale(sale)'>изменить</a></li>
-                        <li class="delete"><a ng-click='removeSale(sale)'>удалить</a></li>
+                        <li class="edit" id='SaleListRowAdd' ng-show='isAddable(sale)'><a ng-click='newSaleAddcard(sale)'>расширить</a></li>
+                        <li class="edit" id='SaleListRowExtra' ng-show='sale.isCard()'><a ng-click='newSaleExtra(sale)'>доплатить</a></li>
+                        <li class="edit" id='SaleListRowEdit'><a ng-click='editSale(sale)'>изменить</a></li>
+                        <li class="delete" id='SaleListRowRemove'><a ng-click='removeSale(sale)'>удалить</a></li>
                     </ul>
                 </td>
             </tr>
@@ -76,7 +76,7 @@
             <tr>
                 <th><label for="SaleListFilterType">Тип</label></th>
                 <td>
-                    <select ng-model='patterns.type' ng-options='opt.name for opt in saleTypes.getItems()' id='SaleListFilterType' >
+                    <select ng-model='patterns.type' ng-options='opt.name for opt in saleTypes.getItems()' id='SaleListFilterType'>
                         <option value='' selected='selected'></option>
                     </select>
                 </td>

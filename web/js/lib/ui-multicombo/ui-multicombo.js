@@ -95,7 +95,7 @@ angular.module("ui.multicombo", [])
                     return;
                 }
                 var filters = _.invoke($scope._search.split(' '), function() {
-                    var idName = ($scope._choiceName === 'companyName') ? 'user.id' : 'id';
+                    var idName = ($scope._choiceName === 'companyName') ? 'id' : 'id';
                     return { type: 'contain', fields: [idName, $scope._choiceName], value: this };
                 });
                 var fieldNames = ($scope._choiceName === 'companyName') ? ['dealer_list_name'] : [];

@@ -811,6 +811,23 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             amount: 19999.97,
             siteAmount: 14999.97,
             info: 'Нерасширенная карточка'
+        },
+        {
+            id: 6,
+            type: 'card',
+            cardId: 4,
+            dealer: {id: 1},
+            site: {id: 1},
+            tariff: {id: 1},
+            cardAmount: 19999.95,
+            count: 50,
+            activeFrom: '2014-06-01',
+            activeTo: '2014-06-30',
+            isActive: false,
+            date: '2014-03-25',
+            amount: 19999.97,
+            siteAmount: 14999.97,
+            info: 'Нерасширенная карточка'
         }
     ], null, {dealers: dealers, sites: sites, tariffs: tariffs, saleTypes: saleTypes, saleStatuses: saleStatuses});
 
