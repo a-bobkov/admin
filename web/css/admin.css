@@ -23,3 +23,7 @@ UL.warning_list {
 	color: blue;
 }
 
+.amount {
+    text-align: right;
+}
+

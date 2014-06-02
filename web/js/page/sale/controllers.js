@@ -233,21 +233,23 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $scope.$watch('patterns', $scope.onPatternChange, true);
 
     $scope.sortableColumns = [
-        {id: "id", name: "Код", width: '7.5%'},
-        {id: "type", name: "Тип", width: '5%'},
-        {id: "date", name: "Дата", width: '7.5%'},
+        {id: "date", name: "Дата", width: '5%'},
         {id: "dealer", name: "Салон", width: '20%'},
         {id: "site", name: "Сайт", width: '15%'},
-        {id: "activeFrom", name: "С", width: '10%'},
-        {id: "activeTo", name: "По", width: '10%'},
-        {id: "isActive", name: "Статус", width: '10%'}
+        {id: "type", name: "Тип", width: '5%'},
+        {id: "count", name: "Лимит", width: '5%'},
+        {id: "activeFrom", name: "С", width: '5%'},
+        {id: "activeTo", name: "По", width: '5%'},
+        {id: "amount", name: "Стоим, руб.", width: '10%'},
+        {id: "siteAmount", name: "Себест, руб.", width: '10%'},
+        {id: "isActive", name: "Акт", width: '5%'}
     ];
 
     $scope.sortingMark = function(column) {
         if (column === $scope.sorting.column) {
             return ($scope.sorting.reverse) ? ' ↑': ' ↓';
         }
-        return '\u00A0\u00A0\u00A0';
+        return '   ';
     }
 
     $scope.changeSorting = function(column) {
