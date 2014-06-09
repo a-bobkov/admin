@@ -35,14 +35,17 @@ describe('MaxPoster Admin Frontend', function() {
 beforeEach(function() {
     this.addMatchers({
         toBeSortedArrayOf: function(params) {
-            // var params = 'AscendingNumbers';
             var convert = function(arg) {
-                if (params.match('Numbers')) {
+                if (params.match('Integers')) {
                     return parseInt(arg, 10);
+                } else if (params.match('Floats')) {
+                    return parseFloat(arg);
                 } else if (params.match('Dates')) {
                     return Date.parse(arg);
-                } else {
+                } else if (params.match('Strings')) {
                     return String(arg).toLowerCase();
+                } else {    // Boolean
+                    return arg;
                 }
             }
             var compare = function(a, b) {
@@ -218,7 +221,7 @@ xdescribe('User App', function() {
         it('сортирует по возрастанию кода', function() {
             element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
                 mapText(element.all(by.repeater('user in users').column('user.id'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingNumbers');
+                    expect(data).toBeSortedArrayOf('AscendingIntegers');
                 });
             });
         });
@@ -227,7 +230,7 @@ xdescribe('User App', function() {
             element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
                 arr[0].click();
                 mapText(element.all(by.repeater('user in users').column('user.id'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('DescendingNumbers');
+                    expect(data).toBeSortedArrayOf('DescendingIntegers');
                 });
             });
         });
@@ -682,24 +685,63 @@ describe('Sale App', function() {
             expect(sortableColumnsRef.get(0).getText()).toBeTruthy();
         });
 
-        it('показывает сортируемые колонки заголовка таблицы продаж - знак сортировки', function() {
-            var pattern = ['','','','','','','','','',''];
+        it('показывает знак сортировки и сортирует элементы', function() {
+            function takeInt() {
+                return _.parseInt(this);
+            }
 
-            function patternSet(what, where) {
-                var copy = pattern.slice(0, 10);
+            function takeFloat() {
+                return parseFloat(this);
+            }
+
+            function takeDate() {
+                return this.replace(/(\d+)\.(\d+)\.(\d+)/, '20$3-$2-$1');
+            }
+
+            function takeId() {
+                return _.parseInt(this.replace(/^(\d+):(.+)/,'$1'));
+            }
+
+            function setHeader(what, where) {
+                var copy = header.slice(0, 10);
                 copy.splice(where, 1, what);
                 return copy;
             }
 
+            var header = ['','','','','','','','','',''];
+            var columns = [
+                {bind: 'date', type: 'Strings', valueFn: takeDate},
+                {bind: 'dealer.id', type: 'Integers', valueFn: takeId},
+                {bind: 'site.id', type: 'Integers', valueFn: takeId},
+                {bind: 'type', type: 'Strings', valueFn: function() {   // сортирует по id, а не по отображаемому наименованию
+                    return ['card', 'addcard', 'extra'][['Осн', 'Расш', 'Доп'].indexOf(this)];
+                }},
+                {bind: 'count', type: 'Integers', valueFn: takeInt},
+                {bind: 'activeFrom', type: 'Strings', valueFn: takeDate},
+                {bind: 'activeTo', type: 'Strings', valueFn: takeDate},
+                {bind: 'amount', type: 'Floats', valueFn: takeFloat},
+                {bind: 'siteAmount', type: 'Floats', valueFn: takeFloat},
+                {bind: 'isActive', type: 'Booleans', valueFn: function() {   // сортирует по id, а не по отображаемому наименованию
+                    return [true, false][['А', 'Н/А'].indexOf(this)];
+                }}
+            ]
+
+            element(by.model('patterns.archive')).click();
             var sortableColumnsRef = element.all(by.id('SaleListTableHeaderRef'));
             var sortableColumnsDir = element.all(by.id('SaleListTableHeaderDir'));
-            expect(mapText(sortableColumnsDir)).toEqual(pattern);
-            _.forEach(pattern, function(value, idx) {
+            expect(mapText(sortableColumnsDir)).toEqual(header);
+            _.forEach(header, function(value, idx) {
                 sortableColumnsRef.get(idx).click();
-                expect(mapText(sortableColumnsDir)).toEqual(patternSet('↓', idx));
+                expect(mapText(sortableColumnsDir)).toEqual(setHeader('↓', idx));
+                mapText(element.all(by.repeater('sale in sales').column('sale.' + columns[idx].bind))).then(function(data) {
+                    expect(_.invoke(data, columns[idx].valueFn)).toBeSortedArrayOf('Ascending' + columns[idx].type);
+                });
                 sortableColumnsRef.get(idx).click();
-                expect(mapText(sortableColumnsDir)).toEqual(patternSet('↑', idx));
-            })
+                expect(mapText(sortableColumnsDir)).toEqual(setHeader('↑', idx));
+                mapText(element.all(by.repeater('sale in sales').column('sale.' + columns[idx].bind))).then(function(data) {
+                    expect(_.invoke(data, columns[idx].valueFn)).toBeSortedArrayOf('Descending' + columns[idx].type);
+                });
+            });
         });
 
         it('показывает реквизиты продаж', function() {
@@ -721,8 +763,14 @@ describe('Sale App', function() {
         });
 
         it('переходит к url изменения продажи по ссылке в "изменить"', function() {
-            element.all(by.id('SaleListRowEdit')).get(0).click();
-            expect(browser.getCurrentUrl()).toMatch(/#\/sale\//);
+            var sales = by.repeater('sale in sales');
+            element.all(sales).count().then(function(count) {
+                for(var i = count; i--; ) {
+                    element.all(by.id('SaleListRowEdit')).get(i).click();
+                    expect(browser.getCurrentUrl()).toMatch(/#\/sale\//);
+                    element(by.id('saleEditCancel')).click();
+                }
+            });
         });
 
         it('показывает постраничку', function() {

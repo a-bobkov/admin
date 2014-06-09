@@ -791,8 +791,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             activeTo: '2014-04-30',
             isActive: false,
             date: '2014-03-25',
-            amount: 19999.97,
-            siteAmount: 14999.97,
+            amount: 19999.98,
+            siteAmount: 14999.98,
             info: 'Основная карточка'
         },
         {
@@ -808,8 +808,8 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             activeTo: '2014-06-30',
             isActive: true,
             date: '2014-03-25',
-            amount: 19999.97,
-            siteAmount: 14999.97,
+            amount: 19999.95,
+            siteAmount: 14999.95,
             info: 'Нерасширенная карточка'
         },
         {
