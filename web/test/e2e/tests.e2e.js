@@ -24,11 +24,15 @@ if (browser.baseUrl.match(/maxposter.ru/)) {
     passwordInput.sendKeys('protractor\n');
 }
 
-var regexpInt = /^\d+$/
-var regexpDate = /^\d{2}.\d{2}.\d{2}$/
+var regexpInt = /^\d+$/;
+var regexpFloat = /^\d+(.\d*|)$/;
+var regexpDate = /^\d{2}.\d{2}.\d{2}$/;
+var regexpDateISO = /^20\d{2}-\d{2}-\d{2}$/;
 var regexpEmail = /^[\w-]+@[\w\.-]+$/;
-var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
+var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/;
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
+var regexpIdName = /^(\d+): (.+)$/;
+var regexpTariff = /^\d+: \d+ руб. за \d+ +(month|day), до \d+ объявлений$/;
 
 describe('MaxPoster Admin Frontend', function() {
 
@@ -656,7 +660,8 @@ xdescribe('User App', function() {
 });
 
 describe('Sale App', function() {
-    describe('Список регистраций', function() {
+
+    xdescribe('Список продаж', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist');
         });
@@ -904,6 +909,197 @@ describe('Sale App', function() {
             expect(type.element(by.css('option:checked')).getText()).toBeFalsy();
             expect(archive.isSelected()).toBeFalsy();
         });
+    });
+
+    describe('Редактирование карточки', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist');
+            element(by.model('patterns.archive')).click();
+            setSelect(element(by.select('patterns.type')), 1);
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Изменение карточки$/);
+        });
+
+        it('выводит значение дилера', function() {
+            expect(element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(/^\d+:/);
+        });
+
+        it('выводит ошибку, если dealer пустой', function() {
+            element.all(by.id('McomboRemoveItem_0')).get(0).click();
+            expect(element(by.id('saleEditDealerErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение сайта', function() {
+            expect(element.all(by.id('McomboSelectedItem_0')).get(1).getText()).toMatch(/^\d+:/);
+        });
+
+        it('выводит ошибку, если site пустой', function() {
+            element.all(by.id('McomboRemoveItem_0')).get(1).click();
+            expect(element(by.id('saleEditSiteErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение тарифа', function() {
+            var tariffElem = element(by.id('saleTariff'));
+            expect(tariffElem.element(by.css('option:checked')).getText()).toMatch(/^\d+: \d+ руб. за \d+ +(month|day), до \d+ объявлений$/);
+        });
+
+        it('при выборе сайта заполняет список тарифов', function() {
+            mapText(element.all(by.id('saleTariff'))).then(function(tariffs) {
+                var preTariffs = tariffs.join();
+                element.all(by.id('McomboSelectedItem_0')).get(1).getText().then(function(siteText) {
+                    var preSiteId = siteText.replace(regexpIdName, '$1');
+                    element.all(by.id('McomboRemoveItem_0')).get(1).click();
+                    mapText(element.all(by.id('McomboDropChoiceItem'))).then(function(dropTexts) {
+                        var newSiteIdx = _.findIndex(dropTexts, function(value) {
+                            return (value.replace(regexpIdName, '$1') !== preSiteId);
+                        });
+                        expect(newSiteIdx).toBeDefined();
+                        element.all(by.id('McomboDropChoiceItem')).get(newSiteIdx).click();
+                        mapText(element.all(by.id('saleTariff'))).then(function(tariffs) {
+                            expect(tariffs.join()).not.toEqual(preTariffs);
+                            expect(_.every(tariffs, function(value) {
+                                return (value.search(regexpTariff) !== -1);
+                            })).toBeTruthy();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('выводит значение count', function() {
+            expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatch(regexpInt);
+        });
+
+        it('выводит ошибку, если count пустой', function() {
+            element(by.model('saleEdited.count')).clear();
+            expect(element(by.id('saleCountErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если count отрицательный', function() {
+            var count = element(by.model('saleEdited.count'));
+            count.clear();
+            count.sendKeys('-1');
+            expect(element(by.id('saleCountErrorMin')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит предупреждение, если count отличается от tariff.count', function() {
+            element(by.id('saleTariff')).element(by.css('option:checked')).getText().then(function(tariffText) {
+                var tariffCount = _.parseInt(tariffText.replace(/^\d+: \d+ руб. за \d+ +(month|day), до \d+ объявлений$/, '$4'));
+                var countElem = element(by.model('saleEdited.count'));
+                countElem.clear();
+                countElem.sendKeys(tariffCount.toString() + '1');
+                expect(element(by.id('saleEditCountWarningDifferent')).isDisplayed()).toBeTruthy();
+            })
+        });
+
+        it('выводит значение activeFrom', function() {
+            expect(element(by.model('saleEdited.activeFrom')).getAttribute('value')).toMatch(regexpDateISO);
+        });
+
+        it('выводит ошибку, если activeFrom пустой', function() {
+            element(by.model('saleEdited.activeFrom')).sendKeys('0');
+            expect(element(by.id('saleActiveFromErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение activeTo', function() {
+            expect(element(by.model('saleEdited.activeTo')).getAttribute('value')).toMatch(regexpDateISO);
+        });
+
+        it('выводит ошибку, если activeTo пустой', function() {
+            element(by.model('saleEdited.activeTo')).sendKeys('0');
+            expect(element(by.id('saleActiveToErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если activeTo меньше activeFrom', function() {
+            element(by.model('saleEdited.activeTo')).sendKeys('010101');
+            expect(element(by.id('saleActiveToErrorGreater')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение cardAmount', function() {
+            expect(element(by.model('saleEdited.cardAmount')).getAttribute('value')).toMatch(regexpFloat);
+        });
+
+        it('выводит ошибку, если cardAmount пустой', function() {
+            element(by.model('saleEdited.cardAmount')).clear();
+            expect(element(by.id('saleCardAmountErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если cardAmount отрицательный', function() {
+            var cardAmountElem = element(by.model('saleEdited.cardAmount'));
+            cardAmountElem.clear();
+            cardAmountElem.sendKeys('-1');
+            expect(element(by.id('saleCardAmountErrorMin')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение amount', function() {
+            expect(element(by.model('saleEdited.amount')).getAttribute('value')).toMatch(regexpFloat);
+        });
+
+        it('выводит ошибку, если amount пустой', function() {
+            element(by.model('saleEdited.amount')).clear();
+            expect(element(by.id('saleAmountErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если amount отрицательный', function() {
+            var cardAmountElem = element(by.model('saleEdited.amount'));
+            cardAmountElem.clear();
+            cardAmountElem.sendKeys('-1');
+            expect(element(by.id('saleAmountErrorMin')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит предупреждение, если amount меньше cardAmount', function() {
+            var cardAmountElem = element(by.model('saleEdited.cardAmount'));
+            cardAmountElem.clear();
+            cardAmountElem.sendKeys('10');
+            var amountElem = element(by.model('saleEdited.amount'));
+            amountElem.clear();
+            amountElem.sendKeys('9');
+            expect(element(by.id('saleEditAmountWarningLessCard')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение siteAmount', function() {
+            expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toMatch(regexpFloat);
+        });
+
+        it('выводит ошибку, если siteAmount пустой', function() {
+            element(by.model('saleEdited.siteAmount')).clear();
+            expect(element(by.id('saleSiteAmountErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если siteAmount отрицательный', function() {
+            var siteAmountElem = element(by.model('saleEdited.siteAmount'));
+            siteAmountElem.clear();
+            siteAmountElem.sendKeys('-1');
+            expect(element(by.id('saleSiteAmountErrorMin')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение info', function() {
+            expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toBeTruthy();
+        });
+
+        it('выводит ошибку, если info пустой', function() {
+            element(by.model('saleEdited.info')).clear();
+            expect(element(by.id('saleInfoErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит значение статуса', function() {
+            var setElem = element(by.model('saleEdited.isActive'));
+            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
+        });
+    });
+
+    describe('Создание карточки', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/sale/card?id=new');
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание карточки$/);
+        });
+
     });
 });
 

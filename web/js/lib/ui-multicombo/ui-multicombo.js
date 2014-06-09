@@ -12,7 +12,7 @@ angular.module("ui.multicombo", [])
             '    <ul class="mcombo-selected-choices">' +
             '        <li class="selected-choice" ng-repeat="choice in _selectedChoices">'+
             '            <span id="McomboSelectedItem_{{$index}}">{{choice.id}}: {{choice[_choiceName]}}</span>' +
-            '            <a class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
+            '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
             '        </li>' +
             '        <li class="search-field" ng-hide="hide">' +
             '            <input type="text" id="McomboSearchInput" placeholder="Фильтр с выбором" autocomplete="off" ng-model="_search">' +
