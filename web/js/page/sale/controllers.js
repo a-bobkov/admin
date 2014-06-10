@@ -312,10 +312,10 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     var ls = $location.search();
     if (_.size(ls)) {
         $scope.patterns = {
-            dealers: ls.dealers && _.invoke(ls.dealers.split(';'), function() {
+            dealers: (!ls.dealers) ? [] : _.invoke(ls.dealers.split(';'), function() {
                 return $scope.dealers.get(_.parseInt(this));
             }),
-            sites: ls.sites && _.invoke(ls.sites.split(';'), function() {
+            sites: (!ls.sites) ? [] : _.invoke(ls.sites.split(';'), function() {
                 return $scope.sites.get(_.parseInt(this));
             }),
             isActive: $scope.saleStatuses.get((ls.isActive === 'true') ? true : (ls.isActive === 'false') ? false : null),
