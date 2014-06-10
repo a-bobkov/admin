@@ -14,11 +14,11 @@ angular.module("ui.multicombo", [])
             '            <span id="McomboSelectedItem_{{$index}}">{{choice.id}}: {{choice[_choiceName]}}</span>' +
             '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
             '        </li>' +
-            '        <li class="search-field" ng-hide="hide">' +
+            '        <li class="search-field" ng-hide="hide()">' +
             '            <input type="text" id="McomboSearchInput" placeholder="Фильтр с выбором" autocomplete="off" ng-model="_search">' +
             '        </li>' +
             '    </ul>' +
-            '    <div class="mcombo-drop" ng-hide="hide">' +
+            '    <div class="mcombo-drop" ng-hide="hide()">' +
             '        <ul class="choices">' +
             '            <li class="item" id="McomboDropChoiceItem" ng-repeat="choice in _filteredChoices" ng-click="moveToSelected(choice, $event)">' +
             '                {{choice.id}}: {{choice[_choiceName]}}' +
@@ -35,15 +35,30 @@ angular.module("ui.multicombo", [])
             _disabled: '=ngDisabled'
         },
         controller: ['$scope', '$filter', function($scope, $filter) {
-            $scope._searchElem = null;
-            if (_.isArray($scope._selected)) {
-                $scope._selectedChoices = $scope._selected;
-            } else if ($scope._selected) {
-                $scope._selectedChoices = [$scope._selected];
-            } else {
-                $scope._selectedChoices = [];
+
+            $scope.$watch('_selected', function _selectedChoicesUpdate() {
+                if (_.isArray($scope._selected)) {
+                    $scope._selectedChoices = $scope._selected;
+                } else if ($scope._selected) {
+                    $scope._selectedChoices = [$scope._selected];
+                } else {
+                    $scope._selectedChoices = [];
+                }
+            }, true);
+
+            $scope.$watch('_selectedChoices', function _selectedUpdate() {
+                if (_.isArray($scope._selected)) {
+                    $scope._selected = $scope._selectedChoices;
+                } else {
+                    $scope._selected = $scope._selectedChoices[0];
+                }
+            }, true);
+
+            $scope.hide = function() {
+                return !_.isArray($scope._selected) && $scope._selected;
             }
-            $scope.hide = !_.isArray($scope._selected) && $scope._selected;
+
+            $scope._searchElem = null;
             $scope._search = '';
             $scope._filteredChoices = [];
 
@@ -59,12 +74,6 @@ angular.module("ui.multicombo", [])
 
             $scope.moveToSelected = function(choice, $event) {
                 $scope._selectedChoices.push(choice);
-                if (_.isArray($scope._selected)) {
-                    $scope._selected = $scope._selectedChoices;
-                } else {
-                    $scope._selected = $scope._selectedChoices[0];
-                }
-                $scope.hide = !_.isArray($scope._selected) && $scope._selected;
                 filterChoices();
 
                 $scope._searchElem.focus();
@@ -79,12 +88,6 @@ angular.module("ui.multicombo", [])
                     return;
                 }
                 $scope._selectedChoices.splice($scope._selectedChoices.indexOf(choice), 1);
-                if (_.isArray($scope._selected)) {
-                    $scope._selected = $scope._selectedChoices;
-                } else {
-                    $scope._selected = $scope._selectedChoices[0];
-                }
-                $scope.hide = !_.isArray($scope._selected) && $scope._selected;
                 filterChoices();
 
                 $scope._searchElem.focus();
