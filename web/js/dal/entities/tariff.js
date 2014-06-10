@@ -69,11 +69,18 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
             }
         }
 
+    Tariff.prototype.periodUnitName = function() {
+        if (this.periodUnit === 'day') {
+            return 'дн.';
+        } else if (this.periodUnit === 'month') {
+            return 'мес.';
+        }
+    }
+
     Tariff.prototype.name = function(city, tariffRates) {
         var tariffRate = this.getLastRate(city, tariffRates);
         var rate = (tariffRate) ? tariffRate.rate : '???';
-        return this.id + ': ' + rate + ' руб. за ' + this.period + '  ' + this.periodUnit + ', до ' + this.count + ' объявлений';
-
+        return this.id + ': ' + rate + ' руб. за ' + this.period + '  ' + this.periodUnitName() + ', до ' + this.count + ' объявлений';
     }
 
     return Tariff;

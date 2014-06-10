@@ -32,7 +32,7 @@ var regexpEmail = /^[\w-]+@[\w\.-]+$/;
 var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/;
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
 var regexpIdName = /^(\d+): (.+)$/;
-var regexpTariff = /^\d+: \d+ руб. за \d+ +(month|day), до \d+ объявлений$/;
+var regexpTariff = /^\d+: \d+ руб. за \d+ +(мес\.|дн\.), до \d+ объявлений$/;
 
 describe('MaxPoster Admin Frontend', function() {
 
@@ -945,7 +945,7 @@ describe('Sale App', function() {
 
         it('выводит значение тарифа', function() {
             var tariffElem = element(by.id('saleTariff'));
-            expect(tariffElem.element(by.css('option:checked')).getText()).toMatch(/^\d+: \d+ руб. за \d+ +(month|day), до \d+ объявлений$/);
+            expect(tariffElem.element(by.css('option:checked')).getText()).toMatch(regexpTariff);
         });
 
         it('при выборе сайта заполняет список тарифов', function() {
@@ -989,7 +989,7 @@ describe('Sale App', function() {
 
         it('выводит предупреждение, если count отличается от tariff.count', function() {
             element(by.id('saleTariff')).element(by.css('option:checked')).getText().then(function(tariffText) {
-                var tariffCount = _.parseInt(tariffText.replace(/^\d+: \d+ руб. за \d+ +(month|day), до \d+ объявлений$/, '$4'));
+                var tariffCount = _.parseInt(tariffText.replace(regexpTariff, '$4'));
                 var countElem = element(by.model('saleEdited.count'));
                 countElem.clear();
                 countElem.sendKeys(tariffCount.toString() + '1');
