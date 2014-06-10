@@ -772,7 +772,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }
         var intervalParent = ($scope.saleParent.activeTo - $scope.saleParent.activeFrom) * 1000 * 60 * 60 * 24 + 1;
         var intervalNew = ($scope.saleEdited.activeTo - $scope.saleEdited.activeFrom) * 1000 * 60 * 60 * 24 + 1;
-        var k = intervalParent / intervalNew;
+        var k = intervalNew / intervalParent;
         var dealer = $scope.saleEdited.dealer;
         var tariffRates = $scope.tariffRates.getItems();
         var rateNew = $scope.saleEdited.tariff.getLastRate(dealer, tariffRates);

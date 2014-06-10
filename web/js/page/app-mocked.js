@@ -780,6 +780,15 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             rate: 7000,
             siteRate: 5000,
             info: 'Только общая'
+        },
+        {
+            id: 8,
+            tariff: {id: 4},
+            city: null,
+            activeFrom: '2013-06-30',
+            rate: 7500,
+            siteRate: 5500,
+            info: 'Только общая ставка'
         }
     ], null, {tariffs: tariffs, cities: userDirectories.cities});
 
@@ -832,14 +841,14 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             site: {id: 1},
             tariff: {id: 2},
             parentId: 1,
-            cardAmount: 29999.95,
+            cardAmount: 2000.00,
             count: 75,
             activeFrom: '2014-04-01',
             activeTo: '2014-04-30',
             isActive: true,
             date: '2014-04-10',
-            amount: 29999.97,
-            siteAmount: 24999.97,
+            amount: 2000.00,
+            siteAmount: 1500.00,
             info: 'Расширение до 75 объявлений'
         },
         {

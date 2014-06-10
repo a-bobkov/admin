@@ -661,7 +661,7 @@ xdescribe('User App', function() {
 
 describe('Sale App', function() {
 
-    xdescribe('Список продаж', function() {
+    describe('Список продаж', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist');
         });
@@ -913,9 +913,7 @@ describe('Sale App', function() {
 
     describe('Редактирование карточки', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist');
-            element(by.model('patterns.archive')).click();
-            setSelect(element(by.select('patterns.type')), 1);
+            browser.get('admin.html#/salelist?type=card&archive=true');
             element.all(by.id('SaleListRowEdit')).get(0).click();
         });
 
@@ -924,7 +922,7 @@ describe('Sale App', function() {
         });
 
         it('выводит значение дилера', function() {
-            expect(element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(/^\d+:/);
+            expect(element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
         });
 
         it('выводит ошибку, если dealer пустой', function() {
@@ -939,6 +937,10 @@ describe('Sale App', function() {
         it('выводит ошибку, если site пустой', function() {
             element.all(by.id('McomboRemoveItem_0')).get(1).click();
             expect(element(by.id('saleEditSiteErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не выводит tariffParent', function() {
+            expect(element(by.id('saleTariffParent')).isDisplayed()).toBeFalsy();
         });
 
         it('выводит значение тарифа', function() {
@@ -1089,6 +1091,16 @@ describe('Sale App', function() {
             var setElem = element(by.model('saleEdited.isActive'));
             expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
         });
+
+        it('после сохранения переходит к списку', function() {
+            element(by.id('saleEditSave')).click();
+            expect(browser.getCurrentUrl()).toMatch('#\/salelist');
+        });
+
+        it('при отмене переходит к списку', function() {
+            element(by.id('saleEditCancel')).click();
+            expect(browser.getCurrentUrl()).toMatch('#\/salelist');
+        });
     });
 
     describe('Создание карточки', function() {
@@ -1100,6 +1112,186 @@ describe('Sale App', function() {
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание карточки$/);
         });
 
+        it('выводит начальное значение статуса', function() {
+            var setElem = element(by.model('saleEdited.isActive'));
+            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^Н\/А$/);
+        });
+
+        it('выводит ошибку, если tariff пустой', function() {
+            expect(element(by.id('saleEditTariffErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
+        it('позволяет выбрать дилера', function() {
+            var dealerElem = element.all(by.id('McomboSearchInput')).get(0);
+            dealerElem.click();
+            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            dropElem.getText().then(function(selectedValue) {
+                dropElem.click();
+                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+            });
+        });
+
+        it('позволяет выбрать сайт', function() {
+            var siteElem = element.all(by.id('McomboSearchInput')).get(1);
+            siteElem.click();
+            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            dropElem.getText().then(function(selectedValue) {
+                dropElem.click();
+                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+            });
+        });
+
+        it('выводит предупреждение, если для дилера и сайта нет тарифа по-умолчанию ', function() {
+            var dealerElem = element(by.id('saleDealer'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            dealerElemDrop.click();
+
+            var tariffElem = element(by.id('saleTariff'));
+            var siteElem = element(by.id('saleSite'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            var siteElemsDrop = siteElem.element.all(by.id('McomboDropChoiceItem'));
+            mapText(siteElemsDrop).then(function(sites) {
+                _.forEach(sites, function(site, siteIdx) {
+                    siteElemsDrop.get(siteIdx).click();
+                    tariffElem.element(by.css('option:checked')).getText().then(function(tariffText) {
+                        if (!tariffText) {
+                            expect(element(by.id('saleEditTariffWarningNoDefaultTariff')).isDisplayed()).toBeTruthy();
+                        }
+                        siteElem.element(by.id('McomboRemoveItem_0')).click();
+                    });
+                });
+            });
+        });
+    });
+
+    describe('Редактирование расширения', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist?type=addcard&archive=true');
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Изменение расширения$/);
+        });
+
+        it('не позволяет очистить dealer', function() {
+            var dealerElem = element(by.id('saleDealer'));
+            dealerElem.element(by.id('McomboRemoveItem_0')).click();
+            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+        });
+
+        it('не позволяет очистить site', function() {
+            var siteElem = element(by.id('saleSite'));
+            siteElem.element(by.id('McomboRemoveItem_0')).click();
+            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+        });
+
+        it('выводит tariffParent', function() {
+            expect(element(by.id('saleTariffParent')).isDisplayed()).toBeTruthy();
+        });
+
+        it('не позволяет изменить tariffParent', function() {
+            expect(element(by.id('saleTariffParent')).isEnabled()).toBeFalsy();
+        });
+
+        it('не позволяет изменить activeTo', function() {
+            expect(element(by.id('saleActiveTo')).isEnabled()).toBeFalsy();
+        });
+    });
+
+    describe('Создание расширения', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist?type=card&archive=true');
+            mapText(element.all(by.id('SaleListRowAdd'))).then(function(rows) {
+                var saleIdx = rows.indexOf('расширить');
+                element.all(by.id('SaleListRowAdd')).get(saleIdx).click();
+            });
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание расширения$/);
+        });
+
+        it('выводит начальное значение статуса', function() {
+            var setElem = element(by.model('saleEdited.isActive'));
+            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^Н\/А$/);
+        });
+    });
+
+    describe('Редактирование доплаты', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist?type=extra&archive=true');
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+        });
+
+        it('выводит режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Изменение доплаты$/);
+        });
+
+        it('не позволяет очистить dealer', function() {
+            var dealerElem = element(by.id('saleDealer'));
+            dealerElem.element(by.id('McomboRemoveItem_0')).click();
+            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+        });
+
+        it('не позволяет очистить site', function() {
+            var siteElem = element(by.id('saleSite'));
+            siteElem.element(by.id('McomboRemoveItem_0')).click();
+            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+        });
+
+        it('не выводит tariff', function() {
+            expect(element(by.id('saleTariff')).isDisplayed()).toBeFalsy();
+        });
+
+        it('не выводит tariffParent', function() {
+            expect(element(by.id('saleTariffParent')).isDisplayed()).toBeFalsy();
+        });
+
+        it('не выводит count', function() {
+            expect(element(by.id('saleCount')).isDisplayed()).toBeFalsy();
+        });
+
+        it('не выводит saleActiveFrom', function() {
+            expect(element(by.id('saleActiveFrom')).isDisplayed()).toBeFalsy();
+        });
+
+        it('не выводит saleActiveTo', function() {
+            expect(element(by.id('saleActiveTo')).isDisplayed()).toBeFalsy();
+        });
+
+        it('не выводит saleCardAmount', function() {
+            expect(element(by.id('saleCardAmount')).isDisplayed()).toBeFalsy();
+        });
+    });
+
+    describe('Создание доплаты', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist?type=card&archive=true');
+            element.all(by.id('SaleListRowExtra')).get(0).click();
+        });
+
+        it('показывает режим работы формы', function() {
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание доплаты$/);
+        });
+
+        it('выводит значение дилера', function() {
+            var dealerElem = element(by.id('saleDealer'));
+            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+        });
+
+        it('выводит значение сайта', function() {
+            var siteElem = element(by.id('saleSite'));
+            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+        });
+
+        it('выводит начальное значение статуса', function() {
+            var setElem = element(by.model('saleEdited.isActive'));
+            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^Н\/А$/);
+        });
     });
 });
 
