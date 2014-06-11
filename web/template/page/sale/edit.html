@@ -32,7 +32,7 @@
 	            </td>
 	        </tr>
 	        <tr ng-show='!saleEdited.isExtra()'>
-	            <th><label for="saleTariff">Тариф</label></th>
+	            <th><label for="saleTariff">{{tariffFieldTitle}}</label></th>
 	            <td>
 		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates.getItems()) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site' ng-required='!saleEdited.isExtra()'>
 		            </select>

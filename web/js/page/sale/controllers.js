@@ -507,6 +507,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
+    $scope.tariffFieldTitle = "Тариф";
+
     if ($scope.sale) {
         makeSaleCopy();
     } else {
@@ -717,6 +719,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
+
+    $scope.tariffFieldTitle = "Новый тариф";
 
     if ($scope.sale) {
         makeSaleCopy();
