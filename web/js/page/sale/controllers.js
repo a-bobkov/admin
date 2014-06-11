@@ -205,8 +205,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 ;
 }])
 
-.controller('SaleListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, 
-    salesLoader, dealersLoader, sitesLoader, Sale) {
+.controller('SaleListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, $q, data, 
+    salesLoader, dealersLoader, sitesLoader, Sale, dealerTariffsLoader) {
 
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
@@ -425,25 +425,43 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         var confirmMessage,
             noticeMessage,
             newStatus;
+        var check;
 
         if (sale.isActive.id === true) {
             confirmMessage = 'Дезактивировать продажу ';
             noticeMessage = 'Дезактивирована продажа ';
             newStatus = $scope.saleStatuses.get(false);
+            check = $q.when(true);
         } else {
             confirmMessage = 'Активировать продажу ';
             noticeMessage = 'Активирована продажа ';
             newStatus = $scope.saleStatuses.get(true);
-        }
-        if (confirm(confirmMessage + sale.name() + '?')) {
-            var saleEdited = new Sale;
-            angular.extend(saleEdited, sale);
-            saleEdited.isActive = newStatus;
-            saleEdited.save($scope).then(function() {
-                $scope.savedSaleListNotice = noticeMessage + sale.name();
-                $scope.onSelectPage();
+            var dealerTariffsQueryParams = {
+                filters: [
+                    { fields: ['dealer'], type: 'equal', value: sale.dealer.id },
+                    { fields: ['site'], type: 'equal', value: sale.site.id }
+                ]
+            };
+            var oldDirectories = _.pick($scope, ['dealers', 'sites', 'tariffs']);
+            check = dealerTariffsLoader.loadItems(dealerTariffsQueryParams, oldDirectories).then(function(dealerTariffsDirectories) {
+                var dealerTariff = dealerTariffsDirectories.dealerTariffs.getItems()[0];
+                if (!dealerTariff) {
+                    alert("У салона не включен экспорт на сайт!");
+                }
+                return !!dealerTariff;
             });
         }
+        check.then(function(valid) {
+            if (valid && confirm(confirmMessage + sale.name() + '?')) {
+                var saleEdited = new Sale;
+                angular.extend(saleEdited, sale);
+                saleEdited.isActive = newStatus;
+                saleEdited.save($scope).then(function() {
+                    $scope.savedSaleListNotice = noticeMessage + sale.name();
+                    $scope.onSelectPage();
+                });
+            }
+        });
     };
 
     $scope.newSaleCard = function() {
