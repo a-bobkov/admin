@@ -114,7 +114,7 @@
 					    <li id='saleSiteAmountErrorMin' ng-show="formSale.saleSiteAmount.$error.min">Себестоимость должна быть неотрицательной.</li>
 					</ul>
 					<ul class="warning_list" ng-show='saleEdited.siteAmount >= saleEdited.amount'>
-					    <li id='saleEditSiteAmountWarningGreaterAmount' ng-show="saleEdited.siteAmount >= saleEdited.amount">Себестоимость больше стоимости.</li>
+					    <li id='saleEditSiteAmountWarningGreaterAmount' ng-show="saleEdited.siteAmount > saleEdited.amount">Себестоимость больше стоимости.</li>
 					</ul>
 	           </td>
 	        </tr>
