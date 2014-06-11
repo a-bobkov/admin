@@ -32,7 +32,7 @@ var regexpEmail = /^[\w-]+@[\w\.-]+$/;
 var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/;
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
 var regexpIdName = /^(\d+): (.+)$/;
-var regexpTariff = /^\d+: \d+ руб. за \d+ +(мес\.|дн\.), до \d+ объявлений$/;
+var regexpTariff = /^\d+ руб. за \d+ +(мес\.|дн\.), до \d+ объявлений$/;
 
 describe('MaxPoster Admin Frontend', function() {
 
