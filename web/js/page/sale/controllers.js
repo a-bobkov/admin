@@ -630,7 +630,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         if (newValue === oldValue) {
             return;
         }
-        if (!$scope.lastActiveCard || !$scope.saleEdited.tariff) {
+        if (!$scope.saleEdited.tariff) {
             $scope.saleEdited.activeFrom = null;
             $scope.saleEdited.activeTo = null;
             return;
