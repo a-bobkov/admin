@@ -442,7 +442,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                     { fields: ['site'], type: 'equal', value: sale.site.id }
                 ]
             };
-            var oldDirectories = _.pick($scope, ['dealers', 'sites', 'tariffs']);
+            var oldDirectories = _.pick($scope, ['dealers', 'sites']);
             check = dealerTariffsLoader.loadItems(dealerTariffsQueryParams, oldDirectories).then(function(dealerTariffsDirectories) {
                 var dealerTariff = dealerTariffsDirectories.dealerTariffs.getItems()[0];
                 if (!dealerTariff) {

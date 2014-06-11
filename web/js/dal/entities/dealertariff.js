@@ -121,7 +121,7 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
                 var newDirectories = _.transform(directoriesArr, _.assign, {});
                 var toResolve = [];
                 if (!oldDirectories || !oldDirectories.tariffs) {
-                    var tariffIds = _.pluck(_.compact(_.pluck([saleData.sale], 'tariff')), 'id');
+                    var tariffIds = _.pluck(_.compact(_.pluck(dealerTariffsData.dealerTariffs, 'tariff')), 'id');
                     if (!_.isEmpty(tariffIds)) {
                         var tariffQueryParams = {
                             filters: [
