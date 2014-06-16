@@ -845,8 +845,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             cardId: $scope.saleParent.cardId,
             date: new Date,
             activeFrom: $scope.saleParent.activeFrom,
-            activeTo: $scope.saleParent.activeTo,
-            isActive: false
+            activeTo: $scope.saleParent.activeTo
         }, $scope);
         $scope.saleEdited.dealer = $scope.saleParent.dealer;
         $scope.saleEdited.site = $scope.saleParent.site;

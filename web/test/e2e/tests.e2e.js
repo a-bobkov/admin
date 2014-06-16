@@ -663,7 +663,7 @@ describe('Sale App', function() {
 
     describe('Список продаж', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist');
+            browser.get('admin.html#/salelist?archive=true');
         });
 
         it('показывает количество продаж', function() {
@@ -760,7 +760,7 @@ describe('Sale App', function() {
                     expect(element(sale.column('sale.site.id')).getText()).toMatch(/^\d+:/);
                     expect(element(sale.column('sale.activeFrom')).getText()).toMatch(regexpDate);
                     expect(element(sale.column('sale.activeTo')).getText()).toMatch(regexpDate);
-                    expect(element(sale.column('sale.isActive')).getText()).toMatch(/^А$|^Н\/А$/);
+                    expect(element(sale.column('sale.isActive')).getText()).toMatchOrEmpty(/^(А|Н\/А)$/);
                     expect(element(sale).getText()).toMatch(/(Осн(?=[\s\S]+доплатить))|(Расш(?![\s\S]+доплатить))|(Доп(?![\s\S]+доплатить))/);
                     expect(element(sale).getText()).toMatch(/(Осн)|(Расш)|(Доп(?![\s\S]+расширить))/);
                 }
@@ -860,7 +860,6 @@ describe('Sale App', function() {
 
         it('накладывает фильтр по архиву', function() {
             var archive = element(by.model('patterns.archive'));
-            archive.click();
             expect(archive.isSelected()).toBeTruthy();
             mapText(element.all(by.repeater('sale in sales').column('sale.activeTo'))).then(function(data) {
                 expect(data.length).toBeTruthy();
@@ -900,7 +899,6 @@ describe('Sale App', function() {
             expect(type.element(by.css('option:checked')).getText()).toBeTruthy();
 
             var archive = element(by.model('patterns.archive'));
-            archive.click();
             expect(archive.isSelected()).toBeTruthy();
 
             element(by.id('SaleListFilterSetDefault')).click();
@@ -1266,6 +1264,10 @@ describe('Sale App', function() {
         it('не выводит saleCardAmount', function() {
             expect(element(by.id('saleCardAmount')).isDisplayed()).toBeFalsy();
         });
+
+        it('не выводит isActive', function() {
+            expect(element(by.id('saleStatus')).isDisplayed()).toBeFalsy();
+        });
     });
 
     describe('Создание доплаты', function() {
@@ -1286,11 +1288,6 @@ describe('Sale App', function() {
         it('выводит значение сайта', function() {
             var siteElem = element(by.id('saleSite'));
             expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
-        });
-
-        it('выводит начальное значение статуса', function() {
-            var setElem = element(by.model('saleEdited.isActive'));
-            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^Н\/А$/);
         });
     });
 
