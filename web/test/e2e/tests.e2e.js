@@ -1293,6 +1293,65 @@ describe('Sale App', function() {
             expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^Н\/А$/);
         });
     });
+
+    describe('Сценарии использования', function() {
+
+        it('Активация и дезактивация карточек и расширений', function() {
+            browser.get('admin.html#/salelist?archive=true');
+            var sales = by.repeater('sale in sales');
+            mapText(element.all(sales.column('sale.type'))).then(function(typeArr) {
+                mapText(element.all(sales.column('sale.isActive'))).then(function(isActiveArr) {
+                    var salesNoExport = 0;
+                    var salesActivated = 0;
+                    var salesDeactivated = 0;
+                    var salesUnknown = 0;
+                    _.forEach(isActiveArr, function(isActive, saleIdx) {
+                        if (!_.contains(['Осн', 'Расш'], typeArr[saleIdx])) {
+                            return;
+                        }
+                        element.all(sales.column('sale.isActive')).get(saleIdx).click();
+                        browser.wait(function() {
+                            return browser.switchTo().alert().then(
+                                function() { return true; },
+                                function() { return false; }
+                            );
+                        });
+                        var alert = browser.switchTo().alert();
+                        alert.getText().then(function(text) {
+                            var saleParams;
+                            if (text === "У салона не включен экспорт на сайт!") {
+                                expect(isActive).toBe("Н\/А");
+                                alert.accept();
+                                expect(element.all(sales.column('sale.isActive')).get(saleIdx).getText()).toBe("Н\/А");
+                                ++salesNoExport;
+                            } else if (saleParams = text.match(/^Активировать продажу салона \"(.+)\" на сайте \"(.+)\"\?$/)) {
+                                expect(isActive).toBe("Н\/А");
+                                alert.accept();
+                                expect(element.all(sales.column('sale.isActive')).get(saleIdx).getText()).toBe("А");
+                                expect(element(by.binding("savedSaleListNotice")).getText()).toBe('Активирована продажа салона "' + saleParams[1] + '" на сайте "' + saleParams[2] + '"');
+                                ++salesActivated;
+                            } else if (saleParams = text.match(/^Дезактивировать продажу салона \"(.+)\" на сайте \"(.+)\"\?$/)) {
+                                expect(isActive).toBe("А");
+                                alert.accept();
+                                expect(element.all(sales.column('sale.isActive')).get(saleIdx).getText()).toBe("Н\/А");
+                                expect(element(by.binding("savedSaleListNotice")).getText()).toMatch('Дезактивирована продажа салона "' + saleParams[1] + '" на сайте "' + saleParams[2] + '"');
+                                ++salesDeactivated;
+                            } else {
+                                ++salesUnknown;
+                            }
+                        });
+                    });
+                    browser.controlFlow().execute(function() {
+                        expect(salesNoExport).toBeTruthy();
+                        expect(salesActivated).toBeTruthy();
+                        expect(salesDeactivated).toBeTruthy();
+                        expect(salesUnknown).toBeFalsy();
+                    });
+                });
+            });
+        });
+    });
+
 });
 
 xdescribe('DealerSite App', function() {
