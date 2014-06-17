@@ -28,8 +28,8 @@
                 <td class="text">{{sale.count}}</td>
                 <td class="date">{{sale.activeFrom | date:'shortDate'}}</td>
                 <td class="date">{{sale.activeTo | date:'shortDate'}}</td>
-                <td class="amount">{{sale.amount}}</td>
-                <td class="amount">{{sale.siteAmount}}</td>
+                <td class="amount">{{sale.amount | number:2}}</td>
+                <td class="amount">{{sale.siteAmount | number:2}}</td>
                 <td class="text"><a ng-click='toggleSaleStatus(sale)'>{{sale.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">

@@ -241,9 +241,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         {id: "count", name: "Лимит", width: '5%'},
         {id: "activeFrom", name: "С", width: '5%'},
         {id: "activeTo", name: "По", width: '5%'},
-        {id: "amount", name: "Стоим, руб.", width: '10%'},
-        {id: "siteAmount", name: "Себест, руб.", width: '10%'},
-        {id: "isActive", name: "Акт", width: '5%'}
+        {id: "amount", name: "Стоимость, руб.", width: '10%'},
+        {id: "siteAmount", name: "Себестоим, руб.", width: '10%'},
+        {id: "isActive", name: "Ста-тус", width: '5%'}
     ];
 
     $scope.sortingMark = function(column) {

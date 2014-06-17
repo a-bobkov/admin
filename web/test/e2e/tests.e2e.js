@@ -21,6 +21,10 @@ var mapIsDisplayed = function(q) {
     });
 };
 
+var parseFloatRu = function(value) {
+    return parseFloat(value.replace(/ /g, '').replace(/,/, '.'));
+};
+
 if (browser.baseUrl.match(/maxposter.ru/)) {
     var test_maxposter_ru = true;
     browser.driver.get('http://test.maxposter.ru/');
@@ -31,7 +35,8 @@ if (browser.baseUrl.match(/maxposter.ru/)) {
 }
 
 var regexpInt = /^\d+$/;
-var regexpFloat = /^\d+(.\d*|)$/;
+var regexpFloat = /^\d+(?:.\d*|)$/;
+var regexpFloatRu = /^[\d ]+(?:,\d*|)$/;
 var regexpDate = /^(\d{2}).(\d{2}).(\d{2})$/;
 var regexpDateISO = /^(20\d{2})-(\d{2})-(\d{2})$/;
 var regexpEmail = /^[\w-]+@[\w\.-]+$/;
@@ -49,7 +54,7 @@ beforeEach(function() {
                 if (params.match('Integers')) {
                     return parseInt(arg, 10);
                 } else if (params.match('Floats')) {
-                    return parseFloat(arg);
+                    return arg;
                 } else if (params.match('Dates')) {
                     return Date.parse(arg);
                 } else if (params.match('Strings')) {
@@ -702,7 +707,7 @@ describe('Sale App', function() {
             }
 
             function takeFloat() {
-                return parseFloat(this);
+                return parseFloatRu(this);
             }
 
             function takeDate() {
@@ -737,7 +742,6 @@ describe('Sale App', function() {
                 }}
             ]
 
-            element(by.model('patterns.archive')).click();
             var sortableColumnsRef = element.all(by.id('SaleListTableHeaderRef'));
             var sortableColumnsDir = element.all(by.id('SaleListTableHeaderDir'));
             expect(mapText(sortableColumnsDir)).toEqual(header);
@@ -760,12 +764,15 @@ describe('Sale App', function() {
             element.all(sales).count().then(function(count) {
                 for(var i = count; i--; ) {
                     var sale = sales.row(i);
-                    expect(element(sale.column('sale.type')).getText()).toMatch(/^(Осн|Расш|Доп)$/);
                     expect(element(sale.column('sale.date')).getText()).toMatch(regexpDate);
                     expect(element(sale.column('sale.dealer.id')).getText()).toMatch(regexpIdName);
                     expect(element(sale.column('sale.site.id')).getText()).toMatch(regexpIdName);
+                    expect(element(sale.column('sale.type')).getText()).toMatch(/^(Осн|Расш|Доп)$/);
+                    expect(element(sale.column('sale.count')).getText()).toMatchOrEmpty(regexpInt);
                     expect(element(sale.column('sale.activeFrom')).getText()).toMatch(regexpDate);
                     expect(element(sale.column('sale.activeTo')).getText()).toMatch(regexpDate);
+                    expect(element(sale.column('sale.amount')).getText()).toMatch(regexpFloatRu);
+                    expect(element(sale.column('sale.siteAmount')).getText()).toMatch(regexpFloatRu);
                     expect(element(sale.column('sale.isActive')).getText()).toMatchOrEmpty(/^(А|Н\/А)$/);
                     expect(element(sale).getText()).toMatch(/(Осн(?=[\s\S]+доплатить))|(Расш(?![\s\S]+доплатить))|(Доп(?![\s\S]+доплатить))/);
                     expect(element(sale).getText()).toMatch(/(Осн)|(Расш)|(Доп(?![\s\S]+расширить))/);
@@ -1360,7 +1367,7 @@ describe('Sale App', function() {
             amountElem.click();
             var newAmount;
             element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloat(amount) + 1;
+                newAmount = parseFloatRu(amount) + 1;
             });
 
             element.all(by.id('SaleListAddSaleUp')).get(0).click();
@@ -1392,7 +1399,9 @@ describe('Sale App', function() {
                 amountElem.sendKeys(newAmount.toString());
 
                 element(by.id('saleEditSave')).click();
-                expect(element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText()).toBe(newAmount.toString());
+                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(floatText) {
+                    expect(parseFloatRu(floatText)).toBe(newAmount);
+                });
             });
         });
 
@@ -1402,7 +1411,7 @@ describe('Sale App', function() {
             amountElem.click();
             var newAmount;
             element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloat(amount) + 1;
+                newAmount = parseFloatRu(amount) + 1;
             });
 
             var saleTypes;
@@ -1444,7 +1453,9 @@ describe('Sale App', function() {
                 amountElem.sendKeys(newAmount.toString());
 
                 element(by.id('saleEditSave')).click();
-                expect(element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText()).toBe(newAmount.toString());
+                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(floatText) {
+                    expect(parseFloatRu(floatText)).toBe(newAmount);
+                });
             });
         });
 
@@ -1454,7 +1465,7 @@ describe('Sale App', function() {
             amountElem.click();
             var newAmount;
             element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloat(amount) + 1;
+                newAmount = parseFloatRu(amount) + 1;
             });
 
             var saleExtras = element.all(by.id('SaleListRowExtra'));
@@ -1476,7 +1487,9 @@ describe('Sale App', function() {
                 siteAmountElem.sendKeys((newAmount - 1).toString());
 
                 element(by.id('saleEditSave')).click();
-                expect(element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText()).toBe(newAmount.toString());
+                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(floatText) {
+                    expect(parseFloatRu(floatText)).toBe(newAmount);
+                });
             });
         });
 

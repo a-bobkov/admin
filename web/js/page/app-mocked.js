@@ -702,6 +702,17 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             isActive: false,
             delay: 3,
             groupName: 'Текущие'
+        },
+        {
+            id: 5,
+            site: {id: 6},
+            type: 'periodical',
+            period: 3,
+            periodUnit: 'month',
+            count: 100,
+            isActive: false,
+            delay: 3,
+            groupName: 'Текущие'
         }
     ], null, {sites: sites});
 
@@ -789,6 +800,15 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             rate: 7500,
             siteRate: 5500,
             info: 'Только общая ставка'
+        },
+        {
+            id: 9,
+            tariff: {id: 5},
+            city: null,
+            activeFrom: '2013-06-30',
+            rate: 10000,
+            siteRate: 7700,
+            info: 'Только общая ставка'
         }
     ], null, {tariffs: tariffs, cities: userDirectories.cities});
 
@@ -823,14 +843,14 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             dealer: {id: 1},
             site: {id: 1},
             tariff: {id: 1},
-            cardAmount: 19999.95,
+            cardAmount: 119999.95,
             count: 50,
             activeFrom: '2014-04-01',
             activeTo: '2014-04-30',
             isActive: true,
             date: '2014-03-25',
-            amount: 19999.97,
-            siteAmount: 14999.97,
+            amount: 119999.97,
+            siteAmount: 114999.97,
             info: 'Основная карточка, потом расширенная'
         },
         {
