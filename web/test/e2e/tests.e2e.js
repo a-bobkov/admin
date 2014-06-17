@@ -15,6 +15,12 @@ var mapText = function(q) {
     })
 };
 
+var mapIsDisplayed = function(q) {
+    return q.map(function(elm) {
+        return elm.isDisplayed();
+    });
+};
+
 if (browser.baseUrl.match(/maxposter.ru/)) {
     var test_maxposter_ru = true;
     browser.driver.get('http://test.maxposter.ru/');
@@ -26,8 +32,8 @@ if (browser.baseUrl.match(/maxposter.ru/)) {
 
 var regexpInt = /^\d+$/;
 var regexpFloat = /^\d+(.\d*|)$/;
-var regexpDate = /^\d{2}.\d{2}.\d{2}$/;
-var regexpDateISO = /^20\d{2}-\d{2}-\d{2}$/;
+var regexpDate = /^(\d{2}).(\d{2}).(\d{2})$/;
+var regexpDateISO = /^(20\d{2})-(\d{2})-(\d{2})$/;
 var regexpEmail = /^[\w-]+@[\w\.-]+$/;
 var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/;
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
@@ -700,11 +706,11 @@ describe('Sale App', function() {
             }
 
             function takeDate() {
-                return this.replace(/(\d+)\.(\d+)\.(\d+)/, '20$3-$2-$1');
+                return this.replace(regexpDate, '20$3-$2-$1');
             }
 
             function takeId() {
-                return _.parseInt(this.replace(/^(\d+):(.+)/,'$1'));
+                return _.parseInt(this.replace(regexpIdName,'$1'));
             }
 
             function setHeader(what, where) {
@@ -754,10 +760,10 @@ describe('Sale App', function() {
             element.all(sales).count().then(function(count) {
                 for(var i = count; i--; ) {
                     var sale = sales.row(i);
-                    expect(element(sale.column('sale.type')).getText()).toMatch(/^Осн$|^Расш$|^Доп$/);
+                    expect(element(sale.column('sale.type')).getText()).toMatch(/^(Осн|Расш|Доп)$/);
                     expect(element(sale.column('sale.date')).getText()).toMatch(regexpDate);
-                    expect(element(sale.column('sale.dealer.id')).getText()).toMatch(/^\d+:/);
-                    expect(element(sale.column('sale.site.id')).getText()).toMatch(/^\d+:/);
+                    expect(element(sale.column('sale.dealer.id')).getText()).toMatch(regexpIdName);
+                    expect(element(sale.column('sale.site.id')).getText()).toMatch(regexpIdName);
                     expect(element(sale.column('sale.activeFrom')).getText()).toMatch(regexpDate);
                     expect(element(sale.column('sale.activeTo')).getText()).toMatch(regexpDate);
                     expect(element(sale.column('sale.isActive')).getText()).toMatchOrEmpty(/^(А|Н\/А)$/);
@@ -775,6 +781,42 @@ describe('Sale App', function() {
                     expect(browser.getCurrentUrl()).toMatch(/#\/sale\//);
                     element(by.id('saleEditCancel')).click();
                 }
+            });
+        });
+
+        it('переходит к url создания расширения для карточки по ссылке в "расширить"', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 1);
+            var saleAdd = element.all(by.id('SaleListRowAdd'));
+            mapIsDisplayed(saleAdd).then(function(displayed) {
+                var saleIdx = displayed.indexOf(true);
+                expect(saleIdx).not.toBe(-1);
+                saleAdd.get(saleIdx).click();
+                expect(browser.getCurrentUrl()).toMatch(/#\/sale\/addcard\?id=new&cardId=\d+/);
+            });
+        });
+
+        it('переходит к url создания расширения для расширения по ссылке в "расширить"', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 2);
+            var saleAdd = element.all(by.id('SaleListRowAdd'));
+            mapIsDisplayed(saleAdd).then(function(displayed) {
+                var saleIdx = displayed.indexOf(true);
+                expect(saleIdx).not.toBe(-1);
+                saleAdd.get(saleIdx).click();
+                expect(browser.getCurrentUrl()).toMatch(/#\/sale\/addcard\?id=new&cardId=\d+/);
+            });
+        });
+
+        it('переходит к url создания дополнительной продажи по ссылке в "доплатить"', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 1);
+            var saleAdd = element.all(by.id('SaleListRowExtra'));
+            mapIsDisplayed(saleAdd).then(function(displayed) {
+                var saleIdx = displayed.indexOf(true);
+                expect(saleIdx).not.toBe(-1);
+                saleAdd.get(saleIdx).click();
+                expect(browser.getCurrentUrl()).toMatch(/#\/sale\/extra\?id=new&cardId=\d+/);
             });
         });
 
@@ -946,6 +988,16 @@ describe('Sale App', function() {
             expect(tariffElem.element(by.css('option:checked')).getText()).toMatch(regexpTariff);
         });
 
+        it('заполняет список тарифов', function() {
+            browser.get('admin.html#/salelist?type=card&archive=true');
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+                expect(_.compact(options).length).toBeTruthy();
+            });
+        });
+
         it('при выборе сайта заполняет список тарифов', function() {
             mapText(element.all(by.id('saleTariff'))).then(function(tariffs) {
                 var preTariffs = tariffs.join();
@@ -1044,9 +1096,9 @@ describe('Sale App', function() {
         });
 
         it('выводит ошибку, если amount отрицательный', function() {
-            var cardAmountElem = element(by.model('saleEdited.amount'));
-            cardAmountElem.clear();
-            cardAmountElem.sendKeys('-1');
+            var amountElem = element(by.model('saleEdited.amount'));
+            amountElem.clear();
+            amountElem.sendKeys('-1');
             expect(element(by.id('saleAmountErrorMin')).isDisplayed()).toBeTruthy();
         });
 
@@ -1088,6 +1140,11 @@ describe('Sale App', function() {
         it('выводит значение статуса', function() {
             var setElem = element(by.model('saleEdited.isActive'));
             expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
+        });
+
+        it('заполняет список статусов', function() {
+            var isActiveElem = element(by.model('saleEdited.isActive'));
+            expect(isActiveElem.element.all(by.css('option')).count()).toBe(2);
         });
 
         it('после сохранения переходит к списку', function() {
@@ -1293,8 +1350,137 @@ describe('Sale App', function() {
 
     describe('Сценарии использования', function() {
 
-        it('Активация и дезактивация карточек и расширений', function() {
+        beforeEach(function() {
             browser.get('admin.html#/salelist?archive=true');
+        });
+
+        it('Создание карточки', function() {
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+            var newAmount;
+            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                newAmount = parseFloat(amount) + 1;
+            });
+
+            element.all(by.id('SaleListAddSaleUp')).get(0).click();
+
+            var dealerElem = element(by.id('saleDealer'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            dealerElemDrop.click();
+
+            var siteElem = element(by.id('saleSite'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            var siteElemDrop = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            siteElemDrop.click();
+
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+                var tariffIdx = _.findIndex(options, function(value) {
+                    return !!value;
+                })
+                expect(tariffIdx).not.toBe(-1);
+                setSelect(tariffElem, tariffIdx);
+            });
+
+            browser.controlFlow().execute(function() {
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+
+                element(by.id('saleEditSave')).click();
+                expect(element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText()).toBe(newAmount.toString());
+            });
+        });
+
+        it('Создание расширения карточки', function() {
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+            var newAmount;
+            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                newAmount = parseFloat(amount) + 1;
+            });
+
+            var saleTypes;
+            mapText(element.all(by.repeater('sale in sales').column('sale.type'))).then(function(types) {
+                saleTypes = types;
+            });
+            var saleAdds = element.all(by.id('SaleListRowAdd'));
+            mapIsDisplayed(saleAdds).then(function(saleAddsDisplayed) {
+                var saleIdx = _.findIndex(saleAddsDisplayed, function(saleAddDisplayed, saleIdx) {
+                    return saleAddDisplayed && _.contains(['Осн', 'Расш'], saleTypes[saleIdx]); 
+                });
+                expect(saleIdx).not.toBe(-1);
+                saleAdds.get(saleIdx).click();
+            });
+
+            var tariffParentElem = element(by.id('saleTariffParent'));
+            var tariffParentText;
+            tariffParentElem.element(by.css('option:checked')).getText().then(function(tariffText) {
+                tariffParentText = tariffText;
+            });
+
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+                var tariffIdx = _.findIndex(options, function(value) {
+                    return !!value && value !== tariffParentText;
+                })
+                expect(tariffIdx).not.toBe(-1);
+                setSelect(tariffElem, tariffIdx);
+            });
+
+            element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(activeTo) {
+                var activeFrom = activeTo.replace(regexpDateISO, '$3$2$1');
+                element(by.model('saleEdited.activeFrom')).sendKeys(activeFrom);
+            });
+
+            browser.controlFlow().execute(function() {
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+
+                element(by.id('saleEditSave')).click();
+                expect(element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText()).toBe(newAmount.toString());
+            });
+        });
+
+        it('Создание доплаты', function() {
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+            var newAmount;
+            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                newAmount = parseFloat(amount) + 1;
+            });
+
+            var saleExtras = element.all(by.id('SaleListRowExtra'));
+            mapIsDisplayed(saleExtras).then(function(saleExtrasDisplayed) {
+                var saleIdx = _.findIndex(saleExtrasDisplayed, function(saleExtraDisplayed) {
+                    return saleExtraDisplayed; 
+                });
+                expect(saleIdx).not.toBe(-1);
+                saleExtras.get(saleIdx).click();
+            });
+
+            browser.controlFlow().execute(function() {
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+
+                var siteAmountElem = element(by.model('saleEdited.siteAmount'));
+                siteAmountElem.clear();
+                siteAmountElem.sendKeys((newAmount - 1).toString());
+
+                element(by.id('saleEditSave')).click();
+                expect(element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText()).toBe(newAmount.toString());
+            });
+        });
+
+        it('Активация и дезактивация карточек и расширений', function() {
             var sales = by.repeater('sale in sales');
             mapText(element.all(sales.column('sale.type'))).then(function(typeArr) {
                 mapText(element.all(sales.column('sale.isActive'))).then(function(isActiveArr) {
