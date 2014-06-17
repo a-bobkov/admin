@@ -861,18 +861,18 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
-.directive('uiGreater', function() {
+.directive('uiGreaterOrEqual', function() {
     return {
         restrict: 'A',
         require: 'ngModel',
         scope: {
             _oneValue: '=ngModel',
-            _otherValue: '=uiGreater',
+            _otherValue: '=uiGreaterOrEqual',
             _required: '=ngRequired'
         },
         link: function (scope, elem, attrs, ctrl) {
             scope.$watch('[_oneValue, _otherValue]', function() {
-                ctrl.$setValidity('greater', !scope._required || scope._oneValue > scope._otherValue);
+                ctrl.$setValidity('greaterOrEqual', !scope._required || scope._oneValue >= scope._otherValue);
             }, true);
         }
     };

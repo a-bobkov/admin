@@ -75,10 +75,10 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleActiveTo">По</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="saleActiveTo" id="saleActiveTo" ng-model='saleEdited.activeTo' ng-required='!saleEdited.isExtra()' ui-greater="saleEdited.activeFrom" ng-disabled='formSaleKey.$invalid || saleEdited.isAddcard()'>
+	                <input class="span-8" type="date" name="saleActiveTo" id="saleActiveTo" ng-model='saleEdited.activeTo' ng-required='!saleEdited.isExtra()' ui-greater-or-equal="saleEdited.activeFrom" ng-disabled='formSaleKey.$invalid || saleEdited.isAddcard()'>
 					<ul class="error_list" ng-show='formSale.saleActiveTo.$invalid'>
 					    <li id='saleActiveToErrorRequired' ng-show="formSale.saleActiveTo.$error.required">Необходимо ввести дату.</li>
-					    <li id='saleActiveToErrorGreater' ng-show="formSale.saleActiveTo.$error.greater && !formSale.saleActiveTo.$error.required">Необходимо ввести дату больше чем "C".</li>
+					    <li id='saleActiveToErrorGreater' ng-show="formSale.saleActiveTo.$error.greaterOrEqual && !formSale.saleActiveTo.$error.required">Дата должна быть больше или равна "C".</li>
 					</ul>
 	           </td>
 	        </tr>
