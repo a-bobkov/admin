@@ -80,7 +80,8 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
     Tariff.prototype.name = function(city, tariffRates) {
         var tariffRate = this.getLastRate(city, tariffRates);
         var rate = (tariffRate) ? tariffRate.rate : '???';
-        return rate + ' руб. за ' + this.period + '  ' + this.periodUnitName() + ', до ' + this.count + ' объявлений';
+        return rate + ' руб. за ' + this.period + '  ' + this.periodUnitName() +
+            ((this.count) ? ', до ' + this.count + ' объявлений' : '');
     }
 
     return Tariff;
