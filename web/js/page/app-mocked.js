@@ -8,7 +8,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
     dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, usersLoader, User, Users, 100, 
+    setHttpMock($httpBackend, usersLoader, User, Users, 10, 
         dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
         DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
         tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
@@ -18,7 +18,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef, 
+function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef, 
     dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
     DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
     tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
@@ -54,9 +54,24 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             {id: 11, name: 'Метро два в питере', city: {id: 2}}
         ],
         sites: [
-            {id: 1, name: 'Дром'},
-            {id: 5, name: 'Ауто'},
-            {id: 6, name: 'ИРР'}
+            {id: 1,  name: 'drom.ru'},
+            {id: 2,  name: 'bibika.ru'},
+            {id: 3,  name: 'autorambler.ru'},
+            {id: 4,  name: 'auto.mail.ru'},
+            {id: 5,  name: 'auto.ru'},
+            {id: 6,  name: 'irr.ru'},
+            {id: 7,  name: 'chance.ru'},
+            {id: 8,  name: 'auto.yandex.ru'},
+            {id: 9,  name: 'auto.dmir.ru'},
+            {id: 10, name: 'auto-mos.ru'},
+            {id: 11, name: 'cars.ru'},
+            {id: 12, name: 'usedcars.ru'},
+            {id: 13, name: 'quto.ru'},
+            {id: 14, name: 'avito.ru'},
+            {id: 15, name: 'fin-auto.ru'},
+            {id: 16, name: 'auto.exist.ru'},
+            {id: 17, name: 'am.ru'},
+            {id: 18, name: 'mercedes-benz.ru'}
         ]
     });
 
@@ -113,7 +128,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             id: 13, companyName: 'Свет', manager: {id: 4}}},
         {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 6}},
         {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
-    ], multiplyUsersCoef), null, userDirectories);
+    ], multiplyCoef), null, userDirectories);
     
     function multiplyArr(arr, coef) {
         coef = coef || 1;
@@ -575,8 +590,6 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         {id: 18, name: 'mercedes-benz.ru'}
     ]);
 
-
-
     var dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
         { 'id': true, 'name': 'Акт' },
         { 'id': false, 'name': 'Бло' }
@@ -647,7 +660,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             publicUrl: 'http://www.irr.ru/pages/119832.html',
             isActive: true
         }
-    ], multiplyUsersCoef), null, {dealerSiteStatuses: dealerSiteStatuses, dealers: dealers, sites: sites});
+    ], multiplyCoef), null, {dealerSiteStatuses: dealerSiteStatuses, dealers: dealers, sites: sites});
 
     var dealerSiteLogins = dealerSiteLoginsLoader.makeCollection([
         {
@@ -815,28 +828,94 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     var tariffs = tariffsLoader.makeCollection([
         {
             id: 1,
-            site: {id: 1},
-            type: 'periodical',
-            period: 10,
-            periodUnit: 'day',
-            count: 50,
-            isActive: true,
-            delay: 3,
-            groupName: 'Текущие'
-        },
-        {
-            id: 2,
-            site: {id: 1},
+            site: {id: 17},
             type: 'periodical',
             period: 1,
             periodUnit: 'month',
-            count: 75,
+            count: 25,
             isActive: true,
             delay: 3,
-            groupName: 'Текущие'
+            groupName: 'Стандарт (середина выдачи)'
+        },
+        {
+            id: 2,
+            site: {id: 17},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 50,
+            isActive: true,
+            delay: 3,
+            groupName: 'Стандарт (середина выдачи)'
         },
         {
             id: 3,
+            site: {id: 17},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 25,
+            isActive: true,
+            delay: 3,
+            groupName: 'PRO (объявления сверху)'
+        },
+        {
+            id: 4,
+            site: {id: 17},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 50,
+            isActive: true,
+            delay: 3,
+            groupName: 'PRO (объявления сверху)'
+        },
+        {
+            id: 5,
+            site: {id: 9},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: 1,
+            isActive: true,
+            delay: 3,
+            groupName: 'Поштучный'
+        },
+        {
+            id: 6,
+            site: {id: 9},
+            type: 'periodical',
+            period: 30,
+            periodUnit: 'day',
+            count: null,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
+        },
+        {
+            id: 7,
+            site: {id: 5},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 10,
+            isActive: true,
+            delay: 3,
+            groupName: 'Нет'
+        },
+        {
+            id: 8,
+            site: {id: 5},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 25,
+            isActive: true,
+            delay: 3,
+            groupName: 'Нет'
+        },
+        {
+            id: 9,
             site: {id: 5},
             type: 'periodical',
             period: 1,
@@ -844,29 +923,128 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
             count: 50,
             isActive: true,
             delay: 3,
-            groupName: 'Текущие'
+            groupName: 'Нет'
         },
         {
-            id: 4,
-            site: {id: 6},
-            type: 'periodical',
-            period: 3,
-            periodUnit: 'month',
-            count: 75,
-            isActive: false,
+            id: 10,
+            site: {id: 2},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: null,
+            isActive: true,
             delay: 3,
-            groupName: 'Текущие'
+            groupName: 'Поштучный'
         },
         {
-            id: 5,
-            site: {id: 6},
+            id: 11,
+            site: {id: 2},
             type: 'periodical',
-            period: 3,
+            period: 1,
             periodUnit: 'month',
             count: 100,
-            isActive: false,
+            isActive: true,
             delay: 3,
-            groupName: 'Текущие'
+            groupName: 'Помесячный'
+        },
+        {
+            id: 12,
+            site: {id: 2},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 200,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
+        },
+        {
+            id: 13,
+            site: {id: 11},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: null,
+            isActive: true,
+            delay: 3,
+            groupName: 'Поштучный'
+        },
+        {
+            id: 14,
+            site: {id: 11},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: null,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
+        },
+        {
+            id: 15,
+            site: {id: 1},
+            type: 'daily',
+            period: 1,
+            periodUnit: 'day',
+            count: null,
+            isActive: true,
+            delay: 3,
+            groupName: 'Поштучный'
+        },
+        {
+            id: 16,
+            site: {id: 1},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 10,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
+        },
+        {
+            id: 17,
+            site: {id: 1},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 25,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
+        },
+        {
+            id: 18,
+            site: {id: 1},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 10,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
+        },
+        {
+            id: 19,
+            site: {id: 6},
+            type: 'periodical',
+            period: 30,
+            periodUnit: 'day',
+            count: 30,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
+        },
+        {
+            id: 20,
+            site: {id: 6},
+            type: 'periodical',
+            period: 30,
+            periodUnit: 'day',
+            count: 50,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
         }
     ], null, {sites: sites});
 
@@ -886,83 +1064,200 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         {
             id: 1,
             tariff: {id: 1},
-            city: {id: 1},
+            city: null,
             activeFrom: '2014-01-01',
-            rate: 10000,
-            siteRate: 7000,
-            info: 'Помесячный за 50 в Москве'
+            rate: 2500,
+            siteRate: 2000,
+            info: 'Общий'
         },
         {
             id: 2,
-            tariff: {id: 1},
-            city: {id: 1},
+            tariff: {id: 2},
+            city: null,
             activeFrom: '2014-01-01',
-            rate: 7000,
-            siteRate: 5000,
-            info: 'Помесячный за 50 в Питере'
+            rate: 4000,
+            siteRate: 3000,
+            info: 'Общий'
         },
         {
             id: 3,
-            tariff: {id: 1},
+            tariff: {id: 3},
             city: null,
             activeFrom: '2014-01-01',
             rate: 5000,
-            siteRate: 3000,
-            info: 'Помесячный за 50 общий'
+            siteRate: 4000,
+            info: 'Общий'
         },
         {
             id: 4,
-            tariff: {id: 2},
-            city: {id: 1},
+            tariff: {id: 4},
+            city: null,
             activeFrom: '2014-01-01',
-            rate: 15000,
-            siteRate: 10000,
-            info: 'Помесячный за 75 в Москве'
+            rate: 8000,
+            siteRate: 6500,
+            info: 'Общий'
         },
         {
             id: 5,
-            tariff: {id: 2},
-            city: {id: 1},
+            tariff: {id: 5},
+            city: null,
             activeFrom: '2014-01-01',
-            rate: 10000,
-            siteRate: 7500,
-            info: 'Помесячный за 75 в Питере'
+            rate: 2,
+            siteRate: 1.50,
+            info: 'Общий'
         },
         {
             id: 6,
-            tariff: {id: 2},
+            tariff: {id: 6},
             city: null,
             activeFrom: '2014-01-01',
-            rate: 7000,
-            siteRate: 5000,
-            info: 'Помесячный за 75 общий'
+            rate: 4950,
+            siteRate: 4000,
+            info: 'Общий'
         },
         {
             id: 7,
-            tariff: {id: 3},
+            tariff: {id: 7},
             city: null,
-            activeFrom: '2014-06-30',
-            rate: 7000,
-            siteRate: 5000,
-            info: 'Только общая'
+            activeFrom: '2014-01-01',
+            rate: 2714,
+            siteRate: 2000,
+            info: 'Общий'
         },
         {
             id: 8,
-            tariff: {id: 4},
+            tariff: {id: 8},
             city: null,
-            activeFrom: '2013-06-30',
-            rate: 7500,
-            siteRate: 5500,
-            info: 'Только общая ставка'
+            activeFrom: '2014-01-01',
+            rate: 5428,
+            siteRate: 4000,
+            info: 'Общий'
         },
         {
             id: 9,
-            tariff: {id: 5},
+            tariff: {id: 9},
             city: null,
-            activeFrom: '2013-06-30',
-            rate: 10000,
-            siteRate: 7700,
-            info: 'Только общая ставка'
+            activeFrom: '2014-01-01',
+            rate: 10856,
+            siteRate: 8000,
+            info: 'Общий'
+        },
+        {
+            id: 10,
+            tariff: {id: 10},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 2,
+            siteRate: 1.5,
+            info: 'Общий'
+        },
+        {
+            id: 11,
+            tariff: {id: 11},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 3000,
+            siteRate: 2000,
+            info: 'Общий'
+        },
+        {
+            id: 12,
+            tariff: {id: 12},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 4500,
+            siteRate: 3000,
+            info: 'Общий'
+        },
+        {
+            id: 13,
+            tariff: {id: 13},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 3.20,
+            siteRate: 2.00,
+            info: 'Общий'
+        },
+        {
+            id: 14,
+            tariff: {id: 14},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 4720,
+            siteRate: 4000,
+            info: 'Общий'
+        },
+        {
+            id: 15,
+            tariff: {id: 15},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 4,
+            siteRate: 3,
+            info: 'Общий'
+        },
+        {
+            id: 16,
+            tariff: {id: 16},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 1080,
+            siteRate: 700,
+            info: 'Общий'
+        },
+        {
+            id: 17,
+            tariff: {id: 17},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 2550,
+            siteRate: 2000,
+            info: 'Общий'
+        },
+        {
+            id: 18,
+            tariff: {id: 18},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 4500,
+            siteRate: 4000,
+            info: 'Общий'
+        },
+        {
+            id: 19,
+            tariff: {id: 19},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 2230.20,
+            siteRate: 1700,
+            info: 'Общий'
+        },
+        {
+            id: 20,
+            tariff: {id: 20},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 2690.40,
+            siteRate: 2000,
+            info: 'Общий'
+        },
+        {
+            id: 21,
+            tariff: {id: 20},
+            city: {id: 2},
+            activeFrom: '2014-01-01',
+            rate: 3000,
+            siteRate: 2500,
+            info: 'Питер'
+        },
+        {
+            id: 22,
+            tariff: {id: 20},
+            city: {id: 1},
+            activeFrom: '2014-01-01',
+            rate: 4000,
+            siteRate: 3000,
+            info: 'Москва'
         }
     ], null, {tariffs: tariffs, cities: userDirectories.cities});
 
@@ -978,6 +1273,29 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         return processGet(url, regexTariffRatesGet, tariffRates, 'tariffRate');
     });
 
+    var dealerTariffs = dealerTariffsLoader.makeCollection([
+        {
+            id: 1,
+            dealer: {id: 3},
+            site: {id: 2},
+            tariff: {id: 11},
+            autoProlong: true,
+            renew: '0'
+        }
+    ], null, {dealers: dealers, sites: sites, tariffs: tariffs});
+
+    var regexDealerTariffsQuery = /^\/api2\/dealertariffs(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealerTariffsQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexDealerTariffsQuery, dealerTariffs.getItems(), 'dealerTariffs', DealerTariffs);
+    });
+    $httpBackend.whenPOST(regexDealerTariffsQuery).respond(function(method, url, data) {
+        return processPostQuery(url, regexDealerTariffsQuery, data, dealerTariffs, 'dealerTariffs', DealerTariffs);
+    });
+    var regexDealerTariffsGet = /^\/api2\/dealertariffs\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexDealerTariffsGet).respond(function(method, url, data) {
+        return processGet(url, regexDealerTariffsGet, dealerTariffs, 'dealerTariff');
+    });
+
     var saleTypes = saleTypesLoader.makeCollection([
         { id: 'card', name: 'Осн' },
         { id: 'addcard', name: 'Расш' },
@@ -989,107 +1307,196 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
         { id: false, name: 'Бло' }
     ]);
 
-    var sales = salesLoader.makeCollection([
+    var sales = salesLoader.makeCollection(multiplyArrFn([
         {
             id: 1,
             type: 'card',
             cardId: 1,
-            dealer: {id: 1},
-            site: {id: 1},
+            dealer: {id: 3},
+            site: {id: 17},
             tariff: {id: 1},
-            cardAmount: 119999.95,
-            count: 50,
+            cardAmount: 2500,
+            count: 25,
             activeFrom: '2014-04-01',
             activeTo: '2014-04-30',
             isActive: true,
             date: '2014-03-25',
-            amount: 119999.97,
-            siteAmount: 114999.97,
-            info: 'Основная карточка, потом расширенная'
+            amount: 2500,
+            siteAmount: 2000,
+            info: 'Основная карточка на am.ru'
         },
         {
             id: 2,
-            type: 'addcard',
+            type: 'card',
             cardId: 2,
-            dealer: {id: 1},
-            site: {id: 1},
-            tariff: {id: 2},
-            parentId: 1,
-            cardAmount: 2000.00,
-            count: 75,
-            activeFrom: '2014-04-01',
-            activeTo: '2014-04-30',
+            dealer: {id: 3},
+            site: {id: 9},
+            tariff: {id: 6},
+            cardAmount: 4950,
+            count: null,
+            activeFrom: '2014-04-15',
+            activeTo: '2014-05-14',
             isActive: true,
             date: '2014-04-10',
-            amount: 2000.00,
-            siteAmount: 1500.00,
-            info: 'Расширение до 75 объявлений'
+            amount: 4950,
+            siteAmount: 4000,
+            info: 'Основная карточка на auto.dmir.ru'
         },
         {
             id: 3,
-            type: 'extra',
-            cardId: 1,
-            dealer: {id: 1},
-            site: {id: 1},
-            activeFrom: '2014-04-01',
-            activeTo: '2015-04-30',
-            date: '2014-04-10',
-            amount: 3000.00,
-            siteAmount: 2000.00,
-            info: 'Выделение рамкой'
+            type: 'card',
+            cardId: 3,
+            dealer: {id: 3},
+            site: {id: 5},
+            tariff: {id: 8},
+            cardAmount: 5428,
+            count: 25,
+            activeFrom: '2014-05-01',
+            activeTo: '2014-05-31',
+            isActive: true,
+            date: '2014-04-25',
+            amount: 5428,
+            siteAmount: 4000,
+            info: 'Основная карточка на auto.ru'
         },
         {
             id: 4,
             type: 'card',
-            cardId: 3,
-            dealer: {id: 2},
-            site: {id: 6},
-            tariff: {id: 4},
-            cardAmount: 19999.95,
-            count: 50,
-            activeFrom: '2014-04-01',
-            activeTo: '2014-04-30',
+            cardId: 4,
+            dealer: {id: 3},
+            site: {id: 2},
+            tariff: {id: 11},
+            cardAmount: 3000,
+            count: 100,
+            activeFrom: '2014-05-01',
+            activeTo: '2014-05-31',
             isActive: false,
-            date: '2014-03-25',
-            amount: 19999.98,
-            siteAmount: 14999.98,
-            info: 'Основная карточка'
+            date: '2014-04-25',
+            amount: 3000,
+            siteAmount: 2000,
+            info: 'Основная карточка на bibika.ru'
         },
         {
             id: 5,
             type: 'card',
-            cardId: 4,
-            dealer: {id: 1},
-            site: {id: 1},
-            tariff: {id: 1},
-            cardAmount: 19999.95,
-            count: 50,
-            activeFrom: '2014-06-01',
-            activeTo: '2014-06-30',
+            cardId: 5,
+            dealer: {id: 3},
+            site: {id: 11},
+            tariff: {id: 14},
+            cardAmount: 4720,
+            count: null,
+            activeFrom: '2014-05-01',
+            activeTo: '2014-05-31',
             isActive: true,
-            date: '2014-03-25',
-            amount: 19999.95,
-            siteAmount: 14999.95,
-            info: 'Нерасширенная карточка'
+            date: '2014-04-25',
+            amount: 4720,
+            siteAmount: 4000,
+            info: 'Основная карточка на cars.ru'
         },
         {
             id: 6,
             type: 'card',
-            cardId: 4,
-            dealer: {id: 1},
+            cardId: 6,
+            dealer: {id: 3},
             site: {id: 1},
-            tariff: {id: 1},
-            cardAmount: 19999.95,
-            count: 50,
-            activeFrom: '2014-06-01',
-            activeTo: '2014-06-30',
+            tariff: {id: 17},
+            cardAmount: 2550,
+            count: 25,
+            activeFrom: '2014-05-01',
+            activeTo: '2014-05-31',
+            isActive: true,
+            date: '2014-04-25',
+            amount: 2550,
+            siteAmount: 2000,
+            info: 'Основная карточка на drom.ru'
+        },
+        {
+            id: 7,
+            type: 'card',
+            cardId: 7,
+            dealer: {id: 3},
+            site: {id: 6},
+            tariff: {id: 19},
+            cardAmount: 2230.20,
+            count: 30,
+            activeFrom: '2014-05-01',
+            activeTo: '2014-05-30',
+            isActive: true,
+            date: '2014-04-25',
+            amount: 2230.20,
+            siteAmount: 1700,
+            info: 'Основная карточка на irr.ru'
+        },
+        {
+            id: 8,
+            type: 'addcard',
+            cardId: 8,
+            parentId: 6,
+            dealer: {id: 3},
+            site: {id: 1},
+            tariff: {id: 18},
+            cardAmount: 1000,
+            count: 25,
+            activeFrom: '2014-05-16',
+            activeTo: '2014-05-31',
+            isActive: true,
+            date: '2014-05-15',
+            amount: 1000,
+            siteAmount: 500,
+            info: 'Расширение на drom.ru'
+        },
+        {
+            id: 9,
+            type: 'addcard',
+            cardId: 9,
+            parentId: 7,
+            dealer: {id: 3},
+            site: {id: 6},
+            tariff: {id: 20},
+            cardAmount: 200,
+            count: 20,
+            activeFrom: '2014-05-16',
+            activeTo: '2014-05-30',
             isActive: false,
-            date: '2014-03-25',
-            amount: 19999.97,
-            siteAmount: 14999.97,
-            info: 'Нерасширенная карточка'
+            date: '2014-05-15',
+            amount: 200,
+            siteAmount: 100,
+            info: 'Расширение на irr.ru'
+        },
+        {
+            id: 10,
+            type: 'extra',
+            cardId: 7,
+            dealer: {id: 3},
+            site: {id: 6},
+            activeFrom: '2014-05-01',
+            activeTo: '2014-05-30',
+            date: '2014-04-20',
+            amount: 300.00,
+            siteAmount: 200.00,
+            info: 'Выделение рамкой'
         }
-    ], null, {dealers: dealers, sites: sites, tariffs: tariffs, saleTypes: saleTypes, saleStatuses: saleStatuses});
+    ], multiplyCoef, function(i, len) {
+        this.cardId = this.cardId + i * len;
+        this.dealer = { id: dealers.getItems()[i].id };
+        if (this.parentId) {
+            this.parentId = this.parentId + i * len;
+        }
+    }), null, {dealers: dealers, sites: sites, tariffs: tariffs, saleTypes: saleTypes, saleStatuses: saleStatuses});
+
+    function multiplyArrFn(arr, coef, fn) {
+        coef = coef || 5;
+        var multiplyArray = [];
+
+        for (var i = 0; i < coef; i++) {
+            _.forEach(angular.copy(arr), function(value) {
+                value.id = value.id + i * arr.length;
+                fn.call(value, i, arr.length);
+                multiplyArray.push(value);
+            });
+        }
+        return multiplyArray;
+    }
 
     var regexSalesQuery = /^\/api2\/sales(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexSalesQuery).respond(function(method, url, data) {
@@ -1129,44 +1536,5 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyUsersCoef,
     var regexSalesDelete = /^\/api2\/sales\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexSalesDelete).respond(function(method, url, data) {
         return processDelete(url, regexSalesDelete, sales);
-    });
-
-    var dealerTariffs = dealerTariffsLoader.makeCollection([
-        {
-            id: 1,
-            dealer: {id: 1},
-            site: {id: 1},
-            tariff: {id: 2},
-            autoProlong: true,
-            renew: '0'
-        },
-        {
-            id: 1,
-            dealer: {id: 2},
-            site: {id: 1},
-            tariff: {id: 2},
-            autoProlong: true,
-            renew: '0'
-        },
-        {
-            id: 1,
-            dealer: {id: 1},
-            site: {id: 5},
-            tariff: {id: 3},
-            autoProlong: true,
-            renew: '0'
-        }
-    ], null, {dealers: dealers, sites: sites, tariffs: tariffs});
-
-    var regexDealerTariffsQuery = /^\/api2\/dealertariffs(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexDealerTariffsQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealerTariffsQuery, dealerTariffs.getItems(), 'dealerTariffs', DealerTariffs);
-    });
-    $httpBackend.whenPOST(regexDealerTariffsQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealerTariffsQuery, data, dealerTariffs, 'dealerTariffs', DealerTariffs);
-    });
-    var regexDealerTariffsGet = /^\/api2\/dealertariffs\/(?:([^\/]+))$/;
-    $httpBackend.whenGET(regexDealerTariffsGet).respond(function(method, url, data) {
-        return processGet(url, regexDealerTariffsGet, dealerTariffs, 'dealerTariff');
     });
 };

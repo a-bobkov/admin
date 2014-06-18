@@ -43,7 +43,7 @@ var regexpEmail = /^[\w-]+@[\w\.-]+$/;
 var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/;
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
 var regexpIdName = /^(\d+): (.+)$/;
-var regexpTariff = /^\d+ руб. за \d+ +(мес\.|дн\.), до \d+ объявлений$/;
+var regexpTariff = /^(\d+(?:.\d*|)) руб. за (\d+) +(мес\.|дн\.), до (\d+) объявлений$/;
 
 describe('MaxPoster Admin Frontend', function() {
 
@@ -674,7 +674,7 @@ describe('Sale App', function() {
 
     describe('Список продаж', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?archive=true');
+            browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
         });
 
         it('показывает количество продаж', function() {
@@ -921,22 +921,24 @@ describe('Sale App', function() {
         });
 
         it('сбрасывает фильтры по кнопке', function() {
-            var searchDealer = element.all(by.id('McomboSearchInput')).get(0);
-            searchDealer.click();
-            searchDealer.sendKeys('1');
-            var dropDealer = element.all(by.id('McomboDropChoiceItem')).get(0);
-            dropDealer.getText().then(function(selectedValue) {
-                dropDealer.click();
-                expect(element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
+            var dealerElem = element(by.id('saleFiltersDealers'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            dealerElemSearch.sendKeys('1');
+            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            dealerElemDrop.getText().then(function(selectedValue) {
+                dealerElemDrop.click();
+                expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
             });
 
-            var searchSite = element.all(by.id('McomboSearchInput')).get(1);
-            searchSite.click();
-            searchSite.sendKeys('1');
-            var dropSite = element.all(by.id('McomboDropChoiceItem')).get(0);
-            dropSite.getText().then(function(selectedValue) {
-                dropSite.click();
-                expect(element.all(by.id('McomboSelectedItem_0')).get(1).getText()).toBe(selectedValue);
+            var siteElem = element(by.id('saleFiltersSites'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            siteElemSearch.sendKeys('1');
+            var siteElemDrop = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            siteElemDrop.getText().then(function(selectedValue) {
+                siteElemDrop.click();
+                expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
             });
 
             var status = element(by.select('patterns.isActive'));
@@ -951,7 +953,8 @@ describe('Sale App', function() {
             expect(archive.isSelected()).toBeTruthy();
 
             element(by.id('SaleListFilterSetDefault')).click();
-            expect(element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
+            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
+            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
             expect(status.element(by.css('option:checked')).getText()).toBeFalsy();
             expect(type.element(by.css('option:checked')).getText()).toBeFalsy();
             expect(archive.isSelected()).toBeFalsy();
@@ -960,7 +963,7 @@ describe('Sale App', function() {
 
     describe('Редактирование карточки', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=card&archive=true');
+            browser.get('admin.html#/salelist?type=card&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowEdit')).get(0).click();
         });
 
@@ -1005,26 +1008,38 @@ describe('Sale App', function() {
             });
         });
 
-        it('при выборе сайта заполняет список тарифов', function() {
-            mapText(element.all(by.id('saleTariff'))).then(function(tariffs) {
-                var preTariffs = tariffs.join();
-                element.all(by.id('McomboSelectedItem_0')).get(1).getText().then(function(siteText) {
-                    var preSiteId = siteText.replace(regexpIdName, '$1');
-                    element.all(by.id('McomboRemoveItem_0')).get(1).click();
-                    mapText(element.all(by.id('McomboDropChoiceItem'))).then(function(dropTexts) {
-                        var newSiteIdx = _.findIndex(dropTexts, function(value) {
-                            return (value.replace(regexpIdName, '$1') !== preSiteId);
-                        });
-                        expect(newSiteIdx).toBeDefined();
-                        element.all(by.id('McomboDropChoiceItem')).get(newSiteIdx).click();
-                        mapText(element.all(by.id('saleTariff'))).then(function(tariffs) {
-                            expect(tariffs.join()).not.toEqual(preTariffs);
-                            expect(_.every(tariffs, function(value) {
-                                return (value.search(regexpTariff) !== -1);
-                            })).toBeTruthy();
-                        });
-                    });
+        it('при выборе сайта перезаполняет список тарифов', function() {
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            var tariffElemOptions = tariffElem.element.all(by.css('option'));
+            var siteElem = element(by.id('saleSite'));
+            var siteDropElems = siteElem.element.all(by.id('McomboDropChoiceItem'));
+
+            var preTariffs;
+            mapText(tariffElemOptions).then(function(tariffs) {
+                preTariffs = tariffs;
+            });
+
+            var preSite;
+            siteElem.element(by.id('McomboSelectedItem_0')).getText().then(function(selectedText) {
+                preSite = selectedText;
+                siteElem.element(by.id('McomboRemoveItem_0')).click();
+            });
+
+            mapText(siteDropElems).then(function(dropTexts) {
+                var newSiteIdx = _.findIndex(dropTexts, function(value) {
+                    return value !== preSite;
                 });
+                expect(newSiteIdx).toBeDefined();
+                siteDropElems.get(newSiteIdx).click();
+            });
+
+            mapText(tariffElemOptions).then(function(tariffs) {
+                tariffs = _.compact(tariffs);
+                expect(tariffs.length).toBeTruthy();
+                _.forEach(tariffs, function(tariff) {
+                    expect(tariff).toMatch(regexpTariff);
+                });
+                expect(_.intersection(tariffs, preTariffs).length).toBe(0);
             });
         });
 
@@ -1231,7 +1246,7 @@ describe('Sale App', function() {
 
     describe('Редактирование расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=addcard&archive=true');
+            browser.get('admin.html#/salelist?type=addcard&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowEdit')).get(0).click();
         });
 
@@ -1266,7 +1281,7 @@ describe('Sale App', function() {
 
     describe('Создание расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=card&archive=true');
+            browser.get('admin.html#/salelist?type=card&archive=true&itemsPerPage=15');
             mapText(element.all(by.id('SaleListRowAdd'))).then(function(rows) {
                 var saleIdx = rows.indexOf('расширить');
                 element.all(by.id('SaleListRowAdd')).get(saleIdx).click();
@@ -1285,7 +1300,7 @@ describe('Sale App', function() {
 
     describe('Редактирование доплаты', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=extra&archive=true');
+            browser.get('admin.html#/salelist?type=extra&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowEdit')).get(0).click();
         });
 
@@ -1336,7 +1351,7 @@ describe('Sale App', function() {
 
     describe('Создание доплаты', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=card&archive=true');
+            browser.get('admin.html#/salelist?type=card&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowExtra')).get(0).click();
         });
 
@@ -1358,7 +1373,7 @@ describe('Sale App', function() {
     describe('Сценарии использования', function() {
 
         beforeEach(function() {
-            browser.get('admin.html#/salelist?archive=true');
+            browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
         });
 
         it('Создание карточки', function() {
@@ -1435,8 +1450,11 @@ describe('Sale App', function() {
 
             var tariffElem = element(by.model('saleEdited.tariff'));
             mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+                function tariffPrice(tariffText) {
+                    return parseFloat(tariffText.replace(regexpTariff, '$1'));
+                }
                 var tariffIdx = _.findIndex(options, function(value) {
-                    return !!value && value !== tariffParentText;
+                    return !!value && tariffPrice(value) > tariffPrice(tariffParentText);
                 })
                 expect(tariffIdx).not.toBe(-1);
                 setSelect(tariffElem, tariffIdx);
