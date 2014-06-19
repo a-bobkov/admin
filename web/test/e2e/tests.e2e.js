@@ -44,6 +44,8 @@ var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2}
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
 var regexpIdName = /^(\d+): (.+)$/;
 var regexpTariff = /^(\d+(?:.\d*|)) руб. за (\d+) +(мес\.|дн\.), до (\d+) объявлений$/;
+var regexpSaleName = /^.+"(.+)".+"(.+)".*$/;
+var regexpTotalItems = /^.+: (\d+)$/;
 
 describe('MaxPoster Admin Frontend', function() {
 
@@ -1564,8 +1566,205 @@ describe('Sale App', function() {
                 });
             });
         });
-    });
 
+        it('Изменение карточки', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 1);
+
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+            var newAmount;
+            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                newAmount = parseFloatRu(amount) + 1;
+            });
+
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            browser.controlFlow().execute(function() {
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+
+                element(by.id('saleEditSave')).click();
+                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                    expect(parseFloatRu(amount)).toBe(newAmount);
+                });
+            });
+        });
+
+        it('Изменение расширения', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 2);
+
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+            var newAmount;
+            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                newAmount = parseFloatRu(amount) + 1;
+            });
+
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            browser.controlFlow().execute(function() {
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+
+                element(by.id('saleEditSave')).click();
+                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                    expect(parseFloatRu(amount)).toBe(newAmount);
+                });
+            });
+        });
+
+        it('Изменение доплаты', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 3);
+
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+            var newAmount;
+            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                newAmount = parseFloatRu(amount) + 1;
+            });
+
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            browser.controlFlow().execute(function() {
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+
+                element(by.id('saleEditSave')).click();
+                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
+                    expect(parseFloatRu(amount)).toBe(newAmount);
+                });
+            });
+        });
+
+        it('Удаление карточки', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 1);
+
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+
+            var totalItems;
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                totalItems = _.parseInt(totalItemsText.replace(regexpTotalItems, '$1'));
+            });
+
+            var saleRemove;
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                saleRemove = saleText;
+            });
+
+            element.all(by.id('SaleListRowRemove')).get(0).click();
+
+            var alertSaleParams;
+            var alert = browser.switchTo().alert();
+            alert.getText().then(function(alertText) {
+                alertSaleParams = alertText.replace(regexpSaleName, '$1;$2');
+                alert.accept();
+            });
+
+            var savedSaleListNoticeElem = element(by.id('savedSaleListNotice'));
+            expect(savedSaleListNoticeElem.isDisplayed()).toBeTruthy();
+            savedSaleListNoticeElem.getText().then(function(noticeText) {
+                expect(noticeText.replace(regexpSaleName, '$1;$2')).toBe(alertSaleParams);
+            });
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                expect(saleText).not.toBe(saleRemove);
+            });
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                expect(_.parseInt(totalItemsText.replace(regexpTotalItems, '$1'))).toBe(totalItems - 1);
+            });
+        });
+
+        it('Удаление расширения', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 2);
+
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+
+            var totalItems;
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                totalItems = _.parseInt(totalItemsText.replace(regexpTotalItems, '$1'));
+            });
+
+            var saleRemove;
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                saleRemove = saleText;
+            });
+
+            element.all(by.id('SaleListRowRemove')).get(0).click();
+
+            var alertSaleParams;
+            var alert = browser.switchTo().alert();
+            alert.getText().then(function(alertText) {
+                alertSaleParams = alertText.replace(regexpSaleName, '$1;$2');
+                alert.accept();
+            });
+
+            var savedSaleListNoticeElem = element(by.id('savedSaleListNotice'));
+            expect(savedSaleListNoticeElem.isDisplayed()).toBeTruthy();
+            savedSaleListNoticeElem.getText().then(function(noticeText) {
+                expect(noticeText.replace(regexpSaleName, '$1;$2')).toBe(alertSaleParams);
+            });
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                expect(saleText).not.toBe(saleRemove);
+            });
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                expect(_.parseInt(totalItemsText.replace(regexpTotalItems, '$1'))).toBe(totalItems - 1);
+            });
+        });
+
+        it('Удаление доплаты', function() {
+            var setElem = element(by.select('patterns.type'));
+            setSelect(setElem, 3);
+
+            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
+            amountElem.click();
+            amountElem.click();
+
+            var totalItems;
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                totalItems = _.parseInt(totalItemsText.replace(regexpTotalItems, '$1'));
+            });
+
+            var saleRemove;
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                saleRemove = saleText;
+            });
+
+            element.all(by.id('SaleListRowRemove')).get(0).click();
+
+            var alertSaleParams;
+            var alert = browser.switchTo().alert();
+            alert.getText().then(function(alertText) {
+                alertSaleParams = alertText.replace(regexpSaleName, '$1;$2');
+                alert.accept();
+            });
+
+            var savedSaleListNoticeElem = element(by.id('savedSaleListNotice'));
+            expect(savedSaleListNoticeElem.isDisplayed()).toBeTruthy();
+            savedSaleListNoticeElem.getText().then(function(noticeText) {
+                expect(noticeText.replace(regexpSaleName, '$1;$2')).toBe(alertSaleParams);
+            });
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                expect(saleText).not.toBe(saleRemove);
+            });
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                expect(_.parseInt(totalItemsText.replace(regexpTotalItems, '$1'))).toBe(totalItems - 1);
+            });
+        });
+    });
 });
 
 xdescribe('DealerSite App', function() {
