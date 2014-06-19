@@ -696,7 +696,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         if (newValue === oldValue) {
             return;
         }
-        if (!$scope.saleEdited.site || !$scope.saleEdited.count || !$scope.saleEdited.tariff) {
+        if (!$scope.saleEdited.site || !$scope.saleEdited.tariff) {
             $scope.saleEdited.info = '';
             return;
         }
