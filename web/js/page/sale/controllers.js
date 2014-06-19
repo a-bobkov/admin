@@ -544,7 +544,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         var tariffQueryParams = {
             filters: [
                 { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id },
-                { fields: ['type'], type: 'equal', value: 'periodical' }
+                { fields: ['type'], type: 'equal', value: 'periodical' },
+                { fields: ['isActive'], type: 'equal', value: true }
             ]
         };
         var oldDirectories = _.pick($scope, 'sites');
