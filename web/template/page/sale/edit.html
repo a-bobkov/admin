@@ -69,7 +69,7 @@
 	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' ng-required='!saleEdited.isExtra()' ui-greater-or-equal="saleParent.activeFrom" ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleActiveFrom.$invalid'>
 					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.required">Необходимо ввести дату.</li>
-					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.greaterOrEqual">Дата должна быть не ранее даты начала родительской карточки: {{saleParent.activeFrom | date:'shortDate'}}</li>
+					    <li id='saleActiveFromErrorGreater' ng-show="formSale.saleActiveFrom.$error.greaterOrEqual">Дата должна быть не ранее даты начала родительской карточки: {{saleParent.activeFrom | date:'shortDate'}}</li>
 					</ul>
 	           </td>
 	        </tr>
@@ -86,7 +86,7 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleCardAmount">Цена по тарифу</label></th>
 	            <td>
-	                <input class="span-8" type="text" ng-pattern="/^[\d]{1,6}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" ng-pattern="/^[\d]{1,6}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCardAmount.$invalid'>
 					    <li id='saleCardAmountErrorRequired' ng-show="formSale.saleCardAmount.$error.required">Необходимо ввести цену по тарифу.</li>
 					    <li id='saleCardAmountErrorPattern' ng-show="formSale.saleCardAmount.$error.pattern">Цена должна быть в формате 123456,78</li>
@@ -96,7 +96,7 @@
 	        <tr>
 	            <th><label for="saleAmount">Стоимость</label></th>
 	            <td>
-	                <input class="span-8" type="text" ng-pattern="/^[\d]{1,7}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" ng-pattern="/^[\d]{1,7}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleAmount.$invalid'>
 					    <li id='saleAmountErrorRequired' ng-show="formSale.saleAmount.$error.required">Необходимо ввести стоимость.</li>
 					    <li id='saleAmountErrorPattern' ng-show="formSale.saleAmount.$error.pattern">Стоимость должна быть в формате 1234567,89</li>
@@ -109,7 +109,7 @@
 	        <tr>
 	            <th><label for="saleSiteAmount">Себестоимость</label></th>
 	            <td>
-	                <input class="span-8" type="text" ng-pattern="/^[\d]{1,7}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" ng-pattern="/^[\d]{1,7}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleSiteAmount.$invalid'>
 					    <li id='saleSiteAmountErrorRequired' ng-show="formSale.saleSiteAmount.$error.required">Необходимо ввести себестоимость.</li>
 					    <li id='saleSiteAmountErrorPattern' ng-show="formSale.saleSiteAmount.$error.pattern">Себестоимость должна быть в формате 1234567,89</li>

@@ -943,9 +943,9 @@ describe('Sale App', function() {
                 expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
             });
 
-            var status = element(by.select('patterns.isActive'));
-            setSelect(status, 1);
-            expect(status.element(by.css('option:checked')).getText()).toBeTruthy();
+            var isActive = element(by.select('patterns.isActive'));
+            setSelect(isActive, 1);
+            expect(isActive.element(by.css('option:checked')).getText()).toBeTruthy();
 
             var type = element(by.select('patterns.type'));
             setSelect(type, 1);
@@ -957,7 +957,7 @@ describe('Sale App', function() {
             element(by.id('SaleListFilterSetDefault')).click();
             expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
             expect(siteElem.element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
-            expect(status.element(by.css('option:checked')).getText()).toBeFalsy();
+            expect(isActive.element(by.css('option:checked')).getText()).toBe('Н\/А');
             expect(type.element(by.css('option:checked')).getText()).toBeFalsy();
             expect(archive.isSelected()).toBeFalsy();
         });
@@ -1103,11 +1103,17 @@ describe('Sale App', function() {
             expect(element(by.id('saleCardAmountErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит ошибку, если cardAmount отрицательный', function() {
+        it('выводит ошибку, если cardAmount не соответствует формату', function() {
             var cardAmountElem = element(by.model('saleEdited.cardAmount'));
             cardAmountElem.clear();
             cardAmountElem.sendKeys('-1');
-            expect(element(by.id('saleCardAmountErrorMin')).isDisplayed()).toBeTruthy();
+            expect(element(by.id('saleCardAmountErrorPattern')).isDisplayed()).toBeTruthy();
+            cardAmountElem.clear();
+            cardAmountElem.sendKeys('1234567');
+            expect(element(by.id('saleCardAmountErrorPattern')).isDisplayed()).toBeTruthy();
+            cardAmountElem.clear();
+            cardAmountElem.sendKeys('123456.123');
+            expect(element(by.id('saleCardAmountErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение amount', function() {
@@ -1119,11 +1125,17 @@ describe('Sale App', function() {
             expect(element(by.id('saleAmountErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит ошибку, если amount отрицательный', function() {
+        it('выводит ошибку, если amount не соответствует формату', function() {
             var amountElem = element(by.model('saleEdited.amount'));
             amountElem.clear();
             amountElem.sendKeys('-1');
-            expect(element(by.id('saleAmountErrorMin')).isDisplayed()).toBeTruthy();
+            expect(element(by.id('saleAmountErrorPattern')).isDisplayed()).toBeTruthy();
+            amountElem.clear();
+            amountElem.sendKeys('12345678');
+            expect(element(by.id('saleAmountErrorPattern')).isDisplayed()).toBeTruthy();
+            amountElem.clear();
+            amountElem.sendKeys('1234567.123');
+            expect(element(by.id('saleAmountErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит предупреждение, если amount меньше cardAmount', function() {
@@ -1145,11 +1157,17 @@ describe('Sale App', function() {
             expect(element(by.id('saleSiteAmountErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит ошибку, если siteAmount отрицательный', function() {
+        it('выводит ошибку, если siteAmount не соответствует формату', function() {
             var siteAmountElem = element(by.model('saleEdited.siteAmount'));
             siteAmountElem.clear();
             siteAmountElem.sendKeys('-1');
-            expect(element(by.id('saleSiteAmountErrorMin')).isDisplayed()).toBeTruthy();
+            expect(element(by.id('saleSiteAmountErrorPattern')).isDisplayed()).toBeTruthy();
+            siteAmountElem.clear();
+            siteAmountElem.sendKeys('12345678');
+            expect(element(by.id('saleSiteAmountErrorPattern')).isDisplayed()).toBeTruthy();
+            siteAmountElem.clear();
+            siteAmountElem.sendKeys('1234567.123');
+            expect(element(by.id('saleSiteAmountErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение info', function() {
@@ -1159,16 +1177,6 @@ describe('Sale App', function() {
         it('выводит ошибку, если info пустой', function() {
             element(by.model('saleEdited.info')).clear();
             expect(element(by.id('saleInfoErrorRequired')).isDisplayed()).toBeTruthy();
-        });
-
-        it('выводит значение статуса', function() {
-            var setElem = element(by.model('saleEdited.isActive'));
-            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
-        });
-
-        it('заполняет список статусов', function() {
-            var isActiveElem = element(by.model('saleEdited.isActive'));
-            expect(isActiveElem.element.all(by.css('option')).count()).toBe(2);
         });
 
         it('после сохранения переходит к списку', function() {
@@ -1189,11 +1197,6 @@ describe('Sale App', function() {
 
         it('показывает режим работы формы', function() {
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание карточки$/);
-        });
-
-        it('выводит начальное значение статуса', function() {
-            var setElem = element(by.model('saleEdited.isActive'));
-            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^Н\/А$/);
         });
 
         it('выводит ошибку, если tariff пустой', function() {
@@ -1276,6 +1279,11 @@ describe('Sale App', function() {
             expect(element(by.id('saleTariffParent')).isEnabled()).toBeFalsy();
         });
 
+        it('выводит ошибку, если activeFrom меньше activeFrom родительской карточки', function() {
+            element(by.model('saleEdited.activeFrom')).sendKeys('010101');
+            expect(element(by.id('saleActiveFromErrorGreater')).isDisplayed()).toBeTruthy();
+        });
+
         it('не позволяет изменить activeTo', function() {
             expect(element(by.id('saleActiveTo')).isEnabled()).toBeFalsy();
         });
@@ -1292,11 +1300,6 @@ describe('Sale App', function() {
 
         it('показывает режим работы формы', function() {
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание расширения$/);
-        });
-
-        it('выводит начальное значение статуса', function() {
-            var setElem = element(by.model('saleEdited.isActive'));
-            expect(setElem.element(by.css('option:checked')).getText()).toMatch(/^Н\/А$/);
         });
     });
 
@@ -1344,10 +1347,6 @@ describe('Sale App', function() {
 
         it('не выводит saleCardAmount', function() {
             expect(element(by.id('saleCardAmount')).isDisplayed()).toBeFalsy();
-        });
-
-        it('не выводит isActive', function() {
-            expect(element(by.id('saleStatus')).isDisplayed()).toBeFalsy();
         });
     });
 
