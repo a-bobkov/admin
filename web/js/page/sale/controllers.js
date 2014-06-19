@@ -527,6 +527,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.actionName = "Создание карточки";
         $scope.saleEdited = new Sale ({
             type: 'card',
+            cardId: null,
             date: new Date,
             isActive: false
         }, $scope);
@@ -742,6 +743,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.actionName = "Создание расширения";
         $scope.saleEdited = new Sale ({
             type: 'addcard',
+            cardId: null,
             parentId: $scope.saleParent.cardId,
             date: new Date,
             isActive: false
