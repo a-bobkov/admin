@@ -221,7 +221,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.patterns = {
             dealers: [],
             sites: [],
-            isActive: null,
+            isActive: $scope.saleStatuses.get(false),
             type: null,
             archive: false
         };
