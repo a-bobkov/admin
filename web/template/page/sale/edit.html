@@ -130,19 +130,6 @@
 	    </table>
 	</fieldset>
 
-	<fieldset class="span-24" ng-show='!saleEdited.isExtra()'>
-	    <legend>Статус</legend>
-	    <table class='parameters'>
-	        <tr>
-	            <th><label for="saleStatus">Статус</label></th>
-	            <td>
-	                <select id="saleStatus" name="saleStatus" ng-model='saleEdited.isActive' ng-options='opt.name for opt in saleStatuses.getItems()' ng-disabled='formSaleKey.$invalid'>
-	                </select>
-	            </td>
-	        </tr>
-	    </table>
-	</fieldset>
-
 	<div class="span-10 prepend-top clear">
 	    <ul class="actions row">
 	        <li class="list"><a id='saleEditCancel' href="#/salelist">Отменить</a></li>
