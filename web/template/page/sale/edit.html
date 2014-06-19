@@ -85,20 +85,20 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleCardAmount">Цена по тарифу</label></th>
 	            <td>
-	                <input class="span-8" type="number" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' ng-required='!saleEdited.isExtra()' min='0' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="text" ng-pattern="/^[\d]{1,6}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCardAmount.$invalid'>
 					    <li id='saleCardAmountErrorRequired' ng-show="formSale.saleCardAmount.$error.required">Необходимо ввести цену по тарифу.</li>
-					    <li id='saleCardAmountErrorMin' ng-show="formSale.saleCardAmount.$error.min">Цена должна быть неотрицательной.</li>
+					    <li id='saleCardAmountErrorPattern' ng-show="formSale.saleCardAmount.$error.pattern">Цена должна быть в формате 123456,78</li>
 					</ul>
 	           </td>
 	        </tr>
 	        <tr>
 	            <th><label for="saleAmount">Стоимость</label></th>
 	            <td>
-	                <input class="span-8" type="number" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required min='0' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="text" ng-pattern="/^[\d]{1,7}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleAmount.$invalid'>
 					    <li id='saleAmountErrorRequired' ng-show="formSale.saleAmount.$error.required">Необходимо ввести стоимость.</li>
-					    <li id='saleAmountErrorMin' ng-show="formSale.saleAmount.$error.min">Стоимость должна быть неотрицательной.</li>
+					    <li id='saleAmountErrorPattern' ng-show="formSale.saleAmount.$error.pattern">Стоимость должна быть в формате 1234567,89</li>
 					</ul>
 					<ul class="warning_list" ng-show='saleEdited.amount < saleEdited.cardAmount'>
 					    <li id='saleEditAmountWarningLessCard' ng-show="saleEdited.amount < saleEdited.cardAmount">Стоимость меньше цены по тарифу.</li>
@@ -108,10 +108,10 @@
 	        <tr>
 	            <th><label for="saleSiteAmount">Себестоимость</label></th>
 	            <td>
-	                <input class="span-8" type="number" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required min='0' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="text" ng-pattern="/^[\d]{1,7}(?:,\d{0,2}|\.\d{0,2}|)$/" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleSiteAmount.$invalid'>
 					    <li id='saleSiteAmountErrorRequired' ng-show="formSale.saleSiteAmount.$error.required">Необходимо ввести себестоимость.</li>
-					    <li id='saleSiteAmountErrorMin' ng-show="formSale.saleSiteAmount.$error.min">Себестоимость должна быть неотрицательной.</li>
+					    <li id='saleSiteAmountErrorPattern' ng-show="formSale.saleSiteAmount.$error.pattern">Себестоимость должна быть в формате 1234567,89</li>
 					</ul>
 					<ul class="warning_list" ng-show='saleEdited.siteAmount >= saleEdited.amount'>
 					    <li id='saleEditSiteAmountWarningGreaterAmount' ng-show="saleEdited.siteAmount > saleEdited.amount">Себестоимость больше стоимости.</li>
