@@ -66,9 +66,10 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleActiveFrom">С</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' ng-required='!saleEdited.isExtra()' ui-greater-or-equal="saleParent.activeFrom" ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleActiveFrom.$invalid'>
 					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.required">Необходимо ввести дату.</li>
+					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.greaterOrEqual">Дата должна быть не ранее даты начала родительской карточки: {{saleParent.activeFrom | date:'shortDate'}}</li>
 					</ul>
 	           </td>
 	        </tr>
@@ -121,7 +122,7 @@
 	        <tr>
 	            <th><label for="saleInfo">Комментарий</label></th>
 	            <td>
-	                <input class="span-18" type="text" name="saleInfo" id="saleInfo" ng-model='saleEdited.info' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-18" type="text" maxlength='100' name="saleInfo" id="saleInfo" ng-model='saleEdited.info' required ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleInfo.$invalid'>
 					    <li id='saleInfoErrorRequired' ng-show="formSale.saleInfo.$error.required">Необходимо ввести комментарий.</li>
 					</ul>

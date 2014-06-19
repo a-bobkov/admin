@@ -877,7 +877,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         },
         link: function (scope, elem, attrs, ctrl) {
             scope.$watch('[_oneValue, _otherValue]', function() {
-                ctrl.$setValidity('greaterOrEqual', !scope._required || scope._oneValue >= scope._otherValue);
+                ctrl.$setValidity('greaterOrEqual', !scope._required || !scope._otherValue || scope._oneValue >= scope._otherValue);
             }, true);
         }
     };
