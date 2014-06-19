@@ -36,6 +36,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                 newValue = directories.saleStatuses.get(value);
             } else if (key === 'activeFrom' || key === 'activeTo' || key === 'date') {
                 newValue = new Date(value);
+                newValue.setHours(0, 0, 0, 0);
             } else {
                 newValue = value;
             }

@@ -659,6 +659,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $scope.saleEdited.activeFrom = angular.copy($scope.lastActiveCard.activeTo);
         } else {
             $scope.saleEdited.activeFrom = new Date();
+            $scope.saleEdited.activeFrom.setHours(0, 0, 0, 0);
         }
         $scope.saleEdited.activeTo = angular.copy($scope.saleEdited.activeFrom);
         $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
@@ -765,6 +766,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             }
         });
         $scope.saleEdited.activeFrom = new Date();
+        $scope.saleEdited.activeFrom.setHours(0, 0, 0, 0);
         if ($scope.saleEdited.site.id !== 1 && $scope.saleEdited.site.id !== 5) {   // Дром и Ауто.ру
             $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
         }
@@ -792,8 +794,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         if (!$scope.saleEdited.tariff || !$scope.saleEdited.activeFrom) {
             return;
         }
-        var intervalParent = ($scope.saleParent.activeTo - $scope.saleParent.activeFrom) * 1000 * 60 * 60 * 24 + 1;
-        var intervalNew = ($scope.saleEdited.activeTo - $scope.saleEdited.activeFrom) * 1000 * 60 * 60 * 24 + 1;
+        var intervalParent = ($scope.saleParent.activeTo - $scope.saleParent.activeFrom) / (1000 * 60 * 60 * 24) + 1;
+        var intervalNew = ($scope.saleEdited.activeTo - $scope.saleEdited.activeFrom) / (1000 * 60 * 60 * 24) + 1;
         var k = intervalNew / intervalParent;
         var dealer = $scope.saleEdited.dealer;
         var tariffRates = $scope.tariffRates.getItems();

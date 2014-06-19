@@ -27,7 +27,9 @@
         }
 
         // return new Date(year, (month - 1), day);
-        return new Date(dateString);
+        var d = new Date(dateString);
+        d.setHours(0, 0, 0, 0);
+        return d;
     }
 
     /**
