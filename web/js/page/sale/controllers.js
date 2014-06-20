@@ -80,27 +80,52 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                         var id = _.parseInt(ls.id);
                         return salesLoader.loadItem(id, directories).then(function(salesDirectories) {
                             _.assign(directories, salesDirectories);
+                            delete directories.tariffs;
                             directories.city = directories.sale.dealer.city;
-                            var tariffQueryParams = {
+                            var addSaleQueryParams = {
                                 filters: [
-                                    { fields: ['site'], type: 'equal', value: directories.sale.site.id },
-                                    { fields: ['type'], type: 'equal', value: 'periodical' },
-                                    { fields: ['isActive'], type: 'equal', value: true }
+                                    { fields: ['type'], type: 'equal', value: 'addcard' },
+                                    { fields: ['parentId'], type: 'equal', value: directories.sale.cardId }
                                 ]
                             };
-                            return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
-                                _.assign(directories, tariffsDirectories);
-                                var tariffs = directories.tariffs.getItems();
-                                unite(tariffs, directories.sale.tariff);
-                                var dealer = directories.dealers.getItems()[0];
-                                var tariffRateQueryParams = {
+                            return salesLoader.loadItems(addSaleQueryParams, directories).then(function(salesDirectories) {
+                                var addSale = salesDirectories.sales.getItems()[0];
+                                if (addSale) {
+                                    directories.addSale = addSale;
+                                }
+                                var extraSaleQueryParams = {
                                     filters: [
-                                        { fields: ['tariff'], type: 'in', value: _.pluck(tariffs, 'id') },
-                                        { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
+                                        { fields: ['type'], type: 'equal', value: 'extra' },
+                                        { fields: ['cardId'], type: 'equal', value: directories.sale.cardId }
                                     ]
                                 };
-                                return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
-                                    return _.assign(directories, tariffRateDirectories);
+                                return salesLoader.loadItems(extraSaleQueryParams, directories).then(function(salesDirectories) {
+                                    var extraSales = salesDirectories.sales;
+                                    if (extraSales.getItems().length) {
+                                        directories.extraSales = extraSales;
+                                    }
+                                    var tariffQueryParams = {
+                                        filters: [
+                                            { fields: ['site'], type: 'equal', value: directories.sale.site.id },
+                                            { fields: ['type'], type: 'equal', value: 'periodical' },
+                                            { fields: ['isActive'], type: 'equal', value: true }
+                                        ]
+                                    };
+                                    return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
+                                        _.assign(directories, tariffsDirectories);
+                                        var tariffs = directories.tariffs.getItems();
+                                        unite(tariffs, directories.sale.tariff);
+                                        var dealer = directories.dealers.getItems()[0];
+                                        var tariffRateQueryParams = {
+                                            filters: [
+                                                { fields: ['tariff'], type: 'in', value: _.pluck(tariffs, 'id') },
+                                                { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
+                                            ]
+                                        };
+                                        return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
+                                            return _.assign(directories, tariffRateDirectories);
+                                        });
+                                    });
                                 });
                             });
                         });
