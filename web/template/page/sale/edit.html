@@ -54,10 +54,9 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleCount">Количество машин</label></th>
 	            <td>
-	                <input class="span-8" type="number" name="saleCount" id="saleCount" ng-model='saleEdited.count' min='0' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" name="saleCount" id="saleCount" ng-model='saleEdited.count' min='1' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCount.$invalid'>
-					    <li id='saleCountErrorRequired' ng-show="formSale.saleCount.$error.required">Необходимо ввести количество.</li>
-					    <li id='saleCountErrorMin' ng-show="formSale.saleCount.$error.min">Количество должно быть неотрицательным.</li>
+					    <li id='saleCountErrorMin' ng-show="formSale.saleCount.$error.min">Количество должно быть положительным.</li>
 					</ul>
 					<ul class="warning_list" ng-show='saleEdited.isCard()'>
 					    <li id='saleEditCountWarningDifferent' ng-show='saleEdited.count - saleEdited.tariff.count'>Количество отличается от тарифа.</li>

@@ -725,7 +725,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $scope.saleEdited.info = '';
             return;
         }
-        $scope.saleEdited.info = 'Оплата на сайте ' + $scope.saleEdited.site.name + ' размещения ' + $scope.saleEdited.count + ' объявлений в течение ' + $scope.saleEdited.tariff.period + ' ' + $scope.saleEdited.tariff.periodUnitName();
+        $scope.saleEdited.info = 'Оплата на сайте ' + $scope.saleEdited.site.name + ' размещения ' + 
+            ($scope.saleEdited.count ? $scope.saleEdited.count : 'неограниченно') + ' объявлений в течение ' + 
+            $scope.saleEdited.tariff.period + ' ' + $scope.saleEdited.tariff.periodUnitName();
     }, true);
 
     $scope.saveSaleEdited = function() {
@@ -832,8 +834,10 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }, true);
 
     $scope.$watch('saleEdited.count', function setInfo(newValue, oldValue) {
-        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за размещение ' + $scope.saleEdited.count + ' объявлений.';
+        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за размещение ' +
+            ($scope.saleEdited.count ? $scope.saleEdited.count : 'неограниченно') + ' объявлений.'; 
     });
+
 
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {

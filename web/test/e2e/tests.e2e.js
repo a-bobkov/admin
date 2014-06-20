@@ -1049,11 +1049,6 @@ describe('Sale App', function() {
             expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatch(regexpInt);
         });
 
-        it('выводит ошибку, если count пустой', function() {
-            element(by.model('saleEdited.count')).clear();
-            expect(element(by.id('saleCountErrorRequired')).isDisplayed()).toBeTruthy();
-        });
-
         it('выводит ошибку, если count отрицательный', function() {
             var count = element(by.model('saleEdited.count'));
             count.clear();
