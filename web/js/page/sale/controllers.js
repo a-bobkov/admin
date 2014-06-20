@@ -154,17 +154,29 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                         toResolve = salesLoader.loadItem(id, directories).then(function(salesDirectories) {
                             _.assign(directories, salesDirectories);
                             delete directories.tariffs;
-                            return salesDirectories.sale.parentId;
+                            var addSaleQueryParams = {
+                                filters: [
+                                    { fields: ['type'], type: 'equal', value: 'addcard' },
+                                    { fields: ['parentId'], type: 'equal', value: directories.sale.cardId }
+                                ]
+                            };
+                            return salesLoader.loadItems(addSaleQueryParams, directories).then(function(addSalesDirectories) {
+                                var addSale = addSalesDirectories.sales.getItems()[0];
+                                if (addSale) {
+                                    directories.addSale = addSale;
+                                }
+                                return salesDirectories.sale.parentId;
+                            });
                         });
                     }
                     return toResolve.then(function(parentId) {
-                        var saleQueryParams = {
+                        var parentSaleQueryParams = {
                             filters: [
                                 { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
                                 { fields: ['cardId'], type: 'equal', value: parentId }
                             ]
                         };
-                        return salesLoader.loadItems(saleQueryParams, directories).then(function(salesDirectories) {
+                        return salesLoader.loadItems(parentSaleQueryParams, directories).then(function(salesDirectories) {
                             directories.saleParent = salesDirectories.sales.getItems()[0];
                             delete salesDirectories.sales;
                             _.assign(directories, salesDirectories);

@@ -1045,6 +1045,17 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             isActive: true,
             delay: 3,
             groupName: 'Помесячный'
+        },
+        {
+            id: 21,
+            site: {id: 6},
+            type: 'periodical',
+            period: 30,
+            periodUnit: 'day',
+            count: 100,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
         }
     ], null, {sites: sites});
 
@@ -1258,6 +1269,15 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             rate: 4000,
             siteRate: 3000,
             info: 'Москва'
+        },
+        {
+            id: 23,
+            tariff: {id: 21},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 3150.60,
+            siteRate: 2500,
+            info: 'Общий'
         }
     ], null, {tariffs: tariffs, cities: userDirectories.cities});
 
@@ -1475,7 +1495,25 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             amount: 300.00,
             siteAmount: 200.00,
             info: 'Доплата на сайте irr.ru за выделение рамкой'
-        }
+        },
+        {
+            id: 11,
+            type: 'addcard',
+            cardId: 11,
+            parentId: 9,
+            dealer: {id: 3},
+            site: {id: 6},
+            tariff: {id: 21},
+            cardAmount: 300,
+            count: 50,
+            activeFrom: '2014-05-20',
+            activeTo: '2014-05-30',
+            isActive: false,
+            date: '2014-05-19',
+            amount: 250,
+            siteAmount: 120,
+            info: 'Второе расширение на irr.ru'
+        },
     ], multiplyCoef, function(i, len) {
         this.cardId = this.cardId + i * len;
         this.dealer = { id: dealers.getItems()[i].id };
