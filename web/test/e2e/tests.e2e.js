@@ -1045,6 +1045,15 @@ describe('Sale App', function() {
             });
         });
 
+        it('выводит значение date', function() {
+            expect(element(by.model('saleEdited.date')).getAttribute('value')).toMatch(regexpDateISO);
+        });
+
+        it('выводит ошибку, если date пустое', function() {
+            element(by.model('saleEdited.date')).sendKeys('0');
+            expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeTruthy();
+        });
+
         it('выводит значение count', function() {
             expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatch(regexpInt);
         });

@@ -51,6 +51,15 @@
 	<fieldset class="span-24">
 	    <legend>Атрибуты</legend>
 	    <table class='parameters'>
+	        <tr>
+	            <th><label for="saleDate">Дата</label></th>
+	            <td>
+	                <input class="span-8" type="date" name="saleDate" id="saleDate" ng-model='saleEdited.date' required ng-disabled='formSaleKey.$invalid'>
+					<ul class="error_list" ng-show='formSale.saleDate.$invalid'>
+					    <li id='saleDateErrorRequired' ng-show="formSale.saleDate.$error.required">Необходимо ввести дату продажи.</li>
+					</ul>
+	           </td>
+	        </tr>
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleCount">Количество машин</label></th>
 	            <td>
