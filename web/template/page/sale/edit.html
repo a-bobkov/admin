@@ -34,10 +34,11 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleTariff">{{tariffFieldTitle}}</label></th>
 	            <td>
-		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates.getItems()) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site' ng-required='!saleEdited.isExtra()'>
+		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates.getItems()) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site' ng-required='!saleEdited.isExtra()' is-active>
 		            </select>
 					<ul class="error_list" ng-show='formSaleKey.saleTariff.$invalid'>
 					    <li id='saleEditTariffErrorRequired' ng-show="formSaleKey.saleTariff.$error.required">Необходимо выбрать тариф.</li>
+					    <li id='saleEditTariffErrorIsActive' ng-show="formSaleKey.saleTariff.$error.isActive">Необходимо выбрать активный тариф.</li>
 					</ul>
 					<ul class="warning_list" ng-show='saleEditTariffWarningNoDefaultTariff'>
 					    <li id='saleEditTariffWarningNoDefaultTariff' ng-show="saleEditTariffWarningNoDefaultTariff">У салона не включен экспорт на сайт.</li>

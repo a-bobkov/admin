@@ -1019,7 +1019,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             type: 'periodical',
             period: 1,
             periodUnit: 'month',
-            count: 10,
+            count: 50,
             isActive: true,
             delay: 3,
             groupName: 'Помесячный'

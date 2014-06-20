@@ -81,7 +81,8 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
         var tariffRate = this.getLastRate(city, tariffRates);
         var rate = (tariffRate) ? tariffRate.rate : '???';
         return rate + ' руб. за ' + this.period + '  ' + this.periodUnitName() +
-            ((this.count) ? ', до ' + this.count + ' объявлений' : '');
+            ((this.count) ? ', до ' + this.count + ' объявлений' : '') +
+            ((this.isActive) ? '' : ' (Н/А)');
     }
 
     return Tariff;

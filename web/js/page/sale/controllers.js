@@ -8,6 +8,15 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
 .config(['$routeProvider', function($routeProvider) {
 
+    function unite(array, elem) {
+        var idx = _.findIndex(array, {id: elem.id});
+        if (idx !== -1) {
+            array[idx] = elem;
+        } else {
+            array.push(elem);
+        }
+    }
+
     $routeProvider
     .when('/salelist', {
         templateUrl: 'template/page/sale/list.html',
@@ -75,13 +84,14 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             var tariffQueryParams = {
                                 filters: [
                                     { fields: ['site'], type: 'equal', value: directories.sale.site.id },
-                                    { fields: ['type'], type: 'equal', value: 'periodical' }
+                                    { fields: ['type'], type: 'equal', value: 'periodical' },
+                                    { fields: ['isActive'], type: 'equal', value: true }
                                 ]
                             };
                             return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
                                 _.assign(directories, tariffsDirectories);
-                                directories.sale.tariff = tariffsDirectories.tariffs.get(directories.sale.tariff.id);
-                                var tariffs = tariffsDirectories.tariffs.getItems();
+                                var tariffs = directories.tariffs.getItems();
+                                unite(tariffs, directories.sale.tariff);
                                 var dealer = directories.dealers.getItems()[0];
                                 var tariffRateQueryParams = {
                                     filters: [
@@ -136,16 +146,17 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             var tariffQueryParams = {
                                 filters: [
                                     { fields: ['site'], type: 'equal', value: directories.saleParent.site.id },
-                                    { fields: ['type'], type: 'equal', value: 'periodical' }
+                                    { fields: ['type'], type: 'equal', value: 'periodical' },
+                                    { fields: ['isActive'], type: 'equal', value: true }
                                 ]
                             };
                             return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
                                 _.assign(directories, tariffsDirectories);
-                                directories.saleParent.tariff = tariffsDirectories.tariffs.get(directories.saleParent.tariff.id);
+                                var tariffs = directories.tariffs.getItems();
+                                unite(tariffs, directories.saleParent.tariff);
                                 if (directories.sale) {
-                                    directories.sale.tariff = tariffsDirectories.tariffs.get(directories.sale.tariff.id);
+                                    unite(tariffs, directories.sale.tariff);
                                 }
-                                var tariffs = tariffsDirectories.tariffs.getItems();
                                 var dealer = directories.dealers.getItems()[0];
                                 var tariffRateQueryParams = {
                                     filters: [
@@ -879,6 +890,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             scope.$watch('[_oneValue, _otherValue]', function() {
                 ctrl.$setValidity('greaterOrEqual', !scope._required || !scope._otherValue || scope._oneValue >= scope._otherValue);
             }, true);
+        }
+    };
+})
+
+.directive('isActive', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        scope: {
+            _value: '=ngModel',
+            _required: '=ngRequired'
+        },
+        link: function (scope, elem, attrs, ctrl) {
+            scope.$watch('_value', function() {
+                ctrl.$setValidity('isActive', !scope._required || !scope._value || scope._value.isActive);
+            });
         }
     };
 })
