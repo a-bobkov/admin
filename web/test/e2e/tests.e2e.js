@@ -1373,6 +1373,10 @@ describe('Sale App', function() {
             var siteElem = element(by.id('saleSite'));
             expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
         });
+
+        it('выводит ошибку, если info не дописано', function() {
+            expect(element(by.id('saleInfoErrorPattern')).isDisplayed()).toBeTruthy();
+        });
     });
 
     describe('Сценарии использования', function() {
@@ -1508,6 +1512,8 @@ describe('Sale App', function() {
                 var siteAmountElem = element(by.model('saleEdited.siteAmount'));
                 siteAmountElem.clear();
                 siteAmountElem.sendKeys((newAmount - 1).toString());
+
+                element(by.model('saleEdited.info')).sendKeys('выделение');
 
                 element(by.id('saleEditSave')).click();
                 element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(floatText) {

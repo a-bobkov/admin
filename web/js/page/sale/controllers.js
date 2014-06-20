@@ -880,8 +880,16 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }, $scope);
         $scope.saleEdited.dealer = $scope.saleParent.dealer;
         $scope.saleEdited.site = $scope.saleParent.site;
-        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за ';
+        $scope.saleEdited.info = info();
     }
+
+    function info() {
+        return 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за ';
+    }
+
+    $scope.infoPattern = function() {
+        return '^' + info() + '\\s*\\S+';
+    };
 
     $scope.saveSaleEdited = function() {
         $scope.saleEdited.save($scope).then(function(sale) {
@@ -921,6 +929,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             scope.$watch('_value', function() {
                 ctrl.$setValidity('isActive', !scope._required || !scope._value || scope._value.isActive);
             });
+        }
+    };
+})
+
+.directive('maxInfoPattern', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        scope: {
+            _value: '=ngModel',
+            _pattern: '=maxInfoPattern'
+        },
+        link: function (scope, elem, attrs, ctrl) {
+            scope.$watch('[_value, _pattern]', function() {
+                ctrl.$setValidity('infoPattern', !scope._value || scope._value.match(new RegExp(scope._pattern)) !== null);
+            }, true);
         }
     };
 })

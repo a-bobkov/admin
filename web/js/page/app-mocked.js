@@ -1474,7 +1474,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             date: '2014-04-20',
             amount: 300.00,
             siteAmount: 200.00,
-            info: 'Выделение рамкой'
+            info: 'Доплата на сайте irr.ru за выделение рамкой'
         }
     ], multiplyCoef, function(i, len) {
         this.cardId = this.cardId + i * len;

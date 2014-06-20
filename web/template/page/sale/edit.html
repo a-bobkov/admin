@@ -134,9 +134,10 @@
 	        <tr>
 	            <th><label for="saleInfo">Комментарий</label></th>
 	            <td>
-	                <input class="span-18" type="text" maxlength='100' name="saleInfo" id="saleInfo" ng-model='saleEdited.info' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-18" type="text" maxlength='100' max-info-pattern="infoPattern()" name="saleInfo" id="saleInfo" ng-model='saleEdited.info' required ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleInfo.$invalid'>
 					    <li id='saleInfoErrorRequired' ng-show="formSale.saleInfo.$error.required">Необходимо ввести комментарий.</li>
+					    <li id='saleInfoErrorPattern' ng-show="formSale.saleInfo.$error.infoPattern">Необходимо дописать назначение доплаты.</li>
 					</ul>
 	           </td>
 	        </tr>
