@@ -72,6 +72,9 @@
 					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.required">Необходимо ввести дату.</li>
 					    <li id='saleActiveFromErrorGreater' ng-show="formSale.saleActiveFrom.$error.greaterOrEqual">Дата должна быть не ранее даты начала родительской карточки: {{saleParent.activeFrom | date:'shortDate'}}</li>
 					</ul>
+					<ul class="warning_list" ng-show='saleEdited.isCard()'>
+					    <li id='saleEditActiveFromWarningDifferent' ng-show='saleEdited.activeTo - activeTo(saleEdited.activeFrom, saleEdited.tariff)'>Разница дат "По" - "С" не соответствует тарифу.</li>
+					</ul>
 	           </td>
 	        </tr>
 	        <tr ng-show='!saleEdited.isExtra()'>

@@ -659,6 +659,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         });
     }, true);
 
+    $scope.activeTo = function(activeFrom, tariff) {
+        if (!activeFrom || !tariff) {
+            return;
+        }
+        var activeTo = angular.copy(activeFrom);
+        activeTo.setDate(activeTo.getDate() - 1);
+        if (tariff.periodUnit === 'day') {
+            activeTo.setDate(activeTo.getDate() + tariff.period);
+        } else if (tariff.periodUnit === 'month') {
+            activeTo.setMonth(activeTo.getMonth() + tariff.period);
+        } else {
+            throw Error('Неизвестное значение единицы периода тарифа: ' + tariff.periodUnit);
+        }
+        return activeTo;
+    }
+
     $scope.$watch('[lastActiveCard, saleEdited.tariff]', function setActiveDates(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
@@ -669,18 +685,13 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             return;
         }
         if ($scope.lastActiveCard) {
-            $scope.saleEdited.activeFrom = angular.copy($scope.lastActiveCard.activeTo);
+            $scope.saleEdited.activeFrom = $scope.lastActiveCard.activeTo;
         } else {
             $scope.saleEdited.activeFrom = new Date();
             $scope.saleEdited.activeFrom.setHours(0, 0, 0, 0);
         }
-        $scope.saleEdited.activeTo = angular.copy($scope.saleEdited.activeFrom);
         $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
-        if ($scope.saleEdited.tariff.periodUnit === 'day') {
-            $scope.saleEdited.activeTo.setDate($scope.saleEdited.activeTo.getDate() + $scope.saleEdited.tariff.period);
-        } else if ($scope.saleEdited.tariff.periodUnit === 'month') {
-            $scope.saleEdited.activeTo.setMonth($scope.saleEdited.activeTo.getMonth() + $scope.saleEdited.tariff.period);
-        }
+        $scope.saleEdited.activeTo = $scope.activeTo($scope.saleEdited.activeFrom, $scope.saleEdited.tariff);
     }, true);
 
     $scope.$watch('[city, saleEdited.tariff, tariffRates]', function setCountAndSums(newValue, oldValue) {
