@@ -64,67 +64,133 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     .when('/sale/card', {       // ?id=new - создание новой карточки; ?id=5 - редактирование карточки 5
         templateUrl: 'template/page/sale/edit.html',
         controller: 'SaleCardEditCtrl',
+        // resolve: {
+        //     data: function(saleStatusesLoader, saleTypesLoader, usersLoader, salesLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
+        //         var toResolve = [
+        //             saleTypesLoader.loadItems(),
+        //             saleStatusesLoader.loadItems(),
+        //             usersLoader.loadDirectories()
+        //         ];
+        //         return $q.all(toResolve).then(function(directoriesArr) {
+        //             var directories = _.transform(directoriesArr, _.assign, {});
+        //             var ls = $location.search();
+        //             if (ls.id === 'new') {
+        //                 return $q.when(directories);
+        //             } else {
+        //                 var id = _.parseInt(ls.id);
+        //                 return salesLoader.loadItem(id, directories).then(function(salesDirectories) {
+        //                     _.assign(directories, salesDirectories);
+        //                     delete directories.tariffs;
+        //                     directories.city = directories.sale.dealer.city;
+        //                     var addSaleQueryParams = {
+        //                         filters: [
+        //                             { fields: ['type'], type: 'equal', value: 'addcard' },
+        //                             { fields: ['parentId'], type: 'equal', value: directories.sale.cardId }
+        //                         ]
+        //                     };
+        //                     return salesLoader.loadItems(addSaleQueryParams, directories).then(function(salesDirectories) {
+        //                         var addSale = salesDirectories.sales.getItems()[0];
+        //                         if (addSale) {
+        //                             directories.addSale = addSale;
+        //                         }
+        //                         var extraSaleQueryParams = {
+        //                             filters: [
+        //                                 { fields: ['type'], type: 'equal', value: 'extra' },
+        //                                 { fields: ['cardId'], type: 'equal', value: directories.sale.cardId }
+        //                             ]
+        //                         };
+        //                         return salesLoader.loadItems(extraSaleQueryParams, directories).then(function(salesDirectories) {
+        //                             var extraSales = salesDirectories.sales;
+        //                             if (extraSales.getItems().length) {
+        //                                 directories.extraSales = extraSales;
+        //                             }
+        //                             var tariffQueryParams = {
+        //                                 filters: [
+        //                                     { fields: ['site'], type: 'equal', value: directories.sale.site.id },
+        //                                     { fields: ['type'], type: 'equal', value: 'periodical' },
+        //                                     { fields: ['isActive'], type: 'equal', value: true }
+        //                                 ]
+        //                             };
+        //                             return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
+        //                                 _.assign(directories, tariffsDirectories);
+        //                                 var tariffs = directories.tariffs.getItems();
+        //                                 unite(tariffs, directories.sale.tariff);
+        //                                 var dealer = directories.dealers.getItems()[0];
+        //                                 var tariffRateQueryParams = {
+        //                                     filters: [
+        //                                         { fields: ['tariff'], type: 'in', value: _.pluck(tariffs, 'id') },
+        //                                         { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
+        //                                     ]
+        //                                 };
+        //                                 return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
+        //                                     return _.assign(directories, tariffRateDirectories);
+        //                                 });
+        //                             });
+        //                         });
+        //                     });
+        //                 });
+        //             }
+        //         });
+        //     }
+        // }
         resolve: {
-            data: function(saleStatusesLoader, saleTypesLoader, usersLoader, salesLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
-                var toResolve = [
-                    saleTypesLoader.loadItems(),
-                    saleStatusesLoader.loadItems(),
-                    usersLoader.loadDirectories()
-                ];
-                return $q.all(toResolve).then(function(directoriesArr) {
-                    var directories = _.transform(directoriesArr, _.assign, {});
+            data: function(usersLoader, salesLoader, dealersLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
+                return usersLoader.loadDirectories().then(function(directories) {
                     var ls = $location.search();
                     if (ls.id === 'new') {
-                        return $q.when(directories);
+                        return $q.when(_.invoke(directories, 'resolveReferences', directories));
                     } else {
-                        var id = _.parseInt(ls.id);
-                        return salesLoader.loadItem(id, directories).then(function(salesDirectories) {
-                            _.assign(directories, salesDirectories);
-                            delete directories.tariffs;
-                            directories.city = directories.sale.dealer.city;
-                            var addSaleQueryParams = {
-                                filters: [
-                                    { fields: ['type'], type: 'equal', value: 'addcard' },
-                                    { fields: ['parentId'], type: 'equal', value: directories.sale.cardId }
-                                ]
-                            };
-                            return salesLoader.loadItems(addSaleQueryParams, directories).then(function(salesDirectories) {
-                                var addSale = salesDirectories.sales.getItems()[0];
-                                if (addSale) {
-                                    directories.addSale = addSale;
-                                }
-                                var extraSaleQueryParams = {
+                        return salesLoader.loadItem(ls.id).then(function(saleData) {
+                            directories.sale = saleData;
+                            toResolve = {
+                                dealers: dealersLoader.loadItems({
+                                    filters: [
+                                        { fields: ['id'], type: 'equal', value: directories.sale.dealer.id }
+                                    ]
+                                }),
+                                addSales: salesLoader.loadItems({
+                                    filters: [
+                                        { fields: ['type'], type: 'equal', value: 'addcard' },
+                                        { fields: ['parentId'], type: 'equal', value: directories.sale.cardId }
+                                    ]
+                                }),
+                                extraSales: salesLoader.loadItems({
                                     filters: [
                                         { fields: ['type'], type: 'equal', value: 'extra' },
                                         { fields: ['cardId'], type: 'equal', value: directories.sale.cardId }
                                     ]
-                                };
-                                return salesLoader.loadItems(extraSaleQueryParams, directories).then(function(salesDirectories) {
-                                    var extraSales = salesDirectories.sales;
-                                    if (extraSales.getItems().length) {
-                                        directories.extraSales = extraSales;
-                                    }
-                                    var tariffQueryParams = {
+                                })
+                            };
+                            return $q.all(toResolve).then(function(salesData) {
+                                _.assign(directories, salesData);
+                                // directories.city = directories.dealers[0].city;  убрать в контроллер.
+                                var tariffIds = _.pluck(_.pluck(directories.addSales, 'tariff'), 'id');
+                                tariffIds.push(directories.sale.tariff.id);
+                                toResolve = {
+                                    selectedTariffs: tariffsLoader.loadItems({
+                                        filters: [
+                                            { fields: ['id'], type: 'in', value: tariffIds }
+                                        ]
+                                    }),
+                                    optionTariffs: tariffsLoader.loadItems({
                                         filters: [
                                             { fields: ['site'], type: 'equal', value: directories.sale.site.id },
                                             { fields: ['type'], type: 'equal', value: 'periodical' },
                                             { fields: ['isActive'], type: 'equal', value: true }
                                         ]
+                                    })
+                                };
+                                return $q.all(toResolve).then(function(tariffsData) {
+                                    directories.tariffs = _.uniq(_.union(tariffsData.selectedTariffs, tariffsData.optionTariffs), 'id');
+                                    var tariffRateQueryParams = {
+                                        filters: [
+                                            { fields: ['tariff'], type: 'in', value: _.pluck(directories.tariffs, 'id') },
+                                            { fields: ['city'], type: 'in', value: [directories.dealers[0].city.id, null] }
+                                        ]
                                     };
-                                    return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
-                                        _.assign(directories, tariffsDirectories);
-                                        var tariffs = directories.tariffs.getItems();
-                                        unite(tariffs, directories.sale.tariff);
-                                        var dealer = directories.dealers.getItems()[0];
-                                        var tariffRateQueryParams = {
-                                            filters: [
-                                                { fields: ['tariff'], type: 'in', value: _.pluck(tariffs, 'id') },
-                                                { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
-                                            ]
-                                        };
-                                        return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
-                                            return _.assign(directories, tariffRateDirectories);
-                                        });
+                                    return tariffRatesLoader.loadItems(tariffRateQueryParams).then(function(tariffRatesData) {
+                                        directories.tariffRates = tariffRatesData;
+                                        return _.invoke(directories, 'resolveReferences', directories);
                                     });
                                 });
                             });

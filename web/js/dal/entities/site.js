@@ -8,44 +8,26 @@ angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal
 })
 
 .factory('Site', function(Item) {
-
-    var Site = function(itemData, directories) {
-        _.extend(this, itemData);
+    function Site(itemData) {
+        Item.call(this, itemData);
     };
-    _.extend(Site.prototype, Item.prototype);
+    _.assign(Site.prototype, Item.prototype);
     return Site;
 })
 
-.factory('Sites', function(Collection) {
-    var Sites = (function() {
-        function Sites(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(Sites.prototype, Collection.prototype);
-        return Sites;
-    }());
+.factory('Sites', function(Collection, Site) {
+    function Sites(itemsData, queryParams) {
+        Collection.call(this, itemsData, Site, queryParams);
+    };
+    _.assign(Sites.prototype, Collection.prototype);
     return Sites;
 })
 
 .service('sitesLoader', function(siteApi, Site, Sites) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new Site(itemData, directories);
-        });
-        return new Sites(items, queryParams);
-    };
-
     this.loadItems = function(queryParams) {
-        var self = this;
-        return siteApi.query(queryParams).then(function(respond) {
-            return {sites: self.makeCollection(respond.sites, respond.params)};
+        return siteApi.query(queryParams).then(function(sitesData) {
+            return new Sites(sitesData, queryParams);
         });
     };
-});
+})
+;

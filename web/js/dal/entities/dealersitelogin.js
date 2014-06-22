@@ -7,169 +7,91 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
     return dealerSiteLoginApi;
 })
 
-.factory('DealerSiteLogin', function(dealerSiteLoginApi, Item) {
+.factory('DealerSiteLogin', function(dealerSiteLoginApi, Item, dealerSiteLoginTypes) {
+    var DealerSiteLogin = (function() {
+        var entityParams = {
+            enumFields: {
+                type: dealerSiteLoginTypes
+            },
+            refFields: {
+                dealer: 'dealers',
+                site: 'sites'
+            }
+        };
+        function DealerSiteLogin(itemData) {
+            Item.call(this, itemData, entityParams);
+        };
+        _.assign(DealerSiteLogin.prototype, Item.prototype);
 
-    var DealerSiteLogin = function(itemData, directories) {
-        var self = this;
-        _.forOwn(itemData, function(value, key) {
-            var newValue;
-            if (value && value.id) {    // ссылка
-                if (key === 'dealer') {
-                    newValue = directories.dealers.get(value.id);
-                } else if (key === 'site') {
-                    newValue = directories.sites.get(value.id);
-                } else {
-                    throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' +angular.toJson(value));
-                }
-                if (!newValue) {
-                    throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
-                }
+        DealerSiteLogin.prototype.resolveRefs = function(directories) {
+            return Item.prototype.resolveRefs.call(this, directories, entityParams);
+        };
+
+        DealerSiteLogin.prototype.serialize = function() {
+            return Item.prototype.serialize.call(this, entityParams);
+        };
+
+        DealerSiteLogin.prototype.save = function(directories) {
+            if (this.id) {
+                return dealerSiteLoginApi.update(this.serialize()).then(function(respond) {
+                    return new DealerSiteLogin(respond.dealerSiteLogin).resolveRefs(directories);
+                });
             } else {
-                newValue = value;
+                return dealerSiteLoginApi.create(this.serialize()).then(function(respond) {
+                    return new DealerSiteLogin(respond.dealerSiteLogin).resolveRefs(directories);
+                });
             }
-            self[key] = newValue;
-        });
-    };
+        };
 
-    _.extend(DealerSiteLogin.prototype, Item.prototype);
-
-    DealerSiteLogin.prototype.isValid = function() {
-        return _.every(this, function(value, key) {
-            if (value && value.id) {    // ссылки пропускаем
-                return true;
-            } else {              // todo: валидация значений полей, кроме ссылок
-                return true;
+        DealerSiteLogin.prototype.remove = function() {
+            if (this.id) {
+                return dealerSiteLoginApi.remove(this.id);
             }
-        });
-    };
+            throw new CollectionError('Попытка удалить элемент без id');
+        };
 
-    DealerSiteLogin.prototype.save = function(directories) {
-        if (this.id) {
-            return dealerSiteLoginApi.update(this.serialize()).then(function(respond) {
-                return new DealerSiteLogin(respond.dealerSiteLogin, directories);
-            });
-        } else {
-            return dealerSiteLoginApi.create(this.serialize()).then(function(respond) {
-                return new DealerSiteLogin(respond.dealerSiteLogin, directories);
-            });
+        DealerSiteLogin.prototype.name = function() {
+            return 'типа ' + this.type + ' салона "' + this.dealer.companyName + '" на сайте "' + this.site.name + '"';
         }
-    };
 
-    DealerSiteLogin.prototype.remove = function() {
-        if (this.id) {
-            return dealerSiteLoginApi.remove(this.id);
-        }
-        throw new CollectionError('Попытка удалить элемент без id');
-    };
-
-    DealerSiteLogin.prototype.name = function() {
-        return 'типа ' + this.type + ' салона "' + this.dealer.companyName + '" на сайте "' + this.site.name + '"';
-    }
-
+        return DealerSiteLogin;
+    }());
     return DealerSiteLogin;
 })
 
-.factory('DealerSiteLogins', function(Collection) {
-    var DealerSiteLogins = (function() {
-        var DealerSiteLogins = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(DealerSiteLogins.prototype, Collection.prototype);
-        return DealerSiteLogins;
-    }());
+.factory('DealerSiteLogins', function(Collection, DealerSiteLogin) {
+    function DealerSiteLogins(itemsData, queryParams) {
+        Collection.call(this, itemsData, DealerSiteLogin, queryParams);
+    };
+    _.assign(DealerSiteLogins.prototype, Collection.prototype);
     return DealerSiteLogins;
 })
 
-.service('dealerSiteLoginsLoader', function(dealerSiteLoginApi, DealerSiteLogin, DealerSiteLogins, dealersLoader, sitesLoader, $q) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new DealerSiteLogin(itemData, directories);
-        });
-        return new DealerSiteLogins(items, queryParams);
-    };
-
-    this.loadItems = function(queryParams, directories) {
-        var self = this;
+.service('dealerSiteLoginsLoader', function(dealerSiteLoginApi, DealerSiteLogin, DealerSiteLogins) {
+    this.loadItems = function(queryParams) {
         return dealerSiteLoginApi.query(queryParams).then(function(dealerSiteLoginsData) {
-            if (!directories) {
-                var getFilterFieldsValue = function(filters, fields) {
-                    var filter = _.find(filters, {fields: fields});
-                    if (filter) {
-                        return filter.value;
-                    }
-                }
-
-                var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
-                if (_.isEmpty(dealerIds)) {
-                    dealerIds = _.pluck(_.pluck(dealerSiteLoginsData.dealerSiteLogins, 'dealer'), 'id');
-                }
-                var dealerQueryParams = {
-                    filters: [
-                        { type: 'in', fields: ['user.id'], value: dealerIds }
-                    ],
-                    fields: [ 'dealer_list_name' ]
-                };
-
-                var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
-                if (_.isEmpty(siteIds)) {
-                    siteIds = _.pluck(_.pluck(dealerSiteLoginsData.dealerSiteLogins, 'site'), 'id');
-                }
-                var siteQueryParams = {
-                    filters: [
-                        { type: 'in', fields: ['id'], value: siteIds }
-                    ]
-                };
-                return $q.all({
-                    dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
-                        return respond.dealers;
-                    }),
-                    sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
-                        return respond.sites;
-                    })
-                }).then(function(directories) {
-                    return _.extend(directories, {dealerSiteLogins: self.makeCollection(dealerSiteLoginsData.dealerSiteLogins, dealerSiteLoginsData.params, directories)});
-                });
-            }
-            return {dealerSiteLogins: self.makeCollection(dealerSiteLoginsData.dealerSiteLogins, dealerSiteLoginsData.params, directories)};
+            return new DealerSiteLogins(dealerSiteLoginsData, queryParams);
         });
     };
-
-    this.loadItem = function(id, directories) {
-        var self = this;
+    this.loadItem = function(id) {
         return dealerSiteLoginApi.get(id).then(function(dealerSiteLoginData) {
-            var dealerSiteLogin = dealerSiteLoginData.dealerSiteLogin;
-            if (directories) {
-                return {dealerSiteLogin: new DealerSiteLogin(dealerSiteLogin, directories)};
-            }
-            var dealerQueryParams = {
-                filters: [
-                    { fields: ['user.id'], type: 'equal', value: dealerSiteLogin.dealer.id }
-                ],
-                fields: [ 'dealer_list_name' ]
-            };
-            var siteQueryParams = {
-                filters: [
-                    { fields: ['id'], type: 'equal', value: dealerSiteLogin.site.id }
-                ]
-            };
-            return $q.all({
-                dealers: dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
-                    return respond.dealers;
-                }),
-                sites: sitesLoader.loadItems(siteQueryParams).then(function(respond) {
-                    return respond.sites;
-                })
-            }).then(function(directories) {
-                directories.dealerSiteLogin = new DealerSiteLogin(dealerSiteLogin, directories);
-                return directories;
-            });
+            return new DealerSiteLogin(dealerSiteLoginData);
         });
     };
-});
+})
+
+.factory('DealerSiteLoginType', function(Item) {
+    function DealerSiteLoginType(itemData) {
+        Item.call(this, itemData);
+    };
+    _.assign(DealerSiteLoginType.prototype, Item.prototype);
+    return DealerSiteLoginType;
+})
+
+.factory('dealerSiteLoginTypes', function(Collection, DealerSiteLoginType) {
+    return new Collection([
+        { id: 'site' },
+        { id: 'ftp' }
+    ], DealerSiteLoginType);
+})
+;

@@ -7,90 +7,83 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
     return dealerApi;
 })
 
-.factory('Dealer', function(Item) {
-
-    var Dealer = function(itemData, directories) {
-        var self = this;
-        _.forOwn(itemData, function(value, key) {
-            var newValue;
-            if (value && value.id) {
-                if (key === 'manager') {
-                    newValue = directories.managers.get(value.id);
-                } else if (key === 'city') {
-                    newValue = directories.cities.get(value.id);
-                } else if (key === 'market') {
-                    newValue = directories.markets.get(value.id);
-                } else if (key === 'metro') {
-                    newValue = directories.metros.get(value.id);
-                } else {
-                    throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' +angular.toJson(value));
-                }
-                if (!newValue) {
-                    throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
-                }
-            } else {
-                newValue = value;
+.factory('Dealer', function(dealerApi, Item, dealerPhoneHours) {
+    var Dealer = (function() {
+        var entityParams = {
+            enumFields: {
+                phoneFrom: dealerPhoneHours,
+                phoneTo: dealerPhoneHours,
+                phone2From: dealerPhoneHours,
+                phone2To: dealerPhoneHours,
+                phone3From: dealerPhoneHours,
+                phone3To: dealerPhoneHours
+            },
+            refFields: {
+                manager: 'managers',
+                city: 'cities',
+                market: 'markets',
+                metro: 'metros'
             }
-            self[key] = newValue;
-        });
-    };
+        };
+        function Dealer(itemData) {
+            Item.call(this, itemData, entityParams);
+        };
+        _.assign(Dealer.prototype, Item.prototype);
 
-    _.extend(Dealer.prototype, Item.prototype);
+        Dealer.prototype.resolveRefs = function(directories) {
+            return Item.prototype.resolveRefs.call(this, directories, entityParams);
+        };
 
-    Dealer.prototype.isValid = function() {
-        return _.every(this, function(value, key) {
-            if (value && value.id) {    // ссылки пропускаем
-                return true;
-            } else {
-                if (key === 'fax' && value) {
-                    var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
-                    return value.match(regexpPhoneNumber);
-                } else {              // todo: валидация значений полей, кроме ссылок
+        Dealer.prototype.serialize = function() {
+            return Item.prototype.serialize.call(this, entityParams);
+        };
+
+        Dealer.prototype.isValid = function() {
+            return _.every(this, function(value, key) {
+                if (_.has(value, 'id')) {    // ссылки пропускаем
                     return true;
+                } else {
+                    if (key === 'fax' && value) {
+                        var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
+                        return value.match(regexpPhoneNumber);
+                    } else {              // todo: валидация значений полей, кроме ссылок
+                        return true;
+                    }
                 }
-            }
-        });
-    };
+            });
+        };
 
+        return Dealer;
+    }());
     return Dealer;
 })
 
-.factory('Dealers', function(Collection) {
-    var Dealers = (function() {
-        var Dealers = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(Dealers.prototype, Collection.prototype);
-        return Dealers;
-    }());
+.factory('Dealers', function(Collection, Dealer) {
+    function Dealers(itemsData, queryParams) {
+        Collection.call(this, itemsData, Dealer, queryParams);
+    };
+    _.assign(Dealers.prototype, Collection.prototype);
     return Dealers;
 })
 
-.service('dealersLoader', function(dealerApi, Dealer, Dealers) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new Dealer(itemData, directories);
-        });
-        return new Dealers(items, queryParams);
-    };
-
-    this.loadItems = function(queryParams, directories) {
-        var self = this;
-        return dealerApi.query(queryParams).then(function(respond) {
-            return {dealers: self.makeCollection(respond.dealers, respond.params, directories)};
+.service('dealersLoader', function(saleApi, Dealers) {
+    this.loadItems = function(queryParams) {
+        return dealerApi.query(queryParams).then(function(dealersData) {
+            return new Dealers(dealersData, queryParams);
         });
     };
 })
 
-.service('dealerPhoneHours', function() {
-    this.data = [
+.factory('DealerPhoneHour', function(Item) {
+    function DealerPhoneHour(itemData) {
+        Item.call(this, itemData);
+    };
+    _.assign(DealerPhoneHour.prototype, Item.prototype);
+    return DealerPhoneHour;
+})
+
+.factory('dealerPhoneHours', function(Collection, DealerPhoneHour) {
+    return new Collection([
         { 'id':  0, 'name':  '0:00'},
         { 'id':  1, 'name':  '1:00'},
         { 'id':  2, 'name':  '2:00'},
@@ -116,5 +109,6 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
         { 'id': 22, 'name': '22:00'},
         { 'id': 23, 'name': '23:00'},
         { 'id': 24, 'name': '24:00'}
-    ];
-});
+    ], DealerPhoneHour);
+})
+;

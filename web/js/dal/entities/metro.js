@@ -8,54 +8,35 @@ angular.module('max.dal.entities.metro', ['max.dal.entities.collection', 'max.da
 })
 
 .factory('Metro', function(Item) {
-
-    var Metro = function(itemData, directories) {
-        var self = this;
-        _.forOwn(itemData, function(value, key) {
-            var newValue;
-            if (value && value.id) {
-                if (key === 'city') {
-                    newValue = directories.cities.get(value.id);
-                } else {
-                    throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' +angular.toJson(value));
-                }
-                if (!newValue) {
-                    throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
-                }
-            } else {
-                newValue = value;
+    var Metro = (function() {
+        var entityParams = {
+            refFields: {
+                city: 'cities'
             }
-            // здесь можно реализовать дополнительную проверку и конвертацию данных элемента
-            self[key] = newValue;
-        });
-    };
-    _.extend(Metro.prototype, Item.prototype);
+        };
+        function Metro(itemData) {
+            Item.call(this, itemData, entityParams);
+        };
+        _.assign(Metro.prototype, Item.prototype);
+
+        Metro.prototype.resolveRefs = function(directories) {
+            return Item.prototype.resolveRefs.call(this, directories, entityParams);
+        };
+
+        Metro.prototype.serialize = function() {
+            return Item.prototype.serialize.call(this, entityParams);
+        };
+
+        return Metro;
+    }());
     return Metro;
 })
 
-.factory('Metros', function(Collection) {
-    var Metros = (function() {
-        var Metros = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(Metros.prototype, Collection.prototype);
-        return Metros;
-    }());
+.factory('Metros', function(Collection, Metro) {
+    function Metros(itemsData, queryParams) {
+        Collection.call(this, itemsData, Metro, queryParams);
+    };
+    _.assign(Metros.prototype, Collection.prototype);
     return Metros;
 })
-
-.service('metrosLoader', function(Metro, Metros) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new Metro(itemData, directories);
-        });
-        return new Metros(items, queryParams);
-    };
-});
+;

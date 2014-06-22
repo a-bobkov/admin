@@ -8,37 +8,18 @@ angular.module('max.dal.entities.city', ['max.dal.entities.collection', 'max.dal
 })
 
 .factory('City', function(Item) {
-
-    var City = function(itemData, directories) {
-        _.extend(this, itemData);
+    function City(itemData) {
+        Item.call(this, itemData);
     };
-    _.extend(City.prototype, Item.prototype);
+    _.assign(City.prototype, Item.prototype);
     return City;
 })
 
-.factory('Cities', function(Collection) {
-    var Cities = (function() {
-        var Cities = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(Cities.prototype, Collection.prototype);
-        return Cities;
-    }());
+.factory('Cities', function(Collection, City) {
+    function Cities(itemsData, queryParams) {
+        Collection.call(this, itemsData, City, queryParams);
+    };
+    _.assign(Cities.prototype, Collection.prototype);
     return Cities;
 })
-
-.service('citiesLoader', function(City, Cities) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new City(itemData, directories);
-        });
-        return new Cities(items, queryParams);
-    };
-});
+;

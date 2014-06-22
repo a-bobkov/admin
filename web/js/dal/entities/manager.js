@@ -8,37 +8,18 @@ angular.module('max.dal.entities.manager', ['max.dal.entities.collection', 'max.
 })
 
 .factory('Manager', function(Item) {
-
-    var Manager = function(itemData, directories) {
-        _.extend(this, itemData);
+    function Manager(itemData) {
+        Item.call(this, itemData);
     };
-    _.extend(Manager.prototype, Item.prototype);
+    _.assign(Manager.prototype, Item.prototype);
     return Manager;
 })
 
-.factory('Managers', function(Collection) {
-    var Managers = (function() {
-        var Managers = function(itemsData, queryParams) {
-            Collection.call(this, itemsData, queryParams);
-        };
-        angular.extend(Managers.prototype, Collection.prototype);
-        return Managers;
-    }());
+.factory('Managers', function(Collection, Manager) {
+    function Managers(itemsData, queryParams) {
+        Collection.call(this, itemsData, Manager, queryParams);
+    };
+    _.assign(Managers.prototype, Collection.prototype);
     return Managers;
 })
-
-.service('managersLoader', function(Manager, Managers) {
-
-    this.makeCollection = function(itemsData, queryParams, directories) {
-        if (!_.isArray(itemsData)) {
-            throw new CollectionError('Отсутствует массив в данных: ' + angular.toJson(itemsData));
-        }
-        var items = _.collect(itemsData, function(itemData) {
-            if (typeof itemData.id === 'undefined') {
-                throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
-            }
-            return new Manager(itemData, directories);
-        });
-        return new Managers(items, queryParams);
-    };
-});
+;
