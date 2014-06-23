@@ -9,7 +9,14 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
 
 .factory('Dealer', function(dealerApi, Item, dealerPhoneHours) {
     var Dealer = (function() {
-        var entityParams = {
+        function Dealer(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(Dealer.prototype, Item.prototype);
+
+        Dealer.prototype.lowerName = 'dealer';
+
+        Dealer.prototype.entityParams = {
             enumFields: {
                 phoneFrom: dealerPhoneHours,
                 phoneTo: dealerPhoneHours,
@@ -24,18 +31,6 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
                 market: 'markets',
                 metro: 'metros'
             }
-        };
-        function Dealer(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(Dealer.prototype, Item.prototype);
-
-        Dealer.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        Dealer.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
         };
 
         Dealer.prototype.isValid = function() {
@@ -60,17 +55,16 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
 
 .factory('Dealers', function(Collection, Dealer) {
     function Dealers(itemsData, queryParams) {
-        Collection.call(this, itemsData, Dealer, queryParams);
+        Collection.call(this, itemsData, queryParams, Dealer, Dealers);
     };
     _.assign(Dealers.prototype, Collection.prototype);
+    Dealers.prototype.lowerName = 'dealers';
     return Dealers;
 })
 
-.service('dealersLoader', function(saleApi, Dealers) {
-    this.loadItems = function(queryParams) {
-        return dealerApi.query(queryParams).then(function(dealersData) {
-            return new Dealers(dealersData, queryParams);
-        });
+.service('dealersLoader', function(entityLoader, dealerApi, Dealer, Dealers) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, dealerApi, Dealers);
     };
 })
 
@@ -109,6 +103,6 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
         { 'id': 22, 'name': '22:00'},
         { 'id': 23, 'name': '23:00'},
         { 'id': 24, 'name': '24:00'}
-    ], DealerPhoneHour);
+    ], null, DealerPhoneHour);
 })
 ;

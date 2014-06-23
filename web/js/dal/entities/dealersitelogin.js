@@ -9,7 +9,14 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
 
 .factory('DealerSiteLogin', function(dealerSiteLoginApi, Item, dealerSiteLoginTypes) {
     var DealerSiteLogin = (function() {
-        var entityParams = {
+        function DealerSiteLogin(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(DealerSiteLogin.prototype, Item.prototype);
+
+        DealerSiteLogin.prototype.lowerName = 'dealerSiteLogin';
+
+        DealerSiteLogin.prototype.entityParams = {
             enumFields: {
                 type: dealerSiteLoginTypes
             },
@@ -17,18 +24,6 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
                 dealer: 'dealers',
                 site: 'sites'
             }
-        };
-        function DealerSiteLogin(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(DealerSiteLogin.prototype, Item.prototype);
-
-        DealerSiteLogin.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        DealerSiteLogin.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
         };
 
         DealerSiteLogin.prototype.save = function(directories) {
@@ -61,22 +56,19 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
 
 .factory('DealerSiteLogins', function(Collection, DealerSiteLogin) {
     function DealerSiteLogins(itemsData, queryParams) {
-        Collection.call(this, itemsData, DealerSiteLogin, queryParams);
+        Collection.call(this, itemsData, queryParams, DealerSiteLogin, DealerSiteLogins);
     };
     _.assign(DealerSiteLogins.prototype, Collection.prototype);
+    DealerSiteLogins.prototype.lowerName = 'dealerSiteLogins';
     return DealerSiteLogins;
 })
 
-.service('dealerSiteLoginsLoader', function(dealerSiteLoginApi, DealerSiteLogin, DealerSiteLogins) {
-    this.loadItems = function(queryParams) {
-        return dealerSiteLoginApi.query(queryParams).then(function(dealerSiteLoginsData) {
-            return new DealerSiteLogins(dealerSiteLoginsData, queryParams);
-        });
+.service('dealerSiteLoginsLoader', function(entityLoader, dealerSiteLoginApi, DealerSiteLogin, DealerSiteLogins) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, dealerSiteLoginApi, DealerSiteLogins);
     };
-    this.loadItem = function(id) {
-        return dealerSiteLoginApi.get(id).then(function(dealerSiteLoginData) {
-            return new DealerSiteLogin(dealerSiteLoginData);
-        });
+    this.loadItem = function(id, directories) {
+        return entityLoader.loadItem(id, directories, dealerSiteLoginApi, DealerSiteLogin);
     };
 })
 
@@ -92,6 +84,6 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
     return new Collection([
         { id: 'site' },
         { id: 'ftp' }
-    ], DealerSiteLoginType);
+    ], null, DealerSiteLoginType);
 })
 ;

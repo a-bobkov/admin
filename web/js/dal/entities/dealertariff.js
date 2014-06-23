@@ -9,24 +9,19 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
 
 .factory('DealerTariff', function(Item) {
     var DealerTariff = (function() {
-        var entityParams = {
+        function DealerTariff(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(DealerTariff.prototype, Item.prototype);
+
+        DealerTariff.prototype.lowerName = 'dealerTariff';
+
+        DealerTariff.prototype.entityParams = {
             refFields: {
                 dealer: 'dealers',
                 site: 'sites',
                 tariff: 'tariffs'
             }
-        };
-        function DealerTariff(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(DealerTariff.prototype, Item.prototype);
-
-        DealerTariff.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        DealerTariff.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
         };
 
         return DealerTariff;
@@ -36,22 +31,19 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
 
 .factory('DealerTariffs', function(Collection, DealerTariff) {
     function DealerTariffs(itemsData, queryParams) {
-        Collection.call(this, itemsData, DealerTariff, queryParams);
+        Collection.call(this, itemsData, queryParams, DealerTariff, DealerTariffs);
     };
     _.assign(DealerTariffs.prototype, Collection.prototype);
+    DealerTariffs.prototype.lowerName = 'dealerTariffs';
     return DealerTariffs;
 })
 
-.service('dealerTariffsLoader', function(dealerTariffApi, DealerTariff, DealerTariffs) {
-    this.loadItems = function(queryParams) {
-        return dealerTariffApi.query(queryParams).then(function(dealerTariffsData) {
-            return new DealerTariffs(dealerTariffsData, queryParams);
-        });
+.service('dealerTariffsLoader', function(entityLoader, dealerTariffApi, DealerTariff, DealerTariffs) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, dealerTariffApi, DealerTariffs);
     };
-    this.loadItem = function(id) {
-        return dealerTariffApi.get(id).then(function(dealerTariffData) {
-            return new DealerTariff(dealerTariffData);
-        });
+    this.loadItem = function(id, directories) {
+        return entityLoader.loadItems(id, directories, dealerTariffApi, DealerTariff);
     };
 })
 ;

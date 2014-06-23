@@ -1,59 +1,56 @@
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, usersLoader, User, Users, 
-    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
-    dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates) {
+.run(function($httpBackend,
+    User, Users, Groups, Managers, Markets, Metros, Cities,
+    Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, usersLoader, User, Users, 10, 
-        dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-        DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-        tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
-        dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates);
+    setHttpMock($httpBackend, 10,
+        User, Users, Groups, Managers, Markets, Metros, Cities,
+        Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
+        Tariffs, TariffRates, DealerTariffs, Sales, Sale);
 });
 
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef, 
-    dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-    DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-    tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales, Sale,
-    dealerTariffsLoader, DealerTariffs, tariffRatesLoader, TariffRates) {
+function setHttpMock($httpBackend, multiplyCoef,
+    User, Users, Groups, Managers, Markets, Metros, Cities,
+    Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
 
-    var userDirectories = usersLoader.makeDirectories({
-        groups: [
+    var userDirectories = {
+        groups: new Groups([
             {id: 1, name: 'admin', description: 'Администратор'},
             {id: 2, name: 'dealer', description: 'Автосалон'},
             {id: 3, name: 'site', description: 'Автосайт'}
-        ],
-        managers: [
+        ]),
+        managers: new Managers([
             {id: 1, name: 'Катя'},
             {id: 2, name: 'Инна'},
             {id: 4, name: 'Потеряшки'},
             {id: 0, name: ''}
-        ],
-        cities: [
+        ]),
+        cities: new Cities([
             {id: 1, name: 'Москва'},
             {id: 2, name: 'Питер'},
             {id: 6, name: 'Екатеринбург'}
-        ],
-        markets: [
+        ]),
+        markets: new Markets([
             {id: 4, name: 'Рынок один в москве', city: {id: 1}},
             {id: 7, name: 'Рынок два в москве', city: {id: 1}},
             {id: 8, name: 'Рынок один в питере', city: {id: 2}},
             {id: 9, name: 'Рынок два в питере', city: {id: 2}}
-        ],
-        metros: [
+        ]),
+        metros: new Metros([
             {id: 8, name: 'Метро один в москве', city: {id: 1}},
             {id: 9, name: 'Метро два в москве', city: {id: 1}},
             {id: 10, name: 'Метро один в питере', city: {id: 2}},
             {id: 11, name: 'Метро два в питере', city: {id: 2}}
-        ],
-        sites: [
+        ]),
+        sites: new Sites([
             {id: 1,  name: 'drom.ru'},
             {id: 2,  name: 'bibika.ru'},
             {id: 3,  name: 'autorambler.ru'},
@@ -72,10 +69,11 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             {id: 16, name: 'auto.exist.ru'},
             {id: 17, name: 'am.ru'},
             {id: 18, name: 'mercedes-benz.ru'}
-        ]
-    });
+        ])
+    };
+    _.invoke(userDirectories, 'resolveRefs', userDirectories);
 
-    var users = usersLoader.makeCollection(multiplyArr([
+    var users = new Users(multiplyArrFn([
         {
             id: 5,
             email: 'demo@maxposter.ru',
@@ -128,26 +126,10 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             id: 13, companyName: 'Свет', manager: {id: 4}}},
         {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 6}},
         {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
-    ], multiplyCoef), null, userDirectories);
+    ], multiplyCoef, function(i, len) {
+        this.email = i + this.email;
+    })).resolveRefs(userDirectories);
     
-    function multiplyArr(arr, coef) {
-        coef = coef || 1;
-        var multiplyArray = [];
-
-        var cloneArr = function(arr, num) {
-            return _.forEach(angular.copy(arr), function(value) {
-                var id = value.id + num * arr.length;
-                value.id = id;
-                value.email = num + value.email;
-                multiplyArray.push(value);
-            });
-        }
-        for (var i = 0; i < coef; i++) {
-            multiplyArray = _.union(multiplyArray, cloneArr(arr, i));
-        }
-        return multiplyArray;
-    }
-
     function getDeepValue(item, field) {
         var value = item[field.shift()];
         if (field.length && value) {
@@ -244,7 +226,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
                 }
             }
         }];
-        respond[1].data[collectionName] = (new collectionConstructor(paged_arr)).serialize();
+        respond[1].data[collectionName] = _.invoke(paged_arr, 'serialize');
 
         return respond;
     }
@@ -414,7 +396,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         return processDelete(url, regexUserDelete, users);
     });
 
-    var dealers = dealersLoader.makeCollection([
+    var dealers = new Dealers([
         {id: 3,   companyName: 'NevaMotors', city: {id: 1}},
         {id: 4,   companyName: 'Автобург', city: {id: 1}},
         {id: 5,   companyName: 'Демо-Кампания', city: {id: 1}},
@@ -567,9 +549,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         {id: 223, companyName: 'Автосалон "Эльва Моторс" официальный дилер SsangYong и FIAT', city: {id: 1}},
         {id: 413, companyName: 'Смольнинский Автоцентр - официальный дилер VOLVO', city: {id: 1}},
         {id: 553, companyName: 'Официальный дилер FORD компания ЗАО «ЕВРО-МОТОРС».', city: {id: 1}}
-    ], null, {cities: userDirectories.cities});
+    ]).resolveRefs(userDirectories);
 
-    var sites = sitesLoader.makeCollection([
+    var sites = new Sites([
         {id: 1,  name: 'drom.ru'},
         {id: 2,  name: 'bibika.ru'},
         {id: 3,  name: 'autorambler.ru'},
@@ -590,12 +572,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         {id: 18, name: 'mercedes-benz.ru'}
     ]);
 
-    var dealerSiteStatuses = dealerSiteStatusesLoader.makeCollection([
-        { 'id': true, 'name': 'Акт' },
-        { 'id': false, 'name': 'Бло' }
-    ]);
-
-    var dealerSites = dealerSitesLoader.makeCollection(multiplyArr([
+    var dealerSites = new DealerSites(multiplyArrFn([
         {
             id: 1,
             dealer: {id: 7},
@@ -660,9 +637,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             publicUrl: 'http://www.irr.ru/pages/119832.html',
             isActive: true
         }
-    ], multiplyCoef), null, {dealerSiteStatuses: dealerSiteStatuses, dealers: dealers, sites: sites});
+    ], multiplyCoef)).resolveRefs({dealers: dealers, sites: sites});
 
-    var dealerSiteLogins = dealerSiteLoginsLoader.makeCollection([
+    var dealerSiteLogins = new DealerSiteLogins([
         {
             id: 1,
             dealer: {id: 7},
@@ -717,7 +694,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             password: 'abyr1110',
             loginError: true
         }
-    ], null, {dealers: dealers, sites: sites});
+    ]).resolveRefs({dealers: dealers, sites: sites});
 
     var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
@@ -734,16 +711,14 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
     $httpBackend.whenPOST(regexDealerSitesPost).respond(function(method, url, data) {
         return processPost(data, dealerSites, 'dealerSite', DealerSite, {
             dealers: dealers,
-            sites: sites,
-            dealerSiteStatuses: dealerSiteStatuses
+            sites: sites
         });
     });
     var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenPUT(regexDealerSitesPut).respond(function(method, url, data) {
         return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
             dealers: dealers,
-            sites: sites,
-            dealerSiteStatuses: dealerSiteStatuses
+            sites: sites
         });
     });
     var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
@@ -825,7 +800,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         return processPostQuery(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 
-    var tariffs = tariffsLoader.makeCollection([
+    var tariffs = new Tariffs([
         {
             id: 1,
             site: {id: 17},
@@ -1057,7 +1032,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             delay: 3,
             groupName: 'Помесячный'
         }
-    ], null, {sites: sites});
+    ]).resolveRefs({sites: sites});
 
     var regexTariffsQuery = /^\/api2\/tariffs(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexTariffsQuery).respond(function(method, url, data) {
@@ -1071,7 +1046,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         return processGet(url, regexTariffsGet, tariffs, 'tariff');
     });
 
-    var tariffRates = tariffRatesLoader.makeCollection([
+    var tariffRates = new TariffRates([
         {
             id: 1,
             tariff: {id: 1},
@@ -1279,7 +1254,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             siteRate: 2500,
             info: 'Общий'
         }
-    ], null, {tariffs: tariffs, cities: userDirectories.cities});
+    ]).resolveRefs({tariffs: tariffs, cities: userDirectories.cities});
 
     var regexTariffRatesQuery = /^\/api2\/tariffrates(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexTariffRatesQuery).respond(function(method, url, data) {
@@ -1293,7 +1268,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         return processGet(url, regexTariffRatesGet, tariffRates, 'tariffRate');
     });
 
-    var dealerTariffs = dealerTariffsLoader.makeCollection([
+    var dealerTariffs = new DealerTariffs([
         {
             id: 1,
             dealer: {id: 3},
@@ -1302,7 +1277,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
             autoProlong: true,
             renew: '0'
         }
-    ], null, {dealers: dealers, sites: sites, tariffs: tariffs});
+    ]).resolveRefs({dealers: dealers, sites: sites, tariffs: tariffs});
 
     var regexDealerTariffsQuery = /^\/api2\/dealertariffs(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerTariffsQuery).respond(function(method, url, data) {
@@ -1316,18 +1291,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         return processGet(url, regexDealerTariffsGet, dealerTariffs, 'dealerTariff');
     });
 
-    var saleTypes = saleTypesLoader.makeCollection([
-        { id: 'card', name: 'Осн' },
-        { id: 'addcard', name: 'Расш' },
-        { id: 'extra', name: 'Доп' }
-    ]);
-
-    var saleStatuses = saleStatusesLoader.makeCollection([
-        { id: true, name: 'Акт' },
-        { id: false, name: 'Бло' }
-    ]);
-
-    var sales = salesLoader.makeCollection(multiplyArrFn([
+    var sales = new Sales(multiplyArrFn([
         {
             id: 1,
             type: 'card',
@@ -1520,7 +1484,7 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         if (this.parentId) {
             this.parentId = this.parentId + i * len;
         }
-    }), null, {dealers: dealers, sites: sites, tariffs: tariffs, saleTypes: saleTypes, saleStatuses: saleStatuses});
+    })).resolveRefs({dealers: dealers, sites: sites, tariffs: tariffs});
 
     function multiplyArrFn(arr, coef, fn) {
         coef = coef || 5;
@@ -1529,7 +1493,9 @@ function setHttpMock($httpBackend, usersLoader, User, Users, multiplyCoef,
         for (var i = 0; i < coef; i++) {
             _.forEach(angular.copy(arr), function(value) {
                 value.id = value.id + i * arr.length;
-                fn.call(value, i, arr.length);
+                if (fn) {
+                    fn.call(value, i, arr.length);
+                }
                 multiplyArray.push(value);
             });
         }

@@ -1,30 +1,18 @@
 'use strict';
 
-angular.module('max.dal.entities.metro', ['max.dal.entities.collection', 'max.dal.rest.api'])
-
-.factory('metroApi', function(RestApi, Api) {
-    var metroApi = new RestApi('metros', 'metro');
-    return metroApi;
-})
+angular.module('max.dal.entities.metro', ['max.dal.entities.collection'])
 
 .factory('Metro', function(Item) {
     var Metro = (function() {
-        var entityParams = {
-            refFields: {
-                city: 'cities'
-            }
-        };
         function Metro(itemData) {
-            Item.call(this, itemData, entityParams);
+            Item.call(this, itemData);
         };
         _.assign(Metro.prototype, Item.prototype);
 
-        Metro.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        Metro.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
+        Metro.prototype.entityParams = {
+            refFields: {
+                city: 'cities'
+            }
         };
 
         return Metro;
@@ -34,7 +22,7 @@ angular.module('max.dal.entities.metro', ['max.dal.entities.collection', 'max.da
 
 .factory('Metros', function(Collection, Metro) {
     function Metros(itemsData, queryParams) {
-        Collection.call(this, itemsData, Metro, queryParams);
+        Collection.call(this, itemsData, queryParams, Metro, Metros);
     };
     _.assign(Metros.prototype, Collection.prototype);
     return Metros;

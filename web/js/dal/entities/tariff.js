@@ -9,26 +9,20 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
 
 .factory('Tariff', function(Item, tariffPeriodUnits) {
     var Tariff = (function() {
-        var entityParams = {
+        function Tariff(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(Tariff.prototype, Item.prototype);
+
+        Tariff.prototype.lowerName = 'tariff';
+
+        Tariff.prototype.entityParams = {
             enumFields: {
                 periodUnit: tariffPeriodUnits
             },
             refFields: {
                 site: 'sites'
             }
-        };
-
-        function Tariff(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(Tariff.prototype, Item.prototype);
-
-        Tariff.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        Tariff.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
         };
 
         Tariff.prototype.getLastRate = function(city, tariffRates) {
@@ -48,7 +42,7 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
         Tariff.prototype.name = function(city, tariffRates) {
             var tariffRate = this.getLastRate(city, tariffRates);
             var rate = (tariffRate) ? tariffRate.rate : '???';
-            return rate + ' руб. за ' + this.period + '  ' + this.periodUnitName() +
+            return rate + ' руб. за ' + this.period + '  ' + this.periodUnit.name +
                 ((this.count) ? ', до ' + this.count + ' объявлений' : '') +
                 ((this.isActive) ? '' : ' (Н/А)');
         }
@@ -60,22 +54,19 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
 
 .factory('Tariffs', function(Collection, Tariff) {
     function Tariffs(itemsData, queryParams) {
-        Collection.call(this, itemsData, Tariff, queryParams);
+        Collection.call(this, itemsData, queryParams, Tariff, Tariffs);
     };
     _.assign(Tariffs.prototype, Collection.prototype);
+    Tariffs.prototype.lowerName = 'tariffs';
     return Tariffs;
 })
 
-.service('tariffsLoader', function(tariffApi, Tariff, Tariffs) {
-    this.loadItems = function(queryParams) {
-        return tariffApi.query(queryParams).then(function(tariffsData) {
-            return new Tariffs(tariffsData, queryParams);
-        });
+.service('tariffsLoader', function(entityLoader, tariffApi, Tariff, Tariffs) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, tariffApi, Tariffs);
     };
-    this.loadItem = function(id) {
-        return tariffApi.get(id).then(function(tariffsData) {
-            return new Tariff(tariffsData);
-        });
+    this.loadItem = function(id, directories) {
+        return entityLoader.loadItem(id, directories, tariffApi, Tariff);
     };
 })
 
@@ -91,6 +82,6 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
     return new Collection([
         { id: 'day', name: 'дн.' },
         { id: 'month', name: 'мес.' }
-    ], TariffPeriodUnit);
+    ], null, TariffPeriodUnit);
 })
 ;

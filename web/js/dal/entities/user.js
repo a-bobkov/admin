@@ -23,7 +23,14 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
 
 .factory('User', function(userApi, Item, userStatuses, Dealer) {
     var User = (function() {
-        var entityParams = {
+        function User(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(User.prototype, Item.prototype);
+
+        User.prototype.lowerName = 'user';
+
+        User.prototype.entityParams = {
             dateFields: ['lastLogin'],
             enumFields: {
                 status: userStatuses
@@ -36,17 +43,9 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
                 dealer: Dealer
             }
         };
-        function User(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(User.prototype, Item.prototype);
-
-        User.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
 
         User.prototype.serialize = function() {
-            var itemData = Item.prototype.serialize.call(this, entityParams);
+            var itemData = Item.prototype.serialize.call(this);
             if (!this.isDealer()) {
                 itemData.dealer = null;
             };
@@ -106,33 +105,30 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
 
 .factory('Users', function(Collection, User) {
     function Users(itemsData, queryParams) {
-        Collection.call(this, itemsData, User, queryParams);
+        Collection.call(this, itemsData, queryParams, User, Users);
     };
     _.assign(Users.prototype, Collection.prototype);
+    User.prototype.lowerName = 'users';
     return Users;
 })
 
-.service('usersLoader', function(userApi, User, Users, Groups, Sites, Managers, Cities, Markets, Metros) {
-    this.loadItems = function(queryParams) {
-        return userApi.query(queryParams).then(function(usersData) {
-            return new Users(usersData, queryParams);
-        });
+.service('usersLoader', function(entityLoader, userApi, User, Users, Construction, Groups, Sites, Managers, Cities, Markets, Metros) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, userApi, Users);
     };
-    this.loadItem = function(id) {
-        return userApi.get(id).then(function(userData) {
-            return new User(userData);
-        });
+    this.loadItem = function(id, directories) {
+        return entityLoader.loadItem(id, directories, userApi, User);
     };
     this.loadDirectories = function() {
-        return userApi.getDirectories().then(function(directoriesData) {
-            return {
-                groups: new Groups(directoriesData.groups),
-                sites: new Sites(directoriesData.sites),
-                managers: new Managers(directoriesData.managers),
-                cities: new Cities(directoriesData.cities),
-                markets: new Markets(directoriesData.markets),
-                metros: new Metros(directoriesData.metros)
-            }
+        return userApi.getDirectories().then(function(collections) {
+            return new Construction({
+                groups: new Groups(collections.groups),
+                sites: new Sites(collections.sites),
+                managers: new Managers(collections.managers),
+                cities: new Cities(collections.cities),
+                markets: new Markets(collections.markets),
+                metros: new Metros(collections.metros)
+            });
         });
     };
 })
@@ -150,6 +146,6 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
         { 'id': 'inactive', 'nameMale': 'Неактивный', 'namePlural': 'Неактивные' },
         { 'id': 'active', 'nameMale': 'Активный', 'namePlural': 'Активные' },
         { 'id': 'blocked', 'nameMale': 'Блокированный', 'namePlural': 'Блокированные' }
-    ], UserStatus);
+    ], null, UserStatus);
 })
 ;

@@ -1,19 +1,22 @@
 'use strict';
 
 angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
-        'max.dal.entities.sale',
+        'max.dal.entities.dealer',
+        'max.dal.entities.site',
+        'max.dal.entities.tariff',
         'max.dal.entities.dealertariff',
-        'max.dal.entities.tariffrate'
+        'max.dal.entities.tariffrate',
+        'max.dal.entities.sale'
     ])
 
 .config(['$routeProvider', function($routeProvider) {
 
-    function unite(array, elem) {
-        var idx = _.findIndex(array, {id: elem.id});
-        if (idx !== -1) {
-            array[idx] = elem;
+    function uniteUniq(itemArray, item) {
+        var itemIdx = _.findIndex(itemArray, {id: item.id});
+        if (itemIdx !== -1) {
+            itemArray[itemIdx] = item;
         } else {
-            array.push(elem);
+            itemArray.push(item);
         }
     }
 
@@ -114,7 +117,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         //                             return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
         //                                 _.assign(directories, tariffsDirectories);
         //                                 var tariffs = directories.tariffs.getItems();
-        //                                 unite(tariffs, directories.sale.tariff);
+        //                                 uniteUniq(tariffs, directories.sale.tariff);
         //                                 var dealer = directories.dealers.getItems()[0];
         //                                 var tariffRateQueryParams = {
         //                                     filters: [
@@ -138,11 +141,11 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 return usersLoader.loadDirectories().then(function(directories) {
                     var ls = $location.search();
                     if (ls.id === 'new') {
-                        return $q.when(_.invoke(directories, 'resolveReferences', directories));
+                        return $q.when(directories.resolveRefs());
                     } else {
                         return salesLoader.loadItem(ls.id).then(function(saleData) {
                             directories.sale = saleData;
-                            toResolve = {
+                            var toResolve = {
                                 dealers: dealersLoader.loadItems({
                                     filters: [
                                         { fields: ['id'], type: 'equal', value: directories.sale.dealer.id }
@@ -163,8 +166,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             };
                             return $q.all(toResolve).then(function(salesData) {
                                 _.assign(directories, salesData);
-                                // directories.city = directories.dealers[0].city;  убрать в контроллер.
-                                var tariffIds = _.pluck(_.pluck(directories.addSales, 'tariff'), 'id');
+                                var tariffIds = _.pluck(_.pluck(directories.addSales.getItems(), 'tariff'), 'id');
                                 tariffIds.push(directories.sale.tariff.id);
                                 toResolve = {
                                     selectedTariffs: tariffsLoader.loadItems({
@@ -181,16 +183,19 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                                     })
                                 };
                                 return $q.all(toResolve).then(function(tariffsData) {
-                                    directories.tariffs = _.uniq(_.union(tariffsData.selectedTariffs, tariffsData.optionTariffs), 'id');
+                                    directories.tariffs = tariffsData.optionTariffs;
+                                    _.forEach(tariffsData.selectedTariffs.getItems(), function(item) {
+                                        uniteUniq(directories.tariffs.getItems(), item);
+                                    });
                                     var tariffRateQueryParams = {
                                         filters: [
-                                            { fields: ['tariff'], type: 'in', value: _.pluck(directories.tariffs, 'id') },
-                                            { fields: ['city'], type: 'in', value: [directories.dealers[0].city.id, null] }
+                                            { fields: ['tariff'], type: 'in', value: _.pluck(directories.tariffs.getItems(), 'id') },
+                                            { fields: ['city'], type: 'in', value: [directories.dealers.getItems()[0].city.id, null] }
                                         ]
                                     };
                                     return tariffRatesLoader.loadItems(tariffRateQueryParams).then(function(tariffRatesData) {
                                         directories.tariffRates = tariffRatesData;
-                                        return _.invoke(directories, 'resolveReferences', directories);
+                                        return directories.resolveRefs();
                                     });
                                 });
                             });
@@ -256,9 +261,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
                                 _.assign(directories, tariffsDirectories);
                                 var tariffs = directories.tariffs.getItems();
-                                unite(tariffs, directories.saleParent.tariff);
+                                uniteUniq(tariffs, directories.saleParent.tariff);
                                 if (directories.sale) {
-                                    unite(tariffs, directories.sale.tariff);
+                                    uniteUniq(tariffs, directories.sale.tariff);
                                 }
                                 var dealer = directories.dealers.getItems()[0];
                                 var tariffRateQueryParams = {
@@ -617,6 +622,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
+    $scope.city = $scope.dealers.getItems()[0].city;
 
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
@@ -768,9 +774,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }
         var activeTo = angular.copy(activeFrom);
         activeTo.setDate(activeTo.getDate() - 1);
-        if (tariff.periodUnit === 'day') {
+        if (tariff.periodUnit.id === 'day') {
             activeTo.setDate(activeTo.getDate() + tariff.period);
-        } else if (tariff.periodUnit === 'month') {
+        } else if (tariff.periodUnit.id === 'month') {
             activeTo.setMonth(activeTo.getMonth() + tariff.period);
         } else {
             throw Error('Неизвестное значение единицы периода тарифа: ' + tariff.periodUnit);

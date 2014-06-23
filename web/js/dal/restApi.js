@@ -23,7 +23,7 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
                     errorMessage = 'Ответ сервера не содержит секции ' + sectionName;
                 } else if (sectionName === collectionName && !angular.isArray(data)) {
                     errorMessage = 'Ответ сервера не содержит массив в секции ' + sectionName;
-                } else if (id && id !== data.id) {
+                } else if (id && id.toString() !== data.id.toString()) {
                     errorMessage = 'Ответ сервера не содержит данных требуемого элемента ' + id;
                 }   // todo: проверить, что в ответе на запрос query всегда есть секция params (+юнит-тест)
 

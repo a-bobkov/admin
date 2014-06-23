@@ -3,16 +3,20 @@
 describe('app-mocked', function() {
     var $httpBackend,
         usersLoader,
-        User,
         Users,
-        UserStatus,
-        Manager,
-        City,
-        Metro,
-        Market,
+        User,
         Group,
+        Groups,
+        Managers,
+        Manager,
+        Cities,
+        City,
+        Metros,
+        Metro,
+        Markets,
+        Market,
+
         dealerSitesLoader,
-        dealerSiteStatusesLoader,
         dealersLoader,
         sitesLoader, 
         DealerSite,
@@ -23,12 +27,15 @@ describe('app-mocked', function() {
         DealerSiteLogin,
         DealerSiteLogins;
 
-    var tariffsLoader,
-        Tariffs,
-        salesLoader,
-        saleTypesLoader,
-        saleStatusesLoader,
-        Sales;
+    var tariffsLoader;
+    var Tariffs;
+    var tariffRatesLoader;
+    var TariffRates;
+    var dealerTariffsLoader;
+    var DealerTariffs;
+    var salesLoader;
+    var Sales;
+    var Sale;
 
     try {
         var ngMock = angular.module('ngMock');
@@ -44,7 +51,9 @@ describe('app-mocked', function() {
     }
 
     beforeEach(function() {
-        var modules = ['ng', 'max.dal.entities.user', 'max.dal.entities.dealersite', 'max.dal.entities.sale'];
+        var modules = ['ng', 'max.dal.entities.user', 
+            'max.dal.entities.dealersite', 'max.dal.entities.dealersitelogin', 
+            'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale'];
         if (ngMock) {
             modules.push('ngMock');
         }
@@ -53,19 +62,23 @@ describe('app-mocked', function() {
         usersLoader = injector.get('usersLoader');
         User = injector.get('User');
         Users = injector.get('Users');
-        UserStatus = injector.get('UserStatus');
         Group = injector.get('Group');
+        Groups = injector.get('Groups');
+        Managers = injector.get('Managers');
         Manager = injector.get('Manager');
+        Cities = injector.get('Cities');
         City = injector.get('City');
+        Metros = injector.get('Metros');
         Metro = injector.get('Metro');
+        Markets = injector.get('Markets');
         Market = injector.get('Market');
+
         dealerSitesLoader = injector.get('dealerSitesLoader');
-        dealerSiteStatusesLoader = injector.get('dealerSiteStatusesLoader');
-        dealersLoader = injector.get('dealersLoader');
-        sitesLoader = injector.get('sitesLoader');
-        DealerSite = injector.get('DealerSite');
         DealerSites = injector.get('DealerSites');
+        DealerSite = injector.get('DealerSite');
+        dealersLoader = injector.get('dealersLoader');
         Dealers = injector.get('Dealers');
+        sitesLoader = injector.get('sitesLoader');
         Sites = injector.get('Sites');
         dealerSiteLoginsLoader = injector.get('dealerSiteLoginsLoader');
         DealerSiteLogins = injector.get('DealerSiteLogins');
@@ -73,17 +86,19 @@ describe('app-mocked', function() {
 
         tariffsLoader = injector.get('tariffsLoader');
         Tariffs = injector.get('Tariffs');
+        tariffRatesLoader = injector.get('tariffRatesLoader');
+        TariffRates = injector.get('TariffRates');
+        dealerTariffsLoader = injector.get('dealerTariffsLoader');
+        DealerTariffs = injector.get('DealerTariffs');
         salesLoader = injector.get('salesLoader');
-        saleTypesLoader = injector.get('saleTypesLoader');
-        saleStatusesLoader = injector.get('saleStatusesLoader');
         Sales = injector.get('Sales');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
-            setHttpMock($httpBackend, usersLoader, User, Users, null,
-                dealerSitesLoader, dealerSiteStatusesLoader, dealersLoader, sitesLoader, 
-                DealerSite, DealerSites, Dealers, Sites, dealerSiteLoginsLoader, DealerSiteLogins, DealerSiteLogin,
-                tariffsLoader, Tariffs, salesLoader, saleTypesLoader, saleStatusesLoader, Sales);
+            setHttpMock($httpBackend, null,
+                User, Users, Groups, Managers, Markets, Metros, Cities,
+                Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
+                Tariffs, TariffRates, DealerTariffs, Sales, Sale);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
@@ -124,30 +139,115 @@ describe('app-mocked', function() {
 
 describe('sales, tariffs', function() {
     
-    it('загружать значения тарифов', function() {
+    it('загружать значения тарифов, затем нужных сайтов', function() {
         var answer = {};
-        var directories;
 
         runSync(answer, function() {
-            return tariffsLoader.loadItems();
-        });
-
-        runSync(answer, function() {
-            var tariffs = answer.respond.tariffs.getItems();
-            expect(tariffs.length).toBeTruthy();
-            var sites = answer.respond.sites.getItems();
-            expect(sites.length).toBeTruthy();
-            var tariff = tariffs[0];
-            return tariffsLoader.loadItem(tariff.id, directories);
+            return tariffsLoader.loadItems().then(function(tariffs) {
+                return sitesLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'in', value: _.pluck(tariffs.getItems(), 'id') }
+                    ]
+                }).then(function(sites) {
+                    tariffs.resolveRefs({sites: sites});
+                    return {
+                        tariffs: tariffs,
+                        sites: sites
+                    }
+                });
+            });
         });
 
         runs(function() {
-            var tariff = answer.respond.tariff;
+            var directories = answer.respond;
+            var tariffItems = directories.tariffs.getItems();
+            var siteItems = directories.sites.getItems();
+            expect(tariffItems.length).toBeTruthy();
+            expect(siteItems.length).toBeTruthy();
+        });
+    });
+
+    it('загружать значения всех сайтов, затем тарифов', function() {
+        var answer = {};
+
+        runSync(answer, function() {
+            return sitesLoader.loadItems().then(function(sites) {
+                return tariffsLoader.loadItems(null, {sites: sites}).then(function(tariffs) {
+                    return {
+                        sites: sites,
+                        tariffs: tariffs
+                    };
+                });
+            });
+        });
+
+        runs(function() {
+            var directories = answer.respond;
+            var tariffItems = directories.tariffs.getItems();
+            var siteItems = directories.sites.getItems();
+            expect(tariffItems.length).toBeTruthy();
+            expect(siteItems.length).toBeTruthy();
+        });
+    });
+
+    it('загружать значения всех сайтов, затем тарифов, затем первого тарифа', function() {
+        var answer = {};
+
+        runSync(answer, function() {
+            return sitesLoader.loadItems().then(function(sites) {
+                return tariffsLoader.loadItems(null, {sites: sites}).then(function(tariffs) {
+                    // return tariffsLoader.loadItem(tariffs.getItems()[0].id, {sites: sites}).then(function(tariff) {
+                        return {
+                            sites: sites,
+                            tariffs: tariffs
+                            // ,
+                            // tariff: tariff
+                        }
+                    // });
+                });
+            });
+        });
+
+        runs(function() {
+            var directories = answer.respond;
+            var siteItems = directories.sites.getItems();
+            var tariffItems = directories.tariffs.getItems();
+            var tariff = directories.tariff;
+            expect(siteItems.length).toBeTruthy();
+            expect(tariffItems.length).toBeTruthy();
+            // expect(tariff.constructor.name).toBe('Tariff');
+        });
+    });
+
+    it('загружать сразу значения тарифов и всех сайтов', function() {
+        var answer = {};
+
+        runSync(answer, function() {
+            return $q.all({
+                tariffs: tariffsLoader.loadItems(),
+                sites: sitesLoader.loadItems()
+            }).then(function(directories) {
+                return _.invoke(directories, 'resolveRefs', directories);
+            });
+        });
+
+        runSync(answer, function() {
+            var directories = answer.respond;
+            var tariffItems = directories.tariffs.getItems();
+            var siteItems = directories.sites.getItems();
+            expect(tariffItems.length).toBeTruthy();
+            expect(siteItems.length).toBeTruthy();
+            return tariffsLoader.loadItem(tariffItems[0].id, directories);
+        });
+
+
+        runs(function() {
+            var tariff = answer.respond;
             expect(tariff).toBeTruthy();
         });
     });
 
-    it('загружать значения продаж', function() {
+    xit('загружать значения продаж', function() {
         var answer = {};
         var directories;
 

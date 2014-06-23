@@ -1,6 +1,9 @@
 'use strict';
 
-angular.module('DealerSiteApp', ['ngRoute', 'max.dal.entities.dealersite', 'ui.bootstrap.pagination', 'ui.multicombo'])
+angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multicombo',
+    'max.dal.entities.dealersite', 
+    'max.dal.entities.dealersitelogin' 
+])
 
 .config(['$routeProvider', function($routeProvider) {
 

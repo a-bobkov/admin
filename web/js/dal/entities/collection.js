@@ -6,7 +6,8 @@ angular.module('max.dal.entities.collection', [])
 
 var Item = (function() {
 
-    var Item = function(itemData, entityParams) {
+    var Item = function(itemData) {
+        var entityParams = this.entityParams;
         _.forOwn(itemData, function(value, key) {
             if (entityParams && _.contains(entityParams.dateFields, key)) {
                 this[key] = new Date(value);
@@ -19,15 +20,16 @@ var Item = (function() {
                 this[key] = value;
             }
             if (this[key] === undefined) {
-                throw new CollectionError('Неправильный формат значения в поле ' + key + ': ' +angular.toJson(value));
+                throw new CollectionError('Неправильный формат значения в поле ' + key + ': ' +angular.toJson(itemData));
             }
         }, this);
         return this;
     };
 
-    Item.prototype.resolveRefs = function(directories, entityParams) {
+    Item.prototype.resolveRefs = function(directories) {
+        var entityParams = this.entityParams;
         var self = this;
-        return _.forOwn(this, function(value, key) {
+        return _.forOwn(self, function(value, key) {
             var newValue;
             if (_.has(value, 'id')) {
                 if (_.has(entityParams.enumFields, key) || _.has(entityParams.objectFields, key)) {
@@ -45,13 +47,15 @@ var Item = (function() {
         });
     };
 
-    Item.prototype.serialize = function(entityParams) {
+    Item.prototype.serialize = function() {
+        var entityParams = this.entityParams;
+        var self = this;
         return _.mapValues(this, function(value, key) {
             if (entityParams && _.has(entityParams.enumFields, key)) {
                 return value.id;
             } else if (entityParams && _.has(entityParams.objectFields, key)) {
                 return value.serialize();
-            } else if (entityParams && _.has(entityParams.refFields, key)) {
+            } else if (entityParams && _.has(entityParams.refFields, key) && value !== null) {
                 return {id: value.id};
             } else if (entityParams && _.contains(entityParams.dateFields, key)) {
                 return value.toISOString().slice(0, 10);
@@ -79,7 +83,7 @@ return Item;
 
 var Collection = (function() {
 
-    var Collection = function(itemsData, itemConstructor, queryParams) {
+    var Collection = function(itemsData, queryParams, itemConstructor, collConstructor) {
         this.items = _.collect(itemsData, function(itemData) {
             if (typeof itemData.id === 'undefined') {
                 throw new CollectionError('Нет параметра id в данных: ' + angular.toJson(itemData));
@@ -99,7 +103,8 @@ var Collection = (function() {
         return _.find(Collection.prototype.getItems.call(this), {id: id});
     };
     Collection.prototype.resolveRefs = function(directories) {
-        return _.invoke(this.getItems(), 'resolveRefs', directories);
+        _.invoke(this.getItems(), 'resolveRefs', directories);
+        return this;
     };
     Collection.prototype.serialize = function() {
         return _.invoke(Collection.prototype.getItems.call(this), function() {
@@ -109,6 +114,42 @@ var Collection = (function() {
     return Collection;
 }());
 return Collection;
+})
+
+.factory('Construction', function() {
+
+    var Construction = function(collections) {
+        _.assign(this, collections);
+    }
+
+    Construction.prototype.resolveRefs = function() {
+        var self = this;
+        return _.forEach(self, function(value) {
+            value.resolveRefs(self);
+        });
+    };
+    return Construction;
+})
+
+.service('entityLoader', function() {
+    this.loadItems = function(queryParams, directories, entityApi, collConstructor) {
+        return entityApi.query(queryParams).then(function(collectionData) {
+            var collection = new collConstructor(collectionData[collConstructor.prototype.lowerName], collectionData.queryParams);
+            if (directories) {
+                collection.resolveRefs(directories);
+            }
+            return collection;
+        });
+    };
+    this.loadItem = function(id, directories, entityApi, itemConstructor) {
+        return entityApi.get(id).then(function(itemData) {
+            var item = new itemConstructor(itemData[itemConstructor.prototype.lowerName]);
+            if (directories) {
+                item.resolveRefs(directories);
+            }
+            return item;
+        });
+    };
 })
 
 var CollectionError = function(message, response) {

@@ -9,7 +9,14 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
 
 .factory('DealerSite', function(dealerSiteApi, Item, dealerSiteStatuses) {
     var DealerSite = (function() {
-        var entityParams = {
+        function DealerSite(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(DealerSite.prototype, Item.prototype);
+
+        DealerSite.prototype.lowerName = 'dealerSite';
+
+        DealerSite.prototype.entityParams = {
             enumFields: {
                 isActive: dealerSiteStatuses
             },
@@ -17,18 +24,6 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
                 dealer: 'dealers',
                 site: 'sites'
             }
-        };
-        function DealerSite(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(DealerSite.prototype, Item.prototype);
-
-        DealerSite.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        DealerSite.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
         };
 
         DealerSite.prototype.save = function(directories) {
@@ -61,22 +56,25 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
 
 .factory('DealerSites', function(Collection, DealerSite) {
     function DealerSites(itemsData, queryParams) {
-        Collection.call(this, itemsData, DealerSite, queryParams);
+        Collection.call(this, itemsData, queryParams, DealerSite, DealerSites);
     };
     _.assign(DealerSites.prototype, Collection.prototype);
+    DealerSites.prototype.lowerName = 'dealerSites';
     return DealerSites;
 })
 
-.service('dealerSitesLoader', function(dealerSiteApi, DealerSite, DealerSites) {
-    this.loadItems = function(queryParams) {
-        return dealerSiteApi.query(queryParams).then(function(dealerSitesData) {
-            return new DealerSites(dealerSitesData, queryParams);
-        });
+.service('dealerSitesLoader', function(entityLoader, dealerSiteApi, DealerSite, DealerSites) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, dealerApi, Dealers);
     };
-    this.loadItem = function(id) {
-        return dealerSiteApi.get(id).then(function(dealerSiteData) {
-            return new DealerSite(dealerSiteData);
-        });
+})
+
+.service('dealerSitesLoader', function(entityLoader, dealerSiteApi, DealerSite, DealerSites) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, dealerSiteApi, DealerSites);
+    };
+    this.loadItem = function(id, directories) {
+        return entityLoader.loadItem(id, directories, dealerSiteApi, DealerSite);
     };
 })
 
@@ -92,6 +90,6 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     return new Collection([
         { id: true, name: 'Акт' },
         { id: false, name: 'Бло' }
-    ], DealerSiteStatus);
+    ], null, DealerSiteStatus);
 })
 ;

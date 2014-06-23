@@ -9,7 +9,14 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
 
 .factory('Sale', function(saleApi, Item, saleTypes, saleStatuses) {
     var Sale = (function() {
-        var entityParams = {
+        function Sale(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(Sale.prototype, Item.prototype);
+
+        Sale.prototype.lowerName = 'sale';
+
+        Sale.prototype.entityParams = {
             dateFields: ['date', 'activeFrom', 'activeTo'],
             enumFields: {
                 type: saleTypes,
@@ -20,18 +27,6 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
                 site: 'sites',
                 tariff: 'tariffs'
             }
-        };
-        function Sale(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(Sale.prototype, Item.prototype);
-
-        Sale.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        Sale.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
         };
 
         Sale.prototype.isCard = function() {
@@ -76,22 +71,19 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
 
 .factory('Sales', function(Collection, Sale) {
     function Sales(itemsData, queryParams) {
-        Collection.call(this, itemsData, Sale, queryParams);
+        Collection.call(this, itemsData, queryParams, Sale, Sales);
     };
+    Sales.prototype.lowerName = 'sales';
     _.assign(Sales.prototype, Collection.prototype);
     return Sales;
 })
 
-.service('salesLoader', function(saleApi, Sale, Sales) {
-    this.loadItems = function(queryParams) {
-        return saleApi.query(queryParams).then(function(salesData) {
-            return new Sales(salesData, queryParams);
-        });
+.service('salesLoader', function(entityLoader, saleApi, Sale, Sales) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, saleApi, Sales);
     };
-    this.loadItem = function(id) {
-        return saleApi.get(id).then(function(saleData) {
-            return new Sale(saleData);
-        });
+    this.loadItem = function(id, directories) {
+        return entityLoader.loadItem(id, directories, saleApi, Sale);
     };
 })
 
@@ -107,7 +99,7 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
     return new Collection([
         { id: true, name: 'А' },
         { id: false, name: 'Н/А' }
-    ], SaleStatus);
+    ], null, SaleStatus);
 })
 
 .factory('SaleType', function(Item) {
@@ -123,6 +115,6 @@ angular.module('max.dal.entities.sale', ['max.dal.entities.collection', 'max.dal
         { id: 'card', name: 'Осн' },
         { id: 'addcard', name: 'Расш' },
         { id: 'extra', name: 'Доп' }
-    ], SaleType);
+    ], null, SaleType);
 })
 ;

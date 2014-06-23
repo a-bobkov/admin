@@ -1,11 +1,6 @@
 'use strict';
 
-angular.module('max.dal.entities.group', ['max.dal.entities.collection', 'max.dal.rest.api'])
-
-.factory('groupApi', function(RestApi, Api) {
-    var groupApi = new RestApi('groups', 'group');
-    return groupApi;
-})
+angular.module('max.dal.entities.group', ['max.dal.entities.collection'])
 
 .factory('Group', function(Item) {
     function Group(itemData) {
@@ -17,7 +12,7 @@ angular.module('max.dal.entities.group', ['max.dal.entities.collection', 'max.da
 
 .factory('Groups', function(Collection, Group) {
     function Groups(itemsData, queryParams) {
-        Collection.call(this, itemsData, Group, queryParams);
+        Collection.call(this, itemsData, queryParams, Group, Groups);
     };
     _.assign(Groups.prototype, Collection.prototype);
     return Groups;

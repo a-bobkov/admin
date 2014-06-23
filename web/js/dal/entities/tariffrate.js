@@ -9,25 +9,19 @@ angular.module('max.dal.entities.tariffrate', ['max.dal.entities.collection', 'm
 
 .factory('TariffRate', function(Item) {
     var TariffRate = (function() {
-        var entityParams = {
+        function TariffRate(itemData) {
+            Item.call(this, itemData);
+        };
+        _.assign(TariffRate.prototype, Item.prototype);
+
+        TariffRate.prototype.lowerName = 'tariffRate';
+
+        TariffRate.prototype.entityParams = {
             dateFields: ['activeFrom'],
             refFields: {
                 tariff: 'tariffs',
                 city: 'cities'
             }
-        };
-
-        function TariffRate(itemData) {
-            Item.call(this, itemData, entityParams);
-        };
-        _.assign(TariffRate.prototype, Item.prototype);
-
-        TariffRate.prototype.resolveRefs = function(directories) {
-            return Item.prototype.resolveRefs.call(this, directories, entityParams);
-        };
-
-        TariffRate.prototype.serialize = function() {
-            return Item.prototype.serialize.call(this, entityParams);
         };
 
         return TariffRate;
@@ -37,22 +31,19 @@ angular.module('max.dal.entities.tariffrate', ['max.dal.entities.collection', 'm
 
 .factory('TariffRates', function(Collection, TariffRate) {
     function TariffRates(itemsData, queryParams) {
-        Collection.call(this, itemsData, TariffRate, queryParams);
+        Collection.call(this, itemsData, queryParams, TariffRate, TariffRates);
     };
     _.assign(TariffRates.prototype, Collection.prototype);
+    TariffRates.prototype.lowerName = 'tariffRates';
     return TariffRates;
 })
 
-.service('tariffRatesLoader', function(tariffRateApi, TariffRate, TariffRates) {
-    this.loadItems = function(queryParams) {
-        return tariffRateApi.query(queryParams).then(function(tariffRatesData) {
-            return new TariffRates(tariffRatesData, queryParams);
-        });
+.service('tariffRatesLoader', function(entityLoader, tariffRateApi, TariffRate, TariffRates) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, tariffRateApi, TariffRates);
     };
-    this.loadItem = function(id) {
-        return tariffRateApi.get(id).then(function(tariffRateData) {
-            return new TariffRate(tariffRateData);
-        });
+    this.loadItem = function(id, directories) {
+        return entityLoader.loadItem(id, directories, tariffRateApi, TariffRate);
     };
 })
 ;
