@@ -1518,9 +1518,7 @@ function setHttpMock($httpBackend, multiplyCoef,
         return processPost(data, sales, 'sale', Sale, {
             dealers: dealers,
             sites: sites,
-            tariffs: tariffs,
-            saleStatuses: saleStatuses,
-            saleTypes: saleTypes
+            tariffs: tariffs
         }, function processId() {
             if (this.type.id === 'card' || this.type.id === 'addcard') {
                 this.cardId = this.id;
@@ -1532,9 +1530,7 @@ function setHttpMock($httpBackend, multiplyCoef,
         return processPut(url, regexSalesPut, data, sales, 'sale', Sale, {
             dealers: dealers,
             sites: sites,
-            tariffs: tariffs,
-            saleStatuses: saleStatuses,
-            saleTypes: saleTypes
+            tariffs: tariffs
         });
     });
     var regexSalesDelete = /^\/api2\/sales\/(?:([^\/]+))$/;

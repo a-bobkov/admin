@@ -109,8 +109,8 @@ angular.module("ui.multicombo", [])
                         per_page: 9
                     }
                 };
-                $scope._choicesLoader.loadItems(queryParams).then(function(respond) {
-                    $scope._choices = respond[_.keys(respond)[0]];
+                $scope._choicesLoader.loadItems(queryParams).then(function(collection) {
+                    $scope._choices = collection;
                     filterChoices();
                 });
             }
