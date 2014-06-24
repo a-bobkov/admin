@@ -26,19 +26,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         controller: 'SaleListCtrl',
         reloadOnSearch: false,
         resolve: {
-            data: function(saleStatusesLoader, saleTypesLoader, dealersLoader, sitesLoader, $rootScope, $location, $q) {
-                var toResolve = {
-                    saleTypes: saleTypesLoader.loadItems().then(function(respond) {
-                        return respond.saleTypes;
-                    }),
-                    saleStatuses: saleStatusesLoader.loadItems().then(function(respond) {
-                        return respond.saleStatuses;
-                    })
-                };
+            data: function(dealersLoader, sitesLoader, $rootScope, $location, $q, Construction) {
                 if (_.isEmpty($location.search()) && !_.isEmpty($rootScope.savedSaleListLocationSearch)) {
                     $location.search($rootScope.savedSaleListLocationSearch);
                 }
                 var ls = $location.search();
+                var toResolve = {};
                 if (!_.isEmpty(ls.dealers)) {
                     var dealerQueryParams = {
                         filters: [
@@ -46,9 +39,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                         ],
                         fields: ['dealer_list_name']
                     };
-                    toResolve.dealers = dealersLoader.loadItems(dealerQueryParams).then(function(respond) {
-                        return respond.dealers;
-                    });
+                    toResolve.dealers = dealersLoader.loadItems(dealerQueryParams);
                 }
                 if (!_.isEmpty(ls.sites)) {
                     var siteQueryParams = {
@@ -56,86 +47,17 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             { fields: ['id'], type: 'in', value: ls.sites.split(';') }
                         ]
                     };
-                    toResolve.sites = sitesLoader.loadItems(siteQueryParams).then(function(respond) {
-                        return respond.sites;
-                    });
+                    toResolve.sites = sitesLoader.loadItems(siteQueryParams);
                 }
-                return $q.all(toResolve);
+                return $q.all(toResolve).then(function(construction) {
+                    return new Construction(construction).resolveRefs();
+                });
             }
         }
     })
     .when('/sale/card', {       // ?id=new - создание новой карточки; ?id=5 - редактирование карточки 5
         templateUrl: 'template/page/sale/edit.html',
         controller: 'SaleCardEditCtrl',
-        // resolve: {
-        //     data: function(saleStatusesLoader, saleTypesLoader, usersLoader, salesLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
-        //         var toResolve = [
-        //             saleTypesLoader.loadItems(),
-        //             saleStatusesLoader.loadItems(),
-        //             usersLoader.loadDirectories()
-        //         ];
-        //         return $q.all(toResolve).then(function(directoriesArr) {
-        //             var directories = _.transform(directoriesArr, _.assign, {});
-        //             var ls = $location.search();
-        //             if (ls.id === 'new') {
-        //                 return $q.when(directories);
-        //             } else {
-        //                 var id = _.parseInt(ls.id);
-        //                 return salesLoader.loadItem(id, directories).then(function(salesDirectories) {
-        //                     _.assign(directories, salesDirectories);
-        //                     delete directories.tariffs;
-        //                     directories.city = directories.sale.dealer.city;
-        //                     var addSaleQueryParams = {
-        //                         filters: [
-        //                             { fields: ['type'], type: 'equal', value: 'addcard' },
-        //                             { fields: ['parentId'], type: 'equal', value: directories.sale.cardId }
-        //                         ]
-        //                     };
-        //                     return salesLoader.loadItems(addSaleQueryParams, directories).then(function(salesDirectories) {
-        //                         var addSale = salesDirectories.sales.getItems()[0];
-        //                         if (addSale) {
-        //                             directories.addSale = addSale;
-        //                         }
-        //                         var extraSaleQueryParams = {
-        //                             filters: [
-        //                                 { fields: ['type'], type: 'equal', value: 'extra' },
-        //                                 { fields: ['cardId'], type: 'equal', value: directories.sale.cardId }
-        //                             ]
-        //                         };
-        //                         return salesLoader.loadItems(extraSaleQueryParams, directories).then(function(salesDirectories) {
-        //                             var extraSales = salesDirectories.sales;
-        //                             if (extraSales.getItems().length) {
-        //                                 directories.extraSales = extraSales;
-        //                             }
-        //                             var tariffQueryParams = {
-        //                                 filters: [
-        //                                     { fields: ['site'], type: 'equal', value: directories.sale.site.id },
-        //                                     { fields: ['type'], type: 'equal', value: 'periodical' },
-        //                                     { fields: ['isActive'], type: 'equal', value: true }
-        //                                 ]
-        //                             };
-        //                             return tariffsLoader.loadItems(tariffQueryParams, directories).then(function(tariffsDirectories) {
-        //                                 _.assign(directories, tariffsDirectories);
-        //                                 var tariffs = directories.tariffs.getItems();
-        //                                 uniteUniq(tariffs, directories.sale.tariff);
-        //                                 var dealer = directories.dealers.getItems()[0];
-        //                                 var tariffRateQueryParams = {
-        //                                     filters: [
-        //                                         { fields: ['tariff'], type: 'in', value: _.pluck(tariffs, 'id') },
-        //                                         { fields: ['city'], type: 'in', value: [dealer.city.id, null] }
-        //                                     ]
-        //                                 };
-        //                                 return tariffRatesLoader.loadItems(tariffRateQueryParams, directories).then(function(tariffRateDirectories) {
-        //                                     return _.assign(directories, tariffRateDirectories);
-        //                                 });
-        //                             });
-        //                         });
-        //                     });
-        //                 });
-        //             }
-        //         });
-        //     }
-        // }
         resolve: {
             data: function(usersLoader, salesLoader, dealersLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
                 return usersLoader.loadDirectories().then(function(directories) {
@@ -324,10 +246,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 ;
 }])
 
-.controller('SaleListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, $q, data, 
-    salesLoader, dealersLoader, sitesLoader, Sale, dealerTariffsLoader) {
+.controller('SaleListCtrl', function($scope, $rootScope, $location, $q, data, 
+    Sale, saleStatuses, saleTypes, salesLoader, dealersLoader, sitesLoader, tariffsLoader, dealerTariffsLoader, Construction) {
 
     _.assign($scope, data);
+    $scope.saleStatuses = saleStatuses;
+    $scope.saleTypes = saleTypes;
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
@@ -340,7 +264,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.patterns = {
             dealers: [],
             sites: [],
-            isActive: $scope.saleStatuses.get(false),
+            isActive: saleStatuses.get(false),
             type: null,
             archive: false
         };
@@ -391,41 +315,57 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $scope.paging.currentPage = page;
         }
 
-        var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
+        var searchParams = _.pick(_.assign({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
             return value;
         });
         $rootScope.savedSaleListLocationSearch = toLocationSearch(searchParams);
         $location.search($rootScope.savedSaleListLocationSearch);
 
-        var queryParams = makeQueryParams($rootScope.savedSaleListLocationSearch);
-        var staticDirectories = _.pick($scope, ['saleTypes', 'saleStatuses']);
-        salesLoader.loadItems(queryParams, staticDirectories).then(function(newDirectories) {
-            _.assign($scope, newDirectories);
-            $scope.totalItems = $scope.sales.getParams().pager.total;
-            var topSaleList = document.getElementById('SaleListAddSaleUp').getBoundingClientRect().top;
-            if (topSaleList < 0) {
-                window.scrollBy(0, topSaleList);
-            }
-
-            var cards = _.filter($scope.sales.getItems(), function(sale) {
-                return sale.isCard() || sale.isAddcard();
-            });
-            var cardIds = _.pluck(cards, 'cardId');
-            var addSaleQueryParams = {
-                filters: [
-                    { fields: ['type'], type: 'equal', value: 'addcard' },
-                    { fields: ['parentId'], type: 'in', value: cardIds }
-                ]
-            };
-            var directories = _.assign({}, staticDirectories, _.pick(newDirectories, ['dealers', 'sites']));
-            return salesLoader.loadItems(addSaleQueryParams, directories).then(function(collection) {
-                $scope.sales_add = collection.sales;
+        var saleQueryParams = makeQueryParams($rootScope.savedSaleListLocationSearch);
+        salesLoader.loadItems(saleQueryParams).then(function(sales) {
+            $scope.totalItems = sales.getParams().pager.total;
+            var construction = new Construction({sales: sales});
+            var salesItems = sales.getItems();
+            $q.all({
+                addSales: salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'addcard' },
+                        { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                    ]
+                }),
+                dealers: dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'in', value: _.pluck(_.pluck(salesItems, 'dealer'), 'id') }
+                    ],
+                    fields: ['dealer_list_name']
+                }),
+                sites: sitesLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'in', value: _.pluck(_.pluck(salesItems, 'site'), 'id') }
+                    ]
+                })
+            }).then(function(collections) {
+                _.assign(construction, collections);
+                tariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'in', value: 
+                            _.pluck(_.compact(_.pluck(_.union(salesItems, construction.addSales.getItems()), 'tariff')), 'id')
+                        }
+                    ]
+                }).then(function(tariffs) {
+                    construction.tariffs = tariffs;
+                    _.assign($scope, construction.resolveRefs());
+                    var topSaleList = document.getElementById('SaleListAddSaleUp').getBoundingClientRect().top;
+                    if (topSaleList < 0) {
+                        window.scrollBy(0, topSaleList);
+                    }
+                });
             });
         });
     };
 
     $scope.isAddable = function(sale) {
-        return (sale.isCard() || sale.isAddcard()) && $scope.sales_add && !_.find($scope.sales_add.getItems(), {parentId: sale.cardId});
+        return (sale.isCard() || sale.isAddcard()) && $scope.addSales && !_.find($scope.addSales.getItems(), {parentId: sale.cardId});
     }
 
     var ls = $location.search();
@@ -437,8 +377,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             sites: (!ls.sites) ? [] : _.invoke(ls.sites.split(';'), function() {
                 return $scope.sites.get(_.parseInt(this));
             }),
-            isActive: $scope.saleStatuses.get((ls.isActive === 'true') ? true : (ls.isActive === 'false') ? false : null),
-            type: $scope.saleTypes.get(ls.type),
+            isActive: saleStatuses.get((ls.isActive === 'true') ? true : (ls.isActive === 'false') ? false : null),
+            type: saleTypes.get(ls.type),
             archive: !!ls.archive
         };
         $scope.sorting = {
@@ -555,19 +495,16 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             confirmMessage = 'Активировать продажу ';
             noticeMessage = 'Активирована продажа ';
             newStatus = $scope.saleStatuses.get(true);
-            var dealerTariffsQueryParams = {
+            check = dealerTariffsLoader.loadItems({
                 filters: [
                     { fields: ['dealer'], type: 'equal', value: sale.dealer.id },
                     { fields: ['site'], type: 'equal', value: sale.site.id }
                 ]
-            };
-            var oldDirectories = _.pick($scope, ['dealers', 'sites']);
-            check = dealerTariffsLoader.loadItems(dealerTariffsQueryParams, oldDirectories).then(function(dealerTariffsDirectories) {
-                var dealerTariff = dealerTariffsDirectories.dealerTariffs.getItems()[0];
-                if (!dealerTariff) {
+            }).then(function(dealerTariffs) {
+                if (!dealerTariffs.getItems().length) {
                     alert("У салона не включен экспорт на сайт!");
                 }
-                return !!dealerTariff;
+                return !!dealerTariffs.getItems().length;
             });
         }
         check.then(function(valid) {
@@ -618,11 +555,13 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
-.controller('SaleCardEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
-    dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
+.controller('SaleCardEditCtrl', function($scope, $rootScope, $location, $window, data,
+    Sale, dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
-    $scope.city = $scope.dealers.getItems()[0].city;
+    if ($scope.dealers) {
+        $scope.city = $scope.dealers.getItems()[0].city;
+    }
 
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
@@ -771,7 +710,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         if (!activeFrom || !tariff) {
             return;
         }
-        var activeTo = angular.copy(activeFrom);
+        var activeTo = _.clone(activeFrom);
         activeTo.setDate(activeTo.getDate() - 1);
         if (tariff.periodUnit.id === 'day') {
             activeTo.setDate(activeTo.getDate() + tariff.period);
@@ -793,7 +732,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             return;
         }
         if ($scope.lastActiveCard) {
-            $scope.saleEdited.activeFrom = $scope.lastActiveCard.activeTo;
+            $scope.saleEdited.activeFrom = _.clone($scope.lastActiveCard.activeTo);
         } else {
             $scope.saleEdited.activeFrom = new Date();
             $scope.saleEdited.activeFrom.setHours(0, 0, 0, 0);

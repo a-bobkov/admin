@@ -134,7 +134,7 @@ return Collection;
 .service('entityLoader', function() {
     this.loadItems = function(queryParams, directories, entityApi, collConstructor) {
         return entityApi.query(queryParams).then(function(collectionData) {
-            var collection = new collConstructor(collectionData[collConstructor.prototype.lowerName], collectionData.queryParams);
+            var collection = new collConstructor(collectionData[collConstructor.prototype.lowerName], collectionData.params);
             if (directories) {
                 collection.resolveRefs(directories);
             }
