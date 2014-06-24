@@ -146,7 +146,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                                     { fields: ['parentId'], type: 'equal', value: sale.cardId }
                                 ]
                             }).then(function(addSales) {
-                                directories.addSale = addSales.getItems()[0];
+                                if (addSales.getItems().length) {
+                                    directories.addSale = addSales.getItems()[0];
+                                }
                                 return sale.parentId;
                             });
                         });
@@ -220,35 +222,46 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         templateUrl: 'template/page/sale/edit.html',
         controller: 'SaleExtraEditCtrl',
         resolve: {
-            data: function(saleStatusesLoader, saleTypesLoader, salesLoader, $location, $q) {
-                var toResolve = [
-                    saleTypesLoader.loadItems(),
-                    saleStatusesLoader.loadItems()
-                ];
-                return $q.all(toResolve).then(function(directoriesArr) {
-                    var directories = _.transform(directoriesArr, _.assign, {});
-                    var ls = $location.search();
-                    if (ls.id === 'new') {
-                        toResolve = $q.when(_.parseInt(ls.cardId));
-                    } else {
-                        var id = _.parseInt(ls.id);
-                        toResolve = salesLoader.loadItem(id, directories).then(function(salesDirectories) {
-                            _.assign(directories, salesDirectories);
-                            return salesDirectories.sale.cardId;
-                        });
-                    }
-                    return toResolve.then(function(cardId) {
-                        var saleQueryParams = {
-                            filters: [
-                                { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
-                                { fields: ['cardId'], type: 'equal', value: cardId }
-                            ]
-                        };
-                        return salesLoader.loadItems(saleQueryParams, directories).then(function(salesDirectories) {
-                            directories.saleParent = salesDirectories.sales.getItems()[0];
-                            delete salesDirectories.sales;
-                            _.assign(directories, salesDirectories);
-                            return directories;
+            data: function(Construction, salesLoader, dealersLoader, sitesLoader, tariffsLoader, $location, $q) {
+                var directories = new Construction;
+                var toResolve;
+                var ls = $location.search();
+                if (ls.id === 'new') {
+                    toResolve = $q.when(ls.cardId);
+                } else {
+                    toResolve = salesLoader.loadItem(ls.id).then(function(sale) {
+                        directories.sale = sale;
+                        return sale.cardId;
+                    });
+                }
+                return toResolve.then(function(cardId) {
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
+                            { fields: ['cardId'], type: 'equal', value: cardId }
+                        ]
+                    }).then(function(parentSales) {
+                        directories.parentSale = parentSales.getItems()[0];
+                        return $q.all({
+                            dealers: dealersLoader.loadItems({
+                                filters: [
+                                    { fields: ['id'], type: 'equal', value: directories.parentSale.dealer.id }
+                                ],
+                                fields: ['dealer_list_name']
+                            }),
+                            sites: sitesLoader.loadItems({
+                                filters: [
+                                    { fields: ['id'], type: 'equal', value: directories.parentSale.site.id }
+                                ]
+                            }),
+                            tariffs: tariffsLoader.loadItems({
+                                filters: [
+                                    { fields: ['id'], type: 'equal', value: directories.parentSale.tariff.id }
+                                ]
+                            })
+                        }).then(function(parentData) {
+                            _.assign(directories, parentData);
+                            return directories.resolveRefs();
                         });
                     });
                 });
@@ -522,7 +535,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         check.then(function(valid) {
             if (valid && confirm(confirmMessage + sale.name() + '?')) {
                 var saleEdited = new Sale;
-                angular.extend(saleEdited, sale);
+                _.assign(saleEdited, sale);
                 saleEdited.isActive = newStatus;
                 saleEdited.save($scope).then(function() {
                     $scope.savedSaleListNotice = noticeMessage + sale.name();
@@ -591,7 +604,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     function makeSaleCopy() {
         $scope.actionName = "Изменение карточки";
         $scope.saleEdited = new Sale();
-        angular.extend($scope.saleEdited, $scope.sale);
+        _.assign($scope.saleEdited, $scope.sale);
     }
 
     function makeSaleNew() {
@@ -798,8 +811,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
-.controller('SaleAddcardEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
-    dealersLoader, sitesLoader, salesLoader, tariffsLoader, usersLoader, dealerTariffsLoader, tariffRatesLoader) {
+.controller('SaleAddcardEditCtrl', function($scope, $rootScope, $location, $window, data,
+    Sale, dealersLoader, sitesLoader, salesLoader, tariffsLoader, usersLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
@@ -903,8 +916,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
-.controller('SaleExtraEditCtrl', function($scope, $rootScope, $location, $window, $filter, data, Sale,
-    dealersLoader, sitesLoader) {
+.controller('SaleExtraEditCtrl', function($scope, $rootScope, $location, $window, data,
+    Sale, dealersLoader, sitesLoader) {
 
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
@@ -921,20 +934,20 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     function makeSaleCopy() {
         $scope.actionName = "Изменение доплаты";
         $scope.saleEdited = new Sale();
-        angular.extend($scope.saleEdited, $scope.sale);
+        _.assign($scope.saleEdited, $scope.sale);
     }
 
     function makeSaleNew() {
         $scope.actionName = "Создание доплаты";
-        $scope.saleEdited = new Sale ({
+        $scope.saleEdited = new Sale({
             type: 'extra',
-            cardId: $scope.saleParent.cardId,
+            cardId: $scope.parentSale.cardId,
             date: new Date,
-            activeFrom: $scope.saleParent.activeFrom,
-            activeTo: $scope.saleParent.activeTo
-        }, $scope);
-        $scope.saleEdited.dealer = $scope.saleParent.dealer;
-        $scope.saleEdited.site = $scope.saleParent.site;
+            activeFrom: $scope.parentSale.activeFrom,
+            activeTo: $scope.parentSale.activeTo
+        });
+        $scope.saleEdited.dealer = $scope.parentSale.dealer;
+        $scope.saleEdited.site = $scope.parentSale.site;
         $scope.saleEdited.info = info();
     }
 
