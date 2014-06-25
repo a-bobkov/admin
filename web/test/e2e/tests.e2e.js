@@ -2191,25 +2191,33 @@ xdescribe('DealerSite App', function() {
         });
 
         it('Выдача нового разрешения на экспорт', function() {
-            element.all(by.id('McomboSearchInput')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(0).sendKeys('888');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            var dealerElem = element(by.id('DealerSiteListFilterDealers'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            dealerElemSearch.sendKeys('1');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
-            element.all(by.id('McomboSearchInput')).get(1).click();
-            element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            var siteElem = element(by.id('DealerSiteListFilterSites'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            siteElemSearch.sendKeys('3');
+            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(0);
 
             element(by.id('DealerSiteListAddDealerSiteUp')).click();
 
-            element.all(by.id('McomboSearchInput')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(0).sendKeys('888');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            var dealerElem = element(by.id('dealerSiteDealer'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            dealerElemSearch.sendKeys('1');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
-            element.all(by.id('McomboSearchInput')).get(1).click();
-            element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            var siteElem = element(by.id('dealerSiteSite'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            siteElemSearch.sendKeys('3');
+            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             element(by.id('dealerSiteExternalId')).sendKeys('8495555');
             element(by.id('dealerSitePublicUrl')).sendKeys('http://www.protractor.ru');
@@ -2219,12 +2227,17 @@ xdescribe('DealerSite App', function() {
         });
 
         it('Удаление разрешения на экспорт', function() {
-            element.all(by.id('McomboSearchInput')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(0).sendKeys('888');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(1).click();
-            element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            var dealerElem = element(by.id('DealerSiteListFilterDealers'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            dealerElemSearch.sendKeys('1');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+
+            var siteElem = element(by.id('DealerSiteListFilterSites'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            siteElemSearch.sendKeys('1');
+            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(1);
 
@@ -2236,33 +2249,30 @@ xdescribe('DealerSite App', function() {
         });
 
         it('Изменение регистрационных данных', function() {
-            element.all(by.id('McomboSearchInput')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(0).sendKeys('14');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(1).click();
-            element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            var dealerElem = element(by.id('DealerSiteListFilterDealers'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            dealerElemSearch.sendKeys('1');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+
+            var siteElem = element(by.id('DealerSiteListFilterSites'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            siteElemSearch.sendKeys('1');
+            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBeTruthy();
 
-            var newExternalId = String(Math.floor(Math.random() * 1000000));
-            var newPublicUrl = 'http://www.protractor.ru/' + String(Math.floor(Math.random() * 1000000));
             element(by.id('DealerSiteListRowEdit')).click();
             element(by.id('dealerSiteExternalId')).clear();
+            var newExternalId = String(Math.floor(Math.random() * 1000000));
             element(by.id('dealerSiteExternalId')).sendKeys(newExternalId);
             element(by.id('dealerSitePublicUrl')).clear();
+            var newPublicUrl = 'http://www.protractor.ru/' + String(Math.floor(Math.random() * 1000000));
             element(by.id('dealerSitePublicUrl')).sendKeys(newPublicUrl);
             element(by.id('dealerSiteEditSave')).click();
 
             expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Сохранена регистрация/);
-
-            browser.get('admin.html#/dealersitelist');
-            element.all(by.id('McomboSearchInput')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(0).sendKeys('14');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
-            element.all(by.id('McomboSearchInput')).get(1).click();
-            element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
-            element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element(by.repeater('dealerSite in dealerSites').row(0).column('externalId')).getText()).toMatch(newExternalId);
             expect(element(by.repeater('dealerSite in dealerSites').row(0).column('publicUrl')).getAttribute('href')).toMatchOrEmpty(newPublicUrl);

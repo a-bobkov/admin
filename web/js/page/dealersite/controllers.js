@@ -22,22 +22,22 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             };
             if (ls.dealers) {
                 queryParams.filters.push({
-                    type: 'in',
                     fields: ['dealer'],
+                    type: 'in',
                     value: ls.dealers.split(';')
                 });
             }
             if (ls.sites) {
                 queryParams.filters.push({
-                    type: 'in',
                     fields: ['site'],
+                    type: 'in',
                     value: ls.sites.split(';')
                 });
             }
             if (ls.isActive !== undefined) {
                 queryParams.filters.push({
-                    type: 'equal',
                     fields: ['isActive'],
+                    type: 'equal',
                     value: ls.isActive
                 });
             }
@@ -55,16 +55,55 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         }
     }
 
+    function getFilterFieldsValue(filters, fields) {
+        var filter = _.find(filters, {fields: fields});
+        if (filter) {
+            return filter.value;
+        }
+    }
+
     $routeProvider
     .when('/dealersitelist', {
         templateUrl: 'template/page/dealersite/list.html',
         controller: 'DealerSiteListCtrl',
         resolve: {
-            data: function(dealerSitesLoader, $location, $rootScope) {
+            data: function(dealerSitesLoader, dealersLoader, sitesLoader, Construction, $q, $location, $rootScope) {
                 if (!_.isEmpty($rootScope.savedDealerSiteListLocationSearch)) {
                     $location.search($rootScope.savedDealerSiteListLocationSearch);
                 }
-                return dealerSitesLoader.loadItems(makeQueryParams($rootScope.savedDealerSiteListLocationSearch));
+                return dealerSitesLoader.loadItems(makeQueryParams($rootScope.savedDealerSiteListLocationSearch)).then(function(dealerSites) {
+                    var construction = new Construction({dealerSites: dealerSites});
+
+                    var queryParams = dealerSites.getParams();
+                    var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
+                    if (_.isEmpty(dealerIds)) {
+                        dealerIds = _.pluck(_.pluck(dealerSites.getItems(), 'dealer'), 'id');
+                    }
+                    var dealerQueryParams = {
+                        filters: [
+                            { type: 'in', fields: ['id'], value: dealerIds }    // user.id
+                        ],
+                        fields: [ 'dealer_list_name' ]
+                    };
+
+                    var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
+                    if (_.isEmpty(siteIds)) {
+                        siteIds = _.pluck(_.pluck(dealerSites.getItems(), 'site'), 'id');
+                    }
+                    var siteQueryParams = {
+                        filters: [
+                            { type: 'in', fields: ['id'], value: siteIds }
+                        ]
+                    };
+
+                    return $q.all({
+                        dealers: dealersLoader.loadItems(dealerQueryParams),
+                        sites: sitesLoader.loadItems(siteQueryParams)
+                    }).then(function(directories) {
+                        _.assign(construction, directories);
+                        return construction.resolveRefs();
+                    });
+                });
             }
         }
     })
@@ -72,9 +111,27 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         templateUrl: 'template/page/dealersite/edit.html',
         controller: 'DealerSiteEditCtrl',
         resolve: {
-            data: function(dealerSitesLoader, $location) {
+            data: function(dealerSitesLoader, dealersLoader, sitesLoader, Construction, $location, $q) {
                 var id = parseInt($location.$$path.replace(/^\/dealersites\/(?:([^\/]+))\/edit$/,'$1'));
-                return dealerSitesLoader.loadItem(id);
+                return dealerSitesLoader.loadItem(id).then(function(dealerSite) {
+                    var construction = new Construction({dealerSite: dealerSite});
+                    return $q.all({
+                        dealers: dealersLoader.loadItems({
+                            filters: [
+                                { type: 'equal', fields: ['id'], value: dealerSite.dealer.id }  // user.id
+                            ],
+                            fields: [ 'dealer_list_name' ]
+                        }),
+                        sites: sitesLoader.loadItems({
+                            filters: [
+                                { type: 'equal', fields: ['id'], value: dealerSite.site.id }
+                            ]
+                        })
+                    }).then(function(directories) {
+                        _.assign(construction, directories);
+                        return construction.resolveRefs();
+                    });
+                });
             }
         }
     })
@@ -82,8 +139,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         templateUrl: 'template/page/dealersite/edit.html',
         controller: 'DealerSiteEditCtrl',
         resolve: {
-            data: function(dealerSiteStatusesLoader) {
-                return dealerSiteStatusesLoader.loadItems();
+            data: function($q) {
+                return $q.when();
             }
         }
     })
@@ -92,9 +149,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     });
 }])
 
-.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, DealerSite, dealersLoader, sitesLoader) {
+.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, 
+    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader) {
 
     _.assign($scope, data);
+    $scope.dealerSiteStatuses = dealerSiteStatuses;
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
@@ -178,7 +237,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         sites: _.invoke(getFilterFieldsValue(params.filters, ['site']), function() {
                 return $scope.sites.get(_.parseInt(this));
             }),
-        isActive: $scope.dealerSiteStatuses.get(getFilterFieldsValue(params.filters, ['isActive']))
+        isActive: dealerSiteStatuses.get(getFilterFieldsValue(params.filters, ['isActive']))
     };
     $scope.sorting = {
         column: params.order.field,
@@ -231,11 +290,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         if (dealerSite.isActive.id === true) {
             confirmMessage = 'Блокировать регистрацию ';
             noticeMessage = 'Блокирована регистрация ';
-            newStatus = $scope.dealerSiteStatuses.get(false);
+            newStatus = dealerSiteStatuses.get(false);
         } else {
             confirmMessage = 'Разблокировать регистрацию ';
             noticeMessage = 'Разблокирована регистрация ';
-            newStatus = $scope.dealerSiteStatuses.get(true);
+            newStatus = dealerSiteStatuses.get(true);
         }
         if (confirm(confirmMessage + dealerSite.name() + '?')) {
             var dealerSiteEdited = new DealerSite;
@@ -276,9 +335,10 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
 })
 
 .controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, $q, data, 
-    DealerSite, dealersLoader, sitesLoader, DealerSiteLogin, dealerSiteLoginsLoader) {
+    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader, DealerSiteLogin, dealerSiteLoginTypes, dealerSiteLoginsLoader) {
 
     _.assign($scope, data);
+    $scope.dealerSiteStatuses = dealerSiteStatuses;
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
@@ -297,7 +357,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         17: {                   publicUrl: true }
     };
 
-    if (data.dealerSite) {
+    if ($scope.dealerSite) {
         makeDealerSiteCopy();
     } else {
         makeDealerSiteNew();
@@ -308,7 +368,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     function makeDealerSiteCopy() {
         $scope.actionName = "Изменение";
         $scope.dealerSiteEdited = new DealerSite;
-        angular.extend($scope.dealerSiteEdited, $scope.dealerSite);
+        _.assign($scope.dealerSiteEdited, $scope.dealerSite);
     }
 
     function makeDealerSiteLoginsCopy() {
@@ -321,9 +381,9 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             site: $scope.dealerSiteEdited.site
         });
         _.forEach($scope.dealerSiteLogins.getItems(), function(dealerSiteLogin) {
-            if (dealerSiteLogin.type === 'site') {
+            if (dealerSiteLogin.type.id === 'site') {
                 _.assign($scope.dealerSiteLoginsEdited.site, dealerSiteLogin);
-            } else if (dealerSiteLogin.type === 'ftp') {
+            } else if (dealerSiteLogin.type.id === 'ftp') {
                 _.assign($scope.dealerSiteLoginsEdited.ftp, dealerSiteLogin);
             }
         });
@@ -335,14 +395,13 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             ftp: new DealerSiteLogin({type: 'ftp'})
         };
         if ($scope.dealerSiteEdited.dealer && $scope.dealerSiteEdited.site) {
-            var dealerSiteLoginQueryParams = {
+            dealerSiteLoginsLoader.loadItems({
                 filters: [
                     { type: 'equal', fields: ['dealer'], value: $scope.dealerSiteEdited.dealer.id },
                     { type: 'equal', fields: ['site'], value: $scope.dealerSiteEdited.site.id }
                 ]
-            };
-            dealerSiteLoginsLoader.loadItems(dealerSiteLoginQueryParams, $scope).then(function(directory) {
-                $scope.dealerSiteLogins = directory.dealerSiteLogins;
+            }, $scope).then(function(dealerSiteLogins) {
+                $scope.dealerSiteLogins = dealerSiteLogins;
                 makeDealerSiteLoginsCopy();
             });
         }
@@ -351,7 +410,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     function makeDealerSiteNew() {
         $scope.actionName = "Создание";
         $scope.dealerSiteEdited = new DealerSite;
-        $scope.dealerSiteEdited.isActive = _.find($scope.dealerSiteStatuses.getItems(), {id: true});
+        $scope.dealerSiteEdited.isActive = dealerSiteStatuses.get(true);
     }
 
     $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
@@ -381,7 +440,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.ftp)
         ]).then(function() {
             $location.path('/dealersitelist');
-        })
+        });
     };
 })
 
@@ -393,14 +452,13 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
 
             function validateDealerSiteUnique(newValue) {
                 if (newValue.dealer && newValue.site) {
-                    var dealerSitesQueryParams = {
+                    dealerSitesLoader.loadItems({
                         filters: [
                             { type: 'equal', fields: ['dealer'], value: newValue.dealer.id },
                             { type: 'equal', fields: ['site'], value: newValue.site.id }
                         ]
-                    };
-                    dealerSitesLoader.loadItems(dealerSitesQueryParams).then(function(directory) {
-                        var doubleItem = _.find(directory.dealerSites.getItems(), function(dealerSite) {
+                    }).then(function(dealerSites) {
+                        var doubleItem = _.find(dealerSites.getItems(), function(dealerSite) {
                             return (dealerSite.id !== newValue.id);
                         });
                         ctrl.$setValidity('unique', doubleItem === undefined);

@@ -7,7 +7,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
     Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, 10,
+    setHttpMock($httpBackend, 100,
         User, Users, Groups, Managers, Markets, Metros, Cities,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale);
@@ -575,75 +575,99 @@ function setHttpMock($httpBackend, multiplyCoef,
     var dealerSites = new DealerSites(multiplyArrFn([
         {
             id: 1,
-            dealer: {id: 7},
+            dealer: {id: 3},
             site: {id: 1},
             publicUrl: 'http://www.drom.ru/1.html',
             isActive: true
         },
         {
             id: 2,
-            dealer: {id: 7},
-            site: {id: 5},
-            externalId: '1109238',
-            publicUrl: 'http://www.auto.mail.ru/1109238.html',
+            dealer: {id: 3},
+            site: {id: 2},
+            publicUrl: 'http://www.bibika.ru/1109238.html',
             isActive: true
         },
         {
             id: 3,
-            dealer: {id: 7},
-            site: {id: 13},
+            dealer: {id: 3},
+            site: {id: 4},
             externalId: '1109',
+            publicUrl: 'http://www.autorambler.ru/1109238.html',
             isActive: false
         },
         {
             id: 4,
-            dealer: {id: 7},
-            site: {id: 14},
+            dealer: {id: 3},
+            site: {id: 5},
+            externalId: '1109',
+            publicUrl: 'http://www.auto.ru/1109238.html',
             isActive: true
         },
         {
             id: 5,
-            dealer: {id: 17},
-            site: {id: 1},
-            publicUrl: 'http://www.drom.ru/2.html',
+            dealer: {id: 3},
+            site: {id: 6},
+            externalId: '1109111',
+            publicUrl: 'http://www.irr.ru/29090.html',
             isActive: true
         },
         {
             id: 6,
-            dealer: {id: 17},
-            site: {id: 5},
-            externalId: '11983248',
-            publicUrl: 'http://www.auto.mail.ru/11983248.html',
+            dealer: {id: 3},
+            site: {id: 7},
+            publicUrl: 'http://www.chance.ru/11983248.html',
             isActive: false
         },
         {
             id: 7,
-            dealer: {id: 17},
-            site: {id: 13},
-            externalId: '1110',
+            dealer: {id: 3},
+            site: {id: 9},
+            publicUrl: 'http://www.auto.yandex.ru/119040.html',
             isActive: true
         },
         {
             id: 8,
-            dealer: {id: 17},
-            site: {id: 14},
-            isActive: false
+            dealer: {id: 3},
+            site: {id: 11},
+            publicUrl: 'http://www.cars.ru/119abc.html',
+            isActive: true
         },
         {
             id: 9,
-            dealer: {id: 7},
-            site: {id: 6},
+            dealer: {id: 3},
+            site: {id: 13},
             externalId: '119832',
-            publicUrl: 'http://www.irr.ru/pages/119832.html',
+            isActive: true
+        },
+        {
+            id: 10,
+            dealer: {id: 3},
+            site: {id: 14},
+            isActive: true
+        },
+        {
+            id: 11,
+            dealer: {id: 3},
+            site: {id: 16},
+            publicUrl: 'http://www.auto.exist.ru/10110111.html',
+            isActive: true
+        },
+        {
+            id: 12,
+            dealer: {id: 3},
+            site: {id: 17},
+            publicUrl: 'http://am.ru/amam112.html',
             isActive: true
         }
-    ], multiplyCoef)).resolveRefs({dealers: dealers, sites: sites});
+    ], multiplyCoef, function(i, len) {
+        this.dealer = { id: dealers.getItems()[i].id };
+    })).resolveRefs({dealers: dealers, sites: sites});
 
-    var dealerSiteLogins = new DealerSiteLogins([
+    var dealerSiteLogins = new DealerSiteLogins(multiplyArrFn([
         {
             id: 1,
-            dealer: {id: 7},
-            site: {id: 5},
+            dealer: {id: 3},
+            site: {id: 2},
             type: 'site',
             login: 'priv1108',
             password: 'abyrabyr',
@@ -651,8 +675,8 @@ function setHttpMock($httpBackend, multiplyCoef,
         },
         {
             id: 2,
-            dealer: {id: 7},
-            site: {id: 14},
+            dealer: {id: 3},
+            site: {id: 5},
             type: 'site',
             login: 'priv1108',
             password: 'abyr1010',
@@ -660,8 +684,8 @@ function setHttpMock($httpBackend, multiplyCoef,
         },
         {
             id: 3,
-            dealer: {id: 17},
-            site: {id: 5},
+            dealer: {id: 3},
+            site: {id: 6},
             type: 'site',
             login: 'pri29834',
             password: 'asdfghj',
@@ -669,32 +693,25 @@ function setHttpMock($httpBackend, multiplyCoef,
         },
         {
             id: 4,
-            dealer: {id: 17},
-            site: {id: 14},
-            type: 'site',
-            login: 'pri29834',
-            password: 'abyr1110',
+            dealer: {id: 3},
+            site: {id: 6},
+            type: 'ftp',
+            login: 'pri298',
+            password: 'asdfg',
             loginError: false
         },
         {
             id: 5,
-            dealer: {id: 7},
-            site: {id: 6},
+            dealer: {id: 3},
+            site: {id: 14},
             type: 'site',
             login: 'as119832',
             password: 'ab1110as',
             loginError: false
-        },
-        {
-            id: 6,
-            dealer: {id: 7},
-            site: {id: 6},
-            type: 'ftp',
-            login: 'pr119832',
-            password: 'abyr1110',
-            loginError: true
         }
-    ]).resolveRefs({dealers: dealers, sites: sites});
+    ], multiplyCoef, function(i, len) {
+        this.dealer = { id: dealers.getItems()[i].id };
+    })).resolveRefs({dealers: dealers, sites: sites});
 
     var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
@@ -1487,11 +1504,11 @@ function setHttpMock($httpBackend, multiplyCoef,
     })).resolveRefs({dealers: dealers, sites: sites, tariffs: tariffs});
 
     function multiplyArrFn(arr, coef, fn) {
-        coef = coef || 5;
+        coef = coef || 1;
         var multiplyArray = [];
 
         for (var i = 0; i < coef; i++) {
-            _.forEach(angular.copy(arr), function(value) {
+            _.forEach(_.cloneDeep(arr), function(value) {
                 value.id = value.id + i * arr.length;
                 if (fn) {
                     fn.call(value, i, arr.length);
