@@ -1,13 +1,13 @@
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend,
+.run(function($httpBackend, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, 100,
+    setHttpMock($httpBackend, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale);
@@ -16,12 +16,12 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, multiplyCoef,
+function setHttpMock($httpBackend, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
 
-    var userDirectories = {
+    var userDirectories = new Construction({
         groups: new Groups([
             {id: 1, name: 'admin', description: 'Администратор'},
             {id: 2, name: 'dealer', description: 'Автосалон'},
@@ -70,8 +70,7 @@ function setHttpMock($httpBackend, multiplyCoef,
             {id: 17, name: 'am.ru'},
             {id: 18, name: 'mercedes-benz.ru'}
         ])
-    };
-    _.invoke(userDirectories, 'resolveRefs', userDirectories);
+    }).resolveRefs();
 
     var users = new Users(multiplyArrFn([
         {

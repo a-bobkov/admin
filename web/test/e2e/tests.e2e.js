@@ -89,7 +89,7 @@ beforeEach(function() {
     });
 });
 
-xdescribe('User App', function() {
+describe('User App', function() {
 
     describe('Список пользователей', function() {
         beforeEach(function() {
@@ -120,37 +120,56 @@ xdescribe('User App', function() {
             expect(sortableColumnsRef.get(0).getText()).toBeTruthy();
         });
 
-        it('показывает сортируемые колонки заголовка таблицы пользователей - знак сортировки', function() {
+        it('показывает знак сортировки и сортирует элементы', function() {
+            function takeInt() {
+                return _.parseInt(this);
+            }
+
+            function takeFloat() {
+                return parseFloatRu(this);
+            }
+
+            function takeDate() {
+                return this.replace(regexpDate, '20$3-$2-$1');
+            }
+
+            function takeString() {
+                return this;
+            }
+
+            function takeId() {
+                return _.parseInt(this.replace(regexpIdName,'$1'));
+            }
+
+            function setHeader(what, where) {
+                var copy = header.slice(0, 10);
+                copy.splice(where, 1, what);
+                return copy;
+            }
+
+            var header = ['   ','   ','   '];
+            var columns = [
+                {bind: 'id', type: 'Integers', valueFn: takeId},
+                {bind: 'email', type: 'Strings', valueFn: takeString},
+                {bind: 'lastLogin', type: 'Dates', valueFn: takeDate}
+            ]
+
             var sortableColumnsRef = element.all(by.id('UserListTableHeaderRef'));
             var sortableColumnsDir = element.all(by.id('UserListTableHeaderDir'));
-            expect(sortableColumnsDir.get(0).getText()).toBe('↓');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(0).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('↑');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(1).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('↓');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(1).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('↑');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(2).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('↓');
-
-            expect(sortableColumnsRef.get(2).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('↑');
+            expect(mapText(sortableColumnsDir)).toEqual(setHeader('↓', 0));
+            sortableColumnsRef.get(0).click();
+            _.forEach(header, function(value, idx) {
+                sortableColumnsRef.get(idx).click();
+                expect(mapText(sortableColumnsDir)).toEqual(setHeader('↓', idx));
+                mapText(element.all(by.repeater('user in users').column('user.' + columns[idx].bind))).then(function(data) {
+                    expect(_.invoke(data, columns[idx].valueFn)).toBeSortedArrayOf('Ascending' + columns[idx].type);
+                });
+                sortableColumnsRef.get(idx).click();
+                expect(mapText(sortableColumnsDir)).toEqual(setHeader('↑', idx));
+                mapText(element.all(by.repeater('user in users').column('user.' + columns[idx].bind))).then(function(data) {
+                    expect(_.invoke(data, columns[idx].valueFn)).toBeSortedArrayOf('Descending' + columns[idx].type);
+                });
+            });
         });
 
         it('показывает реквизиты пользователя', function() {
@@ -233,65 +252,6 @@ xdescribe('User App', function() {
                 element(by.id('UserListFilterSetDefault')).click();
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
             }
-        });
-
-        it('сортирует по возрастанию кода', function() {
-            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                mapText(element.all(by.repeater('user in users').column('user.id'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingIntegers');
-                });
-            });
-        });
-
-        it('сортирует по убыванию кода', function() {
-            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                arr[0].click();
-                mapText(element.all(by.repeater('user in users').column('user.id'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('DescendingIntegers');
-                });
-            });
-        });
-
-        it('сортирует по возрастанию емэйла', function() {
-            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                arr[1].click();
-                mapText(element.all(by.repeater('user in users').column('user.email'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingStrings');
-                });
-            });
-        });
-
-        it('сортирует по убыванию емэйла', function() {
-            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                arr[1].click();
-                element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                    arr[1].click();
-                    mapText(element.all(by.repeater('user in users').column('user.email'))).then(function(data) {
-                        expect(data).toBeSortedArrayOf('DescendingStrings');
-                    });
-                });
-            });
-        });
-
-        it('сортирует по возрастанию даты', function() {
-            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                arr[2].click();
-                mapText(element.all(by.repeater('user in users').column('user.lastLogin'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingDates');
-                });
-            });
-        });
-
-        it('сортирует по убыванию даты', function() {
-            element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                arr[2].click();
-                element.all(by.id('UserListTableHeaderRef')).then(function(arr) {
-                    arr[2].click();
-                    mapText(element.all(by.repeater('user in users').column('user.lastLogin'))).then(function(data) {
-                        expect(data).toBeSortedArrayOf('DescendingDates');
-                    });
-                });
-            });
         });
     });
 
@@ -1776,7 +1736,7 @@ describe('Sale App', function() {
     });
 });
 
-xdescribe('DealerSite App', function() {
+describe('DealerSite App', function() {
 
     describe('Список регистраций', function() {
         beforeEach(function() {

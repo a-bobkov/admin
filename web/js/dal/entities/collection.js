@@ -32,7 +32,10 @@ var Item = (function() {
         return _.forOwn(self, function(value, key) {
             var newValue;
             if (_.has(value, 'id')) {
-                if (_.has(entityParams.enumFields, key) || _.has(entityParams.objectFields, key)) {
+                if (_.has(entityParams.enumFields, key)) {
+                    return;
+                } else if (_.has(entityParams.objectFields, key)) {
+                    value.resolveRefs(directories);
                     return;
                 } else if (_.has(entityParams.refFields, key)) {
                     newValue = directories[entityParams.refFields[key]].get(value.id);

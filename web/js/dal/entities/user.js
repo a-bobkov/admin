@@ -57,6 +57,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
                     itemData.dealer.id = itemData.id;
                 }
             };
+            return itemData;
         };
 
         User.prototype.isValid = function() {
@@ -108,7 +109,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
         Collection.call(this, itemsData, queryParams, User, Users);
     };
     _.assign(Users.prototype, Collection.prototype);
-    User.prototype.lowerName = 'users';
+    Users.prototype.lowerName = 'users';
     return Users;
 })
 

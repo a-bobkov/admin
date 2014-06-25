@@ -11,7 +11,9 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         reloadOnSearch: false,
         resolve: {
             data: function(usersLoader) {
-                return usersLoader.loadDirectories();
+                return usersLoader.loadDirectories().then(function(directories) {
+                    return directories.resolveRefs();
+                });
             }
         }
     })
@@ -19,9 +21,16 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         templateUrl: 'template/page/user/edit.html',
         controller: 'UserCtrl',
         resolve: {
-            data: function(usersLoader, $location) {
+            data: function(usersLoader, $location, $q) {
                 var id = parseInt($location.$$path.replace(/^\/users\/(?:([^\/]+))\/edit$/,'$1'));
-                return usersLoader.loadItem(id);
+                return $q.all({
+                    user: usersLoader.loadItem(id),
+                    construction: usersLoader.loadDirectories()
+                }).then(function(respond) {
+                    var construction = respond.construction;
+                    construction.user = respond.user;
+                    return construction.resolveRefs();
+                });
             }
         }
     })
@@ -30,7 +39,9 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         controller: 'UserCtrl',
         resolve: {
             data: function(usersLoader) {
-                return usersLoader.loadDirectories();
+                return usersLoader.loadDirectories().then(function(directories) {
+                    return directories.resolveRefs();
+                });
             }
         }
     })
@@ -39,10 +50,11 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     });
 }])
 
-.controller('UserListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, usersLoader) {
-    _.forOwn(data, function(collection, key) {
-        $scope[key] = collection.getItems();
-    });
+.controller('UserListCtrl', function($scope, $rootScope, $location, $window, data, 
+    usersLoader, userStatuses) {
+
+    _.assign($scope, data);
+    $scope.userStatuses = userStatuses;
 
     if ($rootScope.savedUserListNotice) {
         $scope.savedUserListNotice = $rootScope.savedUserListNotice;
@@ -56,7 +68,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     $scope.setPatternsDefault = function() {
         $scope.patterns = {
             complex: '',
-            status: [_.find($scope.userstatuses, {id: 'active'})],
+            status: [userStatuses.get('active')],
             manager: null
         };
     }
@@ -102,9 +114,9 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         });
         $rootScope.savedUserListLocationSearch = toLocationSearch(searchParams);
         $location.search($rootScope.savedUserListLocationSearch);
-        usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch), data).then(function(respond) {
-            $scope.users = respond.users.getItems();
-            $scope.totalItems = respond.users.getParams().pager.total;
+        usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch), data).then(function(users) {
+            $scope.users = users;
+            $scope.totalItems = users.getParams().pager.total;
             var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
             if (topUserList < 0) {
                 window.scrollBy(0, topUserList);
@@ -120,9 +132,9 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         $scope.patterns = {
             complex: ls.complex || '',
             status: ls.status && _.invoke(ls.status.split(';'), function() {
-                    return _.find($scope.userstatuses, {id: this})
+                    return $scope.userStatuses.get(this)
                 }),
-            manager: _.find($scope.managers, {id: _.parseInt(ls.manager)})
+            manager: $scope.managers.get(ls.manager)
         };
         $scope.sorting = {
             column: ls.column,
@@ -212,15 +224,11 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     }
 })
 
-.controller('UserCtrl', function($scope, $rootScope, $location, $window, data, User, Dealer, dealerPhoneHours) {
-    _.forOwn(data, function(collection, key) {
-        if (key === 'user') {
-            $scope[key] = collection;
-        } else {
-            $scope[key] = collection.getItems();
-        }
-    });
+.controller('UserCtrl', function($scope, $rootScope, $location, $window, data,
+    User, userStatuses, Dealer, dealerPhoneHours) {
 
+    _.assign($scope, data);
+    $scope.userStatuses = userStatuses;
     $scope.dealerPhoneHours = dealerPhoneHours;
 
     if (data.user) {
@@ -236,11 +244,11 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     function makeUserCopy() {
         $scope.actionName = "Редактирование";
         $scope.userEdited = new User;
-        angular.extend($scope.userEdited, data.user);
+        _.assign($scope.userEdited, data.user);
         $scope.dealerEdited = new Dealer;
         $scope.userEdited.dealer = $scope.dealerEdited;
         if (data.user.dealer) {
-            angular.extend($scope.dealerEdited, data.user.dealer);
+            _.assign($scope.dealerEdited, data.user.dealer);
         }
 
         $scope.dealerEditedPhones = [];
@@ -261,8 +269,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     function makeUserNew() {
         $scope.actionName = "Создание";
         $scope.userEdited = new User;      // данные нового пользователя по умолчанию
-        $scope.userEdited.status = _.find($scope.userstatuses, {id: 'inactive'});
-        $scope.userEdited.manager = _.find($scope.managers, {id: 0});
+        $scope.userEdited.status = userStatuses.get('inactive');
         $scope.dealerEdited = new Dealer;
         $scope.userEdited.dealer = $scope.dealerEdited;
         $scope.dealerEditedPhones = [{}, {}, {}];
@@ -289,9 +296,11 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
         function getPhone(idx, name) {
             var phone = $scope.dealerEditedPhones[idx];
-            $scope.dealerEdited[name] = phone.phoneNumber;
-            $scope.dealerEdited[name + 'From'] = phone.phoneFrom;
-            $scope.dealerEdited[name + 'To'] = phone.phoneTo;
+            if (phone.phoneNumber || phone.phoneFrom || phone.phoneTo) {
+                $scope.dealerEdited[name] = phone.phoneNumber;
+                $scope.dealerEdited[name + 'From'] = phone.phoneFrom;
+                $scope.dealerEdited[name + 'To'] = phone.phoneTo;
+            }
         }
 
         getPhone(0, 'phone');
@@ -367,7 +376,6 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             _selectedItems: '=uiCheckboxgroupSelected'
         },
         controller: ['$scope', function($scope) {
-
                 $scope._selected = {};
 
                 $scope.updateSelectedItems = function() {
@@ -376,13 +384,11 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
                     });
                 };
 
-                $scope.updateSelected = function(newValue, oldValue) {
+                $scope.$watch('_selectedItems', function updateSelected(newValue, oldValue) {
                     _.forEach($scope._items, function(value, key) {
                         $scope._selected[value.id] = !!_.find(newValue, {id: value.id});
                     })
-                }
-
-                $scope.$watch('_selectedItems', $scope.updateSelected, true);
+                }, true);
             }
         ]
     };
@@ -424,7 +430,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         require: 'ngModel',
         link: function (scope, elem, attrs, ctrl) {
             function validatePhonePeriod(newValue) {
-                if (newValue.phoneFrom && newValue.phoneTo && (newValue.phoneFrom >= newValue.phoneTo)) {
+                if (newValue.phoneFrom && newValue.phoneTo && (newValue.phoneFrom.id >= newValue.phoneTo.id)) {
                     ctrl.$setValidity('period', false);
                 } else {
                     ctrl.$setValidity('period', true);
