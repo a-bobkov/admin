@@ -28,7 +28,7 @@
 
         // return new Date(year, (month - 1), day);
         var d = new Date(dateString);
-        d.setHours(0, 0, 0, 0);
+        d.setUTCHours(0, 0, 0, 0);
         return d;
     }
 

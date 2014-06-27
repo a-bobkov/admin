@@ -45,5 +45,15 @@ angular.module('max.dal.entities.dealertariff', ['max.dal.entities.collection', 
     this.loadItem = function(id, directories) {
         return entityLoader.loadItems(id, directories, dealerTariffApi, DealerTariff);
     };
+    this.loadItemDealerSite = function(dealerId, siteId, directories) {
+        return entityLoader.loadItems({
+            filters: [
+                { fields: ['dealer'], type: 'equal', value: dealerId },
+                { fields: ['site'], type: 'equal', value: siteId }
+            ]
+        }, directories, dealerTariffApi, DealerTariffs).then(function(dealerTariffs) {
+            return dealerTariffs.getItems()[0];
+        });
+    };
 })
 ;

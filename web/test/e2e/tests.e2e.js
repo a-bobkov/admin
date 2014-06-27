@@ -43,7 +43,7 @@ var regexpEmail = /^[\w-]+@[\w\.-]+$/;
 var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/;
 var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
 var regexpIdName = /^(\d+): (.+)$/;
-var regexpTariff = /^(\d+(?:.\d*|)) руб. за (\d+) +(мес\.|дн\.), до (\d+) объявлений$/;
+var regexpTariff = /^(\d+(?:\.\d+)?) руб. за (\d+) +(мес\.|дн\.)(?:, до (\d+) объявлений)?( \(Н\/А\))?$/;
 var regexpSaleName = /^.+"(.+)".+"(.+)".*$/;
 var regexpTotalItems = /^.+: (\d+)$/;
 
@@ -961,9 +961,6 @@ describe('Sale App', function() {
         });
 
         it('заполняет список тарифов', function() {
-            browser.get('admin.html#/salelist?type=card&archive=true');
-            element.all(by.id('SaleListRowEdit')).get(0).click();
-
             var tariffElem = element(by.model('saleEdited.tariff'));
             mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
                 expect(_.compact(options).length).toBeTruthy();
@@ -1143,6 +1140,55 @@ describe('Sale App', function() {
             expect(element(by.id('saleInfoErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
+        it('заполняет список isActive', function() {
+            var isActiveElem = element(by.model('saleEdited.isActive'));
+            mapText(isActiveElem.element.all(by.css('option'))).then(function(options) {
+                expect(_.compact(options).length).toBeTruthy();
+            });
+        });
+
+        it('выводит значение isActive', function() {
+            var isActiveElem = element(by.model('saleEdited.isActive'));
+            expect(isActiveElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
+        });
+
+        it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
+            element(by.id('saleEditCancel')).click();
+            setSelect(element(by.select('patterns.isActive')), 2);
+
+            var noDefaultTariffSum = 0;
+            var isDefaultTariffSum = 0;
+            var sales = element.all(by.id('SaleListRowEdit'));
+            sales.count().then(function(count) {
+                expect(count).not.toBeLessThan(2);
+                for(var i = count; i--; ) {
+                    sales.get(i).click();
+                    var noDefaultTariff;
+                    var isActiveDisabled;
+                    var isActive;
+                    element(by.id('saleNoDefaultTariff')).isDisplayed().then(function(respond) {
+                        noDefaultTariff = respond;
+                    });
+                    element(by.id('saleIsActiveDisabled')).isDisplayed().then(function(respond) {
+                        isActiveDisabled = respond;
+                    });
+                    element(by.id('saleIsActive')).isEnabled().then(function(respond) {
+                        isActive = respond;
+                    });
+                    browser.controlFlow().execute(function() {
+                        noDefaultTariff ? noDefaultTariffSum++ : isDefaultTariffSum++;
+                        expect(isActiveDisabled).toBe(noDefaultTariff);
+                        expect(isActiveDisabled).not.toBe(isActive);
+                    });
+                    element(by.id('saleEditCancel')).click();
+                }
+                browser.controlFlow().execute(function() {
+                    expect(noDefaultTariffSum).toBeTruthy();
+                    expect(isDefaultTariffSum).toBeTruthy();
+                });
+            });
+        });
+
         it('после сохранения переходит к списку', function() {
             element(by.id('saleEditSave')).click();
             expect(browser.getCurrentUrl()).toMatch('#\/salelist');
@@ -1161,6 +1207,30 @@ describe('Sale App', function() {
 
         it('показывает режим работы формы', function() {
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание карточки$/);
+        });
+
+        it('выводит начальные значения полей', function() {
+            expect(element(by.model('saleEdited.dealer')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('saleEdited.site')).getAttribute('value')).toBeFalsy();
+
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            expect(tariffElem.element(by.css('option:checked')).getText()).toBeFalsy();
+
+            var today = new Date;
+            today.setUTCHours(0, 0, 0, 0);
+            var todayISO = today.toISOString().slice(0, 10);
+            expect(element(by.model('saleEdited.date')).getAttribute('value')).toBe(todayISO);
+
+            expect(element(by.model('saleEdited.count')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('saleEdited.activeFrom')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('saleEdited.activeTo')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('saleEdited.cardAmount')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('saleEdited.amount')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toBeFalsy();
+            expect(element(by.model('saleEdited.info')).getAttribute('value')).toBeFalsy();
+
+            var isActiveElem = element(by.model('saleEdited.isActive'));
+            expect(isActiveElem.element(by.css('option:checked')).getText()).toBe('Н\/А');
         });
 
         it('выводит ошибку, если tariff пустой', function() {
@@ -1204,7 +1274,7 @@ describe('Sale App', function() {
                     siteElemsDrop.get(siteIdx).click();
                     tariffElem.element(by.css('option:checked')).getText().then(function(tariffText) {
                         if (!tariffText) {
-                            expect(element(by.id('saleEditTariffWarningNoDefaultTariff')).isDisplayed()).toBeTruthy();
+                            expect(element(by.id('saleNoDefaultTariff')).isDisplayed()).toBeTruthy();
                         }
                         siteElem.element(by.id('McomboRemoveItem_0')).click();
                     });
@@ -1251,19 +1321,171 @@ describe('Sale App', function() {
         it('не позволяет изменить activeTo', function() {
             expect(element(by.id('saleActiveTo')).isEnabled()).toBeFalsy();
         });
+
+        it('заполняет список isActive', function() {
+            var isActiveElem = element(by.model('saleEdited.isActive'));
+            mapText(isActiveElem.element.all(by.css('option'))).then(function(options) {
+                expect(_.compact(options).length).toBeTruthy();
+            });
+        });
+
+        it('выводит значение isActive', function() {
+            var isActiveElem = element(by.model('saleEdited.isActive'));
+            expect(isActiveElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
+        });
+
+        it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
+            element(by.id('saleEditCancel')).click();
+            setSelect(element(by.select('patterns.isActive')), 2);
+
+            var noDefaultTariffSum = 0;
+            var isDefaultTariffSum = 0;
+            var sales = element.all(by.id('SaleListRowEdit'));
+            sales.count().then(function(count) {
+                expect(count).not.toBeLessThan(2);
+                for(var i = count; i--; ) {
+                    sales.get(i).click();
+                    var noDefaultTariff;
+                    var isActiveDisabled;
+                    var isActive;
+                    element(by.id('saleNoDefaultTariff')).isDisplayed().then(function(respond) {
+                        noDefaultTariff = respond;
+                    });
+                    element(by.id('saleIsActiveDisabled')).isDisplayed().then(function(respond) {
+                        isActiveDisabled = respond;
+                    });
+                    element(by.id('saleIsActive')).isEnabled().then(function(respond) {
+                        isActive = respond;
+                    });
+                    browser.controlFlow().execute(function() {
+                        noDefaultTariff ? noDefaultTariffSum++ : isDefaultTariffSum++;
+                        expect(isActiveDisabled).toBe(noDefaultTariff);
+                        expect(isActiveDisabled).not.toBe(isActive);
+                    });
+                    element(by.id('saleEditCancel')).click();
+                }
+                browser.controlFlow().execute(function() {
+                    expect(noDefaultTariffSum).toBeTruthy();
+                    expect(isDefaultTariffSum).toBeTruthy();
+                });
+            });
+        });
     });
 
     describe('Создание расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=card&archive=true&itemsPerPage=15');
+            browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
+        });
+
+        it('показывает режим работы формы', function() {
             mapText(element.all(by.id('SaleListRowAdd'))).then(function(rows) {
                 var saleIdx = rows.indexOf('расширить');
                 element.all(by.id('SaleListRowAdd')).get(saleIdx).click();
             });
+
+            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание расширения$/);
         });
 
-        it('показывает режим работы формы', function() {
-            expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание расширения$/);
+        it('выводит начальные значения полей', function() {
+            var addcardElems = element.all(by.id('SaleListRowAdd'));
+            mapIsDisplayed(addcardElems).then(function(sales) {
+                var today = new Date;
+                today.setUTCHours(0, 0, 0, 0);
+                var todayISO = today.toISOString().slice(0, 10);
+                var tomorrow = _.clone(today);
+                tomorrow.setUTCHours(24);
+                var tomorrowISO = tomorrow.toISOString().slice(0, 10);
+
+                var numberCases = {
+                    isTariff: 0,
+                    noTariff: 0,
+                    noDealerTariff: 0
+                };
+
+                _.forEach(sales, function(isDisplayed, saleIdx) {
+                    if (!isDisplayed) {
+                        return;
+                    }
+                    addcardElems.get(saleIdx).click();
+
+                    var dealerText;
+                    element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                        dealerText = respond;
+                        expect(dealerText).toMatch(regexpIdName);
+                    });
+
+                    var dealerTariffRate;
+                    // var elem = element(by.model('dealerTariff.tariff')).element(by.css('option:checked'));
+                    browser.executeScript("var e=document.getElementById('saleDealerTariff'); return e.options[e.selectedIndex].text;")
+                        .then(function(dealerTariffText) {
+                        if (dealerTariffText) {
+                            expect(dealerTariffText).toMatch(regexpTariff);
+                            dealerTariffRate = parseFloat(dealerTariffText.replace(regexpTariff, '$1'));
+                        }
+                    });
+
+                    var siteText;
+                    element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                        siteText = respond;
+                        expect(siteText).toMatch(regexpIdName);
+                    });
+
+                    var parentTariffRate;
+                    element(by.model('tariffParent')).element(by.css('option:checked')).getText().then(function(parentTariffText) {
+                        expect(parentTariffText).toMatch(regexpTariff);
+                        parentTariffRate = parseFloat(parentTariffText.replace(regexpTariff, '$1'));
+                    });
+
+                    var tariffText;
+                    element(by.model('saleEdited.tariff')).element(by.css('option:checked')).getText().then(function(respond) {
+                        tariffText = respond;
+                        if (dealerTariffRate) {
+                            if (dealerTariffRate > parentTariffRate) {
+                                expect(tariffText).toMatch(regexpTariff);
+                                numberCases.isTariff++;
+                            } else {
+                                expect(tariffText).toBeFalsy();
+                                numberCases.noTariff++;
+                            }
+                        } else {
+                            expect(tariffText).toBeFalsy();
+                            numberCases.noDealerTariff++;
+                        }
+                    });
+
+                    expect(element(by.model('saleEdited.date')).getAttribute('value')).toBe(todayISO);
+
+                    element(by.model('saleEdited.count')).getAttribute('value').then(function(count) {
+                        expect(!!count).toBe(!!tariffText);
+                    });
+
+                    element(by.model('saleEdited.activeFrom')).getAttribute('value').then(function(activeFrom) {
+                        var siteId = _.parseInt(siteText.replace(regexpIdName, '$1'));
+                        expect(activeFrom).toBe((siteId === 1 || siteId === 5) ? todayISO : tomorrowISO);
+                    });
+
+                    expect(element(by.model('saleEdited.activeTo')).getAttribute('value')).toBeTruthy();
+                    element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmount) {
+                        expect(!!cardAmount).toBe(!!tariffText);
+                    });
+                    element(by.model('saleEdited.amount')).getAttribute('value').then(function(amountText) {
+                        expect(!!amountText).toBe(!!tariffText);
+                    });
+                    element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(siteAmountText) {
+                        expect(!!siteAmountText).toBe(!!tariffText);
+                    });
+                    expect(element(by.model('saleEdited.info')).getAttribute('value')).toBeTruthy();
+                    expect(element(by.model('saleEdited.isActive')).element(by.css('option:checked')).getText()).toBe('Н\/А');
+
+                    element(by.id('saleEditCancel')).click();
+                });
+
+                browser.controlFlow().execute(function() {
+                    _.forEach(numberCases, function(value, key) {
+                        expect(value).toBeTruthy();
+                    });
+                });
+            });
         });
     });
 
@@ -1301,16 +1523,20 @@ describe('Sale App', function() {
             expect(element(by.id('saleCount')).isDisplayed()).toBeFalsy();
         });
 
-        it('не выводит saleActiveFrom', function() {
+        it('не выводит activeFrom', function() {
             expect(element(by.id('saleActiveFrom')).isDisplayed()).toBeFalsy();
         });
 
-        it('не выводит saleActiveTo', function() {
+        it('не выводит activeTo', function() {
             expect(element(by.id('saleActiveTo')).isDisplayed()).toBeFalsy();
         });
 
-        it('не выводит saleCardAmount', function() {
+        it('не выводит cardAmount', function() {
             expect(element(by.id('saleCardAmount')).isDisplayed()).toBeFalsy();
+        });
+
+        it('не выводит isActive', function() {
+            expect(element(by.id('saleIsActive')).isDisplayed()).toBeFalsy();
         });
     });
 

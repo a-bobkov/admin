@@ -11,7 +11,7 @@ var Item = (function() {
         _.forOwn(itemData, function(value, key) {
             if (entityParams && _.contains(entityParams.dateFields, key)) {
                 this[key] = new Date(value);
-                this[key].setHours(0, 0, 0, 0);
+                this[key].setUTCHours(0, 0, 0, 0);
             } else if (entityParams && _.has(entityParams.enumFields, key)) {
                 this[key] = entityParams.enumFields[key].get(value);
             } else if (entityParams && _.has(entityParams.objectFields, key)) {
@@ -128,7 +128,9 @@ return Collection;
     Construction.prototype.resolveRefs = function() {
         var self = this;
         return _.forEach(self, function(value) {
-            value.resolveRefs(self);
+            if (value) {
+                value.resolveRefs(self);
+            }
         });
     };
     return Construction;

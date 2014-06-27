@@ -59,7 +59,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         templateUrl: 'template/page/sale/edit.html',
         controller: 'SaleCardEditCtrl',
         resolve: {
-            data: function(usersLoader, salesLoader, dealersLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
+            data: function(usersLoader, salesLoader, dealersLoader, tariffsLoader, tariffRatesLoader, dealerTariffsLoader, $location, $q) {
                 return usersLoader.loadDirectories().then(function(directories) {
                     var ls = $location.search();
                     if (ls.id === 'new') {
@@ -70,21 +70,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             var toResolve = {
                                 dealers: dealersLoader.loadItems({
                                     filters: [
-                                        { fields: ['id'], type: 'equal', value: directories.sale.dealer.id }
+                                        { fields: ['id'], type: 'equal', value: saleData.dealer.id }
                                     ]
                                 }),
                                 addSales: salesLoader.loadItems({
                                     filters: [
                                         { fields: ['type'], type: 'equal', value: 'addcard' },
-                                        { fields: ['parentId'], type: 'equal', value: directories.sale.cardId }
+                                        { fields: ['parentId'], type: 'equal', value: saleData.cardId }
                                     ]
                                 }),
                                 extraSales: salesLoader.loadItems({
                                     filters: [
                                         { fields: ['type'], type: 'equal', value: 'extra' },
-                                        { fields: ['cardId'], type: 'equal', value: directories.sale.cardId }
+                                        { fields: ['cardId'], type: 'equal', value: saleData.cardId }
                                     ]
-                                })
+                                }),
+                                dealerTariff: dealerTariffsLoader.loadItemDealerSite(saleData.dealer.id, saleData.site.id)
                             };
                             return $q.all(toResolve).then(function(salesData) {
                                 _.assign(directories, salesData);
@@ -131,7 +132,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         templateUrl: 'template/page/sale/edit.html',
         controller: 'SaleAddcardEditCtrl',
         resolve: {
-            data: function(usersLoader, salesLoader, dealersLoader, tariffsLoader, tariffRatesLoader, $location, $q) {
+            data: function(usersLoader, salesLoader, dealersLoader, tariffsLoader, tariffRatesLoader, dealerTariffsLoader, $location, $q) {
                 return usersLoader.loadDirectories().then(function(directories) {
                     var ls = $location.search();
                     var toResolve;
@@ -167,6 +168,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                                         { fields: ['id'], type: 'equal', value: directories.parentSale.dealer.id }
                                     ]
                                 }),
+                                dealerTariff: dealerTariffsLoader.loadItemDealerSite(directories.parentSale.dealer.id, directories.parentSale.site.id),
                                 optionTariffs: tariffsLoader.loadItems({
                                     filters: [
                                         { fields: ['site'], type: 'equal', value: directories.parentSale.site.id },
@@ -176,6 +178,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                                 })
                             }).then(function(parentData) {
                                 directories.dealers = parentData.dealers;
+                                directories.dealerTariff = parentData.dealerTariff;
                                 directories.tariffs = parentData.optionTariffs;
                                 var selectedTariffIds = [];
                                 if (!directories.tariffs.get(directories.parentSale.tariff.id)) {
@@ -581,13 +584,14 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 })
 
 .controller('SaleCardEditCtrl', function($scope, $rootScope, $location, $window, data,
-    Sale, dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
+    Sale, saleStatuses, dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
     if ($scope.dealers) {
         $scope.city = $scope.dealers.getItems()[0].city;
     }
-
+    $scope.saleNoDefaultTariff = !$scope.dealerTariff;
+    $scope.saleStatuses = saleStatuses;
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
 
@@ -683,24 +687,15 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }
         if (!$scope.saleEdited.dealer || !$scope.saleEdited.site || _.isEmpty($scope.tariffs)) {
             $scope.saleEdited.tariff = null;
-            $scope.saleEditTariffWarningNoDefaultTariff = false;
+            $scope.saleNoDefaultTariff = false;
             return;
         }
-        var dealerTariffsQueryParams = {
-            filters: [
-                { fields: ['dealer'], type: 'equal', value: $scope.saleEdited.dealer.id },
-                { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
-            ]
-        };
-        var oldDirectories = _.pick($scope, ['dealers', 'sites', 'tariffs']);
-        dealerTariffsLoader.loadItems(dealerTariffsQueryParams, oldDirectories).then(function(dealerTariffs) {
-            var dealerTariff = dealerTariffs.getItems()[0];
+        dealerTariffsLoader.loadItemDealerSite($scope.saleEdited.dealer.id, $scope.saleEdited.site.id, $scope).then(function(dealerTariff) {
+            $scope.saleNoDefaultTariff = !dealerTariff;
             if (dealerTariff) {
                 $scope.saleEdited.tariff = dealerTariff.tariff;
-                $scope.saleEditTariffWarningNoDefaultTariff = false;
             } else {
                 $scope.saleEdited.tariff = null;
-                $scope.saleEditTariffWarningNoDefaultTariff = true;
             }
         });
     }, true);
@@ -760,7 +755,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $scope.saleEdited.activeFrom = _.clone($scope.lastActiveCard.activeTo);
         } else {
             $scope.saleEdited.activeFrom = new Date();
-            $scope.saleEdited.activeFrom.setHours(0, 0, 0, 0);
+            $scope.saleEdited.activeFrom.setUTCHours(0, 0, 0, 0);
         }
         $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
         $scope.saleEdited.activeTo = $scope.activeTo($scope.saleEdited.activeFrom, $scope.saleEdited.tariff);
@@ -777,7 +772,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             return;
         }
         $scope.saleEdited.count = $scope.saleEdited.tariff.count;
-        var tariffRate = $scope.saleEdited.tariff.getLastRate($scope.city, $scope.tariffRates.getItems());
+        var tariffRate = $scope.saleEdited.tariff.getLastRate($scope.city, $scope.tariffRates);
         if (tariffRate) {
             $scope.saleEdited.cardAmount = tariffRate.rate;
             $scope.saleEdited.amount = tariffRate.rate;
@@ -812,9 +807,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 })
 
 .controller('SaleAddcardEditCtrl', function($scope, $rootScope, $location, $window, data,
-    Sale, dealersLoader, sitesLoader, salesLoader, tariffsLoader, usersLoader, dealerTariffsLoader, tariffRatesLoader) {
+    Sale, saleStatuses, dealersLoader, sitesLoader, salesLoader, tariffsLoader, usersLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
+    $scope.city = $scope.parentSale.dealer.city;
+    $scope.saleNoDefaultTariff = !$scope.dealerTariff;
+    $scope.saleStatuses = saleStatuses;
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
     $scope.tariffFieldTitle = "Новый тариф";
@@ -846,22 +844,14 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.saleEdited.dealer = $scope.parentSale.dealer;
         $scope.saleEdited.site = $scope.parentSale.site;
         $scope.tariffParent = $scope.parentSale.tariff;
-        dealerTariffsLoader.loadItems({
-            filters: [
-                { fields: ['dealer'], type: 'equal', value: $scope.saleEdited.dealer.id },
-                { fields: ['site'], type: 'equal', value: $scope.saleEdited.site.id }
-            ]
-        }, _.pick($scope, ['dealers', 'sites', 'tariffs'])).then(function(dealerTariffs) {
-            var dealerTariff = dealerTariffs.getItems()[0];
-            $scope.saleEditTariffWarningNoDefaultTariff = !dealerTariff;
-            var dealer = $scope.saleEdited.dealer;
-            var tariffRates = $scope.tariffRates.getItems();
-            if (dealerTariff && (dealerTariff.tariff.getLastRate(dealer, tariffRates).rate > $scope.tariffParent.getLastRate(dealer, tariffRates).rate)) {
-                $scope.saleEdited.tariff = dealerTariff.tariff;
-            }
-        });
+
+        if ($scope.dealerTariff && ($scope.dealerTariff.tariff.getLastRate($scope.city, $scope.tariffRates).rate 
+            > $scope.tariffParent.getLastRate($scope.city, $scope.tariffRates).rate)) {
+            $scope.saleEdited.tariff = $scope.dealerTariff.tariff;
+        }
+
         $scope.saleEdited.activeFrom = new Date();
-        $scope.saleEdited.activeFrom.setHours(0, 0, 0, 0);
+        $scope.saleEdited.activeFrom.setUTCHours(0, 0, 0, 0);
         if ($scope.saleEdited.site.id !== 1 && $scope.saleEdited.site.id !== 5) {   // Дром и Ауто.ру
             $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
         }
@@ -869,7 +859,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }
 
     $scope.$watch('saleEdited.tariff', function setCount(newValue, oldValue) {
-        if (newValue === oldValue) {
+        if (newValue === oldValue && $scope.sale) {
             return;
         }
         if (!$scope.saleEdited.tariff) {
@@ -883,25 +873,27 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     });
 
     $scope.$watch('[saleEdited.tariff, saleEdited.activeFrom]', function setSums(newValue, oldValue) {
-        if (newValue === oldValue) {
+        if (newValue === oldValue && $scope.sale) {
             return;
         }
         if (!$scope.saleEdited.tariff || !$scope.saleEdited.activeFrom) {
             return;
         }
         var intervalParent = ($scope.parentSale.activeTo - $scope.parentSale.activeFrom) / (1000 * 60 * 60 * 24) + 1;
-        var intervalNew = ($scope.saleEdited.activeTo - $scope.saleEdited.activeFrom) / (1000 * 60 * 60 * 24) + 1;
+        var intervalNew = Math.max(($scope.saleEdited.activeTo - $scope.saleEdited.activeFrom) / (1000 * 60 * 60 * 24) + 1, 0);
         var k = intervalNew / intervalParent;
         var dealer = $scope.saleEdited.dealer;
-        var tariffRates = $scope.tariffRates.getItems();
-        var rateNew = $scope.saleEdited.tariff.getLastRate(dealer, tariffRates);
-        var rateParent = $scope.tariffParent.getLastRate(dealer, tariffRates);
+        var rateNew = $scope.saleEdited.tariff.getLastRate(dealer, $scope.tariffRates);
+        var rateParent = $scope.tariffParent.getLastRate(dealer, $scope.tariffRates);
         $scope.saleEdited.cardAmount = Math.ceil((rateNew.rate - rateParent.rate) * k * 100) / 100;
         $scope.saleEdited.amount = $scope.saleEdited.cardAmount;
         $scope.saleEdited.siteAmount = Math.ceil((rateNew.siteRate - rateParent.siteRate) * k * 100) / 100;
     }, true);
 
     $scope.$watch('saleEdited.count', function setInfo(newValue, oldValue) {
+        if (newValue === oldValue && $scope.sale) {
+            return;
+        }
         $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за размещение ' +
             ($scope.saleEdited.count ? $scope.saleEdited.count : 'неограниченно') + ' объявлений.'; 
     });

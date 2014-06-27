@@ -14,6 +14,13 @@
 					</ul>
 	            </td>
 	        </tr>
+	        <tr ng-show='false'>
+	            <th><label for="saleDealerTariff">Тариф салона</label></th>
+	            <td>
+		            <select class="span-8" id="saleDealerTariff" name="saleDealerTariff" ng-model='dealerTariff.tariff' ng-options='opt.name(city, tariffRates) for opt in tariffs.getItems()'>
+		            </select>
+	            </td>
+	        </tr>
 	        <tr>
 	            <th><label for="saleSite">Сайт</label></th>
 	            <td>
@@ -27,21 +34,21 @@
 	        <tr ng-show='saleEdited.isAddcard()'>
 	            <th><label for="saleTariffParent">Старый тариф</label></th>
 	            <td>
-		            <select class="span-8" id="saleTariffParent" name="saleTariffParent" ng-model='tariffParent' ng-options='opt.name(city, tariffRates.getItems()) for opt in tariffs.getItems()' ng-required='saleEdited.isAddcard()' disabled>
+		            <select class="span-8" id="saleTariffParent" name="saleTariffParent" ng-model='tariffParent' ng-options='opt.name(city, tariffRates) for opt in tariffs.getItems()' ng-required='saleEdited.isAddcard()' disabled>
 		            </select>
 	            </td>
 	        </tr>
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleTariff">{{tariffFieldTitle}}</label></th>
 	            <td>
-		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates.getItems()) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site || addSale' ng-required='!saleEdited.isExtra()' is-active>
+		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site || addSale' ng-required='!saleEdited.isExtra()' is-active>
 		            </select>
 					<ul class="error_list" ng-show='formSaleKey.saleTariff.$invalid'>
 					    <li id='saleEditTariffErrorRequired' ng-show="formSaleKey.saleTariff.$error.required">Необходимо выбрать тариф.</li>
 					    <li id='saleEditTariffErrorIsActive' ng-show="formSaleKey.saleTariff.$error.isActive">Необходимо выбрать активный тариф.</li>
 					</ul>
-					<ul class="warning_list" ng-show='saleEditTariffWarningNoDefaultTariff'>
-					    <li id='saleEditTariffWarningNoDefaultTariff' ng-show="saleEditTariffWarningNoDefaultTariff">У салона не включен экспорт на сайт.</li>
+					<ul class="warning_list" ng-show='saleNoDefaultTariff'>
+					    <li id='saleNoDefaultTariff' ng-show="saleNoDefaultTariff">У салона не включен экспорт на сайт.</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -144,7 +151,23 @@
 	    </table>
 	</fieldset>
 
-	<div class="span-10 prepend-top clear">
+	<fieldset class="span-24" ng-show='!saleEdited.isExtra()'>
+	    <legend>Активность</legend>
+	    <table class='parameters'>
+	        <tr>
+	            <th><label for="saleIsActive">Статус</label></th>
+	            <td>
+	                <select id="saleIsActive" name="saleIsActive" ng-model='saleEdited.isActive' ng-options='opt.name for opt in saleStatuses.getItems()' ng-disabled='formSaleKey.$invalid || saleNoDefaultTariff && !saleEdited.isActive.id'>
+	                </select>
+					<ul class="warning_list">
+					    <li id='saleIsActiveDisabled' ng-show="saleNoDefaultTariff && !saleEdited.isActive.id">У салона не включен экспорт на сайт!</li>
+					</ul>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+
+    <div class="span-10 prepend-top clear">
 	    <ul class="actions row">
 	        <li class="list"><a id='saleEditCancel' href="#/salelist">Отменить</a></li>
 	        <li class="save"><input id='saleEditSave' type="submit" value="Сохранить" ng-disabled='formSale.$invalid' ng-click='saveSaleEdited()'></li>

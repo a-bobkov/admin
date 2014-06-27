@@ -26,18 +26,21 @@ angular.module('max.dal.entities.tariff', ['max.dal.entities.collection', 'max.d
         };
 
         Tariff.prototype.getLastRate = function(city, tariffRates) {
-                var thisTariffRates = _.filter(tariffRates, {tariff: this});
-                var thisTariffRatesCity = _.filter(thisTariffRates, {city: city});
-                if (thisTariffRatesCity.length) {
-                    _.sortBy(thisTariffRatesCity, 'activeFrom');
-                    return  thisTariffRatesCity[thisTariffRatesCity.length - 1];
-                }
-                var thisTariffRatesNull = _.filter(thisTariffRates, {city: null});
-                if (thisTariffRatesNull.length) {
-                    _.sortBy(thisTariffRatesNull, 'activeFrom');
-                    return  thisTariffRatesNull[thisTariffRatesNull.length - 1];
-                }
+            if (!tariffRates) {
+                return;
             }
+            var thisTariffRates = _.filter(tariffRates.getItems(), {tariff: this});
+            var thisTariffRatesCity = _.filter(thisTariffRates, {city: city});
+            if (thisTariffRatesCity.length) {
+                _.sortBy(thisTariffRatesCity, 'activeFrom');
+                return  thisTariffRatesCity[thisTariffRatesCity.length - 1];
+            }
+            var thisTariffRatesNull = _.filter(thisTariffRates, {city: null});
+            if (thisTariffRatesNull.length) {
+                _.sortBy(thisTariffRatesNull, 'activeFrom');
+                return  thisTariffRatesNull[thisTariffRatesNull.length - 1];
+            }
+        }
 
         Tariff.prototype.name = function(city, tariffRates) {
             var tariffRate = this.getLastRate(city, tariffRates);

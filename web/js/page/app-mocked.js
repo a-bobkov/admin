@@ -1047,6 +1047,17 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             isActive: true,
             delay: 3,
             groupName: 'Помесячный'
+        },
+        {
+            id: 22,
+            site: {id: 2},
+            type: 'periodical',
+            period: 1,
+            periodUnit: 'month',
+            count: 400,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
         }
     ]).resolveRefs({sites: sites});
 
@@ -1269,6 +1280,15 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             rate: 3150.60,
             siteRate: 2500,
             info: 'Общий'
+        },
+        {
+            id: 24,
+            tariff: {id: 22},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 6000,
+            siteRate: 4500,
+            info: 'Общий'
         }
     ]).resolveRefs({tariffs: tariffs, cities: userDirectories.cities});
 
@@ -1289,7 +1309,15 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             id: 1,
             dealer: {id: 3},
             site: {id: 2},
-            tariff: {id: 11},
+            tariff: {id: 22},
+            autoProlong: true,
+            renew: '0'
+        },
+        {
+            id: 2,
+            dealer: {id: 3},
+            site: {id: 17},
+            tariff: {id: 1},
             autoProlong: true,
             renew: '0'
         }
@@ -1479,7 +1507,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {
             id: 11,
             type: 'addcard',
-            cardId: 11,
+            cardId: 10,
             parentId: 9,
             dealer: {id: 3},
             site: {id: 6},
@@ -1494,6 +1522,24 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             siteAmount: 120,
             info: 'Второе расширение на irr.ru'
         },
+        {
+            id: 12,
+            type: 'addcard',
+            cardId: 11,
+            parentId: 4,
+            dealer: {id: 3},
+            site: {id: 2},
+            tariff: {id: 12},
+            cardAmount: 300,
+            count: 100,
+            activeFrom: '2014-05-20',
+            activeTo: '2014-05-31',
+            isActive: false,
+            date: '2014-05-19',
+            amount: 250,
+            siteAmount: 120,
+            info: 'Расширение на bibika.ru'
+        }
     ], multiplyCoef, function(i, len) {
         this.cardId = this.cardId + i * len;
         this.dealer = { id: dealers.getItems()[i].id };

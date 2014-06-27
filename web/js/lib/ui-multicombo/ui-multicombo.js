@@ -74,9 +74,9 @@ angular.module("ui.multicombo", [])
 
             $scope.moveToSelected = function(choice, $event) {
                 $scope._selectedChoices.push(choice);
-                filterChoices();
-
-                $scope._searchElem.focus();
+                $scope._search = '';
+                // filterChoices();
+                // $scope._searchElem.focus();
 
                 // do not 'close' on choice click
                 $event.preventDefault();
