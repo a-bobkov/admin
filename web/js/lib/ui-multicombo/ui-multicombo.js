@@ -11,7 +11,7 @@ angular.module("ui.multicombo", [])
             '<div class="mcombo-container mcombo-container-multi">' +
             '    <ul class="mcombo-selected-choices">' +
             '        <li class="selected-choice" ng-repeat="choice in _selectedChoices">'+
-            '            <span id="McomboSelectedItem_{{$index}}">{{choice.id}}: {{choice[_choiceName]}}</span>' +
+            '            <span id="McomboSelectedItem_{{$index}}" ng-click="clickChoice(choice)">{{choice.id}}: {{choice[_choiceName]}}</span>' +
             '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
             '        </li>' +
             '        <li class="search-field" ng-hide="hide()">' +
@@ -92,6 +92,12 @@ angular.module("ui.multicombo", [])
 
                 $scope._searchElem.focus();
             };
+
+            $scope.clickChoice = function(choice) {
+                if (!_.isArray($scope._selected)) {
+                    $scope.removeFromSelected(choice)
+                }
+            }
 
             $scope.onFilterChange = function(newValue, oldValue) {
                 if (newValue === oldValue) {
