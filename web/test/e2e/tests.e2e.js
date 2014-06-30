@@ -1264,12 +1264,12 @@ describe('Sale App', function() {
             var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
             dealerElemDrop.click();
 
-            var tariffElem = element(by.id('saleTariff'));
             var siteElem = element(by.id('saleSite'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
             var siteElemsDrop = siteElem.element.all(by.id('McomboDropChoiceItem'));
             mapText(siteElemsDrop).then(function(sites) {
+                var tariffElem = element(by.id('saleTariff'));
                 _.forEach(sites, function(site, siteIdx) {
                     siteElemsDrop.get(siteIdx).click();
                     tariffElem.element(by.css('option:checked')).getText().then(function(tariffText) {

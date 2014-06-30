@@ -48,6 +48,10 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
             });
         };
 
+        Dealer.prototype.idName = function() {
+            return this.id + ': ' + this.companyName;
+        }
+
         return Dealer;
     }());
     return Dealer;
@@ -62,7 +66,7 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
     return Dealers;
 })
 
-.service('dealersLoader', function(entityLoader, dealerApi, Dealer, Dealers) {
+.service('dealersLoader', function dealersLoader(entityLoader, dealerApi, Dealer, Dealers) {
     this.loadItems = function(queryParams, directories) {
         return entityLoader.loadItems(queryParams, directories, dealerApi, Dealers);
     };

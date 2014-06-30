@@ -54,14 +54,14 @@
             <tr>
                 <th><label for="saleFiltersDealers">Салоны</label></th>
                 <td>
-                    <div id="saleFiltersDealers" ng-model="patterns.dealers" ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader">
+                    <div id="saleFiltersDealers" ng-model="patterns.dealers" ui-mcombo-loader="dealersLoader" ui-mcombo-choices="ds">
                     </div>
                 </td>
             </tr>
             <tr>
                 <th><label for="saleFiltersSites">Cайты</label></th>
                 <td>
-                    <div id="saleFiltersSites" ng-model="patterns.sites" ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader">
+                    <div id="saleFiltersSites" ng-model="patterns.sites" ui-mcombo-loader="sitesLoader" ui-mcombo-choices="ss">
                     </div>
                 </td>
             </tr>

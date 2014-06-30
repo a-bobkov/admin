@@ -1,8 +1,9 @@
 angular.module("ui.multicombo", [])
 
-.directive("uiMcomboChoices", function($document){
-    // simultaneously should not be two open items
-    var openElement = null, close;
+.directive("uiMcomboLoader", function($document) {
+    var openedElement;
+    var close;
+
     return {
         restrict: 'A',
         require: 'ngModel',
@@ -11,7 +12,7 @@ angular.module("ui.multicombo", [])
             '<div class="mcombo-container mcombo-container-multi">' +
             '    <ul class="mcombo-selected-choices">' +
             '        <li class="selected-choice" ng-repeat="choice in _selectedChoices">'+
-            '            <span id="McomboSelectedItem_{{$index}}" ng-click="clickChoice(choice)">{{choice.id}}: {{choice[_choiceName]}}</span>' +
+            '            <span id="McomboSelectedItem_{{$index}}" ng-click="clickChoice(choice)">{{choice.idName()}}</span>' +
             '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
             '        </li>' +
             '        <li class="search-field" ng-hide="hide()">' +
@@ -21,7 +22,7 @@ angular.module("ui.multicombo", [])
             '    <div class="mcombo-drop" ng-hide="hide()">' +
             '        <ul class="choices">' +
             '            <li class="item" id="McomboDropChoiceItem" ng-repeat="choice in _filteredChoices" ng-click="moveToSelected(choice, $event)">' +
-            '                {{choice.id}}: {{choice[_choiceName]}}' +
+            '                {{choice.idName()}}' +
             '            </li>' +
             '            <li class="no-results" ng-show="_search && _filteredChoices.length == 0">Нет подходящих значений</li>' +
             '        </ul>' +
@@ -31,10 +32,10 @@ angular.module("ui.multicombo", [])
             _choicesLoader: '=uiMcomboLoader',
             _choices: '=uiMcomboChoices',
             _selected: '=ngModel',
-            _choiceName: '=uiMcomboName',
             _disabled: '=ngDisabled'
         },
         controller: ['$scope', '$filter', function($scope, $filter) {
+            var preSearch = '';
 
             $scope.$watch('_selected', function _selectedChoicesUpdate() {
                 if (_.isArray($scope._selected)) {
@@ -58,16 +59,12 @@ angular.module("ui.multicombo", [])
                 return !_.isArray($scope._selected) && $scope._selected;
             }
 
-            $scope._searchElem = null;
-            $scope._search = '';
-            $scope._filteredChoices = [];
-
             var filterChoices = function() {
                 var selectedIds = _.pluck($scope._selectedChoices, 'id');
-                if ($scope._choices.constructor.name === 'Sites') {
+                if ($scope._choicesLoader.constructor.name === 'sitesLoader') {
                     selectedIds.push(0, 12, 15);    // нельзя выбирать эти сайты
                 }
-                $scope._filteredChoices = _.filter($scope._choices.getItems(), function(value) {
+                $scope._filteredChoices = _.filter($scope._choices && $scope._choices.getItems(), function(value) {
                     return (selectedIds.indexOf(value.id) === -1);
                 });
             }
@@ -75,12 +72,8 @@ angular.module("ui.multicombo", [])
             $scope.moveToSelected = function(choice, $event) {
                 $scope._selectedChoices.push(choice);
                 $scope._search = '';
-                // filterChoices();
-                // $scope._searchElem.focus();
-
-                // do not 'close' on choice click
-                $event.preventDefault();
-                $event.stopPropagation();
+                filterChoices();
+                $scope._searchElem.focus();
             };
 
             $scope.removeFromSelected = function(choice) {
@@ -89,73 +82,74 @@ angular.module("ui.multicombo", [])
                 }
                 $scope._selectedChoices.splice($scope._selectedChoices.indexOf(choice), 1);
                 filterChoices();
-
-                $scope._searchElem.focus();
+                // $scope._searchElem.focus();
+                window.setTimeout(function(){$scope._searchElem.focus();}, 100);
             };
 
             $scope.clickChoice = function(choice) {
                 if (!_.isArray($scope._selected)) {
-                    $scope.removeFromSelected(choice)
+                    $scope.removeFromSelected(choice);
                 }
             }
 
-            $scope.onFilterChange = function(newValue, oldValue) {
-                if (newValue === oldValue) {
-                    return;
-                }
-                var filters = _.invoke($scope._search.split(' '), function() {
-                    var idName = ($scope._choiceName === 'companyName') ? 'id' : 'id';
-                    return { type: 'contain', fields: [idName, $scope._choiceName], value: this };
-                });
-                var fieldNames = ($scope._choiceName === 'companyName') ? ['dealer_list_name'] : [];
-                var queryParams = {
-                    filters: filters,
-                    fields: fieldNames,
+            $scope.loadChoices = function() {
+                var choicesId = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'id' : 'id';
+                var choicesName = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'companyName' : 'name';
+                var choicesFields = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? ['dealer_list_name'] : [];
+                $scope._choicesLoader.loadItems({
+                    filters: _.invoke($scope._search && $scope._search.split(' '), function() {
+                        return { fields: [choicesId, choicesName], type: 'contain', value: this };
+                    }),
+                    fields: choicesFields,
                     pager: {
                         per_page: 9
                     }
-                };
-                $scope._choicesLoader.loadItems(queryParams).then(function(collection) {
+                }).then(function(collection) {
                     $scope._choices = collection;
                     filterChoices();
                 });
             }
 
-            $scope.$watch('_search', $scope.onFilterChange);
+            $scope.watchSearch = function() {
+                var newSearch = $scope._search && $scope._search.trim();
+                if (newSearch !== preSearch) {
+                    $scope.loadChoices();
+                    preSearch = newSearch;
+                }
+            }
 
         }],
         link: function(scope, element, attrs) {
-            var selUl = element.children().eq(0);
-            var selItems = selUl.children();
-            scope._searchElem = selItems.eq(selItems.length-1).children().eq(0)[0];
-            selUl.bind('click', function(event) {
+            var selItems = element.children().eq(0).children();
+            var searchElems = selItems.eq(selItems.length-1).children().eq(0);
+            scope._searchElem = searchElems[0];
+            searchElems.bind('keyup', scope.watchSearch);
+            element.bind('click', function(event) {
                 // otherwise 'close' will be called immediately
                 event.preventDefault();
                 event.stopPropagation();
-
-                scope._search = '';
-                scope.onFilterChange('', undefined);
-
-                if (openElement) {
-                    close();
+                if (element === openedElement || scope._disabled) {
+                    return;
                 }
-
+                openedElement = element;
+                if (close) {
+                    close();     // simultaneously should not be two open items
+                }
                 if (!element.hasClass('mcombo-container-active')) {
                     element.addClass('mcombo-container-active');
-                    openElement = element;
-
                     close = function (event) {
                         event && event.preventDefault();
                         event && event.stopPropagation();
                         $document.unbind('click', close);
                         element.removeClass('mcombo-container-active');
+                        openedElement = null;
                         close = null;
-                        openElement = null;
+                        scope._search = '';
                         scope._searchElem.value = '';
                     }
                     $document.bind('click', close);
+                    scope.loadChoices();
                 }
-
                 scope._searchElem.focus();
             });
         }

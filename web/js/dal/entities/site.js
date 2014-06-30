@@ -13,6 +13,9 @@ angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal
     };
     _.assign(Site.prototype, Item.prototype);
     Site.prototype.lowerName = 'site';
+    Site.prototype.idName = function() {
+        return this.id + ': ' + this.name;
+    }
     return Site;
 })
 
@@ -25,7 +28,7 @@ angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal
     return Sites;
 })
 
-.service('sitesLoader', function(entityLoader, siteApi, Site, Sites) {
+.service('sitesLoader', function sitesLoader(entityLoader, siteApi, Site, Sites) {
     this.loadItems = function(queryParams, directories) {
         return entityLoader.loadItems(queryParams, directories, siteApi, Sites);
     };

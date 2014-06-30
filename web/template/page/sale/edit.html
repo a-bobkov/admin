@@ -7,7 +7,7 @@
 	        <tr>
 	            <th><label for="saleDealer">Салон</label></th>
 	            <td>
-                    <div id="saleDealer" name="saleDealer" ng-model='saleEdited.dealer' ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader" required ng-disabled='!saleEdited.isCard() || addSales.getItems().length || extraSales.getItems().length'>
+                    <div id="saleDealer" name="saleDealer" ng-model='saleEdited.dealer' ui-mcombo-loader="dealersLoader" ui-mcombo-choices="dealers" required ng-disabled='!saleEdited.isCard() || addSales.getItems().length || extraSales.getItems().length'>
                     </div>
 					<ul class="error_list" ng-show='formSaleKey.saleDealer.$invalid'>
 					    <li id='saleEditDealerErrorRequired' ng-show="formSaleKey.saleDealer.$error.required">Необходимо выбрать салон.</li>
@@ -24,7 +24,7 @@
 	        <tr>
 	            <th><label for="saleSite">Сайт</label></th>
 	            <td>
-                    <div id="saleSite" name="saleSite" ng-model='saleEdited.site' ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader" required ng-disabled='!saleEdited.isCard() || addSales.getItems().length || extraSales.getItems().length'>
+                    <div id="saleSite" name="saleSite" ng-model='saleEdited.site' ui-mcombo-loader="sitesLoader" ui-mcombo-choices="sites" required ng-disabled='!saleEdited.isCard() || addSales.getItems().length || extraSales.getItems().length'>
                     </div>
 					<ul class="error_list" ng-show='formSaleKey.saleSite.$invalid'>
 					    <li id='saleEditSiteErrorRequired' ng-show="formSaleKey.saleSite.$error.required">Необходимо выбрать сайт.</li>
