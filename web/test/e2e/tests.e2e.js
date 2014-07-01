@@ -892,6 +892,7 @@ describe('Sale App', function() {
                 dealerElemDrop.click();
                 expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
             });
+            element(by.id('SaleListNumberSales')).click();
 
             var siteElem = element(by.id('saleFiltersSites'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
@@ -902,6 +903,7 @@ describe('Sale App', function() {
                 siteElemDrop.click();
                 expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
             });
+            element(by.id('SaleListNumberSales')).click();
 
             var isActive = element(by.select('patterns.isActive'));
             setSelect(isActive, 1);
