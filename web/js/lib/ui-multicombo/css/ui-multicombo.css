@@ -9,8 +9,8 @@
     *display: inline;
 }
 .mcombo-container-active .mcombo-drop {
+    position: absolute;
     background: #fff;
-    border: 1px solid #aaa;
     border-top: 0;
     left: 0;
     -webkit-box-shadow: 0 4px 5px rgba(0,0,0,.15);
@@ -19,6 +19,9 @@
     box-shadow        : 0 4px 5px rgba(0,0,0,.15);
     z-index: 1010;
     width: 100%;
+    background-color: #fff;
+    border: 1px solid #aaa;
+    border-top-width: 0px;
 }
 /* @end */
 
@@ -116,7 +119,7 @@
 /* @group Results */
 .mcombo-container .choices {
     margin: 0 4px 4px 0;
-    max-height: 240px;
+    max-height: 400px;
     padding: 0 0 0 4px;
     position: relative;
     overflow-x: hidden;
