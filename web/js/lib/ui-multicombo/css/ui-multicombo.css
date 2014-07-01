@@ -137,7 +137,7 @@
 .mcombo-container-active .choices li {
     display: block;
 }
-.mcombo-container .choices li.item:hover {
+.mcombo-container .choices li.item.hover {
     background-color: #3875d7;
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3875d7', endColorstr='#2a62bc', GradientType=0 );
     background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(20%, #3875d7), color-stop(90%, #2a62bc));
