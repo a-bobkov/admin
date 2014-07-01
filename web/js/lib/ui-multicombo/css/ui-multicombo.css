@@ -4,8 +4,9 @@
 .mcombo-container {
     font-size: 13px;
     position: relative;
-    display: inline-block;
+    display: block;
     zoom: 1;
+    width: 90%;
     *display: inline;
 }
 .mcombo-container-active .mcombo-drop {

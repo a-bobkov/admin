@@ -1,14 +1,61 @@
-<h1>Список продаж</h1>
-
-<div class="span-6">
-    <h3 id="SaleListNumberSales">Количество продаж: {{totalItems}}</h3>
-</div>
-
-<div class="append-bottom">
-    <input id='SaleListAddSaleUp' type="submit" value="Добавить карточку" ng-click='newSaleCard()'/>
-</div>
-
-<div class="span-17">
+<div class="span-24">
+    <table>
+        <tr>
+            <td class="first">
+            <div class="span-5">
+                <h1>Список продаж</h1>
+                <h3 id="SaleListNumberSales">Количество продаж: {{totalItems}}</h3>
+                <input id='SaleListAddSaleUp' type="submit" value="Добавить карточку" ng-click='newSaleCard()'/>
+            </div>
+            </td>
+            <td class="last">
+            <fieldset class="span-18 last right">
+                <legend>Фильтр</legend>
+                <table class='multi-parameters'>
+                    <tbody>
+                        <tr>
+                            <th><label for="saleFiltersDealers">Салоны</label></th>
+                            <td width="50%">
+                                <div id="saleFiltersDealers" ng-model="patterns.dealers" ui-mcombo-loader="dealersLoader" ui-mcombo-choices="ds">
+                                </div>
+                            </td>
+                            <th><label for="SaleListFilterStatus">Статус</label></th>
+                            <td>
+                                <select ng-model='patterns.isActive' ng-options='opt.name for opt in saleStatuses.getItems()' id='SaleListFilterStatus' >
+                                    <option value='' selected='selected'></option>
+                                </select>
+                            </td>
+                            <th><label for="sf_guard_sale_filters_archive">Архив</label></th>
+                            <td>
+                                <input type="checkbox" ng-model='patterns.archive' id='sf_guard_sale_filters_archive'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="saleFiltersSites">Cайты</label></th>
+                            <td>
+                                <div id="saleFiltersSites" ng-model="patterns.sites" ui-mcombo-loader="sitesLoader" ui-mcombo-choices="ss">
+                                </div>
+                            </td>
+                            <th><label for="SaleListFilterType">Тип</label></th>
+                            <td>
+                                <select ng-model='patterns.type' ng-options='opt.name for opt in saleTypes.getItems()' id='SaleListFilterType'>
+                                    <option value='' selected='selected'></option>
+                                </select>
+                            </td>
+                            <td colspan="2">
+                                <ul class="actions">
+                                    <li class="list">
+                                        <a ng-click='setPatternsDefault()' id='SaleListFilterSetDefault'>Сбросить</a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            </td>
+        </tr>
+    </table>
     <div class="notice" id="savedSaleListNotice" ng-show='savedSaleListNotice'>{{savedSaleListNotice}}</div>
     <table class="list">
         <thead>
@@ -16,7 +63,7 @@
 				<th ng-repeat='column in sortableColumns' id="SaleListTableHeader" ng-class='{"active": sorting.column === column.id}' ng-style='{width: column.width}'>
             		<a ng-click='changeSorting(column.id)' id="SaleListTableHeaderRef">{{column.name}}</a><span id="SaleListTableHeaderDir">{{sortingMark(column.id)}}</span>
                 </th>
-                <th>Действия</th>
+                <th colspan="2">Действия</th>
             </tr>
         </thead>
         <tbody id="SaleListTable">
@@ -24,17 +71,21 @@
                 <td class="date">{{sale.date | date:'shortDate'}}</td>
                 <td class="text">{{sale.dealer.id}}: {{sale.dealer.companyName}}</td>
                 <td class="text">{{sale.site.id}}: {{sale.site.name}}</td>
-                <td class="text">{{sale.type.name}}</td>
-                <td class="text">{{sale.count}}</td>
+                <td class="center">{{sale.type.name}}</td>
+                <td class="center">{{sale.count}}</td>
                 <td class="date">{{sale.activeFrom | date:'shortDate'}}</td>
                 <td class="date">{{sale.activeTo | date:'shortDate'}}</td>
                 <td class="amount">{{sale.amount | number:2}}</td>
                 <td class="amount">{{sale.siteAmount | number:2}}</td>
-                <td class="text"><a ng-click='toggleSaleStatus(sale)'>{{sale.isActive.name}}</a></td>
+                <td class="center"><a ng-click='toggleSaleStatus(sale)'>{{sale.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
-                        <li class="edit" id='SaleListRowAdd' ng-show='isAddable(sale)'><a ng-click='newSaleAddcard(sale)'>расширить</a></li>
-                        <li class="edit" id='SaleListRowExtra' ng-show='sale.isCard()'><a ng-click='newSaleExtra(sale)'>доплатить</a></li>
+                        <li class="new" id='SaleListRowAdd' ng-show='isAddable(sale)'><a ng-click='newSaleAddcard(sale)'>расширить</a></li>
+                        <li class="pricelist" id='SaleListRowExtra' ng-show='sale.isCard()'><a ng-click='newSaleExtra(sale)'>доплатить</a></li>
+                    </ul>
+                </td>
+                <td>
+                    <ul class="actions">
                         <li class="edit" id='SaleListRowEdit'><a ng-click='editSale(sale)'>изменить</a></li>
                         <li class="delete" id='SaleListRowRemove'><a ng-click='removeSale(sale)'>удалить</a></li>
                     </ul>
@@ -47,58 +98,3 @@
         <input id='SaleListAddSaleDown' type="submit" value="Добавить карточку" ng-click='newSaleCard()'/>
     </div>
 </div>
-<fieldset class="span-6 last right">
-    <legend>Фильтр</legend>
-    <table class='parameters'>
-        <tbody>
-            <tr>
-                <th><label for="saleFiltersDealers">Салоны</label></th>
-                <td>
-                    <div id="saleFiltersDealers" ng-model="patterns.dealers" ui-mcombo-loader="dealersLoader" ui-mcombo-choices="ds">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <th><label for="saleFiltersSites">Cайты</label></th>
-                <td>
-                    <div id="saleFiltersSites" ng-model="patterns.sites" ui-mcombo-loader="sitesLoader" ui-mcombo-choices="ss">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <th><label for="SaleListFilterStatus">Статус</label></th>
-                <td>
-                    <select ng-model='patterns.isActive' ng-options='opt.name for opt in saleStatuses.getItems()' id='SaleListFilterStatus' >
-                        <option value='' selected='selected'></option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th><label for="SaleListFilterType">Тип</label></th>
-                <td>
-                    <select ng-model='patterns.type' ng-options='opt.name for opt in saleTypes.getItems()' id='SaleListFilterType'>
-                        <option value='' selected='selected'></option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th><label for="sf_guard_sale_filters_archive">Архив</label></th>
-                <td>
-                    <input type="checkbox" ng-model='patterns.archive' id='sf_guard_sale_filters_archive'>
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td></td>
-                <td>
-                    <ul class="actions">
-                        <li class="list">
-                            <a ng-click='setPatternsDefault()' id='SaleListFilterSetDefault'>Сбросить</a>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-</fieldset>

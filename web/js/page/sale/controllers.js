@@ -306,15 +306,15 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.sortableColumns = [
         {id: "date", name: "Дата", width: '5%'},
-        {id: "dealer", name: "Салон", width: '20%'},
-        {id: "site", name: "Сайт", width: '15%'},
+        {id: "dealer", name: "Салон", width: '25%'},
+        {id: "site", name: "Сайт", width: '10%'},
         {id: "type", name: "Тип", width: '5%'},
-        {id: "count", name: "Лим.", width: '5%'},
+        {id: "count", name: "Лимит", width: '5%'},
         {id: "activeFrom", name: "С", width: '5%'},
         {id: "activeTo", name: "По", width: '5%'},
-        {id: "amount", name: "Стоимость, руб.", width: '10%'},
-        {id: "siteAmount", name: "Себестоим, руб.", width: '10%'},
-        {id: "isActive", name: "Ста-тус", width: '5%'}
+        {id: "amount", name: "Стоимость, руб.", width: '7.5%'},
+        {id: "siteAmount", name: "Себестоим, руб.", width: '7.5%'},
+        {id: "isActive", name: "Статус", width: '5%'}
     ];
 
     $scope.sortingMark = function(column) {

@@ -10,6 +10,18 @@ table.parameters th {
 	width: 20%;
 }
 
+table.multi-parameters th {
+	width: 10%;
+}
+
+FIELDSET {
+  margin-top: inherit;
+}
+
+TD.center {
+	text-align: center;
+}
+
 th, td {padding: 4px 4px 4px 4px;}
 
 .checkbox-group {
