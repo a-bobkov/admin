@@ -277,9 +277,6 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         if (top < 0) {
             window.scrollBy(0, top);
         }
-        if ($rootScope.savedDealerSiteListFocus) {
-            document.getElementById($rootScope.savedDealerSiteListFocus).focus();
-        }
     });
 
     $scope.toggleDealerSiteStatus = function(dealerSite) {

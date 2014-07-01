@@ -7,7 +7,7 @@
 	        <tr>
 	            <th><label for="dealerSiteDealer">Салон</label></th>
 	            <td>
-                    <div id="dealerSiteDealer" name="dealerSiteDealer" ng-model='dealerSiteEdited.dealer' ui-mcombo-choices="dealers" ui-mcombo-name="'companyName'" ui-mcombo-loader="dealersLoader" ui-dealer-site-unique='dealerSiteEdited' required>
+                    <div id="dealerSiteDealer" name="dealerSiteDealer" ng-model='dealerSiteEdited.dealer' ui-mcombo-loader="dealersLoader" ui-mcombo-choices="dealers" ui-dealer-site-unique='dealerSiteEdited' required>
                     </div>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteDealer.$invalid'>
 					    <li id='dealerSiteEditDealerErrorRequired' ng-show="formDealerSite.dealerSiteDealer.$error.required">Необходимо выбрать значение.</li>
@@ -18,7 +18,7 @@
 	        <tr>
 	            <th><label for="dealerSiteSite">Сайт</label></th>
 	            <td>
-                    <div id="dealerSiteSite" name="dealerSiteSite" ng-model='dealerSiteEdited.site' ui-mcombo-choices="sites" ui-mcombo-name="'name'" ui-mcombo-loader="sitesLoader" required>
+                    <div id="dealerSiteSite" name="dealerSiteSite" ng-model='dealerSiteEdited.site' ui-mcombo-loader="sitesLoader" ui-mcombo-choices="sites" required>
                     </div>
 					<ul class="error_list" ng-show='formDealerSite.dealerSiteSite.$invalid'>
 					    <li id='dealerSiteEditSiteErrorRequired' ng-show="formDealerSite.dealerSiteSite.$error.required">Необходимо выбрать значение.</li>
