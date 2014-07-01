@@ -15,7 +15,7 @@ angular.module("ui.multicombo", [])
             '            <span id="McomboSelectedItem_{{$index}}" ng-click="clickChoice(choice)">{{choice.idName()}}</span>' +
             '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
             '        </li>' +
-            '        <li class="search-field" ng-hide="hide()" ng-keydown="watchKeys($event)">' +
+            '        <li class="search-field" ng-hide="hide()" ng-keydown="watchControls($event)" ng-keyup="watchSearch($event)">' +
             '            <input type="text" id="McomboSearchInput" placeholder="Фильтр с выбором" autocomplete="off" ng-model="_search">' +
             '        </li>' +
             '    </ul>' +
@@ -116,7 +116,7 @@ angular.module("ui.multicombo", [])
                 });
             }
 
-            $scope.watchKeys = function(event) {
+            $scope.watchControls = function(event) {
                 if (event.keyIdentifier === 'Up') {
                     $scope.hover = Math.max(-1, $scope.hover - 1);
                 } else if (event.keyIdentifier === 'Down') {
@@ -128,6 +128,9 @@ angular.module("ui.multicombo", [])
                         $scope.hover = Math.min($scope._filteredChoices.length - 1, $scope.hover);
                     }
                 }
+            }
+
+            $scope.watchSearch = function(event) {
                 var newSearch = $scope._search && $scope._search.trim();
                 if (newSearch !== preSearch) {
                     $scope.loadChoices();
