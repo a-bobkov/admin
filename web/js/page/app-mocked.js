@@ -1058,6 +1058,17 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             isActive: true,
             delay: 3,
             groupName: 'Помесячный'
+        },
+        {
+            id: 23,
+            site: {id: 9},
+            type: 'periodical',
+            period: 30,
+            periodUnit: 'day',
+            count: 100,
+            isActive: true,
+            delay: 3,
+            groupName: 'Помесячный'
         }
     ]).resolveRefs({sites: sites});
 
@@ -1289,6 +1300,15 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             rate: 6000,
             siteRate: 4500,
             info: 'Общий'
+        },
+        {
+            id: 25,
+            tariff: {id: 23},
+            city: null,
+            activeFrom: '2014-01-01',
+            rate: 3333,
+            siteRate: 2222,
+            info: 'Общий'
         }
     ]).resolveRefs({tariffs: tariffs, cities: userDirectories.cities});
 
@@ -1318,6 +1338,22 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealer: {id: 3},
             site: {id: 17},
             tariff: {id: 1},
+            autoProlong: true,
+            renew: '0'
+        },
+        {
+            id: 3,
+            dealer: {id: 3},
+            site: {id: 9},
+            tariff: {id: 6},
+            autoProlong: true,
+            renew: '0'
+        },
+        {
+            id: 3,
+            dealer: {id: 3},
+            site: {id: 5},
+            tariff: {id: 9},
             autoProlong: true,
             renew: '0'
         }
@@ -1359,15 +1395,15 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             cardId: 2,
             dealer: {id: 3},
             site: {id: 9},
-            tariff: {id: 6},
-            cardAmount: 4950,
+            tariff: {id: 23},
+            cardAmount: 3333,
             count: null,
             activeFrom: '2014-04-15',
             activeTo: '2014-05-14',
             isActive: true,
             date: '2014-04-10',
-            amount: 4950,
-            siteAmount: 4000,
+            amount: 3333,
+            siteAmount: 2222,
             info: 'Основная карточка на auto.dmir.ru'
         },
         {
@@ -1379,10 +1415,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             tariff: {id: 8},
             cardAmount: 5428,
             count: 25,
-            activeFrom: '2014-05-01',
-            activeTo: '2014-05-31',
+            activeFrom: '2014-01-01',
+            activeTo: '2014-12-31',
             isActive: true,
-            date: '2014-04-25',
+            date: '2013-12-30',
             amount: 5428,
             siteAmount: 4000,
             info: 'Основная карточка на auto.ru'

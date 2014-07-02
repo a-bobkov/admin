@@ -69,8 +69,8 @@
         <tbody id="SaleListTable">
             <tr ng-repeat='sale in sales.getItems()' ng-class-odd="'odd'" ng-class-even="'even'">
                 <td class="date">{{sale.date | date:'shortDate'}}</td>
-                <td class="text">{{sale.dealer.id}}: {{sale.dealer.companyName}}</td>
-                <td class="text">{{sale.site.id}}: {{sale.site.name}}</td>
+                <td class="text">{{sale.dealer.idName()}}</td>
+                <td class="text">{{sale.site.idName()}}</td>
                 <td class="center">{{sale.type.name}}</td>
                 <td class="center">{{sale.count}}</td>
                 <td class="date">{{sale.activeFrom | date:'shortDate'}}</td>

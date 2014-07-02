@@ -1389,59 +1389,91 @@ describe('Sale App', function() {
         });
 
         it('выводит начальные значения полей', function() {
+            var saleElems = by.repeater('sale in sales');
+            var sales = {};
+            mapText(element.all(saleElems.column('sale.dealer.idName'))).then(function(respond) {
+                sales.dealerText = respond;
+            });
+            mapText(element.all(saleElems.column('sale.site.idName'))).then(function(respond) {
+                sales.siteText = respond;
+            });
+            mapText(element.all(saleElems.column('sale.type.name'))).then(function(respond) {
+                sales.typeText = respond;
+            });
+            mapText(element.all(saleElems.column('sale.activeFrom'))).then(function(respond) {
+                sales.activeFrom = respond;
+            });
+            mapText(element.all(saleElems.column('sale.activeTo'))).then(function(respond) {
+                sales.activeTo = respond;
+            });
             var addcardElems = element.all(by.id('SaleListRowAdd'));
-            mapIsDisplayed(addcardElems).then(function(sales) {
-                var today = new Date;
-                today.setUTCHours(0, 0, 0, 0);
-                var todayISO = today.toISOString().slice(0, 10);
-                var tomorrow = _.clone(today);
-                tomorrow.setUTCHours(24);
-                var tomorrowISO = tomorrow.toISOString().slice(0, 10);
+            mapIsDisplayed(addcardElems).then(function(respond) {
+                sales.isDisplayed = respond;
+            });
 
-                var numberCases = {
-                    isTariff: 0,
-                    noTariff: 0,
-                    noDealerTariff: 0
-                };
+            var today = new Date;
+            today.setUTCHours(0, 0, 0, 0);
+            var todayISO = today.toISOString().slice(0, 10);
+            var tomorrow = _.clone(today);
+            tomorrow.setUTCHours(24);
+            var tomorrowISO = tomorrow.toISOString().slice(0, 10);
 
-                _.forEach(sales, function(isDisplayed, saleIdx) {
+            var numberCases = {
+                isTariff: 0,            // выбрался тариф
+                noTariff: 0,            // не выбрался тариф
+                noDealerTariff: 0,      // у дилера нет тарифа
+                isTariffLimited: 0,     // выбрался лимитный тариф
+                isTariffUnlimited: 0,   // выбрался безлимитный тариф
+                isInterval: 0,          // получилась дата начала <= даты конца
+                isAddAdd: 0             // расширение расширения
+            };
+
+            browser.controlFlow().execute(function() {
+                _.forEach(sales.isDisplayed, function(isDisplayed, saleIdx) {
                     if (!isDisplayed) {
                         return;
                     }
+
+                    if (sales.typeText[saleIdx] === 'Расш') {
+                        numberCases.isAddAdd++;
+                    }
+
                     addcardElems.get(saleIdx).click();
 
                     var dealerText;
                     element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                         dealerText = respond;
-                        expect(dealerText).toMatch(regexpIdName);
+                        expect(dealerText).toBe(sales.dealerText[saleIdx]);
                     });
 
-                    var dealerTariffRate;
+                    var dealerTariffText;
                     // var elem = element(by.model('dealerTariff.tariff')).element(by.css('option:checked'));
                     browser.executeScript("var e=document.getElementById('saleDealerTariff'); return e.options[e.selectedIndex].text;")
-                        .then(function(dealerTariffText) {
+                        .then(function(respond) {
+                        dealerTariffText = respond;
                         if (dealerTariffText) {
                             expect(dealerTariffText).toMatch(regexpTariff);
-                            dealerTariffRate = parseFloat(dealerTariffText.replace(regexpTariff, '$1'));
                         }
                     });
 
                     var siteText;
                     element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                         siteText = respond;
-                        expect(siteText).toMatch(regexpIdName);
+                        expect(siteText).toBe(sales.siteText[saleIdx]);
                     });
 
-                    var parentTariffRate;
-                    element(by.model('tariffParent')).element(by.css('option:checked')).getText().then(function(parentTariffText) {
+                    var parentTariffText;
+                    element(by.model('tariffParent')).element(by.css('option:checked')).getText().then(function(respond) {
+                        parentTariffText = respond;
                         expect(parentTariffText).toMatch(regexpTariff);
-                        parentTariffRate = parseFloat(parentTariffText.replace(regexpTariff, '$1'));
                     });
 
                     var tariffText;
                     element(by.model('saleEdited.tariff')).element(by.css('option:checked')).getText().then(function(respond) {
                         tariffText = respond;
+                        var dealerTariffRate = parseFloat(dealerTariffText.replace(regexpTariff, '$1'));
                         if (dealerTariffRate) {
+                            var parentTariffRate = parseFloat(parentTariffText.replace(regexpTariff, '$1'));
                             if (dealerTariffRate > parentTariffRate) {
                                 expect(tariffText).toMatch(regexpTariff);
                                 numberCases.isTariff++;
@@ -1457,21 +1489,84 @@ describe('Sale App', function() {
 
                     expect(element(by.model('saleEdited.date')).getAttribute('value')).toBe(todayISO);
 
-                    element(by.model('saleEdited.count')).getAttribute('value').then(function(count) {
-                        expect(!!count).toBe(!!tariffText);
+                    element(by.model('saleEdited.count')).getAttribute('value').then(function(countText) {
+                        if (!tariffText) {
+                            expect(countText).toBeFalsy();  // если тариф не выбран, то лимит пустой
+                        } else {
+                            var tariffCountText = tariffText.replace(regexpTariff, '$4');
+                            if (!tariffCountText) {
+                                expect(countText).toBeFalsy();  // если тариф выбран и он безлимитный, то лимит пустой
+                                numberCases.isTariffUnlimited++;
+                            } else {
+                                // если тариф выбран и он лимитный, то лимит = лимит тарифа - лимит родительского тарифа
+                                var parentTariffCountText = parentTariffText.replace(regexpTariff, '$4');
+                                expect(_.parseInt(countText)).toBe(_.parseInt(tariffCountText) - _.parseInt(parentTariffCountText));
+                                numberCases.isTariffLimited++;
+                            }
+                        }
                     });
 
-                    element(by.model('saleEdited.activeFrom')).getAttribute('value').then(function(activeFrom) {
+                    var activeFromText;
+                    element(by.model('saleEdited.activeFrom')).getAttribute('value').then(function(respond) {
+                        activeFromText = respond;
                         var siteId = _.parseInt(siteText.replace(regexpIdName, '$1'));
-                        expect(activeFrom).toBe((siteId === 1 || siteId === 5) ? todayISO : tomorrowISO);
+                        expect(activeFromText).toBe((siteId === 1 || siteId === 5) ? todayISO : tomorrowISO);
                     });
 
-                    expect(element(by.model('saleEdited.activeTo')).getAttribute('value')).toBeTruthy();
-                    element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmount) {
-                        expect(!!cardAmount).toBe(!!tariffText);
+                    var activeToText;
+                    element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(respond) {
+                        activeToText = respond;
+                        expect(activeToText).toBe(sales.activeTo[saleIdx].replace(regexpDate, '20$3-$2-$1'));
+                    });
+
+                    element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
+                        if (!tariffText) {
+                            expect(cardAmountText).toBeFalsy();
+                        } else {
+                            var parentActiveFrom = new Date(sales.activeFrom[saleIdx].replace(regexpDate, '20$3-$2-$1'));
+                            parentActiveFrom.setUTCHours(0, 0, 0, 0);
+                            var parentActiveTo = new Date(sales.activeTo[saleIdx].replace(regexpDate, '20$3-$2-$1'));
+                            parentActiveTo.setUTCHours(0, 0, 0, 0);
+                            var parentInterval = (parentActiveTo - parentActiveFrom) / (1000 * 60 * 60 * 24) + 1;
+
+                            var activeFrom = new Date(activeFromText);
+                            activeFrom.setUTCHours(0, 0, 0, 0);
+                            var activeTo = new Date(activeToText);
+                            activeTo.setUTCHours(0, 0, 0, 0);
+                            var interval = Math.max((activeTo - activeFrom) / (1000 * 60 * 60 * 24) + 1, 0);
+                            if (interval) {
+                                 numberCases.isInterval++;
+                            }
+
+                            var parentTariffRate = parseFloat(parentTariffText.replace(regexpTariff, '$1'));
+                            var tariffRate = parseFloat(tariffText.replace(regexpTariff, '$1'));
+
+                            expect(parseFloat(cardAmountText))
+                                .toBe(Math.ceil((tariffRate - parentTariffRate) / parentInterval * interval * 100) / 100);
+                        }
                     });
                     element(by.model('saleEdited.amount')).getAttribute('value').then(function(amountText) {
-                        expect(!!amountText).toBe(!!tariffText);
+                        if (!tariffText) {
+                            expect(amountText).toBeFalsy();
+                        } else {
+                            var parentActiveFrom = new Date(sales.activeFrom[saleIdx].replace(regexpDate, '20$3-$2-$1'));
+                            parentActiveFrom.setUTCHours(0, 0, 0, 0);
+                            var parentActiveTo = new Date(sales.activeTo[saleIdx].replace(regexpDate, '20$3-$2-$1'));
+                            parentActiveTo.setUTCHours(0, 0, 0, 0);
+                            var parentInterval = (parentActiveTo - parentActiveFrom) / (1000 * 60 * 60 * 24) + 1;
+
+                            var activeFrom = new Date(activeFromText);
+                            activeFrom.setUTCHours(0, 0, 0, 0);
+                            var activeTo = new Date(activeToText);
+                            activeTo.setUTCHours(0, 0, 0, 0);
+                            var interval = Math.max((activeTo - activeFrom) / (1000 * 60 * 60 * 24) + 1, 0);
+
+                            var parentTariffRate = parseFloat(parentTariffText.replace(regexpTariff, '$1'));
+                            var tariffRate = parseFloat(tariffText.replace(regexpTariff, '$1'));
+
+                            expect(parseFloat(amountText))
+                                .toBe(Math.ceil((tariffRate - parentTariffRate) / parentInterval * interval * 100) / 100);
+                        }
                     });
                     element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(siteAmountText) {
                         expect(!!siteAmountText).toBe(!!tariffText);
@@ -1481,11 +1576,10 @@ describe('Sale App', function() {
 
                     element(by.id('saleEditCancel')).click();
                 });
-
-                browser.controlFlow().execute(function() {
-                    _.forEach(numberCases, function(value, key) {
-                        expect(value).toBeTruthy();
-                    });
+            });
+            browser.controlFlow().execute(function() {
+                _.forEach(numberCases, function(value, key) {
+                    expect(value).toBeTruthy();
                 });
             });
         });
