@@ -131,6 +131,9 @@ angular.module("ui.multicombo", [])
             }
 
             $scope.watchSearch = function(event) {
+                if (event.keyIdentifier === 'Enter') {
+                    return;
+                }
                 var newSearch = $scope._search && $scope._search.trim();
                 if (newSearch !== preSearch) {
                     $scope.loadChoices();
@@ -145,10 +148,10 @@ angular.module("ui.multicombo", [])
                 if ($element === openedElement || $scope._disabled) {
                     return;
                 }
-                openedElement = $element;
                 if (close) {
                     close();     // simultaneously should not be two open items
                 }
+                openedElement = $element;
                 if (!$element.hasClass('mcombo-container-active')) {
                     $element.addClass('mcombo-container-active');
                     close = function (event) {
