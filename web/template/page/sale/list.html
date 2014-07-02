@@ -80,14 +80,14 @@
                 <td class="center"><a ng-click='toggleSaleStatus(sale)'>{{sale.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
-                        <li class="new" id='SaleListRowAdd' ng-show='isAddable(sale)'><a ng-click='newSaleAddcard(sale)'>расширить</a></li>
-                        <li class="pricelist" id='SaleListRowExtra' ng-show='sale.isCard()'><a ng-click='newSaleExtra(sale)'>доплатить</a></li>
+                        <li class="new" ng-show='isAddable(sale)'><a id='SaleListRowAdd' ng-click='newSaleAddcard(sale)'>расширить</a></li>
+                        <li class="pricelist" ng-show='sale.isCard()'><a id='SaleListRowExtra' ng-click='newSaleExtra(sale)'>доплатить</a></li>
                     </ul>
                 </td>
                 <td>
                     <ul class="actions">
-                        <li class="edit" id='SaleListRowEdit'><a ng-click='editSale(sale)'>изменить</a></li>
-                        <li class="delete" id='SaleListRowRemove'><a ng-click='removeSale(sale)'>удалить</a></li>
+                        <li class="edit"><a id='SaleListRowEdit' ng-click='editSale(sale)'>изменить</a></li>
+                        <li class="delete"><a id='SaleListRowRemove' ng-click='removeSale(sale)'>удалить</a></li>
                     </ul>
                 </td>
             </tr>

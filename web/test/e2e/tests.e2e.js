@@ -9,6 +9,14 @@ var setSelect = function (elem, optIndex) {
     });
 };
 
+var getSelectOptions = function(elem) {
+    return elem.element.all(by.css('option'));
+}
+
+var getSelectedOption = function(elem) {
+    return elem.element(by.css('option:checked'));
+}
+
 var mapText = function(q) {
     return q.map(function(elm) {
         return elm.getText();
@@ -1668,25 +1676,29 @@ describe('Sale App', function() {
         });
 
         it('Создание карточки', function() {
+            var salesSelector = by.repeater('sale in sales');
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
             amountElem.click();
-            var newAmount;
-            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloatRu(amount) + 1;
+
+            var preAmountText;
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
+                preAmountText = respond;
             });
 
             element.all(by.id('SaleListAddSaleUp')).get(0).click();
 
-            var dealerElem = element(by.id('saleDealer'));
+            var dealerElem = element(by.model('saleEdited.dealer'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            dealerElemSearch.sendKeys('7');
+            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2);
             dealerElemDrop.click();
 
-            var siteElem = element(by.id('saleSite'));
+            var siteElem = element(by.model('saleEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
+            siteElemSearch.sendKeys('17');
             var siteElemDrop = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
             siteElemDrop.click();
 
@@ -1700,28 +1712,115 @@ describe('Sale App', function() {
             });
 
             browser.controlFlow().execute(function() {
+                var newAmount = parseFloatRu(preAmountText) + 1;
                 var amountElem = element(by.model('saleEdited.amount'));
                 amountElem.clear();
                 amountElem.sendKeys(newAmount.toString());
+            });
 
-                element(by.id('saleEditSave')).click();
-                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(floatText) {
-                    expect(parseFloatRu(floatText)).toBe(newAmount);
-                });
+            var saleData = {};
+            dealerElem.element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.dealerText = respond;
+            });
+            siteElem.element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.siteText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+                saleData.tariffText = respond;
+            });
+            element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
+                saleData.dateText = respond;
+            });
+            element(by.model('saleEdited.count')).getAttribute('value').then(function(respond) {
+                saleData.countText = respond;
+            });
+            element(by.model('saleEdited.activeFrom')).getAttribute('value').then(function(respond) {
+                saleData.activeFromText = respond;
+            });
+            element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(respond) {
+                saleData.activeToText = respond;
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(respond) {
+                saleData.cardAmountText = respond;
+            });
+            element(by.model('saleEdited.amount')).getAttribute('value').then(function(respond) {
+                saleData.amountText = respond;
+            });
+            element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(respond) {
+                saleData.siteAmountText = respond;
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
+                saleData.infoText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+                saleData.isActiveText = respond;
+            });
+
+            element(by.id('saleEditSave')).click();
+
+            element.all(salesSelector.column('sale.date')).get(0).getText().then(function(dateText) {
+                expect(dateText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.dateText);
+            });
+            element.all(salesSelector.column('sale.dealer.')).get(0).getText().then(function(dealerText) {
+                expect(dealerText).toBe(saleData.dealerText);
+            });
+            element.all(salesSelector.column('sale.site.')).get(0).getText().then(function(siteText) {
+                expect(siteText).toBe(saleData.siteText);
+            });
+            element.all(salesSelector.column('sale.type')).get(0).getText().then(function(typeText) {
+                expect(typeText).toBe('Осн');
+            });
+            element.all(salesSelector.column('sale.count')).get(0).getText().then(function(countText) {
+                expect(countText).toBe(saleData.countText);
+            });
+            element.all(salesSelector.column('sale.activeFrom')).get(0).getText().then(function(activeFromText) {
+                expect(activeFromText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeFromText);
+            });
+            element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(activeToText) {
+                expect(activeToText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeToText);
+            });
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(amountText) {
+                expect(parseFloatRu(amountText)).toBe(parseFloat(saleData.amountText));
+            });
+            element.all(salesSelector.column('sale.siteAmount')).get(0).getText().then(function(siteAmountText) {
+                expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
+            });
+            element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
+                expect(isActiveText).toBe(saleData.isActiveText);
+            });
+            expect(element.all(by.id('SaleListRowAdd')).get(0).isDisplayed()).toBeTruthy();
+            expect(element.all(by.id('SaleListRowExtra')).get(0).isDisplayed()).toBeTruthy();
+            element(by.id('savedSaleListNotice')).getText().then(function(noticeText) {
+                var dealerName = saleData.dealerText.replace(regexpIdName, '$2');
+                var siteName = saleData.siteText.replace(regexpIdName, '$2');
+                expect(noticeText).toBe('Сохранена продажа салона "' + dealerName + '" на сайте "' + siteName + '"');
+            });
+
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+                expect(tariffText).toBe(saleData.tariffText);
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
+                expect(cardAmountText).toBe(saleData.cardAmountText);
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(infoText) {
+                expect(infoText).toBe(saleData.infoText);
             });
         });
 
         it('Создание расширения карточки', function() {
+            var salesSelector = by.repeater('sale in sales');
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
             amountElem.click();
-            var newAmount;
-            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloatRu(amount) + 1;
+            var preAmountText;
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
+                preAmountText = respond;
             });
 
             var saleTypes;
-            mapText(element.all(by.repeater('sale in sales').column('sale.type'))).then(function(types) {
+            mapText(element.all(salesSelector.column('sale.type'))).then(function(types) {
                 saleTypes = types;
             });
             var saleAdds = element.all(by.id('SaleListRowAdd'));
@@ -1733,14 +1832,13 @@ describe('Sale App', function() {
                 saleAdds.get(saleIdx).click();
             });
 
-            var tariffParentElem = element(by.id('saleTariffParent'));
             var tariffParentText;
-            tariffParentElem.element(by.css('option:checked')).getText().then(function(tariffText) {
+            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(tariffText) {
                 tariffParentText = tariffText;
             });
 
             var tariffElem = element(by.model('saleEdited.tariff'));
-            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+            mapText(getSelectOptions(tariffElem)).then(function(options) {
                 function tariffPrice(tariffText) {
                     return parseFloat(tariffText.replace(regexpTariff, '$1'));
                 }
@@ -1757,50 +1855,212 @@ describe('Sale App', function() {
             });
 
             browser.controlFlow().execute(function() {
+                var newAmount = parseFloatRu(preAmountText) + 1;
                 var amountElem = element(by.model('saleEdited.amount'));
                 amountElem.clear();
                 amountElem.sendKeys(newAmount.toString());
+            });
 
-                element(by.id('saleEditSave')).click();
-                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(floatText) {
-                    expect(parseFloatRu(floatText)).toBe(newAmount);
-                });
+            var saleData = {};
+            element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.dealerText = respond;
+            });
+            element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.siteText = respond;
+            });
+            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(respond) {
+                saleData.parentTariffText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+                saleData.tariffText = respond;
+            });
+            element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
+                saleData.dateText = respond;
+            });
+            element(by.model('saleEdited.count')).getAttribute('value').then(function(respond) {
+                saleData.countText = respond;
+            });
+            element(by.model('saleEdited.activeFrom')).getAttribute('value').then(function(respond) {
+                saleData.activeFromText = respond;
+            });
+            element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(respond) {
+                saleData.activeToText = respond;
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(respond) {
+                saleData.cardAmountText = respond;
+            });
+            element(by.model('saleEdited.amount')).getAttribute('value').then(function(respond) {
+                saleData.amountText = respond;
+            });
+            element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(respond) {
+                saleData.siteAmountText = respond;
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
+                saleData.infoText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+                saleData.isActiveText = respond;
+            });
+
+            element(by.id('saleEditSave')).click();
+
+            element.all(salesSelector.column('sale.date')).get(0).getText().then(function(dateText) {
+                expect(dateText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.dateText);
+            });
+            element.all(salesSelector.column('sale.dealer.')).get(0).getText().then(function(dealerText) {
+                expect(dealerText).toBe(saleData.dealerText);
+            });
+            element.all(salesSelector.column('sale.site.')).get(0).getText().then(function(siteText) {
+                expect(siteText).toBe(saleData.siteText);
+            });
+            element.all(salesSelector.column('sale.type')).get(0).getText().then(function(typeText) {
+                expect(typeText).toBe('Расш');
+            });
+            element.all(salesSelector.column('sale.count')).get(0).getText().then(function(countText) {
+                expect(countText).toBe(saleData.countText);
+            });
+            element.all(salesSelector.column('sale.activeFrom')).get(0).getText().then(function(activeFromText) {
+                expect(activeFromText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeFromText);
+            });
+            element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(activeToText) {
+                expect(activeToText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeToText);
+            });
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(amountText) {
+                expect(parseFloatRu(amountText)).toBe(parseFloat(saleData.amountText));
+            });
+            element.all(salesSelector.column('sale.siteAmount')).get(0).getText().then(function(siteAmountText) {
+                expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
+            });
+            element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
+                expect(isActiveText).toBe(saleData.isActiveText);
+            });
+            expect(element.all(by.id('SaleListRowAdd')).get(0).isDisplayed()).toBeTruthy();
+            expect(element.all(by.id('SaleListRowExtra')).get(0).isDisplayed()).toBeFalsy();
+            element(by.id('savedSaleListNotice')).getText().then(function(noticeText) {
+                var dealerName = saleData.dealerText.replace(regexpIdName, '$2');
+                var siteName = saleData.siteText.replace(regexpIdName, '$2');
+                expect(noticeText).toBe('Сохранена продажа салона "' + dealerName + '" на сайте "' + siteName + '"');
+            });
+
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
+                expect(parentTariffText).toBe(saleData.parentTariffText);
+            });
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+                expect(tariffText).toBe(saleData.tariffText);
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
+                expect(cardAmountText).toBe(saleData.cardAmountText);
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(infoText) {
+                expect(infoText).toBe(saleData.infoText);
             });
         });
 
         it('Создание доплаты', function() {
+            var salesSelector = by.repeater('sale in sales');
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
             amountElem.click();
-            var newAmount;
-            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloatRu(amount) + 1;
+            var preAmountText;
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
+                preAmountText = respond;
             });
 
+            var saleData = {};
             var saleExtras = element.all(by.id('SaleListRowExtra'));
             mapIsDisplayed(saleExtras).then(function(saleExtrasDisplayed) {
                 var saleIdx = _.findIndex(saleExtrasDisplayed, function(saleExtraDisplayed) {
                     return saleExtraDisplayed; 
                 });
                 expect(saleIdx).not.toBe(-1);
+                element.all(salesSelector.column('sale.activeFrom')).get(saleIdx).getText().then(function(respond) {
+                    saleData.activeFromText = respond;
+                });
+                element.all(salesSelector.column('sale.activeTo')).get(saleIdx).getText().then(function(respond) {
+                    saleData.activeToText = respond;
+                });
                 saleExtras.get(saleIdx).click();
             });
 
             browser.controlFlow().execute(function() {
+                var newAmount = parseFloatRu(preAmountText) + 1;
                 var amountElem = element(by.model('saleEdited.amount'));
                 amountElem.clear();
                 amountElem.sendKeys(newAmount.toString());
 
+                var newSiteAmount = parseFloatRu(preAmountText);
                 var siteAmountElem = element(by.model('saleEdited.siteAmount'));
                 siteAmountElem.clear();
-                siteAmountElem.sendKeys((newAmount - 1).toString());
+                siteAmountElem.sendKeys(newSiteAmount.toString());
 
                 element(by.model('saleEdited.info')).sendKeys('выделение');
+            });
 
-                element(by.id('saleEditSave')).click();
-                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(floatText) {
-                    expect(parseFloatRu(floatText)).toBe(newAmount);
-                });
+            element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.dealerText = respond;
+            });
+            element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.siteText = respond;
+            });
+            element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
+                saleData.dateText = respond;
+            });
+            element(by.model('saleEdited.amount')).getAttribute('value').then(function(respond) {
+                saleData.amountText = respond;
+            });
+            element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(respond) {
+                saleData.siteAmountText = respond;
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
+                saleData.infoText = respond;
+            });
+
+            element(by.id('saleEditSave')).click();
+
+            element.all(salesSelector.column('sale.date')).get(0).getText().then(function(dateText) {
+                expect(dateText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.dateText);
+            });
+            element.all(salesSelector.column('sale.dealer.')).get(0).getText().then(function(dealerText) {
+                expect(dealerText).toBe(saleData.dealerText);
+            });
+            element.all(salesSelector.column('sale.site.')).get(0).getText().then(function(siteText) {
+                expect(siteText).toBe(saleData.siteText);
+            });
+            element.all(salesSelector.column('sale.type')).get(0).getText().then(function(typeText) {
+                expect(typeText).toBe('Доп');
+            });
+            element.all(salesSelector.column('sale.count')).get(0).getText().then(function(countText) {
+                expect(countText).toBeFalsy();
+            });
+            element.all(salesSelector.column('sale.activeFrom')).get(0).getText().then(function(activeFromText) {
+                expect(activeFromText).toBe(saleData.activeFromText);
+            });
+            element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(activeToText) {
+                expect(activeToText).toBe(saleData.activeToText);
+            });
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(amountText) {
+                expect(parseFloatRu(amountText)).toBe(parseFloat(saleData.amountText));
+            });
+            element.all(salesSelector.column('sale.siteAmount')).get(0).getText().then(function(siteAmountText) {
+                expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
+            });
+            element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
+                expect(isActiveText).toBeFalsy();
+            });
+            expect(element.all(by.id('SaleListRowAdd')).get(0).isDisplayed()).toBeFalsy();
+            expect(element.all(by.id('SaleListRowExtra')).get(0).isDisplayed()).toBeFalsy();
+            element(by.id('savedSaleListNotice')).getText().then(function(noticeText) {
+                var dealerName = saleData.dealerText.replace(regexpIdName, '$2');
+                var siteName = saleData.siteText.replace(regexpIdName, '$2');
+                expect(noticeText).toBe('Сохранена продажа салона "' + dealerName + '" на сайте "' + siteName + '"');
+            });
+
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(infoText) {
+                expect(infoText).toBe(saleData.infoText);
             });
         });
 
@@ -1859,86 +2119,355 @@ describe('Sale App', function() {
         });
 
         it('Изменение карточки', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 1);
+            setSelect(element(by.model('patterns.type')), 1);
+
+            var salesSelector = by.repeater('sale in sales');
 
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
             amountElem.click();
-            var newAmount;
-            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloatRu(amount) + 1;
+            var preAmountText;
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
+                preAmountText = respond;
+            });
+
+            var saleData = {};
+            element.all(by.id('SaleListRowAdd')).get(0).isDisplayed().then(function(respond) {
+                saleData.addIsDisplayed = respond;
+            });
+            element.all(by.id('SaleListRowExtra')).get(0).isDisplayed().then(function(respond) {
+                saleData.extraIsDisplayed = respond;
+            });
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            browser.controlFlow().execute(function() {
+                var newAmount = parseFloatRu(preAmountText) + 1;
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+            });
+
+            element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.dealerText = respond;
+            });
+            element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.siteText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+                saleData.tariffText = respond;
+            });
+            element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
+                saleData.dateText = respond;
+            });
+            element(by.model('saleEdited.count')).getAttribute('value').then(function(respond) {
+                saleData.countText = respond;
+            });
+            element(by.model('saleEdited.activeFrom')).getAttribute('value').then(function(respond) {
+                saleData.activeFromText = respond;
+            });
+            element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(respond) {
+                saleData.activeToText = respond;
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(respond) {
+                saleData.cardAmountText = respond;
+            });
+            element(by.model('saleEdited.amount')).getAttribute('value').then(function(respond) {
+                saleData.amountText = respond;
+            });
+            element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(respond) {
+                saleData.siteAmountText = respond;
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
+                saleData.infoText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+                saleData.isActiveText = respond;
+            });
+
+            element(by.id('saleEditSave')).click();
+
+            element.all(salesSelector.column('sale.date')).get(0).getText().then(function(dateText) {
+                expect(dateText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.dateText);
+            });
+            element.all(salesSelector.column('sale.dealer.')).get(0).getText().then(function(dealerText) {
+                expect(dealerText).toBe(saleData.dealerText);
+            });
+            element.all(salesSelector.column('sale.site.')).get(0).getText().then(function(siteText) {
+                expect(siteText).toBe(saleData.siteText);
+            });
+            element.all(salesSelector.column('sale.type')).get(0).getText().then(function(typeText) {
+                expect(typeText).toBe('Осн');
+            });
+            element.all(salesSelector.column('sale.count')).get(0).getText().then(function(countText) {
+                expect(countText).toBe(saleData.countText);
+            });
+            element.all(salesSelector.column('sale.activeFrom')).get(0).getText().then(function(activeFromText) {
+                expect(activeFromText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeFromText);
+            });
+            element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(activeToText) {
+                expect(activeToText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeToText);
+            });
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(amountText) {
+                expect(parseFloatRu(amountText)).toBe(parseFloat(saleData.amountText));
+            });
+            element.all(salesSelector.column('sale.siteAmount')).get(0).getText().then(function(siteAmountText) {
+                expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
+            });
+            element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
+                expect(isActiveText).toBe(saleData.isActiveText);
+            });
+            element.all(by.id('SaleListRowAdd')).get(0).isDisplayed().then(function(isDisplayed) {
+                expect(isDisplayed).toBe(saleData.addIsDisplayed);
+            });
+            element.all(by.id('SaleListRowExtra')).get(0).isDisplayed().then(function(isDisplayed) {
+                expect(isDisplayed).toBe(saleData.extraIsDisplayed);
+            });
+            element(by.id('savedSaleListNotice')).getText().then(function(noticeText) {
+                var dealerName = saleData.dealerText.replace(regexpIdName, '$2');
+                var siteName = saleData.siteText.replace(regexpIdName, '$2');
+                expect(noticeText).toBe('Сохранена продажа салона "' + dealerName + '" на сайте "' + siteName + '"');
             });
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            browser.controlFlow().execute(function() {
-                var amountElem = element(by.model('saleEdited.amount'));
-                amountElem.clear();
-                amountElem.sendKeys(newAmount.toString());
-
-                element(by.id('saleEditSave')).click();
-                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                    expect(parseFloatRu(amount)).toBe(newAmount);
-                });
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+                expect(tariffText).toBe(saleData.tariffText);
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
+                expect(cardAmountText).toBe(saleData.cardAmountText);
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(infoText) {
+                expect(infoText).toBe(saleData.infoText);
             });
         });
 
         it('Изменение расширения', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 2);
+            setSelect(element(by.select('patterns.type')), 2);
+
+            var salesSelector = by.repeater('sale in sales');
 
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
             amountElem.click();
-            var newAmount;
-            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloatRu(amount) + 1;
+            var preAmountText;
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
+                preAmountText = respond;
+            });
+
+            var saleData = {};
+            element.all(by.id('SaleListRowAdd')).get(0).isDisplayed().then(function(respond) {
+                saleData.addIsDisplayed = respond;
+            });
+            element.all(by.id('SaleListRowExtra')).get(0).isDisplayed().then(function(respond) {
+                saleData.extraIsDisplayed = respond;
             });
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
             browser.controlFlow().execute(function() {
+                var newAmount = parseFloatRu(preAmountText) + 1;
                 var amountElem = element(by.model('saleEdited.amount'));
                 amountElem.clear();
                 amountElem.sendKeys(newAmount.toString());
+            });
 
-                element(by.id('saleEditSave')).click();
-                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                    expect(parseFloatRu(amount)).toBe(newAmount);
-                });
+            var saleData = {};
+            element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.dealerText = respond;
+            });
+            element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.siteText = respond;
+            });
+            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(respond) {
+                saleData.parentTariffText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+                saleData.tariffText = respond;
+            });
+            element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
+                saleData.dateText = respond;
+            });
+            element(by.model('saleEdited.count')).getAttribute('value').then(function(respond) {
+                saleData.countText = respond;
+            });
+            element(by.model('saleEdited.activeFrom')).getAttribute('value').then(function(respond) {
+                saleData.activeFromText = respond;
+            });
+            element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(respond) {
+                saleData.activeToText = respond;
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(respond) {
+                saleData.cardAmountText = respond;
+            });
+            element(by.model('saleEdited.amount')).getAttribute('value').then(function(respond) {
+                saleData.amountText = respond;
+            });
+            element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(respond) {
+                saleData.siteAmountText = respond;
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
+                saleData.infoText = respond;
+            });
+            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+                saleData.isActiveText = respond;
+            });
+
+            element(by.id('saleEditSave')).click();
+
+            element.all(salesSelector.column('sale.date')).get(0).getText().then(function(dateText) {
+                expect(dateText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.dateText);
+            });
+            element.all(salesSelector.column('sale.dealer.')).get(0).getText().then(function(dealerText) {
+                expect(dealerText).toBe(saleData.dealerText);
+            });
+            element.all(salesSelector.column('sale.site.')).get(0).getText().then(function(siteText) {
+                expect(siteText).toBe(saleData.siteText);
+            });
+            element.all(salesSelector.column('sale.type')).get(0).getText().then(function(typeText) {
+                expect(typeText).toBe('Расш');
+            });
+            element.all(salesSelector.column('sale.count')).get(0).getText().then(function(countText) {
+                expect(countText).toBe(saleData.countText);
+            });
+            element.all(salesSelector.column('sale.activeFrom')).get(0).getText().then(function(activeFromText) {
+                expect(activeFromText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeFromText);
+            });
+            element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(activeToText) {
+                expect(activeToText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.activeToText);
+            });
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(amountText) {
+                expect(parseFloatRu(amountText)).toBe(parseFloat(saleData.amountText));
+            });
+            element.all(salesSelector.column('sale.siteAmount')).get(0).getText().then(function(siteAmountText) {
+                expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
+            });
+            element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
+                expect(isActiveText).toBe(saleData.isActiveText);
+            });
+            element.all(by.id('SaleListRowAdd')).get(0).isDisplayed().then(function(isDisplayed) {
+                expect(isDisplayed).toBe(saleData.addIsDisplayed);
+            });
+            element.all(by.id('SaleListRowExtra')).get(0).isDisplayed().then(function(isDisplayed) {
+                expect(isDisplayed).toBe(saleData.extraIsDisplayed);
+            });
+            element(by.id('savedSaleListNotice')).getText().then(function(noticeText) {
+                var dealerName = saleData.dealerText.replace(regexpIdName, '$2');
+                var siteName = saleData.siteText.replace(regexpIdName, '$2');
+                expect(noticeText).toBe('Сохранена продажа салона "' + dealerName + '" на сайте "' + siteName + '"');
+            });
+
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
+                expect(parentTariffText).toBe(saleData.parentTariffText);
+            });
+            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+                expect(tariffText).toBe(saleData.tariffText);
+            });
+            element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
+                expect(cardAmountText).toBe(saleData.cardAmountText);
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(infoText) {
+                expect(infoText).toBe(saleData.infoText);
             });
         });
 
         it('Изменение доплаты', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 3);
+            setSelect(element(by.select('patterns.type')), 3);
 
+            var salesSelector = by.repeater('sale in sales');
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
             amountElem.click();
-            var newAmount;
-            element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                newAmount = parseFloatRu(amount) + 1;
+            var preAmountText;
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
+                preAmountText = respond;
+            });
+
+            var saleData = {};
+            element.all(salesSelector.column('sale.activeFrom')).get(0).getText().then(function(respond) {
+                saleData.activeFromText = respond;
+            });
+            element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(respond) {
+                saleData.activeToText = respond;
+            });
+            element.all(by.id('SaleListRowEdit')).get(0).click();
+
+            browser.controlFlow().execute(function() {
+                var newAmount = parseFloatRu(preAmountText) + 1;
+                var amountElem = element(by.model('saleEdited.amount'));
+                amountElem.clear();
+                amountElem.sendKeys(newAmount.toString());
+            });
+
+            element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.dealerText = respond;
+            });
+            element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                saleData.siteText = respond;
+            });
+            element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
+                saleData.dateText = respond;
+            });
+            element(by.model('saleEdited.amount')).getAttribute('value').then(function(respond) {
+                saleData.amountText = respond;
+            });
+            element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(respond) {
+                saleData.siteAmountText = respond;
+            });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
+                saleData.infoText = respond;
+            });
+
+            element(by.id('saleEditSave')).click();
+
+            element.all(salesSelector.column('sale.date')).get(0).getText().then(function(dateText) {
+                expect(dateText.replace(regexpDate, '20$3-$2-$1')).toBe(saleData.dateText);
+            });
+            element.all(salesSelector.column('sale.dealer.')).get(0).getText().then(function(dealerText) {
+                expect(dealerText).toBe(saleData.dealerText);
+            });
+            element.all(salesSelector.column('sale.site.')).get(0).getText().then(function(siteText) {
+                expect(siteText).toBe(saleData.siteText);
+            });
+            element.all(salesSelector.column('sale.type')).get(0).getText().then(function(typeText) {
+                expect(typeText).toBe('Доп');
+            });
+            element.all(salesSelector.column('sale.count')).get(0).getText().then(function(countText) {
+                expect(countText).toBeFalsy();
+            });
+            element.all(salesSelector.column('sale.activeFrom')).get(0).getText().then(function(activeFromText) {
+                expect(activeFromText).toBe(saleData.activeFromText);
+            });
+            element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(activeToText) {
+                expect(activeToText).toBe(saleData.activeToText);
+            });
+            element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(amountText) {
+                expect(parseFloatRu(amountText)).toBe(parseFloat(saleData.amountText));
+            });
+            element.all(salesSelector.column('sale.siteAmount')).get(0).getText().then(function(siteAmountText) {
+                expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
+            });
+            element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
+                expect(isActiveText).toBeFalsy();
+            });
+            expect(element.all(by.id('SaleListRowAdd')).get(0).isDisplayed()).toBeFalsy();
+            expect(element.all(by.id('SaleListRowExtra')).get(0).isDisplayed()).toBeFalsy();
+            element(by.id('savedSaleListNotice')).getText().then(function(noticeText) {
+                var dealerName = saleData.dealerText.replace(regexpIdName, '$2');
+                var siteName = saleData.siteText.replace(regexpIdName, '$2');
+                expect(noticeText).toBe('Сохранена продажа салона "' + dealerName + '" на сайте "' + siteName + '"');
             });
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            browser.controlFlow().execute(function() {
-                var amountElem = element(by.model('saleEdited.amount'));
-                amountElem.clear();
-                amountElem.sendKeys(newAmount.toString());
-
-                element(by.id('saleEditSave')).click();
-                element.all(by.repeater('sale in sales').column('sale.amount')).get(0).getText().then(function(amount) {
-                    expect(parseFloatRu(amount)).toBe(newAmount);
-                });
+            element(by.model('saleEdited.info')).getAttribute('value').then(function(infoText) {
+                expect(infoText).toBe(saleData.infoText);
             });
         });
 
         it('Удаление карточки', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 1);
+            setSelect(element(by.select('patterns.type')), 1);
 
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
@@ -1977,8 +2506,7 @@ describe('Sale App', function() {
         });
 
         it('Удаление расширения', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 2);
+            setSelect(element(by.select('patterns.type')), 2);
 
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
@@ -2017,8 +2545,7 @@ describe('Sale App', function() {
         });
 
         it('Удаление доплаты', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 3);
+            setSelect(element(by.select('patterns.type')), 3);
 
             var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
             amountElem.click();
