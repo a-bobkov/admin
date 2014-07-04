@@ -13,7 +13,7 @@ var getSelectOptions = function(elem) {
     return elem.element.all(by.css('option'));
 }
 
-var getSelectedOption = function(elem) {
+var getSelectedOptionElem = function(elem) {
     return elem.element(by.css('option:checked'));
 }
 
@@ -806,13 +806,14 @@ describe('Sale App', function() {
         });
 
         it('накладывает фильтр по дилеру', function() {
-            var searchElem = element.all(by.id('McomboSearchInput')).get(0);
+            var dealerElem = element(by.model('patterns.dealers'));
+            var searchElem = dealerElem.element(by.id('McomboSearchInput'));
             searchElem.click();
-            searchElem.sendKeys('1');
-            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            searchElem.sendKeys('3');
+            var dropElem = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
-                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+                expect(dealerElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
                 mapText(element.all(by.repeater('sale in sales').column('sale.dealer.id'))).then(function(data) {
                     _.forEach(data, function(value) {
                         expect(value).toBe(selectedValue);
@@ -822,15 +823,15 @@ describe('Sale App', function() {
         });
 
         it('накладывает фильтр по сайту', function() {
-            var searchElem = element.all(by.id('McomboSearchInput')).get(1);
+            var siteElem = element(by.model('patterns.sites'));
+            var searchElem = siteElem.element(by.id('McomboSearchInput'));
             searchElem.click();
-            searchElem.sendKeys('1');
-            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            searchElem.sendKeys('17');
+            var dropElem = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
-                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+                expect(siteElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
                 mapText(element.all(by.repeater('sale in sales').column('sale.site.id'))).then(function(data) {
-                    expect(data.length).toBeTruthy();
                     _.forEach(data, function(value) {
                         expect(value).toBe(selectedValue);
                     });
@@ -891,7 +892,7 @@ describe('Sale App', function() {
         });
 
         it('сбрасывает фильтры по кнопке', function() {
-            var dealerElem = element(by.id('saleFiltersDealers'));
+            var dealerElem = element(by.model('patterns.dealers'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
             dealerElemSearch.sendKeys('1');
@@ -902,7 +903,7 @@ describe('Sale App', function() {
             });
             element(by.id('SaleListNumberSales')).click();
 
-            var siteElem = element(by.id('saleFiltersSites'));
+            var siteElem = element(by.model('patterns.sites'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
             siteElemSearch.sendKeys('1');
@@ -944,43 +945,43 @@ describe('Sale App', function() {
         });
 
         it('выводит значение дилера', function() {
-            expect(element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+            expect(element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
         });
 
         it('выводит ошибку, если dealer пустой', function() {
-            element.all(by.id('McomboRemoveItem_0')).get(0).click();
+            element(by.model('saleEdited.dealer')).element(by.id('McomboRemoveItem_0')).click();
             expect(element(by.id('saleEditDealerErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение сайта', function() {
-            expect(element.all(by.id('McomboSelectedItem_0')).get(1).getText()).toMatch(/^\d+:/);
+            expect(element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
         });
 
         it('выводит ошибку, если site пустой', function() {
-            element.all(by.id('McomboRemoveItem_0')).get(1).click();
+            element(by.model('saleEdited.site')).element(by.id('McomboRemoveItem_0')).click();
             expect(element(by.id('saleEditSiteErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
         it('не выводит tariffParent', function() {
-            expect(element(by.id('saleTariffParent')).isDisplayed()).toBeFalsy();
-        });
-
-        it('выводит значение тарифа', function() {
-            var tariffElem = element(by.id('saleTariff'));
-            expect(tariffElem.element(by.css('option:checked')).getText()).toMatch(regexpTariff);
+            expect(element(by.model('tariffParent')).isDisplayed()).toBeFalsy();
         });
 
         it('заполняет список тарифов', function() {
             var tariffElem = element(by.model('saleEdited.tariff'));
-            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+            mapText(getSelectOptions(tariffElem)).then(function(options) {
                 expect(_.compact(options).length).toBeTruthy();
             });
         });
 
+        it('выводит значение тарифа', function() {
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            expect(getSelectedOptionElem(tariffElem).getText()).toMatch(regexpTariff);
+        });
+
         it('при выборе сайта перезаполняет список тарифов', function() {
             var tariffElem = element(by.model('saleEdited.tariff'));
-            var tariffElemOptions = tariffElem.element.all(by.css('option'));
-            var siteElem = element(by.id('saleSite'));
+            var tariffElemOptions = getSelectOptions(tariffElem);
+            var siteElem = element(by.model('saleEdited.site'));
             var siteDropElems = siteElem.element.all(by.id('McomboDropChoiceItem'));
 
             var preTariffs;
@@ -1022,7 +1023,7 @@ describe('Sale App', function() {
         });
 
         it('выводит значение count', function() {
-            expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatch(regexpInt);
+            expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatchOrEmpty(regexpInt);
         });
 
         it('выводит ошибку, если count отрицательный', function() {
@@ -1033,7 +1034,7 @@ describe('Sale App', function() {
         });
 
         it('выводит предупреждение, если count отличается от tariff.count', function() {
-            element(by.id('saleTariff')).element(by.css('option:checked')).getText().then(function(tariffText) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 var tariffCount = _.parseInt(tariffText.replace(regexpTariff, '$4'));
                 var countElem = element(by.model('saleEdited.count'));
                 countElem.clear();
@@ -1046,7 +1047,7 @@ describe('Sale App', function() {
             expect(element(by.model('saleEdited.activeFrom')).getAttribute('value')).toMatch(regexpDateISO);
         });
 
-        it('выводит ошибку, если activeFrom пустой', function() {
+        it('выводит ошибку, если activeFrom не дата', function() {
             element(by.model('saleEdited.activeFrom')).sendKeys('0');
             expect(element(by.id('saleActiveFromErrorRequired')).isDisplayed()).toBeTruthy();
         });
@@ -1152,14 +1153,14 @@ describe('Sale App', function() {
 
         it('заполняет список isActive', function() {
             var isActiveElem = element(by.model('saleEdited.isActive'));
-            mapText(isActiveElem.element.all(by.css('option'))).then(function(options) {
+            mapText(getSelectOptions(isActiveElem)).then(function(options) {
                 expect(_.compact(options).length).toBeTruthy();
             });
         });
 
         it('выводит значение isActive', function() {
             var isActiveElem = element(by.model('saleEdited.isActive'));
-            expect(isActiveElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
+            expect(getSelectedOptionElem(isActiveElem).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
@@ -1182,7 +1183,7 @@ describe('Sale App', function() {
                     element(by.id('saleIsActiveDisabled')).isDisplayed().then(function(respond) {
                         isActiveDisabled = respond;
                     });
-                    element(by.id('saleIsActive')).isEnabled().then(function(respond) {
+                    element(by.model('saleEdited.isActive')).isEnabled().then(function(respond) {
                         isActive = respond;
                     });
                     browser.controlFlow().execute(function() {
@@ -1220,11 +1221,9 @@ describe('Sale App', function() {
         });
 
         it('выводит начальные значения полей', function() {
-            expect(element(by.model('saleEdited.dealer')).getAttribute('value')).toBeFalsy();
-            expect(element(by.model('saleEdited.site')).getAttribute('value')).toBeFalsy();
-
-            var tariffElem = element(by.model('saleEdited.tariff'));
-            expect(tariffElem.element(by.css('option:checked')).getText()).toBeFalsy();
+            expect(element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).isPresent()).toBeFalsy();
+            expect(element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).isPresent()).toBeFalsy();
+            expect(getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText()).toBeFalsy();
 
             var today = new Date;
             today.setUTCHours(0, 0, 0, 0);
@@ -1239,8 +1238,7 @@ describe('Sale App', function() {
             expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('saleEdited.info')).getAttribute('value')).toBeFalsy();
 
-            var isActiveElem = element(by.model('saleEdited.isActive'));
-            expect(isActiveElem.element(by.css('option:checked')).getText()).toBe('Н\/А');
+            expect(getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText()).toBe('Н\/А');
         });
 
         it('выводит ошибку, если tariff пустой', function() {
@@ -1248,41 +1246,45 @@ describe('Sale App', function() {
         });
 
         it('позволяет выбрать дилера', function() {
-            var dealerElem = element.all(by.id('McomboSearchInput')).get(0);
-            dealerElem.click();
-            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            var dealerElem = element(by.model('saleEdited.dealer'));
+            var searchElem = dealerElem.element(by.id('McomboSearchInput'));
+            searchElem.click();
+            searchElem.sendKeys('3');
+            var dropElem = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
-                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+                expect(dealerElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
             });
         });
 
         it('позволяет выбрать сайт', function() {
-            var siteElem = element.all(by.id('McomboSearchInput')).get(1);
-            siteElem.click();
-            var dropElem = element.all(by.id('McomboDropChoiceItem')).get(0);
+            var siteElem = element(by.model('saleEdited.site'));
+            var searchElem = siteElem.element(by.id('McomboSearchInput'));
+            searchElem.click();
+            searchElem.sendKeys('17');
+            var dropElem = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
-                expect(element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
+                expect(siteElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
             });
         });
 
         it('выводит предупреждение, если для дилера и сайта нет тарифа по-умолчанию ', function() {
-            var dealerElem = element(by.id('saleDealer'));
+            var dealerElem = element(by.model('saleEdited.dealer'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
             var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
             dealerElemDrop.click();
 
-            var siteElem = element(by.id('saleSite'));
+            var siteElem = element(by.model('saleEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
             var siteElemsDrop = siteElem.element.all(by.id('McomboDropChoiceItem'));
             mapText(siteElemsDrop).then(function(sites) {
-                var tariffElem = element(by.id('saleTariff'));
+                var tariffElem = element(by.model('saleEdited.tariff'));
                 _.forEach(sites, function(site, siteIdx) {
                     siteElemsDrop.get(siteIdx).click();
-                    tariffElem.element(by.css('option:checked')).getText().then(function(tariffText) {
+                    getSelectedOptionElem(tariffElem).getText().then(function(tariffText) {
                         if (!tariffText) {
                             expect(element(by.id('saleNoDefaultTariff')).isDisplayed()).toBeTruthy();
                         }
@@ -1304,23 +1306,23 @@ describe('Sale App', function() {
         });
 
         it('не позволяет очистить dealer', function() {
-            var dealerElem = element(by.id('saleDealer'));
+            var dealerElem = element(by.model('saleEdited.dealer'));
             dealerElem.element(by.id('McomboRemoveItem_0')).click();
-            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+            expect(dealerElem.element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
         });
 
         it('не позволяет очистить site', function() {
-            var siteElem = element(by.id('saleSite'));
+            var siteElem = element(by.model('saleEdited.dealer'));
             siteElem.element(by.id('McomboRemoveItem_0')).click();
-            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+            expect(siteElem.element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
         });
 
         it('выводит tariffParent', function() {
-            expect(element(by.id('saleTariffParent')).isDisplayed()).toBeTruthy();
+            expect(element(by.model('tariffParent')).isDisplayed()).toBeTruthy();
         });
 
         it('не позволяет изменить tariffParent', function() {
-            expect(element(by.id('saleTariffParent')).isEnabled()).toBeFalsy();
+            expect(element(by.model('tariffParent')).isEnabled()).toBeFalsy();
         });
 
         it('выводит ошибку, если activeFrom меньше activeFrom родительской карточки', function() {
@@ -1329,19 +1331,17 @@ describe('Sale App', function() {
         });
 
         it('не позволяет изменить activeTo', function() {
-            expect(element(by.id('saleActiveTo')).isEnabled()).toBeFalsy();
+            expect(element(by.model('saleEdited.activeTo')).isEnabled()).toBeFalsy();
         });
 
         it('заполняет список isActive', function() {
-            var isActiveElem = element(by.model('saleEdited.isActive'));
-            mapText(isActiveElem.element.all(by.css('option'))).then(function(options) {
+            mapText(getSelectOptions(element(by.model('saleEdited.isActive')))).then(function(options) {
                 expect(_.compact(options).length).toBeTruthy();
             });
         });
 
         it('выводит значение isActive', function() {
-            var isActiveElem = element(by.model('saleEdited.isActive'));
-            expect(isActiveElem.element(by.css('option:checked')).getText()).toMatch(/^(А|Н\/А)$/);
+            expect(getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
@@ -1725,7 +1725,7 @@ describe('Sale App', function() {
             siteElem.element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -1752,7 +1752,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -1798,7 +1798,7 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -1833,7 +1833,7 @@ describe('Sale App', function() {
             });
 
             var tariffParentText;
-            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(tariffText) {
+            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(tariffText) {
                 tariffParentText = tariffText;
             });
 
@@ -1868,10 +1868,10 @@ describe('Sale App', function() {
             element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(respond) {
                 saleData.parentTariffText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -1898,7 +1898,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -1944,10 +1944,10 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
+            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
                 expect(parentTariffText).toBe(saleData.parentTariffText);
             });
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -2153,7 +2153,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -2180,7 +2180,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -2230,7 +2230,7 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -2278,10 +2278,10 @@ describe('Sale App', function() {
             element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(respond) {
                 saleData.parentTariffText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -2308,7 +2308,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -2358,10 +2358,10 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOption(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
+            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
                 expect(parentTariffText).toBe(saleData.parentTariffText);
             });
-            getSelectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -3003,13 +3003,13 @@ describe('DealerSite App', function() {
             var dealerElem = element(by.id('DealerSiteListFilterDealers'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            dealerElemSearch.sendKeys('1');
-            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            dealerElemSearch.sendKeys('3');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
 
             var siteElem = element(by.id('DealerSiteListFilterSites'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('3');
+            siteElemSearch.sendKeys('17');
             siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(0);
@@ -3019,13 +3019,13 @@ describe('DealerSite App', function() {
             var dealerElem = element(by.id('dealerSiteDealer'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            dealerElemSearch.sendKeys('1');
-            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            dealerElemSearch.sendKeys('3');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
 
             var siteElem = element(by.id('dealerSiteSite'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('3');
+            siteElemSearch.sendKeys('17');
             siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             element(by.id('dealerSiteExternalId')).sendKeys('8495555');

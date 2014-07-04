@@ -650,13 +650,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             site: {id: 16},
             publicUrl: 'http://www.auto.exist.ru/10110111.html',
             isActive: true
-        },
-        {
-            id: 12,
-            dealer: {id: 3},
-            site: {id: 17},
-            publicUrl: 'http://am.ru/amam112.html',
-            isActive: true
         }
     ], multiplyCoef, function(i, len) {
         this.dealer = { id: dealers.getItems()[i].id };

@@ -36,8 +36,7 @@ angular.module("ui.multicombo", [])
         },
         controller: ['$scope', '$filter', '$element', function($scope, $filter, $element) {
             var _searchElem = $element.children().eq(0).children().eq(-1).children().eq(0)[0];
-            var preSearch = '';
-            $scope.hover = -1;
+            var preSearch;
 
             $scope.mouseHover = function(index) {
                 $scope.hover = index;
@@ -152,21 +151,21 @@ angular.module("ui.multicombo", [])
                     close();     // simultaneously should not be two open items
                 }
                 openedElement = $element;
-                if (!$element.hasClass('mcombo-container-active')) {
-                    $element.addClass('mcombo-container-active');
-                    close = function (event) {
-                        event && event.preventDefault();
-                        event && event.stopPropagation();
-                        $document.unbind('click', close);
-                        $element.removeClass('mcombo-container-active');
-                        openedElement = null;
-                        close = null;
-                        $scope._search = '';
-                        _searchElem.value = '';
-                    }
-                    $document.bind('click', close);
-                    $scope.loadChoices();
+                preSearch = '';
+                $element.addClass('mcombo-container-active');
+                close = function (event) {
+                    event && event.preventDefault();
+                    event && event.stopPropagation();
+                    $document.unbind('click', close);
+                    $element.removeClass('mcombo-container-active');
+                    openedElement = null;
+                    close = null;
+                    $scope._search = '';
+                    _searchElem.value = '';
                 }
+                $document.bind('click', close);
+                $scope.loadChoices();
+                $scope.hover = 0;
                 _searchElem.focus();
             };
         }]
