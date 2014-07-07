@@ -993,6 +993,7 @@ describe('Sale App', function() {
             siteElem.element(by.id('McomboSelectedItem_0')).getText().then(function(selectedText) {
                 preSite = selectedText;
                 siteElem.element(by.id('McomboRemoveItem_0')).click();
+                siteElem.element(by.id('McomboSearchInput')).click();
             });
 
             mapText(siteDropElems).then(function(dropTexts) {
@@ -1289,6 +1290,7 @@ describe('Sale App', function() {
                             expect(element(by.id('saleNoDefaultTariff')).isDisplayed()).toBeTruthy();
                         }
                         siteElem.element(by.id('McomboRemoveItem_0')).click();
+                        siteElemSearch.click();
                     });
                 });
             });

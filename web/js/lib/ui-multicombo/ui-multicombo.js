@@ -9,17 +9,17 @@ angular.module("ui.multicombo", [])
         require: 'ngModel',
         replace: true,
         template:
-            '<div class="mcombo-container mcombo-container-multi" ng-click="clickElem($event)">' +
+            '<div class="mcombo-container mcombo-container-multi">' +
             '    <ul class="mcombo-selected-choices">' +
-            '        <li class="selected-choice" ng-repeat="choice in _selectedChoices">'+
-            '            <span id="McomboSelectedItem_{{$index}}" ng-click="clickChoice(choice)">{{choice.idName()}}</span>' +
-            '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete" ng-click="removeFromSelected(choice)"></a>' +
+            '        <li class="selected-choice" ng-repeat="choice in _selectedChoices" ng-click="removeFromSelected(choice)">'+
+            '            <span id="McomboSelectedItem_{{$index}}">{{choice.idName()}}</span>' +
+            '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete"></a>' +
             '        </li>' +
-            '        <li class="search-field" ng-hide="hide()" ng-keydown="watchControls($event)" ng-keyup="watchSearch($event)">' +
-            '            <input type="text" id="McomboSearchInput" placeholder="Фильтр с выбором" autocomplete="off" ng-model="_search">' +
+            '        <li class="search-field" ng-click="openElem($event)" ng-keydown="watchControls($event)" ng-keyup="watchSearch($event)">' +
+            '            <input type="text" id="McomboSearchInput" placeholder="Введите фильтр" autocomplete="off" ng-model="_search">' +
             '        </li>' +
             '    </ul>' +
-            '    <div class="mcombo-drop" ng-hide="hide()">' +
+            '    <div class="mcombo-drop">' +
             '        <ul class="choices">' +
             '            <li class="item" ng-mouseenter="mouseHover($index)" ng-class="{hover: $index === hover}" id="McomboDropChoiceItem" ng-repeat="choice in _filteredChoices" ng-click="moveToSelected(choice, $event)">' +
             '                {{choice.idName()}}' +
@@ -37,6 +37,15 @@ angular.module("ui.multicombo", [])
         controller: ['$scope', '$filter', '$element', function($scope, $filter, $element) {
             var _searchElem = $element.children().eq(0).children().eq(-1).children().eq(0)[0];
             var preSearch;
+
+            $scope._single = !_.isArray($scope._selected);
+
+            $scope.close = function() {
+                if (close) {
+                    _searchElem.blur();
+                    close();
+                }
+            }
 
             $scope.mouseHover = function(index) {
                 $scope.hover = index;
@@ -60,10 +69,6 @@ angular.module("ui.multicombo", [])
                 }
             }, true);
 
-            $scope.hide = function() {
-                return !_.isArray($scope._selected) && $scope._selected;
-            }
-
             var filterChoices = function() {
                 var selectedIds = _.pluck($scope._selectedChoices, 'id');
                 if ($scope._choicesLoader.constructor.name === 'sitesLoader') {
@@ -75,20 +80,24 @@ angular.module("ui.multicombo", [])
             }
 
             $scope.moveToSelected = function(choice, $event) {
-                $scope._selectedChoices.push(choice);
-                $scope._search = '';
-                filterChoices();
-                _searchElem.focus();
+                event.preventDefault();
+                event.stopPropagation();
+                if ($scope._single) {
+                    $scope._selectedChoices[0] = choice;
+                } else {
+                    $scope._selectedChoices.push(choice);
+                }
+                $scope.close();
             };
 
             $scope.removeFromSelected = function(choice) {
                 if ($scope._disabled) {
                     return;
                 }
+                event.preventDefault();
+                event.stopPropagation();
                 $scope._selectedChoices.splice($scope._selectedChoices.indexOf(choice), 1);
                 filterChoices();
-                // _searchElem.focus();
-                window.setTimeout(function(){_searchElem.focus();}, 100);
             };
 
             $scope.clickChoice = function(choice) {
@@ -117,7 +126,7 @@ angular.module("ui.multicombo", [])
 
             $scope.watchControls = function(event) {
                 if (event.keyIdentifier === 'Up') {
-                    $scope.hover = Math.max(-1, $scope.hover - 1);
+                    $scope.hover = Math.max(0, $scope.hover - 1);
                 } else if (event.keyIdentifier === 'Down') {
                     $scope.hover = Math.min($scope._filteredChoices.length - 1, $scope.hover + 1);
                 } else if (event.keyIdentifier === 'Enter') {
@@ -126,6 +135,8 @@ angular.module("ui.multicombo", [])
                         $scope.moveToSelected(choice, event);
                         $scope.hover = Math.min($scope._filteredChoices.length - 1, $scope.hover);
                     }
+                } else if (event.keyIdentifier === 'U+001B') {  // Esc
+                    $scope.close();
                 }
             }
 
@@ -140,16 +151,14 @@ angular.module("ui.multicombo", [])
                 }
             }
 
-            $scope.clickElem = function(event) {
+            $scope.openElem = function(event) {
                 // otherwise 'close' will be called immediately
                 event.preventDefault();
                 event.stopPropagation();
                 if ($element === openedElement || $scope._disabled) {
                     return;
                 }
-                if (close) {
-                    close();     // simultaneously should not be two open items
-                }
+                $scope.close();      // simultaneously should not be two open items
                 openedElement = $element;
                 preSearch = '';
                 $element.addClass('mcombo-container-active');
@@ -161,7 +170,9 @@ angular.module("ui.multicombo", [])
                     openedElement = null;
                     close = null;
                     $scope._search = '';
-                    _searchElem.value = '';
+                    if (event) {
+                        $scope.$digest();
+                    }
                 }
                 $document.bind('click', close);
                 $scope.loadChoices();
