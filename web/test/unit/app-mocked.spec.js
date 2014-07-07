@@ -1,8 +1,9 @@
 'use strict';
 
 describe('app-mocked', function() {
-    var $httpBackend,
-        usersLoader,
+    var $httpBackend;
+    var Construction;
+    var usersLoader,
         Users,
         User,
         Group,
@@ -51,7 +52,7 @@ describe('app-mocked', function() {
     }
 
     beforeEach(function() {
-        var modules = ['ng', 'max.dal.entities.user', 
+        var modules = ['ng', 'max.dal.entities.user', 'max.dal.entities.collection', 
             'max.dal.entities.dealersite', 'max.dal.entities.dealersitelogin', 
             'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale'];
         if (ngMock) {
@@ -60,6 +61,7 @@ describe('app-mocked', function() {
         var injector = angular.injector(modules);
 
         usersLoader = injector.get('usersLoader');
+        Construction = injector.get('Construction');
         User = injector.get('User');
         Users = injector.get('Users');
         Group = injector.get('Group');
@@ -95,7 +97,7 @@ describe('app-mocked', function() {
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
-            setHttpMock($httpBackend, null,
+            setHttpMock($httpBackend, null, Construction,
                 User, Users, Groups, Managers, Markets, Metros, Cities,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
                 Tariffs, TariffRates, DealerTariffs, Sales, Sale);
@@ -264,42 +266,38 @@ describe('sales, tariffs', function() {
     });
 });
 
-xdescribe('dealersite, dealersitelogin', function() {
+describe('dealersite, dealersitelogin', function() {
 
     describe('dealersitelogin', function() {
 
         it('equal - по равенству dealer и site заданным значениям', function() {
             var answer = {};
-            var dealer;
-            var site;
+            var dealerId;
+            var siteId;
 
             runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
-                dealer = dealerSiteLogin.dealer;
-                site = dealerSiteLogin.site;
-                var params = {
-                    filters: [
-                        { fields: ['dealer'], type: 'equal', value: dealer.id },
-                        { fields: ['site'], type: 'equal', value: site.id }
-                    ]
-                };
-                return dealerSiteLoginsLoader.loadItems(params, directories);
+                return dealerSiteLoginsLoader.loadItems().then(function(dealerSiteLogins) {
+                    var dealerSiteLogin = dealerSiteLogins.getItems()[0];
+                    dealerId = String(dealerSiteLogin.dealer.id);
+                    siteId = String(dealerSiteLogin.site.id);
+                    return dealerSiteLoginsLoader.loadItems({
+                        filters: [
+                            { fields: ['dealer'], type: 'equal', value: dealerId },
+                            { fields: ['site'], type: 'equal', value: siteId }
+                        ]
+                    });
+                });
             });
 
             runs(function() {
-                var dealerSiteLogins = answer.respond.dealerSiteLogins.getItems();
-                expect(dealerSiteLogins.length).toBeTruthy();
-                console.log(dealerSiteLogins);
-                expect(_.every(dealerSiteLogins, function(value) {
-                    var dealerId = String(value.dealer.id);
-                    var siteId = String(value.site.id);
-                    return ((dealerId === String(dealer.id)) && (siteId === String(site.id)));
-                })).toBeTruthy();
+                var dealerSiteLoginsArray = answer.respond.getItems();
+                expect(dealerSiteLoginsArray.length).toBeTruthy();
+                _.forEach(dealerSiteLoginsArray, function(value) {
+                    var valueDealerId = String(value.dealer.id);
+                    var valueSiteId = String(value.site.id);
+                    expect(valueDealerId).toBe(dealerId);
+                    expect(valueSiteId).toBe(siteId);
+                });
             });
         });
 
@@ -1487,7 +1485,7 @@ xdescribe('dealersite, dealersitelogin', function() {
     });
 });
 
-xdescribe('user, dealer', function() {
+describe('user, dealer', function() {
     describe('Методы post должны проверять в user', function() {
 
         it('обязательность email', function() {
