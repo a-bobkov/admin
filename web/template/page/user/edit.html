@@ -63,16 +63,27 @@
 	</fieldset>
 
 	<fieldset class="span-24" ng-show='userEdited.isDealer()'>
-	    <legend>Тэг автосалона</legend>
+	    <legend>Административные данные</legend>
 	    <table class='parameters'>
 	        <tr>
-	            <th><label for="user_dealer_manager">Тэг</label></th>
+	            <th><label for="user_dealer_manager">Менеджер</label></th>
 	            <td>
 	                <select class="required" ng-required='userEdited.isDealer()' id="user_dealer_manager_id" name="user_dealer_manager" ng-model='dealerEdited.manager' ng-options='opt.name for opt in managers.getItems()'>
 	                    <option value=''></option>
 	                </select>
 					<ul class="error_list" ng-show='formUser.user_dealer_manager.$invalid'>
-					    <li id='UserEditManagerErrorRequired' ng-show="formUser.user_dealer_manager.$error.required">Необходимо выбрать тэг.</li>
+					    <li id='UserEditManagerErrorRequired' ng-show="formUser.user_dealer_manager.$error.required">Необходимо выбрать менеджера.</li>
+					</ul>
+	            </td>
+	        </tr>
+	        <tr>
+	            <th><label for="user_dealer_company">Оплачивает на</label></th>
+	            <td>
+	                <select class="required" ng-required='userEdited.isDealer()' id="user_dealer_company_id" name="user_dealer_company" ng-model='dealerEdited.billingCompany' ng-options='opt.name for opt in billingCompanies.getItems()'>
+	                    <option value=''></option>
+	                </select>
+					<ul class="error_list" ng-show='formUser.user_dealer_company.$invalid'>
+					    <li id='UserEditCompanyErrorRequired' ng-show="formUser.user_dealer_company.$error.required">Необходимо выбрать компанию.</li>
 					</ul>
 	            </td>
 	        </tr>

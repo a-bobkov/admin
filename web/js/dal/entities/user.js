@@ -113,7 +113,9 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
     return Users;
 })
 
-.service('usersLoader', function(entityLoader, userApi, User, Users, Construction, Groups, Sites, Managers, Cities, Markets, Metros) {
+.service('usersLoader', function(entityLoader, userApi, User, Users, Construction, 
+    Groups, Sites, Managers, BillingCompanies, Cities, Markets, Metros) {
+    
     this.loadItems = function(queryParams, directories) {
         return entityLoader.loadItems(queryParams, directories, userApi, Users);
     };
@@ -126,6 +128,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
                 groups: new Groups(collections.groups),
                 sites: new Sites(collections.sites),
                 managers: new Managers(collections.managers),
+                billingCompanies: new BillingCompanies(collections.billingCompanies),
                 cities: new Cities(collections.cities),
                 markets: new Markets(collections.markets),
                 metros: new Metros(collections.metros)

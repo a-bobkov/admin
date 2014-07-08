@@ -16,6 +16,7 @@ describe('app-mocked', function() {
         Metro,
         Markets,
         Market,
+        BillingCompanies,
 
         dealerSitesLoader,
         dealersLoader,
@@ -74,6 +75,7 @@ describe('app-mocked', function() {
         Metro = injector.get('Metro');
         Markets = injector.get('Markets');
         Market = injector.get('Market');
+        BillingCompanies = injector.get('BillingCompanies');
 
         dealerSitesLoader = injector.get('dealerSitesLoader');
         DealerSites = injector.get('DealerSites');
@@ -98,7 +100,7 @@ describe('app-mocked', function() {
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, null, Construction,
-                User, Users, Groups, Managers, Markets, Metros, Cities,
+                User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
                 Tariffs, TariffRates, DealerTariffs, Sales, Sale);
         } else {

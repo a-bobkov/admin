@@ -27,6 +27,7 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
             },
             refFields: {
                 manager: 'managers',
+                billingCompany: 'billingCompanies',
                 city: 'cities',
                 market: 'markets',
                 metro: 'metros'
@@ -108,5 +109,21 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
         { id: 23, name: '23:00'},
         { id: 24, name: '24:00'}
     ], null, DealerPhoneHour);
+})
+
+.factory('BillingCompany', function(Item) {
+    function BillingCompany(itemData) {
+        Item.call(this, itemData);
+    };
+    _.assign(BillingCompany.prototype, Item.prototype);
+    return BillingCompany;
+})
+
+.factory('BillingCompanies', function(Collection, BillingCompany) {
+    function BillingCompanies(itemsData, queryParams) {
+        Collection.call(this, itemsData, queryParams, BillingCompany, BillingCompanies);
+    };
+    _.assign(BillingCompanies.prototype, Collection.prototype);
+    return BillingCompanies;
 })
 ;

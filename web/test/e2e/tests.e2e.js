@@ -335,7 +335,17 @@ describe('User App', function() {
             expect(element(by.selectedOption('dealerEdited.manager')).getText()).toBeTruthy();
         });
 
-        it('выводит название компании', function() {
+        it('заполняет список компаний', function() {
+            element(by.select('dealerEdited.billingCompany')).findElements(by.tagName('option')).then(function(options) {
+                expect(options.length).toBeGreaterThan(1);
+            });
+        });
+
+        it('выводит значение компании', function() {
+            expect(element(by.selectedOption('dealerEdited.billingCompany')).getText()).toBeTruthy();
+        });
+
+        it('выводит название дилера', function() {
             expect(element(by.model('dealerEdited.companyName')).getAttribute('value')).toBeTruthy();
         });
 

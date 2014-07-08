@@ -2,13 +2,13 @@
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, Construction,
-    User, Users, Groups, Managers, Markets, Metros, Cities,
+    User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
-        User, Users, Groups, Managers, Markets, Metros, Cities,
+        User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale);
 });
@@ -17,7 +17,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
  * мини-сервер http для комплексных тестов
  */
 function setHttpMock($httpBackend, multiplyCoef, Construction,
-    User, Users, Groups, Managers, Markets, Metros, Cities,
+    User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
 
@@ -32,6 +32,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             {id: 2, name: 'Инна'},
             {id: 4, name: 'Потеряшки'},
             {id: 0, name: ''}
+        ]),
+        billingCompanies: new BillingCompanies([
+            {id: 1, name: 'Макспостер, ООО'},
+            {id: 2, name: 'Харитонов, ИП'}
         ]),
         cities: new Cities([
             {id: 1, name: 'Москва'},
@@ -100,6 +104,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 phone3From: 7,
                 phone3To: 15,
                 companyInfo: 'Здесь может быть произвольный текст...',
+                billingCompany: {id: 1},
                 manager: {id: 1}
             }
         },
