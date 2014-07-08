@@ -18,84 +18,87 @@
     <![endif]-->
     <script src="js/page/setupga.js"></script>
 </head>
-
 <body ng-app="RootApp">
     <script>
-    if (!window.location.hostname.match(/maxposter.ru$/)) {
-        document.body.setAttribute('ng-app', 'RootApp-mocked');
-    }
+        if (!window.location.hostname.match(/maxposter.ru$/)) {
+            document.body.setAttribute('ng-app', 'RootApp-mocked');
+        }
     </script>
-<div class="container" id="container">
+    <div class="container" id="container">
 
-<div id="top">
-    <div class="span-7">
-        <a href="/"><img src="images/logo.png" id="logo" alt="Логотип MaxPoster"/></a>
+        <div id="top">
+            <div class="span-7">
+                <a href="/"><img src="images/logo.png" id="logo" alt="Логотип MaxPoster"/></a>
+            </div>
+            <div class="mainmenu span-17 last">
+                <div><a href="/">Главная</a></div>
+                <div><a href="/avtosalonam">Автосалонам</a></div>
+                <div><a href="/avtosaitam">Автосайтам</a></div>
+                <div><a href="/contacts">Контакты</a></div>
+            </div>
+            <div class="submenu span-24">
+                <table>
+                    <tr>
+                        <td class="tdl">
+                            <span><a href="/user">Пользователи</a></span>
+                            <span><a href="/auto">Объявления</a></span>
+                            <span><a href="/report/admin">Отчеты</a></span>
+                        </td>
+                        <td class="tdr">
+                            <span><a href="/profile">Профиль</a></span>
+                            <span><a href="/logout">Выйти</a></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="content_frame" class="span-24 last" ng-controller="AppCtrl">
+            <div class='routeSpinner' ng-show="viewRouteSpinner"></div>
+            <div ng-view ng-hide="viewRouteSpinner"></div>
+        </div>
+
+        <div class='block span-24 last' id="javascriptError" style='display:none'>
+            <h1>
+                ОШИБКА!
+            </h1>
+
+            <h3>
+                К сожалению, вы столкнулись с ошибкой в программе. Обратитесь в службу поддержки компании MaxPoster.<br>
+                При обращении, пожалуйста, передайте следующую информацию:
+            </h3>
+            <h5 id="javascriptErrorMessage"></h5>
+
+            <p id="javascriptErrorStack"></p>
+
+            <p id="javascriptErrorResponse"></p>
+        </div>
+
+        <noscript>
+            <div class="span-24">
+                <h1>Отключен JavaScript</h1>
+
+                <p>Для корректной работы этого раздела сайта необходим JavaScript, который в вашем браузере отключен.</p>
+            </div>
+        </noscript>
+
+        <div class="span-24 h5">&#160;</div>
+
+        <div id="bottom" class="span-24">
+            <table>
+                <tr>
+                    <td>
+                        <span>Email:</span> <a href="mailto:info@maxposter.ru">info@maxposter.ru</a><br/>
+                        <span>Телефон:</span> +7 (911) 101-66-62
+                    </td>
+                    <td class="r">MaxPoster &copy; 2009 - 2014</td>
+                </tr>
+            </table>
+        </div>
+
     </div>
-    <div class="mainmenu span-17 last">
-        <div><a href="/">Главная</a></div>
-        <div><a href="/avtosalonam">Автосалонам</a></div>
-        <div><a href="/avtosaitam">Автосайтам</a></div>
-        <div><a href="/contacts">Контакты</a></div>
+
     </div>
-    <div class="submenu span-24">
-        <table>
-            <tr>
-                <td class="tdl">
-                    <span><a href="/user">Пользователи</a></span>
-                    <span><a href="/auto">Объявления</a></span>
-                    <span><a href="/report/admin">Отчеты</a></span>
-                </td>
-                <td class="tdr">
-                    <span><a href="/profile">Профиль</a></span>
-                    <span><a href="/logout">Выйти</a></span>
-                </td>
-            </tr>
-        </table>
-    </div>
-</div>
-
-<div id="content_frame" class="span-24 last" ng-controller="AppCtrl">
-    <div class='routeSpinner' ng-show="viewRouteSpinner"></div>
-    <div ng-view ng-hide="viewRouteSpinner"></div>
-</div>
-
-<div class='block span-24 last' id="javascriptError" style='display:none'>
-    <h1>
-        ОШИБКА!
-    </h1>
-    <h3>
-        К сожалению, вы столкнулись с ошибкой в программе. Обратитесь в службу поддержки компании MaxPoster.<br>
-        При обращении, пожалуйста, передайте следующую информацию:
-    </h3>
-    <h5 id="javascriptErrorMessage"></h5>
-    <p id="javascriptErrorStack"></p>
-    <p id="javascriptErrorResponse"></p>
-</div>
-
-<noscript>
-    <div class="span-24">
-        <h1>Отключен JavaScript</h1>
-        <p>Для корректной работы этого раздела сайта необходим JavaScript, который в вашем браузере отключен.</p>
-    </div>
-</noscript>
-
-<div class="span-24 h5">&#160;</div>
-
-<div id="bottom" class="span-24">
-    <table>
-        <tr>
-            <td>
-                <span>Email:</span> <a href="mailto:info@maxposter.ru">info@maxposter.ru</a><br/>
-                <span>Телефон:</span> +7 (911) 101-66-62
-            </td>
-            <td class="r">MaxPoster &copy; 2009 - 2014</td>
-        </tr>
-    </table>
-</div>
-
-</div>
-
-</div>
     <script src="js/vendor/angular/angular.js"></script>
     <script src="js/vendor/angular/angular-route.js"></script>
     <script src="js/vendor/angular/angular-mocks.js"></script>
@@ -129,5 +132,4 @@
     <script src="js/lib/ui-multicombo/ui-multicombo.js"></script>
     <script src="js/lib/angular-input-date/angular-input-date.js"></script>
 <body>
-
 </html>
