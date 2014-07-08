@@ -342,7 +342,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     $scope.requiredFields = {
         1:  {                   publicUrl: true },
         2:  {                   publicUrl: true, site: true },
-        4:  { externalId: true, publicUrl: true },
+        4:  { externalId: true },
         5:  { externalId: true, publicUrl: true, site: true },
         6:  { externalId: true, publicUrl: true, site: true, ftp: true },
         7:  {                   publicUrl: true },
