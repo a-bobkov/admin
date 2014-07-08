@@ -13,7 +13,7 @@ var Item = (function() {
                 this[key] = new Date(value);
                 this[key].setUTCHours(0, 0, 0, 0);
             } else if (entityParams && _.has(entityParams.enumFields, key)) {
-                this[key] = entityParams.enumFields[key].get(value);
+                this[key] = (value === null) ? null : entityParams.enumFields[key].get(value);
             } else if (entityParams && _.has(entityParams.objectFields, key)) {
                 this[key] = new entityParams.objectFields[key](value);
             } else {
@@ -55,7 +55,7 @@ var Item = (function() {
         var self = this;
         return _.mapValues(this, function(value, key) {
             if (entityParams && _.has(entityParams.enumFields, key)) {
-                return value.id;
+                return (value === null) ? null : value.id;
             } else if (entityParams && _.has(entityParams.objectFields, key)) {
                 return value.serialize();
             } else if (entityParams && _.has(entityParams.refFields, key) && value !== null) {

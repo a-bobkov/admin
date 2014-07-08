@@ -109,7 +109,13 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }
         },
         {id: 1, email: 'a-bobkov@ab.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 1, companyName: 'Ещё одна компания', manager: {id: 2}}},
+            id: 1,
+            companyName: 'Ещё одна компания',
+            manager: {id: 2},
+            phone: '+7(812)232-4123',
+            phoneFrom: null,
+            phoneTo: null
+        }},
         {id: 2, email: 'a-bobkov@abb.com', lastLogin: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 1}},
         {id: 3, email: 'a-bobkov@abc.com', lastLogin: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
             id: 3, companyName: 'Другая компания', manager: {id: 1}}},
