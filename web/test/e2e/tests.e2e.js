@@ -3011,7 +3011,7 @@ describe('DealerSite App', function() {
             var siteElem = element(by.id('DealerSiteListFilterSites'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('17');
+            siteElemSearch.sendKeys('16');
             siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(0);
@@ -3027,49 +3027,29 @@ describe('DealerSite App', function() {
             var siteElem = element(by.id('dealerSiteSite'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('17');
+            siteElemSearch.sendKeys('16');
             siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             element(by.id('dealerSiteExternalId')).sendKeys('8495555');
             element(by.id('dealerSitePublicUrl')).sendKeys('http://www.protractor.ru');
+            element(by.id('dealerSiteLoginSiteLogin')).sendKeys('111');
+            element(by.id('dealerSiteLoginSitePassword')).sendKeys('222');
             element(by.id('dealerSiteEditSave')).click();
 
             expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Сохранена регистрация/);
-        });
-
-        it('Удаление разрешения на экспорт', function() {
-            var dealerElem = element(by.id('DealerSiteListFilterDealers'));
-            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
-            dealerElemSearch.click();
-            dealerElemSearch.sendKeys('1');
-            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
-
-            var siteElem = element(by.id('DealerSiteListFilterSites'));
-            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
-            siteElemSearch.click();
-            siteElemSearch.sendKeys('1');
-            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
-
-            expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(1);
-
-            element(by.id('DealerSiteListRowDelete')).click();
-            browser.switchTo().alert().accept();
-
-            expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Удалена регистрация/);
-            expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(0);
         });
 
         it('Изменение регистрационных данных', function() {
             var dealerElem = element(by.id('DealerSiteListFilterDealers'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            dealerElemSearch.sendKeys('1');
-            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            dealerElemSearch.sendKeys('3');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
 
             var siteElem = element(by.id('DealerSiteListFilterSites'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('1');
+            siteElemSearch.sendKeys('16');
             siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBeTruthy();
@@ -3081,12 +3061,39 @@ describe('DealerSite App', function() {
             element(by.id('dealerSitePublicUrl')).clear();
             var newPublicUrl = 'http://www.protractor.ru/' + String(Math.floor(Math.random() * 1000000));
             element(by.id('dealerSitePublicUrl')).sendKeys(newPublicUrl);
-            element(by.id('dealerSiteEditSave')).click();
 
+            expect(element(by.id('dealerSiteLoginSiteLogin')).getText()).toBeTruthy();
+            element(by.id('dealerSiteLoginSiteLogin')).sendKeys('333');
+            expect(element(by.id('dealerSiteLoginSitePassword')).getText()).toBeTruthy();
+            element(by.id('dealerSiteLoginSitePassword')).sendKeys('444');
+
+            element(by.id('dealerSiteEditSave')).click();
             expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Сохранена регистрация/);
 
             expect(element(by.repeater('dealerSite in dealerSites').row(0).column('externalId')).getText()).toMatch(newExternalId);
             expect(element(by.repeater('dealerSite in dealerSites').row(0).column('publicUrl')).getAttribute('href')).toMatchOrEmpty(newPublicUrl);
+        });
+
+        it('Удаление разрешения на экспорт', function() {
+            var dealerElem = element(by.id('DealerSiteListFilterDealers'));
+            var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+            dealerElemSearch.click();
+            dealerElemSearch.sendKeys('3');
+            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
+
+            var siteElem = element(by.id('DealerSiteListFilterSites'));
+            var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+            siteElemSearch.click();
+            siteElemSearch.sendKeys('16');
+            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+
+            expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(1);
+
+            element(by.id('DealerSiteListRowDelete')).click();
+            browser.switchTo().alert().accept();
+
+            expect(element(by.id('DealerSiteListNotice')).getText()).toMatch(/^Удалена регистрация/);
+            expect(element.all(by.repeater('dealerSite in dealerSites')).count()).toBe(0);
         });
     });
 });

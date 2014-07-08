@@ -413,18 +413,18 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
 
     function saveDealerSiteEdited() {
-        $scope.dealerSiteEdited.save($scope).then(function(dealerSite) {
+        return $scope.dealerSiteEdited.save($scope).then(function(dealerSite) {
             $rootScope.savedDealerSiteListNotice = 'Сохранена регистрация ' + dealerSite.name();
         });
     }
 
     function saveRemoveDealerSiteLogin(dealerSiteLogin) {
         if (dealerSiteLogin.login) {
-            dealerSiteLogin.save($scope).then(function(dealerSiteLogin) {
+            return dealerSiteLogin.save($scope).then(function(dealerSiteLogin) {
                 // $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ ' + dealerSiteLogin.name();
             });
         } else if (dealerSiteLogin.id) {
-            dealerSiteLogin.remove($scope).then(function() {
+            return dealerSiteLogin.remove($scope).then(function() {
                 // $rootScope.savedDealerSiteListNotice += '.\nУдалён доступ ' + dealerSiteLogin.name();
             });
         }
