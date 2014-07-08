@@ -40,44 +40,46 @@
         <input id='DealerSiteListAddDealerSiteDown' type="submit" value="Добавить запись" ng-click='clickNewDealerSite()'/>
     </div>
 </div>
-<fieldset class="span-8 last">
-    <legend>Фильтр</legend>
-    <table class='parameters'>
-        <tfoot>
-            <tr>
-                <td></td>
-                <td>
-                    <ul class="actions">
-                        <li class="list">
-                            <a ng-click='setPatternsDefault()' id='DealerSiteListFilterSetDefault'>Сбросить</a>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-        </tfoot>
-        <tbody>
-            <tr>
-                <th><label for="DealerSiteListFilterDealers">Салоны</label></th>
-                <td>
-                    <div id="DealerSiteListFilterDealers" ng-model="patterns.dealers" ui-mcombo-loader="dealersLoader" ui-mcombo-choices="ds">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <th><label for="DealerSiteListFilterSites">Cайты</label></th>
-                <td>
-                    <div id="DealerSiteListFilterSites" ng-model="patterns.sites" ui-mcombo-loader="sitesLoader" ui-mcombo-choices="ss">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <th><label for="DealerSiteListFilterStatus">Статус</label></th>
-                <td>
-                    <select ng-model='patterns.isActive' ng-options='opt.name for opt in dealerSiteStatuses.getItems()' id='DealerSiteListFilterStatus' >
-                        <option value='' selected="selected">Все</option>
-                    </select>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</fieldset>
+<div class="span-8 last">
+    <fieldset class="span-8 last">
+        <legend>Фильтр</legend>
+        <table class='parameters'>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td>
+                        <ul class="actions">
+                            <li class="list">
+                                <a ng-click='setPatternsDefault()' id='DealerSiteListFilterSetDefault'>Сбросить</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                    <th><label for="DealerSiteListFilterDealers">Салоны</label></th>
+                    <td>
+                        <div id="DealerSiteListFilterDealers" ng-model="patterns.dealers" ui-mcombo-loader="dealersLoader" ui-mcombo-choices="ds">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="DealerSiteListFilterSites">Cайты</label></th>
+                    <td>
+                        <div id="DealerSiteListFilterSites" ng-model="patterns.sites" ui-mcombo-loader="sitesLoader" ui-mcombo-choices="ss">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="DealerSiteListFilterStatus">Статус</label></th>
+                    <td>
+                        <select ng-model='patterns.isActive' ng-options='opt.name for opt in dealerSiteStatuses.getItems()' id='DealerSiteListFilterStatus' >
+                            <option value='' selected="selected">Все</option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </fieldset>
+</div>
