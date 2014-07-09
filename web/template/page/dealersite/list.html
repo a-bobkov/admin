@@ -28,8 +28,8 @@
                 <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
-                        <li class="edit" id='DealerSiteListRowEdit' ng-show='dealerSite.isActive.id'><a ng-click='editDealerSite(dealerSite)'>изменить</a></li>
-                        <li class="delete" id='DealerSiteListRowDelete'><a ng-click='removeDealerSite(dealerSite)'>удалить</a></li>
+                        <li class="edit" ng-show='dealerSite.isActive.id'><a id='DealerSiteListRowEdit' ng-click='editDealerSite(dealerSite)'>изменить</a></li>
+                        <li class="delete"><a id='DealerSiteListRowDelete' ng-click='removeDealerSite(dealerSite)'>удалить</a></li>
                     </ul>
                 </td>
             </tr>
