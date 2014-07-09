@@ -30,6 +30,9 @@
                         <li class="switch"><a href='#/users/{{user.id}}/switch'>войти</a></li>
                     </ul>
                 </td>
+                <td class="hide" name='dealerCompanyName'>{{user.dealer.companyName}}</td>
+                <td class="hide" name='userStatus'>{{user.status.nameMale}}</td>
+                <td class="hide" name='dealerManager'>{{user.dealer.manager.name}}</td>
             </tr>
         </tbody>
     </table>
@@ -69,7 +72,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="sf_guard_user_filters_manager_id">Тэг</label></th>
+                    <th><label for="sf_guard_user_filters_manager_id">Менеджер</label></th>
                     <td>
                         <select ng-model='patterns.manager' ng-options='opt.name for opt in managers.getItems()' id='sf_guard_user_filters_manager_id' >
                             <option value='' selected="selected"></option>

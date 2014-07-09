@@ -105,7 +105,7 @@ describe('User App', function() {
 
     describe('Список пользователей', function() {
         beforeEach(function() {
-            browser.get('admin.html#/userlist');
+            browser.get('admin.html#/userlist?column=id&itemsPerPage=15');
         });
 
         it('показывает количество пользователей', function() {
@@ -200,8 +200,8 @@ describe('User App', function() {
             expect(browser.getCurrentUrl()).toMatch('#\/users\/1\/edit');
         });
 
-        it('показывает 25 пользователей', function() {
-            expect(element.all(by.repeater('user in users')).count()).toBe(25);
+        it('показывает несколько пользователей', function() {
+            expect(element.all(by.repeater('user in users')).count()).not.toBeLessThan(2);
         });
 
         it('показывает постраничку', function() {
@@ -209,61 +209,123 @@ describe('User App', function() {
             expect(element.all(by.id('paginationPrev')).count()).toBe(1);
             expect(element.all(by.id('paginationNext')).count()).toBe(1);
             expect(element.all(by.id('paginationLast')).count()).toBe(1);
-            expect(element.all(by.id('paginationPages')).count()).toBe(9);
+            expect(element.all(by.id('paginationPages')).count()).not.toBeLessThan(3);
         });
 
         it('переходит по страничкам', function() {
-            if (test_maxposter_ru) {
-                element.all(by.id('paginationPages')).get(2).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('170');
+            var usersSelector = by.repeater('user in users');
+            var paginationTexts = [];
 
-                element(by.id('paginationPrev')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('72');
-
-                element(by.id('paginationNext')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('170');
-
-                element(by.id('paginationFirst')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
-
-                element(by.id('paginationLast')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('746');
-            } else {
-                element.all(by.id('paginationPages')).get(2).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
-
-                element(by.id('paginationPrev')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('39');
-
-                element(by.id('paginationNext')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('76');
-
-                element(by.id('paginationFirst')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1');
-
-                element(by.id('paginationLast')).click();
-                expect(element(by.repeater('user in users').row(0).column('user.id')).getText()).toBe('1464');
-            }
+            element(usersSelector.row(0)).getText().then(function(userText) {
+                paginationTexts[0] = userText;
+            });
+            element.all(by.id('paginationPages')).get(1).click();
+            element(usersSelector.row(0)).getText().then(function(userText) {
+                expect(_.indexOf(paginationTexts, userText)).toBe(-1);
+                paginationTexts[1] = userText;
+            });
+            element(by.id('paginationPrev')).click();
+            element(usersSelector.row(0)).getText().then(function(userText) {
+                expect(_.indexOf(paginationTexts, userText)).toBe(0);
+            });
+            element(by.id('paginationNext')).click();
+            element(usersSelector.row(0)).getText().then(function(userText) {
+                expect(_.indexOf(paginationTexts, userText)).toBe(1);
+            });
+            element(by.id('paginationFirst')).click();
+            element(usersSelector.row(0)).getText().then(function(userText) {
+                expect(_.indexOf(paginationTexts, userText)).toBe(0);
+            });
+            element(by.id('paginationLast')).click();
+            element(usersSelector.row(0)).getText().then(function(userText) {
+                expect(_.indexOf(paginationTexts, userText)).toBe(-1);
+            });
         });
 
-        it('накладывает фильтры и инициализирует фильтры', function() {
-            if (test_maxposter_ru) {
-                element(by.model('patterns.complex')).sendKeys('1 2');
-                element(by.id('checkbox_group_0')).click();
-                setSelect(element(by.select('patterns.manager')), 1);
-                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 47$/);
+        it('накладывает фильтр по текстовому поиску', function() {
+            var usersSelector = by.repeater('user in users');
+            var complexElem = element(by.model('patterns.complex'));
+            var testValues = '1 S Д';
+            complexElem.sendKeys(testValues);
 
-                element(by.id('UserListFilterSetDefault')).click();
-                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 310$/);
-            } else {
-                element(by.model('patterns.complex')).sendKeys('1 2');
-                element(by.id('checkbox_group_0')).click();
-                setSelect(element(by.select('patterns.manager')), 1);
-                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 72$/);
+            var usersData={};
+            mapText(element.all(usersSelector.column('user.id'))).then(function(respond) {
+                usersData.id = respond;
+                expect(usersData.id).toBeTruthy();
+            });
+            mapText(element.all(usersSelector.column('user.email'))).then(function(respond) {
+                usersData.email = respond;
+            });
+            browser.executeScript("_.forEach(document.getElementsByName('dealerCompanyName'), function(value){value.className =''});");
+            mapText(element.all(by.name('dealerCompanyName'))).then(function(respond) {
+                usersData.name = respond;
+            });
+            browser.executeScript("_.forEach(document.getElementsByName('dealerCompanyName'), function(value){value.className ='hide'});");
+            browser.controlFlow().execute(function() {
+                _.forEach(testValues.toLowerCase().split(' '), function(testValue) {
+                    _.forEach(usersData.id, function(value, userIdx) {
+                        expect(usersData.id[userIdx].toLowerCase().indexOf(testValue) 
+                            || usersData.email[userIdx].toLowerCase().indexOf(testValue) 
+                            || usersData.name[userIdx].toLowerCase().indexOf(testValue)).toBeTruthy();
+                    });
+                });
+            });
+        });
 
-                element(by.id('UserListFilterSetDefault')).click();
-                expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 1000$/);
-            }
+        it('накладывает фильтр по статусу', function() {
+            var statusElem = element(by.id('checkbox_group_2'));
+            statusElem.click();
+            expect(statusElem.isSelected()).toBeTruthy();
+
+            var usersData={};
+            browser.executeScript("_.forEach(document.getElementsByName('userStatus'), function(el){el.className =''});");
+            mapText(element.all(by.name('userStatus'))).then(function(respond) {
+                usersData.status = respond;
+            });
+            browser.executeScript("_.forEach(document.getElementsByName('userStatus'), function(el){el.className ='hide'});");
+
+            browser.controlFlow().execute(function() {
+                _.forEach(usersData.status, function(userStatus) {
+                    expect(userStatus).toBe('Блокированный');
+                });
+            });
+        });
+
+        it('накладывает фильтр по менеджеру', function() {
+            var managerElem = element(by.select('patterns.manager'));
+            setSelect(managerElem, 1);
+
+            var selectedValue;
+            getSelectedOptionElem(managerElem).getText().then(function(respond) {
+                selectedValue = respond;
+            });
+
+            var usersData={};
+            browser.executeScript("_.forEach(document.getElementsByName('dealerManager'), function(el){el.className =''});");
+            mapText(element.all(by.name('dealerManager'))).then(function(respond) {
+                usersData.manager = respond;
+            });
+            browser.executeScript("_.forEach(document.getElementsByName('dealerManager'), function(el){el.className ='hide'});");
+
+            browser.controlFlow().execute(function() {
+                _.forEach(usersData.manager, function(dealerManager) {
+                    expect(dealerManager).toBe(selectedValue);
+                });
+            });
+        });
+
+        it('инициализирует фильтры по кнопке', function() {
+            element(by.model('patterns.complex')).sendKeys('1');
+            element(by.id('checkbox_group_2')).click();
+            var managerElem = element(by.select('patterns.manager'));
+            setSelect(managerElem, 1);
+
+            element(by.id('UserListFilterSetDefault')).click();
+
+            expect(element(by.model('patterns.complex')).getAttribute('value')).toBeFalsy();
+            expect(element(by.id('checkbox_group_1')).isSelected()).toBeTruthy();
+            expect(element(by.id('checkbox_group_2')).isSelected()).toBeFalsy();
+            expect(getSelectedOptionElem(managerElem).getText()).toBeFalsy();
         });
     });
 
