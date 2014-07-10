@@ -1035,6 +1035,238 @@ describe('User App', function() {
 
 describe('Sale App', function() {
 
+    describe('Одиночный выбор значений, загружаемых с сервера', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
+        });
+
+        it('заменяет в карточке дилера с помощью загружающего контрола', function() {
+            mapIsDisplayed(element.all(by.id('SaleListRowAdd'))).then(function(isDisplayedArray) {
+                var saleIdx = isDisplayedArray.indexOf(true);
+                expect(saleIdx).not.toBe(-1);
+                element.all(by.id('SaleListRowEdit')).get(saleIdx).click();
+            });
+
+            var dealerElem = element(by.model('saleEdited.dealer'));
+            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var searchElem = dealerElem.element(by.id('McomboSearchInput'));
+            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var noResultsElem = dealerElem.element(by.css('.no-results'));
+
+            // показывает контрол в исходном состоянии
+            expect(selectedElems.count()).toBe(1);
+            expect(searchElem.isDisplayed()).toBeTruthy();
+            expect(searchElem.isEnabled()).toBeTruthy();
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // заполняет и показывает начальный список вариантов и ставит маркер на верхний
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            expect(dropElems.count()).not.toBeLessThan(2);
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // изменяет список вариантов
+            mapText(dropElems).then(function(preDrops) {
+                searchElem.sendKeys('3');
+                mapText(dropElems).then(function(newDrops) {
+                    expect(_.isEqual(newDrops, preDrops)).toBeFalsy();
+                });
+            });
+
+            // выводит пустой список вариантов и надпись "Нет вариантов"
+            searchElem.sendKeys('999');
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeTruthy();
+
+            // убирает надпись "Нет вариантов"
+            searchElem.sendKeys(protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE);
+            expect(dropElems.count()).toBeTruthy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // двигает маркер вниз и вверх в пределах списка
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_DOWN);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[1]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // выбирает значение с помощью клавиатуры, скрывает список вариантов, очищает фильтр
+            dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                searchElem.sendKeys(protractor.Key.ENTER);
+                expect(selectedElems.count()).toBe(1);
+                mapText(selectedElems).then(function(selectedTexts) {
+                    expect(selectedTexts[0]).toBe(hoverText);
+                });
+            });
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+
+            // удаляет значение с помощью мыши, не показывая список вариантов
+            selectedElems.get(0).click();
+            expect(selectedElems.count()).toBe(0);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+
+            // показывает список вариантов и скрывает его по нажатию Esc
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            searchElem.sendKeys(protractor.Key.ESCAPE);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+        });
+    });
+
+    describe('Множественный выбор значений, загружаемых с сервера', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/salelist?dealers=3');
+        });
+
+        it('выбирает несколько дилеров с помощью загружающего контрола', function() {
+            var dealerElem = element(by.model('patterns.dealers'));
+            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var searchElem = dealerElem.element(by.id('McomboSearchInput'));
+            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var noResultsElem = dealerElem.element(by.css('.no-results'));
+
+            // показывает контрол в исходном состоянии
+            expect(selectedElems.count()).toBe(1);
+            expect(searchElem.isDisplayed()).toBeTruthy();
+            expect(searchElem.isEnabled()).toBeTruthy();
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // заполняет и показывает начальный список вариантов и ставит маркер на верхний
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            expect(dropElems.count()).not.toBeLessThan(2);
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // изменяет список вариантов
+            mapText(dropElems).then(function(preDrops) {
+                searchElem.sendKeys('3');
+                mapText(dropElems).then(function(newDrops) {
+                    expect(_.isEqual(newDrops, preDrops)).toBeFalsy();
+                });
+            });
+
+            // выводит пустой список вариантов и надпись "Нет вариантов"
+            searchElem.sendKeys('999');
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeTruthy();
+
+            // убирает надпись "Нет вариантов"
+            searchElem.sendKeys(protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE);
+            expect(dropElems.count()).toBeTruthy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // двигает маркер вниз и вверх в пределах списка
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_DOWN);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[1]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // выбирает значение с помощью клавиатуры, скрывает список вариантов, очищает фильтр
+            dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                searchElem.sendKeys(protractor.Key.ENTER);
+                expect(selectedElems.count()).toBe(2);
+                mapText(selectedElems).then(function(selectedTexts) {
+                    expect(selectedTexts[1]).toBe(hoverText);
+                });
+            });
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+
+            // удаляет значение с помощью мыши, не показывая список вариантов
+            selectedElems.get(0).click();
+            expect(selectedElems.count()).toBe(1);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+
+            // показывает список вариантов и скрывает его по нажатию Esc
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            searchElem.sendKeys(protractor.Key.ESCAPE);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+        });
+    });
+
     describe('Список продаж', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
@@ -2996,6 +3228,250 @@ describe('Sale App', function() {
 });
 
 describe('DealerSite App', function() {
+
+    describe('Одиночный выбор значений, загружаемых с сервера', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/dealersitelist');
+        });
+
+        it('заменяет в карточке дилера с помощью загружающего контрола', function() {
+            element.all(by.id('DealerSiteListRowEdit')).get(0).click();
+
+            var dealerElem = element(by.model('dealerSiteEdited.dealer'));
+            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var searchElem = dealerElem.element(by.id('McomboSearchInput'));
+            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var noResultsElem = dealerElem.element(by.css('.no-results'));
+
+            // показывает контрол в исходном состоянии
+            expect(selectedElems.count()).toBe(1);
+            expect(searchElem.isDisplayed()).toBeTruthy();
+            expect(searchElem.isEnabled()).toBeTruthy();
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // заполняет и показывает начальный список вариантов и ставит маркер на верхний
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            expect(dropElems.count()).not.toBeLessThan(2);
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // изменяет список вариантов
+            mapText(dropElems).then(function(preDrops) {
+                searchElem.sendKeys('3');
+                mapText(dropElems).then(function(newDrops) {
+                    expect(_.isEqual(newDrops, preDrops)).toBeFalsy();
+                });
+            });
+
+            // выводит пустой список вариантов и надпись "Нет вариантов"
+            searchElem.sendKeys('999');
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeTruthy();
+
+            // убирает надпись "Нет вариантов"
+            searchElem.sendKeys(protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE);
+            expect(dropElems.count()).toBeTruthy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // двигает маркер вниз и вверх в пределах списка
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_DOWN);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[1]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // выбирает значение с помощью клавиатуры, скрывает список вариантов, очищает фильтр
+            dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                searchElem.sendKeys(protractor.Key.ENTER);
+                expect(selectedElems.count()).toBe(1);
+                mapText(selectedElems).then(function(selectedTexts) {
+                    expect(selectedTexts[0]).toBe(hoverText);
+                });
+            });
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+
+            // удаляет значение с помощью мыши, не показывая список вариантов
+            selectedElems.get(0).click();
+            expect(selectedElems.count()).toBe(0);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+
+            // показывает список вариантов и скрывает его по нажатию Esc
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            searchElem.sendKeys(protractor.Key.ESCAPE);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+        });
+    });
+
+    describe('Множественный выбор значений, загружаемых с сервера', function() {
+        beforeEach(function() {
+            browser.get('admin.html#/dealersitelist');
+        });
+
+        it('выбирает несколько дилеров с помощью загружающего контрола', function() {
+            var dealerElem = element(by.model('patterns.dealers'));
+            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var searchElem = dealerElem.element(by.id('McomboSearchInput'));
+            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var noResultsElem = dealerElem.element(by.css('.no-results'));
+
+            // показывает контрол в исходном состоянии
+            expect(selectedElems.count()).toBe(0);
+            expect(searchElem.isDisplayed()).toBeTruthy();
+            expect(searchElem.isEnabled()).toBeTruthy();
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // заполняет и показывает начальный список вариантов и ставит маркер на верхний
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            expect(dropElems.count()).not.toBeLessThan(2);
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // изменяет список вариантов
+            mapText(dropElems).then(function(preDrops) {
+                searchElem.sendKeys('3');
+                mapText(dropElems).then(function(newDrops) {
+                    expect(_.isEqual(newDrops, preDrops)).toBeFalsy();
+                });
+            });
+
+            // выводит пустой список вариантов и надпись "Нет вариантов"
+            searchElem.sendKeys('999');
+            expect(dropElems.count()).toBeFalsy();
+            expect(noResultsElem.isDisplayed()).toBeTruthy();
+
+            // убирает надпись "Нет вариантов"
+            searchElem.sendKeys(protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE + protractor.Key.BACK_SPACE);
+            expect(dropElems.count()).toBeTruthy();
+            expect(noResultsElem.isDisplayed()).toBeFalsy();
+
+            // двигает маркер вниз и вверх в пределах списка
+            mapText(dropElems).then(function(dropTexts) {
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_DOWN);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[1]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+                searchElem.sendKeys(protractor.Key.ARROW_UP);
+                dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                    expect(hoverText).toBe(dropTexts[0]);
+                });
+            });
+
+            // выбирает значение с помощью клавиатуры, скрывает список вариантов, очищает фильтр
+            dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                searchElem.sendKeys(protractor.Key.ENTER);
+                expect(selectedElems.count()).toBe(1);
+                mapText(selectedElems).then(function(selectedTexts) {
+                    expect(selectedTexts[0]).toBe(hoverText);
+                });
+            });
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+
+            // выбирает еще значение с помощью клавиатуры, скрывает список вариантов, очищает фильтр
+            searchElem.click();
+            dealerElem.element(by.css('.hover')).getText().then(function(hoverText) {
+                searchElem.sendKeys(protractor.Key.ENTER);
+                expect(selectedElems.count()).toBe(2);
+                mapText(selectedElems).then(function(selectedTexts) {
+                    expect(selectedTexts[1]).toBe(hoverText);
+                });
+            });
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+            expect(searchElem.getAttribute('value')).toBeFalsy();
+
+            // удаляет значение с помощью мыши, не показывая список вариантов
+            selectedElems.get(0).click();
+            expect(selectedElems.count()).toBe(1);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+
+            // показывает список вариантов и скрывает его по нажатию Esc
+            searchElem.click();
+            expect(dropElems.count()).toBeTruthy();
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeTruthy();
+                });
+            });
+            searchElem.sendKeys(protractor.Key.ESCAPE);
+            mapIsDisplayed(dropElems).then(function(isDisplayedArray) {
+                _.forEach(isDisplayedArray, function(isDisplayed) {
+                    expect(isDisplayed).toBeFalsy();
+                });
+            });
+        });
+    });
 
     describe('Список регистраций', function() {
         beforeEach(function() {
