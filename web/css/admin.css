@@ -14,6 +14,10 @@ table.multi-parameters th {
 	width: 10%;
 }
 
+body {
+  overflow-y: scroll;
+}
+
 FIELDSET {
   margin-top: inherit;
 }
