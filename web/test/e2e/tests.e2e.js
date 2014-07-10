@@ -1416,15 +1416,30 @@ describe('Sale App', function() {
             expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит значение count', function() {
+        it('выводит значение count без ошибки', function() {
             expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatchOrEmpty(regexpInt);
+            expect(element(by.id('saleCountErrorPattern')).isDisplayed()).toBeFalsy();
         });
 
         it('выводит ошибку, если count отрицательный', function() {
             var count = element(by.model('saleEdited.count'));
             count.clear();
             count.sendKeys('-1');
-            expect(element(by.id('saleCountErrorMin')).isDisplayed()).toBeTruthy();
+            expect(element(by.id('saleCountErrorPattern')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если count ноль', function() {
+            var count = element(by.model('saleEdited.count'));
+            count.clear();
+            count.sendKeys('0');
+            expect(element(by.id('saleCountErrorPattern')).isDisplayed()).toBeTruthy();
+        });
+
+        it('выводит ошибку, если count содержит не цифры', function() {
+            var count = element(by.model('saleEdited.count'));
+            count.clear();
+            count.sendKeys('1.1');
+            expect(element(by.id('saleCountErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит предупреждение, если count отличается от tariff.count', function() {
