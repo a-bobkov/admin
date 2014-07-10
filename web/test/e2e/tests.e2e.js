@@ -775,7 +775,7 @@ describe('User App', function() {
             });
         });
     
-        it('Создание пользователя-дилера', function() {
+        it('Создание и изменение пользователя-дилера', function() {
             var usersSelector = by.repeater('user in users');
             element(by.id('UserListAddUserUp')).click();
 
@@ -980,6 +980,219 @@ describe('User App', function() {
             element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.companyInfo);
             });
+
+            element(by.id('UserEditCancel')).click();
+            // изменение
+
+            var userData = {};
+            element.all(usersSelector.column('user.id')).get(0).getText().then(function(respond) {
+                userData.id = respond;
+            });
+            element.all(usersSelector.column('user.lastLogin')).get(0).getText().then(function(respond) {
+                userData.lastLogin = respond;
+            });
+
+            element.all(usersSelector.column('user.email')).get(0).click();
+
+            element(by.model('userEdited.email')).clear();
+            element(by.model('userEdited.email')).sendKeys(randomMillion() + '@protractor.ru');
+            setSelect(element(by.model('userEdited.status')), 2);
+
+            setSelect(element(by.model('dealerEdited.manager')), 2);
+            setSelect(element(by.model('dealerEdited.billingCompany')), 2);
+
+            element(by.model('dealerEdited.companyName')).sendKeys('1');
+            setSelect(element(by.model('dealerEdited.city')), 2);
+            setSelect(element(by.model('dealerEdited.market')), 2);
+            setSelect(element(by.model('dealerEdited.metro')), 2);
+            element(by.model('dealerEdited.address')).sendKeys('1');
+            element(by.model('dealerEdited.fax')).clear();
+            element(by.model('dealerEdited.email')).clear();
+            element(by.model('dealerEdited.url')).clear();
+            element(by.model('dealerEdited.contactName')).clear();
+
+            element.all(by.model('phone.phoneNumber')).get(0).clear();
+            setSelect(element.all(by.model('phone.phoneFrom')).get(0), 0);
+            setSelect(element.all(by.model('phone.phoneTo')).get(0), 0);
+            element.all(by.model('phone.phoneNumber')).get(1).clear();
+            setSelect(element.all(by.model('phone.phoneFrom')).get(1), 0);
+            setSelect(element.all(by.model('phone.phoneTo')).get(1), 0);
+            element.all(by.model('phone.phoneNumber')).get(2).clear();
+            setSelect(element.all(by.model('phone.phoneFrom')).get(2), 0);
+            setSelect(element.all(by.model('phone.phoneTo')).get(2), 0);
+
+            element(by.model('dealerEdited.companyInfo')).clear();
+
+            element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
+                userData.email = respond;
+            });
+            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+                userData.status = respond;
+            });
+            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+                userData.group = respond;
+            });
+
+            var dealerData = {};
+            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+                dealerData.manager = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+                dealerData.billingCompany = respond;
+            });
+            element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
+                dealerData.companyName = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+                dealerData.city = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+                dealerData.market = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+                dealerData.metro = respond;
+            });
+            element(by.model('dealerEdited.address')).getAttribute('value').then(function(respond) {
+                dealerData.address = respond;
+            });
+            element(by.model('dealerEdited.fax')).getAttribute('value').then(function(respond) {
+                dealerData.fax = respond;
+            });
+            element(by.model('dealerEdited.email')).getAttribute('value').then(function(respond) {
+                dealerData.email = respond;
+            });
+            element(by.model('dealerEdited.url')).getAttribute('value').then(function(respond) {
+                dealerData.url = respond;
+            });
+            element(by.model('dealerEdited.contactName')).getAttribute('value').then(function(respond) {
+                dealerData.contactName = respond;
+            });
+
+            element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
+                dealerData.phone = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+                dealerData.phoneFrom = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+                dealerData.phoneTo = respond;
+            });
+            element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
+                dealerData.phone2 = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+                dealerData.phone2From = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+                dealerData.phone2To = respond;
+            });
+            element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
+                dealerData.phone3 = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+                dealerData.phone3From = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+                dealerData.phone3To = respond;
+            });
+
+            element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
+                dealerData.companyInfo = respond;
+            });
+
+            element(by.id('UserEditSaveUser')).click();
+
+            element(by.id('savedUserListNotice')).getText().then(function(noticeText) {
+                expect(noticeText).toBe('Сохранён пользователь с идентификатором: ' + userData.id);
+            });
+
+            element.all(usersSelector.column('user.email')).get(0).getText().then(function(respond) {
+                expect(respond).toBe(userData.email);
+            });
+            element.all(usersSelector.column('user.lastLogin')).get(0).getText().then(function(respond) {
+                expect(respond).toBe(userData.lastLogin);
+            });
+            element.all(usersSelector.column('user.id')).get(0).getText().then(function(respond) {
+                expect(respond).toBe(userData.id);
+            });
+            element.all(usersSelector.column('user.email')).get(0).click();
+
+            element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(userData.email);
+            });
+            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+                expect(respond).toBe(userData.status);
+            });
+            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+                expect(respond).toBe(userData.group);
+            });
+
+            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.manager);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.billingCompany);
+            });
+            element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.companyName);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.city);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.market);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.metro);
+            });
+
+            element(by.model('dealerEdited.address')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.address);
+            });
+            element(by.model('dealerEdited.fax')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.fax);
+            });
+            element(by.model('dealerEdited.email')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.email);
+            });
+            element(by.model('dealerEdited.url')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.url);
+            });
+            element(by.model('dealerEdited.contactName')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.contactName);
+            });
+
+            element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.phone);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phoneFrom);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phoneTo);
+            });
+            element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.phone2);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone2From);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone2To);
+            });
+            element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.phone3);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone3From);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone3To);
+            });
+
+            element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.companyInfo);
+            });
         });
 
         it('Создание пользователя-сайта', function() {
@@ -1034,6 +1247,308 @@ describe('User App', function() {
             });
             getSelectedOptionElem(element(by.model('userEdited.site'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.site);
+            });
+        });
+
+        it('Изменение пользователя-администратора (с превращением в сайт)', function() {
+            var usersSelector = by.repeater('user in users');
+            var usersData = {};
+            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className =''});");
+            mapText(element.all(by.name('groupName'))).then(function(respond) {
+                usersData.group = respond;
+                console.log(usersData.group);
+            });
+            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className ='hide'});");
+
+            var count;
+            var userData = {};
+            browser.controlFlow().execute(function() {
+                count = _.indexOf(usersData.group, 'admin');
+                expect(count).not.toBe(-1);
+                element.all(usersSelector.column('user.lastLogin')).get(count).getText().then(function(respond) {
+                    userData.lastLogin = respond;
+                });
+                element.all(usersSelector.column('user.email')).get(count).click();
+            });
+
+            element(by.model('userEdited.email')).clear();
+            element(by.model('userEdited.email')).sendKeys(randomMillion() + '@protractor.ru');
+            setSelect(element(by.model('userEdited.status')), 2);
+            setSelect(element(by.model('userEdited.group')), 3);
+            setSelect(element(by.model('userEdited.site')), 1);
+
+            element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
+                userData.email = respond;
+            });
+            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+                userData.status = respond;
+            });
+            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+                userData.group = respond;
+            });
+            getSelectedOptionElem(element(by.model('userEdited.site'))).getText().then(function(respond) {
+                userData.site = respond;
+            });
+
+            element(by.id('UserEditSaveUser')).click();
+
+            browser.controlFlow().execute(function() {
+                element.all(usersSelector.column('user.email')).get(count).getText().then(function(respond) {
+                    expect(respond).toBe(userData.email);
+                });
+                element.all(usersSelector.column('user.lastLogin')).get(count).getText().then(function(respond) {
+                    expect(respond).toBe(userData.lastLogin);
+                });
+                element.all(usersSelector.column('user.id')).get(count).getText().then(function(respond) {
+                    userData.idText = respond;
+                });
+            });
+            element(by.id('savedUserListNotice')).getText().then(function(noticeText) {
+                expect(noticeText).toBe('Сохранён пользователь с идентификатором: ' + userData.idText);
+            });
+
+            browser.controlFlow().execute(function() {
+                element.all(usersSelector.column('user.email')).get(count).click();
+            });
+
+            element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(userData.email);
+            });
+            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+                expect(respond).toBe(userData.status);
+            });
+            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+                expect(respond).toBe(userData.group);
+            });
+            getSelectedOptionElem(element(by.model('userEdited.site'))).getText().then(function(respond) {
+                expect(respond).toBe(userData.site);
+            });
+        });
+
+        it('Изменение пользователя-дилера', function() {
+            var usersSelector = by.repeater('user in users');
+            var usersData = {};
+            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className =''});");
+            mapText(element.all(by.name('groupName'))).then(function(respond) {
+                usersData.group = respond;
+                console.log(usersData.group);
+            });
+            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className ='hide'});");
+
+            var count;
+            var userData = {};
+            browser.controlFlow().execute(function() {
+                count = _.indexOf(usersData.group, 'dealer');
+                expect(count).not.toBe(-1);
+                element.all(usersSelector.column('user.id')).get(count).getText().then(function(respond) {
+                    userData.id = respond;
+                });
+                element.all(usersSelector.column('user.lastLogin')).get(count).getText().then(function(respond) {
+                    userData.lastLogin = respond;
+                });
+                element.all(usersSelector.column('user.email')).get(count).click();
+            });
+
+            element(by.model('userEdited.email')).clear();
+            element(by.model('userEdited.email')).sendKeys(randomMillion() + '@protractor.ru');
+            setSelect(element(by.model('userEdited.status')), 2);
+
+            setSelect(element(by.model('dealerEdited.manager')), 2);
+            setSelect(element(by.model('dealerEdited.billingCompany')), 2);
+
+            element(by.model('dealerEdited.companyName')).sendKeys('1');
+            setSelect(element(by.model('dealerEdited.city')), 2);
+            setSelect(element(by.model('dealerEdited.market')), 2);
+            setSelect(element(by.model('dealerEdited.metro')), 2);
+            element(by.model('dealerEdited.address')).sendKeys('1');
+            element(by.model('dealerEdited.fax')).clear();
+            element(by.model('dealerEdited.email')).clear();
+            element(by.model('dealerEdited.url')).clear();
+            element(by.model('dealerEdited.contactName')).clear();
+
+            element.all(by.model('phone.phoneNumber')).get(0).clear();
+            setSelect(element.all(by.model('phone.phoneFrom')).get(0), 0);
+            setSelect(element.all(by.model('phone.phoneTo')).get(0), 0);
+            element.all(by.model('phone.phoneNumber')).get(1).clear();
+            setSelect(element.all(by.model('phone.phoneFrom')).get(1), 0);
+            setSelect(element.all(by.model('phone.phoneTo')).get(1), 0);
+            element.all(by.model('phone.phoneNumber')).get(2).clear();
+            setSelect(element.all(by.model('phone.phoneFrom')).get(2), 0);
+            setSelect(element.all(by.model('phone.phoneTo')).get(2), 0);
+
+            element(by.model('dealerEdited.companyInfo')).clear();
+
+            element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
+                userData.email = respond;
+            });
+            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+                userData.status = respond;
+            });
+            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+                userData.group = respond;
+            });
+
+            var dealerData = {};
+            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+                dealerData.manager = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+                dealerData.billingCompany = respond;
+            });
+            element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
+                dealerData.companyName = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+                dealerData.city = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+                dealerData.market = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+                dealerData.metro = respond;
+            });
+            element(by.model('dealerEdited.address')).getAttribute('value').then(function(respond) {
+                dealerData.address = respond;
+            });
+            element(by.model('dealerEdited.fax')).getAttribute('value').then(function(respond) {
+                dealerData.fax = respond;
+            });
+            element(by.model('dealerEdited.email')).getAttribute('value').then(function(respond) {
+                dealerData.email = respond;
+            });
+            element(by.model('dealerEdited.url')).getAttribute('value').then(function(respond) {
+                dealerData.url = respond;
+            });
+            element(by.model('dealerEdited.contactName')).getAttribute('value').then(function(respond) {
+                dealerData.contactName = respond;
+            });
+
+            element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
+                dealerData.phone = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+                dealerData.phoneFrom = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+                dealerData.phoneTo = respond;
+            });
+            element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
+                dealerData.phone2 = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+                dealerData.phone2From = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+                dealerData.phone2To = respond;
+            });
+            element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
+                dealerData.phone3 = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+                dealerData.phone3From = respond;
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+                dealerData.phone3To = respond;
+            });
+
+            element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
+                dealerData.companyInfo = respond;
+            });
+
+            element(by.id('UserEditSaveUser')).click();
+
+            element(by.id('savedUserListNotice')).getText().then(function(noticeText) {
+                expect(noticeText).toBe('Сохранён пользователь с идентификатором: ' + userData.id);
+            });
+
+            browser.controlFlow().execute(function() {
+                element.all(usersSelector.column('user.email')).get(count).getText().then(function(respond) {
+                    expect(respond).toBe(userData.email);
+                });
+                element.all(usersSelector.column('user.lastLogin')).get(count).getText().then(function(respond) {
+                    expect(respond).toBe(userData.lastLogin);
+                });
+                element.all(usersSelector.column('user.id')).get(count).getText().then(function(respond) {
+                    expect(respond).toBe(userData.id);
+                });
+                element.all(usersSelector.column('user.email')).get(count).click();
+            });
+
+            element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(userData.email);
+            });
+            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+                expect(respond).toBe(userData.status);
+            });
+            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+                expect(respond).toBe(userData.group);
+            });
+
+            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.manager);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.billingCompany);
+            });
+            element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.companyName);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.city);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.market);
+            });
+            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.metro);
+            });
+
+            element(by.model('dealerEdited.address')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.address);
+            });
+            element(by.model('dealerEdited.fax')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.fax);
+            });
+            element(by.model('dealerEdited.email')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.email);
+            });
+            element(by.model('dealerEdited.url')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.url);
+            });
+            element(by.model('dealerEdited.contactName')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.contactName);
+            });
+
+            element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.phone);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phoneFrom);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phoneTo);
+            });
+            element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.phone2);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone2From);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone2To);
+            });
+            element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.phone3);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone3From);
+            });
+            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+                expect(respond).toBe(dealerData.phone3To);
+            });
+
+            element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.companyInfo);
             });
         });
     });
