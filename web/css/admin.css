@@ -22,7 +22,7 @@ body {
   background: #f2f0ec;
 }
 
-FIELDSET {
+FIELDSET.sale {
   margin-top: inherit;
 }
 
