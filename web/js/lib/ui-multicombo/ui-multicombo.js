@@ -16,7 +16,7 @@ angular.module("ui.multicombo", [])
             '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete"></a>' +
             '        </li>' +
             '        <li class="search-field" ng-click="openElem($event)" ng-keydown="watchControls($event)" ng-keyup="watchSearch($event)">' +
-            '            <input type="text" id="McomboSearchInput" placeholder="Введите фильтр" autocomplete="off" ng-model="_search" ng-disabled="_disabled">' +
+            '            <input type="text" id="McomboSearchInput" placeholder="Введите фильтр" autocomplete="off" ng-model="_search" ng-hide="_disabled">' +
             '        </li>' +
             '    </ul>' +
             '    <div class="mcombo-drop">' +
