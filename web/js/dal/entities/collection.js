@@ -60,7 +60,7 @@ var Item = (function() {
             } else if (entityParams && _.has(entityParams.refFields, key) && value !== null) {
                 return {id: value.id};
             } else if (entityParams && _.contains(entityParams.dateFields, key)) {
-                return value.toISOString().slice(0, 10);
+                return (value === null) ? null : value.toISOString().slice(0, 10);
             } else {
                 return value;
             }
