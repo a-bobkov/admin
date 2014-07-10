@@ -332,7 +332,6 @@ describe('User App', function() {
     describe('Редактирование пользователя', function() {
         beforeEach(function() {
             browser.get('admin.html#/users/5/edit');
-            expect(browser.getTitle()).toBe('MaxPoster - Управление пользователями');
         });
 
         it('показывает режим работы формы', function() {
@@ -478,6 +477,13 @@ describe('User App', function() {
 
         it('выводит значение сайта', function() {
             expect(element(by.model('dealerEdited.url')).getAttribute('value')).toMatch(regexpUrl);
+        });
+
+        it('выводит ошибку, если сайт введен, но не соответствует формату', function() {
+            element(by.model('dealerEdited.url')).clear();
+            expect(element(by.id('DealerUrlErrorPattern')).isDisplayed()).toBeFalsy();
+            element(by.model('dealerEdited.url')).sendKeys('http://a');
+            expect(element(by.id('DealerUrlErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение контакта', function() {
