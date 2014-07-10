@@ -18,6 +18,10 @@ body {
   overflow-y: scroll;
 }
 
+#javascriptError {
+  background: #f2f0ec;
+}
+
 FIELDSET {
   margin-top: inherit;
 }

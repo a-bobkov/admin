@@ -58,26 +58,32 @@
             <div ng-view ng-hide="viewRouteSpinner"></div>
         </div>
 
-        <div class='block span-24 last' id="javascriptError" style='display:none'>
-            <h1>
-                ОШИБКА!
-            </h1>
-
-            <h3>
-                К сожалению, вы столкнулись с ошибкой в программе. Обратитесь в службу поддержки компании MaxPoster.<br>
-                При обращении, пожалуйста, передайте следующую информацию:
-            </h3>
-            <h5 id="javascriptErrorMessage"></h5>
-
-            <p id="javascriptErrorStack"></p>
-
-            <p id="javascriptErrorResponse"></p>
+        <div class='span-24 last hide' id="javascriptError">
+            <table>
+                <tr>
+                    <td>
+                        <h1>
+                            ОШИБКА!
+                        </h1>
+                        <h3>
+                            К сожалению, вы столкнулись с ошибкой в программе. Обратитесь в службу поддержки компании MaxPoster.<br>
+                            При обращении, пожалуйста, передайте следующую информацию:
+                        </h3>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h5 id="javascriptErrorMessage"></h5>
+                        <p id="javascriptErrorStack"></p>
+                        <p id="javascriptErrorResponse"></p>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <noscript>
             <div class="span-24">
                 <h1>Отключен JavaScript</h1>
-
                 <p>Для корректной работы этого раздела сайта необходим JavaScript, который в вашем браузере отключен.</p>
             </div>
         </noscript>
