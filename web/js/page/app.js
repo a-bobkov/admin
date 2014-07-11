@@ -40,8 +40,17 @@ angular.module('RootApp', ['UsersApp', 'DealerSiteApp', 'SaleApp'])
     });
 })
 
-.factory('$exceptionHandler', function ($log) {
+.factory('$exceptionHandler', function ($log, $window) {
     return function (errorObj, cause) {
+    	if (errorObj.message === 'Unauthorized') {
+    		if (confirm('Вы не авторизованы в системе. Для работы с данной формой необходимы права администратора. Нажмите ОК для перехода к странице авторизации')) {
+				$window.location = "/login";
+    		}
+			return;
+    	} else if (errorObj.message === 'Forbidden') {
+    		alert('Для работы с данной формой необходимы права администратора.')
+			return;
+    	}
     	$log.error(errorObj);
 	    document.getElementById('content_frame').style.display = 'none';
 	    document.getElementById('javascriptErrorMessage').innerHTML = errorObj.message;
