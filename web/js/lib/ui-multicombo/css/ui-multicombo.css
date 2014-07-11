@@ -126,6 +126,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    text-align: left;
 }
 .mcombo-container-multi .choices {
     margin: -1px 0 0;
