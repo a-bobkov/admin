@@ -6,7 +6,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         'max.dal.entities.tariff',
         'max.dal.entities.dealertariff',
         'max.dal.entities.tariffrate',
-        'max.dal.entities.sale'
+        'max.dal.entities.sale',
+        'max.dal.entities.sitebalance'
     ])
 
 .config(['$routeProvider', function($routeProvider) {
@@ -275,7 +276,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 }])
 
 .controller('SaleListCtrl', function($scope, $rootScope, $location, $q, data, 
-    Sale, saleStatuses, saleTypes, salesLoader, dealersLoader, sitesLoader, tariffsLoader, dealerTariffsLoader, Construction) {
+    Sale, saleStatuses, saleTypes, salesLoader, dealersLoader, sitesLoader, tariffsLoader, dealerTariffsLoader, 
+    Construction, siteBalancesLoader) {
 
     _.assign($scope, data);
     $scope.saleStatuses = saleStatuses;
@@ -287,6 +289,29 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.savedSaleListNotice = $rootScope.savedSaleListNotice;
         delete $rootScope.savedSaleListNotice;
     }
+
+    $scope.toggleSiteBalances = function() {
+        if (!$scope.showSiteBalances) {
+            $q.all({
+                siteBalances: siteBalancesLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'in', value: [5, 6] }
+                    ]
+                }),
+                sites: sitesLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'in', value: [5, 6] }
+                    ]
+                })
+            }).then(function(collections) {
+                collections.siteBalances.resolveRefs(collections);
+                $scope.siteBalances = collections.siteBalances;
+                $scope.showSiteBalances = !$scope.showSiteBalances;
+            });
+        } else {
+            $scope.showSiteBalances = !$scope.showSiteBalances;
+        }
+    };
 
     $scope.setPatternsDefault = function() {
         $scope.patterns = {

@@ -4,13 +4,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-        Tariffs, TariffRates, DealerTariffs, Sales, Sale);
+        Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances);
 });
 
 /**
@@ -19,7 +19,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
 
     var userDirectories = new Construction({
         groups: new Groups([
@@ -1638,5 +1638,30 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var regexSalesDelete = /^\/api2\/sales\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexSalesDelete).respond(function(method, url, data) {
         return processDelete(url, regexSalesDelete, sales);
+    });
+
+    var siteBalances = new SiteBalances([
+        {
+            site: {id: 5},
+            saleBalance: 12345678.99,
+            purchaseBalance: -87654321.09
+        },
+        {
+            site: {id: 6},
+            saleBalance: -87654321.09,
+            purchaseBalance: 12345678.99
+        }
+    ]).resolveRefs({sites: sites});
+
+    var regexSiteBalancesQuery = /^\/api2\/report\/sitebalances(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexSiteBalancesQuery).respond(function(method, url, data) {
+        return processQueryUrl(url, regexSiteBalancesQuery, siteBalances.getItems(), 'siteBalances', SiteBalances);
+    });
+    $httpBackend.whenPOST(regexSiteBalancesQuery).respond(function(method, url, data) {
+        siteBalances.getItems()[0].saleBalance += Math.floor(Math.random() * 1000000) / 100;
+        siteBalances.getItems()[0].purchaseBalance += Math.floor(Math.random() * 1000000) / 100;
+        siteBalances.getItems()[1].saleBalance += Math.floor(Math.random() * 1000000) / 100;
+        siteBalances.getItems()[1].purchaseBalance += Math.floor(Math.random() * 1000000) / 100;
+        return processPostQuery(url, regexSiteBalancesQuery, data, siteBalances, 'siteBalances', SiteBalances);
     });
 };

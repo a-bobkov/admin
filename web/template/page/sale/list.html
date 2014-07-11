@@ -2,14 +2,15 @@
     <table>
         <tr>
             <td class="first">
-            <div class="span-5">
+            <div class="span-6">
                 <h1>Список продаж</h1>
                 <h3 id="SaleListNumberSales">Количество продаж: {{totalItems}}</h3>
                 <input id='SaleListAddSaleUp' type="submit" value="Добавить карточку" ng-click='newSaleCard()'/>
+                <input class="right" id='ToggleSiteBalances' title="Контрольные цифры задолженности по auto.ru и irr.ru" type="submit" value="Отчёт" ng-click='toggleSiteBalances()'/>
             </div>
             </td>
             <td class="last">
-            <fieldset class="span-18 last right sale">
+            <fieldset class="span-17 last right sale">
                 <legend>Фильтр</legend>
                 <table class='multi-parameters'>
                     <tbody>
@@ -57,6 +58,22 @@
         </tr>
     </table>
     <div class="notice" id="savedSaleListNotice" ng-show='savedSaleListNotice'>{{savedSaleListNotice}}</div>
+    <table class="list span-8 append-bottom" ng-show='showSiteBalances'>
+        <thead>
+            <tr>
+                <th>Сайт</th>
+                <th>В ценах продажи</th>
+                <th>В ценах закупки</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat='siteBalance in siteBalances.getItems()' ng-class-odd="'odd'" ng-class-even="'even'">
+                <td class="text">{{siteBalance.site.idName()}}</td>
+                <td class="amount">{{siteBalance.saleBalance | number:2}}</td>
+                <td class="amount">{{siteBalance.purchaseBalance | number:2}}</td>
+            </tr>
+        </tbody>
+    </table>
     <table class="list">
         <thead>
             <tr>

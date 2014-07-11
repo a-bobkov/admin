@@ -10,9 +10,9 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
      * @param string entityName Имя сущности, например: user, city. market
      * @constructor
      */
-    var RestApiConstructor = function (collectionName, entityName) {
+    var RestApiConstructor = function (collectionName, entityName, apiPrefix) {
 
-        var url = '/' + collectionName.toLowerCase();
+        var url = '/' + ((apiPrefix) ? apiPrefix + '/' : '') + collectionName.toLowerCase();
 
         this._getResponseHandler = function (sectionName, id) {
             return function(response) {
