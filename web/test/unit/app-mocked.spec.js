@@ -145,6 +145,251 @@ describe('app-mocked', function() {
         });
     }
 
+describe('tariff', function() {
+
+    describe('Метод get', function() {
+
+        it('возвращать те же значения, что и query', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                tariff = answer.respond.getItems()[0];
+                return tariffLoader.loadItems(tariff.id);
+            });
+
+            runs(function() {
+                var tariffEqual = answer.respond;
+                expect(tariffEqual).toMatch(tariff);
+            });
+        });
+    });
+        
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems();
+            });
+
+            runs(function() {
+                var tariff = answer.respond.getItems()[0];
+                expect(tariff.id).toBeInteger();
+                expect(tariff.site).toBeReference();
+                expect(tariff.type).toBeMemberOf(['daily', 'periodical']);
+                expect(tariff.period).toBeIntegerOrNull();
+                expect(tariff.periodUnit.id).toBeMemberOf(['day', 'month']);
+                expect(tariff.count).toBeIntegerOrNull();
+                expect(tariff.isActive).toBeMemberOf([true, false]);
+                expect(tariff.delay).toBeInteger();
+                expect(tariff.groupName).toBeStringOrNull();
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                tariff = answer.respond.getItems()[0];
+                return tariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: tariff.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBe(1);
+                expect(tariffs[0]).toEqual(tariff);
+            });
+        });
+
+        it('equal - фильтровать по равенству site заданному значению', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                tariff = answer.respond.getItems()[0];
+                return tariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: tariff.site.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                _.forEach(tariffs, function(tariffEqual) {
+                    expect(tariffEqual.site).toEqual(tariff.site);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству type заданному значению', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                tariff = answer.respond.getItems()[0];
+                return tariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: tariff.type }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                _.forEach(tariffs, function(tariffEqual) {
+                    expect(tariffEqual.type).toEqual(tariff.type);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству isActive значению true', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                _.forEach(tariffs, function(tariffEqual) {
+                    expect(tariffEqual.isActive).toEqual(true);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству isActive значению false', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: false }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                _.forEach(tariffs, function(tariffEqual) {
+                    expect(tariffEqual.isActive).toEqual(false);
+                });
+            });
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems({
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'asc'
+                    },
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                expect(_.pluck(tariffs, 'id')).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('сортировать по id по убыванию', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems({
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    },
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                expect(_.pluck(tariffs, 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+
+        it('сортировать по site по возрастанию', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems({
+                    order: {
+                        order_field: 'site',
+                        order_direction: 'asc'
+                    },
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                expect(_.pluck(_.pluck(tariffs, 'site'), 'id')).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('сортировать по site по убыванию', function() {
+            var answer = {};
+            var tariff;
+
+            runSync(answer, function() {
+                return tariffsLoader.loadItems({
+                    order: {
+                        order_field: 'site',
+                        order_direction: 'desc'
+                    },
+                });
+            });
+
+            runs(function() {
+                var tariffs = answer.respond.getItems();
+                expect(tariffs.length).toBeTruthy();
+                expect(_.pluck(_.pluck(tariffs, 'site'), 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+    });
+});
+
 describe('sales, tariffs', function() {
     
     it('загружать значения тарифов, затем нужных сайтов', function() {

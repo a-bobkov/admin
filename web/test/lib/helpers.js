@@ -11,6 +11,21 @@ beforeEach(function() {
         toBeArray: function () {
             return angular.isArray(this.actual);
         },
+        toBeInteger: function () {
+            return typeof this.actual === 'number';
+        },
+        toBeIntegerOrNull: function () {
+            return typeof this.actual === 'number' || this.actual === null;
+        },
+        toBeStringOrNull: function () {
+            return typeof this.actual === 'string' || this.actual === null;
+        },
+        toBeReference: function () {
+            return _.isEqual(_.keys(this.actual), ["id"]);
+        },
+        toBeMemberOf: function (array) {
+            return _.contains(array, this.actual);
+        },
         toBeSorted: function(params) {
             var convert = function(arg) {
                 if (params.match('Numbers')) {

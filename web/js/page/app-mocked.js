@@ -982,7 +982,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             period: 1,
             periodUnit: 'day',
             count: null,
-            isActive: true,
+            isActive: false,
             delay: 3,
             groupName: 'Поштучный'
         },
