@@ -38,6 +38,9 @@ beforeEach(function() {
         toBeDate: function () {
             return _.isDate(this.actual);
         },
+        toBeBoolean: function () {
+            return this.actual === true || this.actual === false;
+        },
         toBeSorted: function(params) {
             var convert = function(arg) {
                 if (params.match('Numbers')) {

@@ -147,6 +147,295 @@ describe('app-mocked', function() {
         });
     }
 
+describe('sale', function() {
+
+    describe('Метод get', function() {
+
+        it('возвращать те же значения, что и query', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems(sale.id);
+            });
+
+            runs(function() {
+                var saleEqual = answer.respond;
+                expect(saleEqual).toMatch(sale);
+            });
+        });
+    });
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(sale) {
+                    expect(sale.id).toBeInteger();
+                    expect(sale.type.id).toBeMemberOf(['card', 'addcard', 'extra']);
+                    if (sale.type === 'addcard') {
+                        expect(sale.parentId).toBeInteger();
+                    }
+                    if (sale.type.id === 'card' || sale.type.id === 'addcard') {
+                        expect(sale.tariff).toBeReference();
+                        expect(sale.cardAmount).toBeNumber();
+                        expect(sale.count).toBeIntegerOrNull();
+                        expect(sale.isActive.id).toBeBoolean();
+                    }
+                    expect(sale.cardId).toBeInteger();
+                    expect(sale.dealer).toBeReference();
+                    expect(sale.site).toBeReference();
+                    expect(sale.date).toBeDate();
+                    expect(sale.activeFrom).toBeDate();
+                    expect(sale.activeTo).toBeDate();
+                    expect(sale.amount).toBeNumber();
+                    expect(sale.siteAmount).toBeNumber();
+                    expect(sale.info).toBeString();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: sale.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBe(1);
+                expect(sales[0]).toEqual(sale);
+            });
+        });
+
+        it('equal - фильтровать по равенству type заданному значению', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: sale.type.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sales, function(saleEqual) {
+                    expect(saleEqual.type).toEqual(sale.type);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству parentId заданному значению', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'addcard' }
+                    ]
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['parentId'], type: 'equal', value: sale.parentId }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBe(1);
+                expect(sales[0]).toEqual(sale);
+            });
+        });
+
+        it('equal - фильтровать по равенству dealer заданному значению', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['dealer'], type: 'equal', value: sale.dealer.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sales, function(saleEqual) {
+                    expect(saleEqual.dealer).toEqual(sale.dealer);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству site заданному значению', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: sale.site.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sales, function(saleEqual) {
+                    expect(saleEqual.site).toEqual(sale.site);
+                });
+            });
+        });
+
+        it('equal - фильтровать по activeTo больше или равно заданного значения', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['activeTo'], type: 'greaterOrEqual', value: sale.activeTo }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sales, function(saleEqual) {
+                    expect(saleEqual.activeTo).not.toBeLessThan(sale.activeTo);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству isActive значению true', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sales, function(saleEqual) {
+                    expect(saleEqual.isActive.id).toEqual(true);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству isActive значению false', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: false }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sales, function(saleEqual) {
+                    expect(saleEqual.isActive.id).toEqual(false);
+                });
+            });
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: ['+id']
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                expect(_.pluck(sales, 'id')).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('сортировать по id по убыванию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: ['-id']
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                expect(_.pluck(sales, 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+    });
+});
+
 describe('tariffRate', function() {
 
     describe('Метод get', function() {
@@ -334,7 +623,6 @@ describe('tariffRate', function() {
         });
     });
 });
-
 
 describe('tariff', function() {
 

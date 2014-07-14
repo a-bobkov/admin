@@ -1657,10 +1657,10 @@ function setHttpMock($httpBackend, $filter, multiplyCoef, Construction,
 
     var regexSalesQuery = /^\/api2\/sales(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexSalesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexSalesQuery, sales.getItems(), 'sales', Sales);
+        return processQueryUrlSort(url, regexSalesQuery, sales.getItems(), 'sales', Sales);
     });
     $httpBackend.whenPOST(regexSalesQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexSalesQuery, data, sales, 'sales', Sales);
+        return processPostQuerySort(url, regexSalesQuery, data, sales, 'sales', Sales);
     });
     var regexSalesGet = /^\/api2\/sales\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexSalesGet).respond(function(method, url, data) {
