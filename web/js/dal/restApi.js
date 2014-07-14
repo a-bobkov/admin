@@ -52,6 +52,19 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
          * @returns {Promise}
          */
         this.query = function(params) {
+            if (_.contains(['sales', 'tariffs', 'tariffrates', 'sites'], url.replace(/\/(\w+)$/, '$1'))) {
+                var paramsPager =  _.pick(params, 'pager');
+                var paramsFiltersOrdersFields = _.pick(params, ['filters', 'fields', 'orders']);
+                if (!_.isEmpty(paramsFiltersOrdersFields)) {
+                    return Api.post(url, paramsFiltersOrdersFields, paramsPager).then(
+                        this._getResponseHandler(collectionName)
+                    );
+                } else {
+                    return Api.get(url, paramsPager).then(
+                        this._getResponseHandler(collectionName)
+                    );
+                }
+            }
             if (params) {
                 var paramsOrderPager =  _.assign({}, params.order, params.pager);
             }

@@ -1,13 +1,13 @@
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, Construction,
+.run(function($httpBackend, $filter, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, 100, Construction,
+    setHttpMock($httpBackend, $filter, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances);
@@ -16,7 +16,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, multiplyCoef, Construction,
+function setHttpMock($httpBackend, $filter, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
@@ -246,6 +246,57 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         var filtered_arr = filterArr(collection.getItems(), filters);
         var respond = processQueryUrl(url, regex, filtered_arr, collectionName, collectionConstructor);
         respond[1].data.params.filters = filters;
+        return respond;
+    }
+
+    var processQueryUrlSort = function(url, regex, arr, collectionName, collectionConstructor) {
+
+        var search = url.replace(regex, '$1');
+        var pairs = search.split('&');
+        var params = {};
+        _.forEach(pairs, function(value) {
+            var param = value.split('=');
+            params[param[0]] = param[1];
+        })
+
+        var per_page = Math.min(params.per_page || 100, 100);
+        var page = params.page || 1;
+
+        var paged_arr = arr.slice(per_page * (page - 1), per_page * page);
+
+        var respond = [200, {
+            status: 'success',
+            data: {
+                params: {
+                    filters: [],
+                    orders: [],
+                    pager: {
+                        per_page:   per_page,
+                        page:       page,
+                        total:      arr.length
+                    },
+                    fields: []
+                }
+            }
+        }];
+        respond[1].data[collectionName] = _.invoke(paged_arr, 'serialize');
+
+        return respond;
+    }
+
+    var processPostQuerySort = function(url, regex, data, collection, collectionName, collectionConstructor) {
+        var filters = angular.fromJson(data).filters;
+        var filtered_arr = filterArr(collection.getItems(), filters);
+        var orders = angular.fromJson(data).orders;
+        var angularOrders = _.map(orders, function(order) {
+            var regexpOrder = /^([+-]?)(\w+)$/;
+            var field = order.replace(regexpOrder, '$2');
+            return order + ((_.contains(['site', 'dealer'], field)) ? '.id' : '');
+        });
+        var ordered_arr = $filter('orderBy')(filtered_arr, angularOrders);
+        var respond = processQueryUrlSort(url, regex, ordered_arr, collectionName, collectionConstructor);
+        respond[1].data.params.filters = filters;
+        respond[1].data.params.orders = orders;
         return respond;
     }
 
@@ -869,8 +920,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             id: 5,
             site: {id: 9},
             type: 'daily',
-            period: 1,
-            periodUnit: 'day',
+            period: null,
+            periodUnit: null,
             count: 1,
             isActive: true,
             delay: 3,
@@ -924,8 +975,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             id: 10,
             site: {id: 2},
             type: 'daily',
-            period: 1,
-            periodUnit: 'day',
+            period: null,
+            periodUnit: null,
             count: null,
             isActive: true,
             delay: 3,
@@ -957,8 +1008,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             id: 13,
             site: {id: 11},
             type: 'daily',
-            period: 1,
-            periodUnit: 'day',
+            period: null,
+            periodUnit: null,
             count: null,
             isActive: true,
             delay: 3,
@@ -979,8 +1030,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             id: 15,
             site: {id: 1},
             type: 'daily',
-            period: 1,
-            periodUnit: 'day',
+            period: null,
+            periodUnit: null,
             count: null,
             isActive: false,
             delay: 3,
@@ -1078,10 +1129,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexTariffsQuery = /^\/api2\/tariffs(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexTariffsQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexTariffsQuery, tariffs.getItems(), 'tariffs', Tariffs);
+        return processQueryUrlSort(url, regexTariffsQuery, tariffs.getItems(), 'tariffs', Tariffs);
     });
     $httpBackend.whenPOST(regexTariffsQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexTariffsQuery, data, tariffs, 'tariffs', Tariffs);
+        return processPostQuerySort(url, regexTariffsQuery, data, tariffs, 'tariffs', Tariffs);
     });
     var regexTariffsGet = /^\/api2\/tariffs\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexTariffsGet).respond(function(method, url, data) {
@@ -1318,10 +1369,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexTariffRatesQuery = /^\/api2\/tariffrates(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexTariffRatesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexTariffRatesQuery, tariffRates.getItems(), 'tariffRates', TariffRates);
+        return processQueryUrlSort(url, regexTariffRatesQuery, tariffRates.getItems(), 'tariffRates', TariffRates);
     });
     $httpBackend.whenPOST(regexTariffRatesQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexTariffRatesQuery, data, tariffRates, 'tariffRates', TariffRates);
+        return processPostQuerySort(url, regexTariffRatesQuery, data, tariffRates, 'tariffRates', TariffRates);
     });
     var regexTariffRatesGet = /^\/api2\/tariffrates\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexTariffRatesGet).respond(function(method, url, data) {

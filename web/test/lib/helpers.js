@@ -11,11 +11,17 @@ beforeEach(function() {
         toBeArray: function () {
             return angular.isArray(this.actual);
         },
-        toBeInteger: function () {
+        toBeNumber: function () {
             return typeof this.actual === 'number';
         },
+        toBeInteger: function () {
+            return typeof this.actual === 'number' && Math.ceil(this.actual) === this.actual;
+        },
         toBeIntegerOrNull: function () {
-            return typeof this.actual === 'number' || this.actual === null;
+            return typeof this.actual === 'number' && Math.ceil(this.actual) === this.actual || this.actual === null;
+        },
+        toBeString: function () {
+            return typeof this.actual === 'string';
         },
         toBeStringOrNull: function () {
             return typeof this.actual === 'string' || this.actual === null;
@@ -23,8 +29,14 @@ beforeEach(function() {
         toBeReference: function () {
             return _.isEqual(_.keys(this.actual), ["id"]);
         },
+        toBeReferenceOrNull: function () {
+            return _.isEqual(_.keys(this.actual), ["id"]) || this.actual === null;
+        },
         toBeMemberOf: function (array) {
             return _.contains(array, this.actual);
+        },
+        toBeDate: function () {
+            return _.isDate(this.actual);
         },
         toBeSorted: function(params) {
             var convert = function(arg) {
