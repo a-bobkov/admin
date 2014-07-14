@@ -2,6 +2,7 @@
 
 describe('app-mocked', function() {
     var $httpBackend;
+    var $q;
     var Construction;
     var usersLoader,
         Users,
@@ -38,6 +39,7 @@ describe('app-mocked', function() {
     var salesLoader;
     var Sales;
     var Sale;
+    var SiteBalances;
 
     try {
         var ngMock = angular.module('ngMock');
@@ -55,11 +57,12 @@ describe('app-mocked', function() {
     beforeEach(function() {
         var modules = ['ng', 'max.dal.entities.user', 'max.dal.entities.collection', 
             'max.dal.entities.dealersite', 'max.dal.entities.dealersitelogin', 
-            'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale'];
+            'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale', 'max.dal.entities.sitebalance'];
         if (ngMock) {
             modules.push('ngMock');
         }
         var injector = angular.injector(modules);
+        $q = injector.get('$q');
 
         usersLoader = injector.get('usersLoader');
         Construction = injector.get('Construction');
@@ -96,13 +99,14 @@ describe('app-mocked', function() {
         DealerTariffs = injector.get('DealerTariffs');
         salesLoader = injector.get('salesLoader');
         Sales = injector.get('Sales');
+        SiteBalances = injector.get('SiteBalances');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, null, Construction,
                 User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-                Tariffs, TariffRates, DealerTariffs, Sales, Sale);
+                Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
@@ -250,22 +254,6 @@ describe('sales, tariffs', function() {
             expect(tariff).toBeTruthy();
         });
     });
-
-    xit('загружать значения продаж', function() {
-        var answer = {};
-        var directories;
-
-        runSync(answer, function() {
-            return salesLoader.loadItems();
-        });
-
-        runs(function() {
-            var sales = answer.respond.sales;
-            expect(sales).toBeTruthy();
-            var salesAdd = answer.respond.salesAdd;
-            expect(salesAdd).toBeTruthy();
-        });
-    });
 });
 
 describe('dealersite, dealersitelogin', function() {
@@ -306,53 +294,46 @@ describe('dealersite, dealersitelogin', function() {
         it('post - сохранять новый dealersitelogin', function() {
             var answer = {};
             var directories = {};
-            var sites;
-            var dealers;
+            var siteId;
             var freeDealerId;
 
             runSync(answer, function() {
-                return sitesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond); 
-                sites = answer.respond.sites.getItems();
-                var dealerQueryParams = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    },
-                    fields: ['dealer_list_name']
-                };
-                return dealersLoader.loadItems(dealerQueryParams);
+                return $q.all({
+                    sites: sitesLoader.loadItems(),
+                    dealers: dealersLoader.loadItems({
+                        order: {
+                            order_field: 'id',
+                            order_direction: 'desc'
+                        },
+                        fields: ['dealer_list_name']
+                    })
+                });
             });
 
             runSync(answer, function() {
                 _.assign(directories, answer.respond);
-                dealers = answer.respond.dealers.getItems();
-                var dealersId = _.pluck(dealers, 'id');
-                var params = {
+                siteId = directories.sites.getItems()[1].id;
+                var dealerIds = _.pluck(directories.dealers.getItems(), 'id');
+                return dealerSiteLoginsLoader.loadItems({
                     filters: [
-                        { fields: ['site'], type: 'equal', value: sites[1].id },
-                        { fields: ['dealer'], type: 'in', value: dealersId }
+                        { fields: ['site'], type: 'equal', value: siteId },
+                        { fields: ['dealer'], type: 'in', value: dealerIds }
                     ]
-                };
-                return dealerSiteLoginsLoader.loadItems(params, directories).then(function(directory) {
-                    var dealerSiteLogins = directory.dealerSiteLogins.getItems();
-                    var dealerSiteLoginsDealersId = _.pluck(_.pluck(dealerSiteLogins, 'dealer'), 'id');
-                    return _.difference(dealersId, dealerSiteLoginsDealersId);
+                }, directories).then(function(dealerSiteLogins) {
+                    var dealerSiteLoginsDealerIds = _.pluck(_.pluck(dealerSiteLogins.getItems(), 'dealer'), 'id');
+                    return _.difference(dealerIds, dealerSiteLoginsDealerIds);
                 });
             });
 
             runSync(answer, function() {
                 freeDealerId = answer.respond[0];
                 var newDealerSiteLogin = new DealerSiteLogin({
-                        dealer: {id: freeDealerId},
-                        site: {id: sites[1].id},
-                        type: 'site',
-                        login: 'a11111',
-                        password: 'p22222'
-                    }, directories);
+                    dealer: {id: freeDealerId},
+                    site: {id: siteId},
+                    type: 'site',
+                    login: 'a11111',
+                    password: 'p22222'
+                });
                 return newDealerSiteLogin.save(directories);
             });
 
@@ -362,10 +343,10 @@ describe('dealersite, dealersitelogin', function() {
             });
 
             runs(function() {
-                var newDealerSiteLogin = answer.respond.dealerSiteLogin;
+                var newDealerSiteLogin = answer.respond;
                 expect(newDealerSiteLogin.dealer.id).toEqual(freeDealerId);
-                expect(newDealerSiteLogin.site).toEqual(sites[1]);
-                expect(newDealerSiteLogin.type).toEqual('site');
+                expect(newDealerSiteLogin.site.id).toEqual(siteId);
+                expect(newDealerSiteLogin.type.id).toEqual('site');
                 expect(newDealerSiteLogin.login).toEqual('a11111');
                 expect(newDealerSiteLogin.password).toEqual('p22222');
             });
@@ -373,25 +354,42 @@ describe('dealersite, dealersitelogin', function() {
 
         it('post - выдавать ошибку, если такая комбинация dealer, site, type уже есть', function() {
             var answer = {};
+            var directories = {};
+            var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
+                return dealerSiteLoginsLoader.loadItems({
                     order: {
                         order_field: 'id',
                         order_direction: 'desc'
                     }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSiteLogins = directories.dealerSiteLogins.getItems();
-                var dealerSiteLogin = dealerSiteLogins[0];
+                directories.dealerSiteLogins = answer.respond;
+                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                return $q.all({
+                    sites: sitesLoader.loadItems({
+                        filters: [
+                            { fields: ['id'], type: 'equal', value: dealerSiteLogin.site.id }
+                        ]
+                    }),
+                    dealers: dealersLoader.loadItems({
+                        filters: [
+                            { fields: ['id'], type: 'equal', value: dealerSiteLogin.dealer.id }
+                        ],
+                        fields: ['dealer_list_name']
+                    })
+                });
+            });
+
+            runSync(answer, function() {
+                _.assign(directories, answer.respond);
                 var dealerSiteLoginCopy = new DealerSiteLogin({
-                    dealer: dealerSiteLogin.dealer,
-                    site: dealerSiteLogin.site,
-                    type: dealerSiteLogin.type
+                    dealer: {id: dealerSiteLogin.dealer.id},
+                    site: {id: dealerSiteLogin.site.id},
+                    type: dealerSiteLogin.type.id
                 }, directories);
                 return dealerSiteLoginCopy.save(directories);
             });
