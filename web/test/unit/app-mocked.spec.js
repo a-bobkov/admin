@@ -3,7 +3,6 @@
 describe('app-mocked', function() {
     var $httpBackend;
     var $q;
-    var $filter;
     var Construction;
     var usersLoader,
         Users,
@@ -55,6 +54,53 @@ describe('app-mocked', function() {
         }
     }
 
+    function sortByOrders(array, orders) {
+
+        function convert(value) {
+            if (_.isDate(value)) {
+                return value.toISOString();
+            } else if (_.isObject(value)) {
+                return value.id;
+            } else if (value === undefined) {
+                return -Infinity;
+            } else {
+                return value;
+            }
+        }
+
+        var regexpOrder = /^([+-]?)(\w+)$/;
+
+        function compareByOrders(a, b, ordersIndex) {
+            ordersIndex = ordersIndex || 0;
+            var order = orders[ordersIndex];
+            if (!order) {
+                return 0;
+            }
+            var dir = order.replace(regexpOrder, '$1') || '+';
+            var field = order.replace(regexpOrder, '$2');
+            var conva = convert(a[field]);
+            var convb = convert(b[field]);
+            if (dir === '+') {
+                if (conva > convb) {
+                    return 1;
+                } else if (conva < convb) {
+                    return -1;
+                } else {
+                    return compareByOrders(a, b, ordersIndex + 1);
+                }
+            } else {
+                if (conva < convb) {
+                    return 1;
+                } else if (conva > convb) {
+                    return -1;
+                } else {
+                    return compareByOrders(a, b, ordersIndex + 1);
+                }
+            }
+        }
+        return array.sort(compareByOrders);
+    }
+
     beforeEach(function() {
         var modules = ['ng', 'max.dal.entities.user', 'max.dal.entities.collection', 
             'max.dal.entities.dealersite', 'max.dal.entities.dealersitelogin', 
@@ -64,7 +110,6 @@ describe('app-mocked', function() {
         }
         var injector = angular.injector(modules);
         $q = injector.get('$q');
-        $filter = injector.get('$filter');
 
         Construction = injector.get('Construction');
         usersLoader = injector.get('usersLoader');
@@ -101,11 +146,12 @@ describe('app-mocked', function() {
         DealerTariffs = injector.get('DealerTariffs');
         salesLoader = injector.get('salesLoader');
         Sales = injector.get('Sales');
+        Sale = injector.get('Sale');
         SiteBalances = injector.get('SiteBalances');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
-            setHttpMock($httpBackend, $filter, null, Construction,
+            setHttpMock($httpBackend, 3, Construction,
                 User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
                 Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances);
@@ -348,7 +394,7 @@ describe('sale', function() {
                 sale = answer.respond.getItems()[0];
                 return salesLoader.loadItems({
                     filters: [
-                        { fields: ['activeTo'], type: 'greaterOrEqual', value: sale.activeTo }
+                        { fields: ['activeTo'], type: 'greaterOrEqual', value: sale.activeTo.toISOString().slice(0, 10) }
                     ]
                 });
             });
@@ -431,6 +477,619 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 expect(_.pluck(sales, 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+
+        it('сортировать по date по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+date', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.date, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по date по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-date', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.date, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по dealer по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+dealer', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.dealer.id, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по dealer по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-dealer', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.dealer.id, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по site по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+site', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.site.id, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по site по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-site', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.site.id, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по count по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+count', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.count, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по count по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-count', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.count, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+amount', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.amount, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по amount по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-amount', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.amount, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по siteAmount по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+siteAmount', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.siteAmount, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по siteAmount по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-siteAmount', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.siteAmount, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по activeFrom по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+activeFrom', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.activeFrom, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по activeFrom по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-activeFrom', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.activeFrom, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по activeTo по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+activeTo', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.activeTo, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по activeTo по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-activeTo', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.activeTo, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по isActive по возрастанию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['+isActive', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.isActive, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+
+        it('сортировать по isActive по убыванию, затем по id по убыванию', function() {
+            var answer = {};
+            var orders = ['-isActive', '-id'];
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: orders
+                });
+            });
+
+            runs(function() {
+                var sales = answer.respond.getItems();
+                expect(sales.length).toBeTruthy();
+                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
+                    console.log(sale.isActive, sale.id);
+                    expect(sale.id).toEqual(sales[saleIdx].id);
+                });
+            });
+        });
+    });
+
+    describe('Метод post', function() {
+
+        it('сохранять данные новой карточки', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: ['-activeTo']
+                });
+            });
+
+            runSync(answer, function() {
+                var sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: Math.floor(Math.random() * 100000) / 100,
+                    count: Math.floor(Math.random() * 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: Math.floor(Math.random() * 100000) / 100,
+                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var sale = answer.respond;
+                expect(sale.id).toEqual(sale.cardId);
+                _.forEach(sale.serialize(), function(value, key) {
+                    if (!_.contains(['id', 'cardId'], key)) {
+                        expect(value).toEqual(saleData[key]);
+                    }
+                });
+            });
+        });
+
+        it('сохранять данные нового расширения', function() {
+            var answer = {};
+            var sale;
+            var addSaleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ]
+                }).then(function(sales) {
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(sales.getItems(), function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                var activeTo = _.clone(sale.activeTo);
+                var date = new Date;
+                date.setUTCHours(0, 0, 0, 0);
+                addSaleData = {
+                    type: 'addcard',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    parentId: sale.cardId,
+                    cardAmount: Math.floor(Math.random() * 100000) / 100,
+                    count: Math.floor(Math.random() * 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: Math.floor(Math.random() * 100000) / 100,
+                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    info: 'Комментарий'
+                };
+                var addSale = new Sale(addSaleData);
+                return addSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var addSale = answer.respond;
+                expect(addSale.id).toEqual(addSale.cardId);
+                _.forEach(addSale.serialize(), function(value, key) {
+                    if (!_.contains(['id', 'cardId'], key)) {
+                        expect(value).toEqual(addSaleData[key]);
+                    }
+                });
+            });
+        });
+
+        it('сохранять данные новой доплаты', function() {
+            var answer = {};
+            var sale;
+            var extraSaleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ]
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeFrom);
+                var activeTo = _.clone(sale.activeTo);
+                var date = new Date;
+                date.setUTCHours(0, 0, 0, 0);
+                extraSaleData = {
+                    type: 'extra',
+                    cardId: sale.cardId,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    date: date.toISOString().slice(0, 10),
+                    amount: Math.floor(Math.random() * 100000) / 100,
+                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    info: 'Комментарий'
+                };
+                var extraSale = new Sale(extraSaleData);
+                return extraSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var extraSale = answer.respond;
+                _.forEach(extraSale.serialize(), function(value, key) {
+                    if (!_.contains(['id'], key)) {
+                        expect(value).toEqual(extraSaleData[key]);
+                    }
+                });
+            });
+        });
+    });
+
+    describe('Метод put', function() {
+
+        it('сохранять данные имеющейся нерасширенной карточки', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ],
+                    orders: ['-activeTo']
+                }).then(function(sales) {
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(sales.getItems(), function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var salesArray = answer.respond.getItems();
+                var sale = salesArray[0];
+                var otherSale = _.find(salesArray, function(otherSale) {
+                    return (otherSale.dealer.id !== sale.dealer.id) && (otherSale.site.id !== sale.site.id);
+                });
+                console.log(sale);
+                console.log(otherSale);
+                expect(otherSale).toBeDefined();
+
+                var activeFrom = _.clone(otherSale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+
+                saleData = {
+                    id: sale.id,
+                    type: 'card',
+                    cardId: sale.cardId,
+                    dealer: {id: otherSale.dealer.id},
+                    site: {id: otherSale.site.id},
+                    tariff: {id: otherSale.tariff.id},
+                    cardAmount: Math.floor(Math.random() * 100000) / 100,
+                    count: Math.floor(Math.random() * 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: !sale.isActive,
+                    date: date.toISOString().slice(0, 10),
+                    amount: Math.floor(Math.random() * 100000) / 100,
+                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    info: sale.info + '1'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: otherSale.dealer.id}]),
+                    sites: new Sites([{id: otherSale.site.id}]),
+                    tariffs: new Tariffs([{id: otherSale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var sale = answer.respond;
+                console.log(sale);
+                _.forEach(sale.serialize(), function(value, key) {
+                    expect(value).toEqual(saleData[key]);
+                });
             });
         });
     });

@@ -11,6 +11,7 @@ var Item = (function() {
         _.forOwn(itemData, function(value, key) {
             if (entityParams && _.contains(entityParams.dateFields, key)) {
                 this[key] = (value === null) ? null : new Date(value);
+                this[key].setUTCHours(0, 0, 0, 0);
             } else if (entityParams && _.has(entityParams.enumFields, key)) {
                 this[key] = (value === null) ? null : entityParams.enumFields[key].get(value);
             } else if (entityParams && _.has(entityParams.objectFields, key)) {

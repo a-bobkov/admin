@@ -1,13 +1,13 @@
 
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
-.run(function($httpBackend, $filter, Construction,
+.run(function($httpBackend, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
-    setHttpMock($httpBackend, $filter, 100, Construction,
+    setHttpMock($httpBackend, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances);
@@ -16,7 +16,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 /**
  * мини-сервер http для комплексных тестов
  */
-function setHttpMock($httpBackend, $filter, multiplyCoef, Construction,
+function setHttpMock($httpBackend, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
@@ -284,16 +284,60 @@ function setHttpMock($httpBackend, $filter, multiplyCoef, Construction,
         return respond;
     }
 
+    function sortByOrders(array, orders) {
+
+        function convert(value) {
+            if (_.isDate(value)) {
+                return value.toISOString();
+            } else if (_.isObject(value)) {
+                return value.id;
+            } else if (value === undefined) {
+                return -Infinity;
+            } else {
+                return value;
+            }
+        }
+
+        var regexpOrder = /^([+-]?)(\w+)$/;
+
+        function compareByOrders(a, b, ordersIndex) {
+            ordersIndex = ordersIndex || 0;
+            var order = orders[ordersIndex];
+            if (!order) {
+                return 0;
+            }
+            var dir = order.replace(regexpOrder, '$1') || '+';
+            var field = order.replace(regexpOrder, '$2');
+            var conva = convert(a[field]);
+            var convb = convert(b[field]);
+            // console.log(conva, convb, conva > convb);
+            if (dir === '+') {
+                if (conva > convb) {
+                    return 1;
+                } else if (conva < convb) {
+                    return -1;
+                } else {
+                    return compareByOrders(a, b, ordersIndex + 1);
+                }
+            } else {
+                if (conva < convb) {
+                    return 1;
+                } else if (conva > convb) {
+                    return -1;
+                } else {
+                    return compareByOrders(a, b, ordersIndex + 1);
+                }
+            }
+        }
+        return array.sort(compareByOrders);
+    }
+
     var processPostQuerySort = function(url, regex, data, collection, collectionName, collectionConstructor) {
         var filters = angular.fromJson(data).filters;
         var filtered_arr = filterArr(collection.getItems(), filters);
-        var orders = angular.fromJson(data).orders;
-        var angularOrders = _.map(orders, function(order) {
-            var regexpOrder = /^([+-]?)(\w+)$/;
-            var field = order.replace(regexpOrder, '$2');
-            return order + ((_.contains(['site', 'dealer'], field)) ? '.id' : '');
-        });
-        var ordered_arr = $filter('orderBy')(filtered_arr, angularOrders);
+        var orders = angular.fromJson(data).orders || ['+id'];
+        var ordered_arr = sortByOrders(filtered_arr, orders);
+
         var respond = processQueryUrlSort(url, regex, ordered_arr, collectionName, collectionConstructor);
         respond[1].data.params.filters = filters;
         respond[1].data.params.orders = orders;

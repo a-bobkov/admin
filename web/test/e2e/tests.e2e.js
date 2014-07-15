@@ -47,7 +47,7 @@ if (browser.baseUrl.match(/maxposter.ru/)) {
 }
 
 var regexpInt = /^\d+$/;
-var regexpFloat = /^\d+(?:.\d*|)$/;
+var regexpFloat = /^\d+(?:\.\d*)?$/;
 var regexpFloatRu = /^[\d ]+(?:,\d*|)$/;
 var regexpDate = /^(\d{2}).(\d{2}).(\d{2})$/;
 var regexpDateISO = /^(20\d{2})-(\d{2})-(\d{2})$/;
