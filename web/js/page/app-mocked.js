@@ -4,13 +4,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-        Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances);
+        Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances);
 });
 
 /**
@@ -19,7 +19,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances) {
 
     var userDirectories = new Construction({
         groups: new Groups([
@@ -435,16 +435,25 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return respond;
     };
 
-    var processDelete = function(url, regex, collection) {
+    var processDelete = function(url, regex, collection, validation) {
         var id = parseInt(url.replace(regex,'$1'));
         var items = collection.getItems();
         var idx = _.findIndex(items, {id: id});
         if (idx !== -1) {
-            items.splice(idx, 1);
-            return [200, {
-                status: 'success',
-                data: null
-            }];
+            var validationError = validation && validation(items[idx]);
+            if (validationError) {
+                return [400, {
+                    status: 'error',
+                    message: 'Validation Failed',
+                    errors: validationError
+                }];
+            } else {
+                items.splice(idx, 1);
+                return [200, {
+                    status: 'success',
+                    data: null
+                }];
+            }
         } else {
             return [404, {
                 status: 'error',
@@ -1674,6 +1683,19 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             amount: 250,
             siteAmount: 120,
             info: 'Расширение на bibika.ru'
+        },
+        {
+            id: 13,
+            type: 'extra',
+            cardId: 5,
+            dealer: {id: 3},
+            site: {id: 11},
+            activeFrom: '2014-05-01',
+            activeTo: '2014-05-31',
+            date: '2014-04-25',
+            amount: 1000,
+            siteAmount: 500,
+            info: 'Доплата на сайте cars.ru за промоушн'
         }
     ], multiplyCoef, function(i, len) {
         this.cardId = this.cardId + i * len;
@@ -1732,7 +1754,17 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     });
     var regexSalesDelete = /^\/api2\/sales\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexSalesDelete).respond(function(method, url, data) {
-        return processDelete(url, regexSalesDelete, sales);
+        return processDelete(url, regexSalesDelete, sales, function validation(item) {
+            if (item.type.id === 'card' && _.find(sales.getItems(), {type: saleTypes.get('addcard'), parentId: item.cardId})) {
+                return 'Нельзя удалить карточку, имеющую расширение.';
+            } else if (item.type.id === 'card' && _.find(sales.getItems(), {type: saleTypes.get('extra'), cardId: item.cardId})) {
+                return 'Нельзя удалить карточку, имеющую доплату.';
+            } else if (item.type.id === 'addcard' && _.find(sales.getItems(), {type: saleTypes.get('addcard'), parentId: item.cardId})) {
+                return 'Нельзя удалить расширение, имеющее расширение.';
+            } else {
+                return null;
+            }
+        });
     });
 
     var siteBalances = new SiteBalances([

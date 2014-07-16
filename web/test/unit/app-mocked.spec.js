@@ -39,6 +39,7 @@ describe('app-mocked', function() {
     var salesLoader;
     var Sales;
     var Sale;
+    var saleTypes;
     var SiteBalances;
 
     try {
@@ -147,6 +148,7 @@ describe('app-mocked', function() {
         salesLoader = injector.get('salesLoader');
         Sales = injector.get('Sales');
         Sale = injector.get('Sale');
+        saleTypes = injector.get('saleTypes');
         SiteBalances = injector.get('SiteBalances');
 
         if (ngMock) {
@@ -154,7 +156,7 @@ describe('app-mocked', function() {
             setHttpMock($httpBackend, 3, Construction,
                 User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-                Tariffs, TariffRates, DealerTariffs, Sales, Sale, SiteBalances);
+                Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
@@ -1090,6 +1092,276 @@ describe('sale', function() {
                 _.forEach(sale.serialize(), function(value, key) {
                     expect(value).toEqual(saleData[key]);
                 });
+            });
+        });
+    });
+
+    describe('Метод remove', function() {
+
+        it('удалять карточку, не имеющую расширений и доплат', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ]
+                }).then(function(sales) {
+                    var salesItems = sales.getItems();
+                    return $q.all({
+                        addSales: salesLoader.loadItems({
+                            filters: [
+                                { fields: ['type'], type: 'equal', value: 'addcard' },
+                                { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                            ]
+                        }),
+                        extraSales: salesLoader.loadItems({
+                            filters: [
+                                { fields: ['type'], type: 'equal', value: 'extra' },
+                                { fields: ['cardId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                            ]
+                        })
+                    }).then(function(collections) {
+                        var addSaleParentIds = _.pluck(collections.addSales.getItems(), 'parentId');
+                        _.remove(salesItems, function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        expect(collections.extraSales.getParams().pager.total).not.toBeGreaterThan(100);
+                        var extraSaleCardIds = _.pluck(collections.extraSales.getItems(), 'cardId');
+                        _.remove(salesItems, function(sale) {
+                            return _.contains(extraSaleCardIds, sale.cardId); 
+                        });
+                        expect(salesItems.length).toBeTruthy();
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var saleItems = answer.respond.getItems();
+                var sale = saleItems[0];
+                return sale.remove().then(function(respond) {
+                    expect(respond).toEqual(null);
+                    return salesLoader.loadItem(sale.id);
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Not Found');
+            });
+        });
+
+        it('выдавать ошибку при удалении карточки, имеющей расширение', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ]
+                }).then(function(sales) {
+                    var salesItems = sales.getItems();
+                    return $q.all({
+                        addSales: salesLoader.loadItems({
+                            filters: [
+                                { fields: ['type'], type: 'equal', value: 'addcard' },
+                                { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                            ]
+                        }),
+                        extraSales: salesLoader.loadItems({
+                            filters: [
+                                { fields: ['type'], type: 'equal', value: 'extra' },
+                                { fields: ['cardId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                            ]
+                        })
+                    }).then(function(collections) {
+                        var addSaleParentIds = _.pluck(collections.addSales.getItems(), 'parentId');
+                        _.remove(salesItems, function(sale) {
+                            return !_.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        expect(collections.extraSales.getParams().pager.total).not.toBeGreaterThan(100);
+                        var extraSaleCardIds = _.pluck(collections.extraSales.getItems(), 'cardId');
+                        _.remove(salesItems, function(sale) {
+                            return _.contains(extraSaleCardIds, sale.cardId); 
+                        });
+                        expect(salesItems.length).toBeTruthy();
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var saleItems = answer.respond.getItems();
+                var sale = saleItems[0];
+                return sale.remove();
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors).toEqual('Нельзя удалить карточку, имеющую расширение.');
+            });
+        });
+
+        it('выдавать ошибку при удалении карточки, имеющей доплату', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ]
+                }).then(function(sales) {
+                    var salesItems = sales.getItems();
+                    return $q.all({
+                        addSales: salesLoader.loadItems({
+                            filters: [
+                                { fields: ['type'], type: 'equal', value: 'addcard' },
+                                { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                            ]
+                        }),
+                        extraSales: salesLoader.loadItems({
+                            filters: [
+                                { fields: ['type'], type: 'equal', value: 'extra' },
+                                { fields: ['cardId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                            ]
+                        })
+                    }).then(function(collections) {
+                        var addSaleParentIds = _.pluck(collections.addSales.getItems(), 'parentId');
+                        _.remove(salesItems, function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        expect(collections.extraSales.getParams().pager.total).not.toBeGreaterThan(100);
+                        var extraSaleCardIds = _.pluck(collections.extraSales.getItems(), 'cardId');
+                        _.remove(salesItems, function(sale) {
+                            return !_.contains(extraSaleCardIds, sale.cardId); 
+                        });
+                        expect(salesItems.length).toBeTruthy();
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var saleItems = answer.respond.getItems();
+                var sale = saleItems[0];
+                return sale.remove();
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors).toEqual('Нельзя удалить карточку, имеющую доплату.');
+            });
+        });
+
+        it('удалять расширение, не имеющее расширений', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'addcard' }
+                    ]
+                }).then(function(sales) {
+                    var salesItems = sales.getItems();
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(salesItems, function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        expect(salesItems.length).toBeTruthy();
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var saleItems = answer.respond.getItems();
+                var sale = saleItems[0];
+                return sale.remove().then(function(respond) {
+                    expect(respond).toEqual(null);
+                    return salesLoader.loadItem(sale.id);
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Not Found');
+            });
+        });
+
+        it('выдавать ошибку при удалении расширения, имеющего расширение', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'addcard' }
+                    ]
+                }).then(function(sales) {
+                    var salesItems = sales.getItems();
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(salesItems, function(sale) {
+                            return !_.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        expect(salesItems.length).toBeTruthy();
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var saleItems = answer.respond.getItems();
+                var sale = saleItems[0];
+                return sale.remove();
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors).toEqual('Нельзя удалить расширение, имеющее расширение.');
+            });
+        });
+
+        it('удалять доплату', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'extra' }
+                    ]
+                });
+            });
+
+            runSync(answer, function() {
+                var saleItems = answer.respond.getItems();
+                var sale = saleItems[0];
+                return sale.remove().then(function(respond) {
+                    expect(respond).toEqual(null);
+                    return salesLoader.loadItem(sale.id);
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Not Found');
             });
         });
     });
