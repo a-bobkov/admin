@@ -898,6 +898,106 @@ describe('sale', function() {
             });
         });
 
+        it('выдавать ошибку, если дата начала > даты конца', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: ['-activeTo']
+                });
+            });
+
+            runSync(answer, function() {
+                var sale = answer.respond.getItems()[0];
+                var activeTo = _.clone(sale.activeFrom);
+                    activeTo.setDate(activeTo.getDate() + 1);
+                var activeFrom = _.clone(activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: Math.floor(Math.random() * 100000) / 100,
+                    count: Math.floor(Math.random() * 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: Math.floor(Math.random() * 100000) / 100,
+                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors).toEqual('Дата начала должна быть не позже даты конца.');
+            });
+        });
+
+        it('выдавать ошибку, если интервал дат пересекается с другой карточкой', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ],
+                    orders: ['-activeTo']
+                });
+            });
+
+            runSync(answer, function() {
+                var sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: Math.floor(Math.random() * 100000) / 100,
+                    count: Math.floor(Math.random() * 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: Math.floor(Math.random() * 100000) / 100,
+                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors).toEqual('Интервал дат пересекается с другой карточкой.');
+            });
+        });
+
         it('сохранять данные нового расширения', function() {
             var answer = {};
             var sale;
@@ -1050,8 +1150,6 @@ describe('sale', function() {
                 var otherSale = _.find(salesArray, function(otherSale) {
                     return (otherSale.dealer.id !== sale.dealer.id) && (otherSale.site.id !== sale.site.id);
                 });
-                console.log(sale);
-                console.log(otherSale);
                 expect(otherSale).toBeDefined();
 
                 var activeFrom = _.clone(otherSale.activeTo);
@@ -1088,7 +1186,6 @@ describe('sale', function() {
 
             runs(function() {
                 var sale = answer.respond;
-                console.log(sale);
                 _.forEach(sale.serialize(), function(value, key) {
                     expect(value).toEqual(saleData[key]);
                 });

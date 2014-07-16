@@ -363,7 +363,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
     }
 
-    var processPost = function(data, collection, itemName, itemConstuctor, directories, processId) {
+    var processPost = function(data, collection, itemName, itemConstuctor, directories, processId, validation) {
         var items = collection.getItems();
         try {
             var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
@@ -372,6 +372,15 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 status: 'error',
                 message: 'Ошибка при создании',
                 errors: err.message
+            }];
+        }
+
+        var validationError = validation && validation(item);
+        if (validationError) {
+            return [400, {
+                status: 'error',
+                message: 'Validation Failed',
+                errors: validationError
             }];
         }
 
@@ -1742,6 +1751,20 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             if (this.type.id === 'card' || this.type.id === 'addcard') {
                 this.cardId = this.id;
             }
+        }, function validation(item) {
+            if (item.type.id === 'card') {
+                if (item.activeFrom > item.activeTo) {
+                    return 'Дата начала должна быть не позже даты конца.';
+                } else if (_.filter(sales.getItems(), function(sale) {
+                    return (sale.type === item.type)
+                        && (sale.dealer.id === item.dealer.id)
+                        && (sale.site.id === item.site.id)
+                        && !(sale.activeTo < item.activeFrom || sale.activeFrom > item.activeTo);
+                }).length) {
+                    return 'Интервал дат пересекается с другой карточкой.';
+                }
+            }
+            return null;
         });
     });
     var regexSalesPut = /^\/api2\/sales\/(?:([^\/]+))$/;
