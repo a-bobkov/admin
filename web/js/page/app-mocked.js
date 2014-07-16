@@ -1754,14 +1754,18 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }, function validation(item) {
             if (item.type.id === 'card') {
                 if (item.activeFrom > item.activeTo) {
-                    return 'Дата начала должна быть не позже даты конца.';
-                } else if (_.filter(sales.getItems(), function(sale) {
-                    return (sale.type === item.type)
-                        && (sale.dealer.id === item.dealer.id)
-                        && (sale.site.id === item.site.id)
-                        && !(sale.activeTo < item.activeFrom || sale.activeFrom > item.activeTo);
-                }).length) {
-                    return 'Интервал дат пересекается с другой карточкой.';
+                    return {children: {activeFrom: {errors: ['Дата activeFrom должна быть меньше или равна дате activeTo.']}}};
+                } else {
+                    var crossSales = _.filter(sales.getItems(), function(sale) {
+                        return (sale.type === item.type)
+                            && (sale.dealer.id === item.dealer.id)
+                            && (sale.site.id === item.site.id)
+                            && !(sale.activeTo < item.activeFrom || sale.activeFrom > item.activeTo);
+                    });
+                    if (crossSales.length) {
+                        return {children: {activeFrom: {errors: ['В диапазоне от ' + item.activeFrom.toISOString().slice(0, 10)
+                            + ' до ' + item.activeTo.toISOString().slice(0, 10) + ' уже находятся продажи (' + crossSales.length + ').']}}};
+                    }
                 }
             }
             return null;
@@ -1779,11 +1783,11 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     $httpBackend.whenDELETE(regexSalesDelete).respond(function(method, url, data) {
         return processDelete(url, regexSalesDelete, sales, function validation(item) {
             if (item.type.id === 'card' && _.find(sales.getItems(), {type: saleTypes.get('addcard'), parentId: item.cardId})) {
-                return 'Нельзя удалить карточку, имеющую расширение.';
+                return 'Невозможно удалить продажу с расширением или доплатой.';
             } else if (item.type.id === 'card' && _.find(sales.getItems(), {type: saleTypes.get('extra'), cardId: item.cardId})) {
-                return 'Нельзя удалить карточку, имеющую доплату.';
+                return 'Невозможно удалить продажу с расширением или доплатой.';
             } else if (item.type.id === 'addcard' && _.find(sales.getItems(), {type: saleTypes.get('addcard'), parentId: item.cardId})) {
-                return 'Нельзя удалить расширение, имеющее расширение.';
+                return 'Невозможно удалить продажу с расширением или доплатой.';
             } else {
                 return null;
             }

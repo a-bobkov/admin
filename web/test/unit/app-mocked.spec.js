@@ -332,6 +332,37 @@ describe('sale', function() {
             });
         });
 
+        it('equal - фильтровать доплаты по равенству cardId заданному значению', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'extra' }
+                    ]
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'extra' },
+                        { fields: ['cardId'], type: 'equal', value: sale.cardId }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var saleItems = answer.respond.getItems();
+                expect(saleItems.length).toBeTruthy();
+                _.forEach(saleItems, function(saleItem) {
+                    expect(saleItem.cardId).toEqual(sale.cardId);
+                })
+            });
+        });
+
         it('equal - фильтровать по равенству dealer заданному значению', function() {
             var answer = {};
             var sale;
@@ -943,7 +974,7 @@ describe('sale', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Дата начала должна быть не позже даты конца.');
+                expect(errorResponse.errors.children.activeFrom.errors).toEqual(['Дата activeFrom должна быть меньше или равна дате activeTo.']);
             });
         });
 
@@ -994,7 +1025,8 @@ describe('sale', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Интервал дат пересекается с другой карточкой.');
+                expect(errorResponse.errors.children.activeFrom.errors[0]).toMatch(new RegExp('^В диапазоне от ' + saleData.activeFrom
+                    + ' до ' + saleData.activeTo + ' уже находятся продажи \\(\\d+\\)\\.$'));
             });
         });
 
@@ -1057,7 +1089,6 @@ describe('sale', function() {
 
             runs(function() {
                 var addSale = answer.respond;
-                expect(addSale.id).toEqual(addSale.cardId);
                 _.forEach(addSale.serialize(), function(value, key) {
                     if (!_.contains(['id', 'cardId'], key)) {
                         expect(value).toEqual(addSaleData[key]);
@@ -1203,7 +1234,8 @@ describe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'card' }
-                    ]
+                    ],
+                    orders: ['-id']
                 }).then(function(sales) {
                     var salesItems = sales.getItems();
                     return $q.all({
@@ -1257,7 +1289,8 @@ describe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'card' }
-                    ]
+                    ],
+                    orders: ['-id']
                 }).then(function(sales) {
                     var salesItems = sales.getItems();
                     return $q.all({
@@ -1298,7 +1331,7 @@ describe('sale', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Нельзя удалить карточку, имеющую расширение.');
+                expect(errorResponse.errors).toEqual('Невозможно удалить продажу с расширением или доплатой.');
             });
         });
 
@@ -1309,7 +1342,8 @@ describe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'card' }
-                    ]
+                    ],
+                    orders: ['-id']
                 }).then(function(sales) {
                     var salesItems = sales.getItems();
                     return $q.all({
@@ -1350,7 +1384,7 @@ describe('sale', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Нельзя удалить карточку, имеющую доплату.');
+                expect(errorResponse.errors).toEqual('Невозможно удалить продажу с расширением или доплатой.');
             });
         });
 
@@ -1362,7 +1396,8 @@ describe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'addcard' }
-                    ]
+                    ],
+                    orders: ['-id']
                 }).then(function(sales) {
                     var salesItems = sales.getItems();
                     return salesLoader.loadItems({
@@ -1403,7 +1438,8 @@ describe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'addcard' }
-                    ]
+                    ],
+                    orders: ['-id']
                 }).then(function(sales) {
                     var salesItems = sales.getItems();
                     return salesLoader.loadItems({
@@ -1431,7 +1467,7 @@ describe('sale', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Нельзя удалить расширение, имеющее расширение.');
+                expect(errorResponse.errors).toEqual('Невозможно удалить продажу с расширением или доплатой.');
             });
         });
 
@@ -1443,7 +1479,8 @@ describe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'extra' }
-                    ]
+                    ],
+                    orders: ['-id']
                 });
             });
 
