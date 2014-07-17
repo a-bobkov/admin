@@ -1384,8 +1384,8 @@ describe('sale', function() {
                         });
                         var sale = salesItems[0];
                         expect(sale).toBeDefined();
-                        console.log('Удаляемая продажа:', sale);
-                        console.log('Расширение удаляемой продажи:', _.find(addSales.getItems(), {parentId: sale.cardId}));
+                        console.log('Удаляемая карточка:', sale);
+                        console.log('Расширение удаляемой карточки:', _.find(addSales.getItems(), {parentId: sale.cardId}));
                         return collections.sales;
                     });
                 });
@@ -1516,7 +1516,10 @@ describe('sale', function() {
                         _.remove(salesItems, function(sale) {
                             return !_.contains(addSaleParentIds, sale.cardId); 
                         });
-                        expect(salesItems.length).toBeTruthy();
+                        var sale = salesItems[0];
+                        expect(sale).toBeDefined();
+                        console.log('Удаляемое расширение:', sale);
+                        console.log('Расширение удаляемого расширения:', _.find(addSales.getItems(), {parentId: sale.cardId}));
                         return sales;
                     });
                 });
@@ -1988,117 +1991,6 @@ describe('tariff', function() {
                 expect(tariffs.length).toBeTruthy();
                 expect(_.pluck(_.pluck(tariffs, 'site'), 'id')).toBeSorted('DescendingNumbers');
             });
-        });
-    });
-});
-
-describe('sales, tariffs', function() {
-    
-    it('загружать значения тарифов, затем нужных сайтов', function() {
-        var answer = {};
-
-        runSync(answer, function() {
-            return tariffsLoader.loadItems().then(function(tariffs) {
-                return sitesLoader.loadItems({
-                    filters: [
-                        { fields: ['id'], type: 'in', value: _.pluck(tariffs.getItems(), 'id') }
-                    ]
-                }).then(function(sites) {
-                    tariffs.resolveRefs({sites: sites});
-                    return {
-                        tariffs: tariffs,
-                        sites: sites
-                    }
-                });
-            });
-        });
-
-        runs(function() {
-            var directories = answer.respond;
-            var tariffItems = directories.tariffs.getItems();
-            var siteItems = directories.sites.getItems();
-            expect(tariffItems.length).toBeTruthy();
-            expect(siteItems.length).toBeTruthy();
-        });
-    });
-
-    it('загружать значения всех сайтов, затем тарифов', function() {
-        var answer = {};
-
-        runSync(answer, function() {
-            return sitesLoader.loadItems().then(function(sites) {
-                return tariffsLoader.loadItems(null, {sites: sites}).then(function(tariffs) {
-                    return {
-                        sites: sites,
-                        tariffs: tariffs
-                    };
-                });
-            });
-        });
-
-        runs(function() {
-            var directories = answer.respond;
-            var tariffItems = directories.tariffs.getItems();
-            var siteItems = directories.sites.getItems();
-            expect(tariffItems.length).toBeTruthy();
-            expect(siteItems.length).toBeTruthy();
-        });
-    });
-
-    it('загружать значения всех сайтов, затем тарифов, затем первого тарифа', function() {
-        var answer = {};
-
-        runSync(answer, function() {
-            return sitesLoader.loadItems().then(function(sites) {
-                return tariffsLoader.loadItems(null, {sites: sites}).then(function(tariffs) {
-                    // return tariffsLoader.loadItem(tariffs.getItems()[0].id, {sites: sites}).then(function(tariff) {
-                        return {
-                            sites: sites,
-                            tariffs: tariffs
-                            // ,
-                            // tariff: tariff
-                        }
-                    // });
-                });
-            });
-        });
-
-        runs(function() {
-            var directories = answer.respond;
-            var siteItems = directories.sites.getItems();
-            var tariffItems = directories.tariffs.getItems();
-            var tariff = directories.tariff;
-            expect(siteItems.length).toBeTruthy();
-            expect(tariffItems.length).toBeTruthy();
-            // expect(tariff.constructor.name).toBe('Tariff');
-        });
-    });
-
-    it('загружать сразу значения тарифов и всех сайтов', function() {
-        var answer = {};
-
-        runSync(answer, function() {
-            return $q.all({
-                tariffs: tariffsLoader.loadItems(),
-                sites: sitesLoader.loadItems()
-            }).then(function(directories) {
-                return _.invoke(directories, 'resolveRefs', directories);
-            });
-        });
-
-        runSync(answer, function() {
-            var directories = answer.respond;
-            var tariffItems = directories.tariffs.getItems();
-            var siteItems = directories.sites.getItems();
-            expect(tariffItems.length).toBeTruthy();
-            expect(siteItems.length).toBeTruthy();
-            return tariffsLoader.loadItem(tariffItems[0].id, directories);
-        });
-
-
-        runs(function() {
-            var tariff = answer.respond;
-            expect(tariff).toBeTruthy();
         });
     });
 });
