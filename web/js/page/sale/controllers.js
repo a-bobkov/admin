@@ -290,6 +290,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         delete $rootScope.savedSaleListNotice;
     }
 
+    var regexpOrder = /^([+-]?)(\w+)$/;
+
     $scope.toggleSiteBalances = function() {
         if (!$scope.showSiteBalances) {
             $q.all({
@@ -342,19 +344,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         {id: "isActive", name: "Статус", width: '5%'}
     ];
 
+    $scope.sortingColumn = function() {
+        return $scope.sorting[0].replace(regexpOrder, '$2');
+    }
+
     $scope.sortingMark = function(column) {
-        if (column === $scope.sorting.column) {
-            return ($scope.sorting.reverse) ? ' ↑': ' ↓';
+        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+            return ($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? ' ↑' : ' ↓';
         }
         return '   ';
     }
 
     $scope.changeSorting = function(column) {
-        if (column === $scope.sorting.column) {
-            $scope.sorting.reverse = !$scope.sorting.reverse;
+        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+            $scope.sorting[0] = (($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? '' : '-') + column;
         } else {
-            $scope.sorting.column = column;
-            $scope.sorting.reverse = false;
+            $scope.sorting = [column, '-id'];
         }
         onSortingChange();
     }
@@ -368,9 +373,10 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $scope.paging.currentPage = page;
         }
 
-        var searchParams = _.pick(_.assign({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
+        var searchParams = _.pick(_.assign({}, $scope.patterns, $scope.paging), function(value) {
             return value;
         });
+        searchParams.orders = $scope.sorting;
         $rootScope.savedSaleListLocationSearch = toLocationSearch(searchParams);
         $location.search($rootScope.savedSaleListLocationSearch);
 
@@ -434,20 +440,14 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             type: saleTypes.get(ls.type),
             archive: !!ls.archive
         };
-        $scope.sorting = {
-            column: ls.column,
-            reverse: !!ls.reverse
-        };
+        $scope.sorting = ls.orders && ls.orders.split(';') || ['-id'];
         $scope.paging = {
             currentPage: _.parseInt(ls.currentPage),
             itemsPerPage: _.parseInt(ls.itemsPerPage)
         };
     } else {
         $scope.setPatternsDefault();
-        $scope.sorting = {
-            column: 'id',
-            reverse: false
-        };
+        $scope.sorting = ['-id'];
         $scope.paging = {
             itemsPerPage: 25
         };
@@ -458,10 +458,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         if (_.size(ls)) {
             var queryParams = {
                 filters: [],
-                order: {
-                    order_field: ls.column,
-                    order_direction: ls.reverse ? 'desc': 'asc'
-                },
+                orders: ls.orders.split(';'),
                 pager: {
                     page: ls.currentPage,
                     per_page: ls.itemsPerPage
@@ -505,9 +502,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             return queryParams;
         } else {
             return {
-                order: {
-                    order_field: 'id'
-                },
+                orders: ['-id'],
                 pager: {
                     per_page: 25
                 }
@@ -740,10 +735,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 { fields: ['type'], type: 'in', value: ['card', 'addcard'] },
                 { fields: ['activeTo'], type: 'greaterOrEqual', value: new Date().toISOString().slice(0, 10) }
             ],
-            order: {
-                order_field: 'activeTo',
-                order_direction: 'desc'
-            }
+            orders: ['-activeTo']
         };
         var oldDirectories = _.pick($scope, ['saleTypes', 'saleStatuses', 'dealers', 'sites', 'tariffs']);
         salesLoader.loadItems(salesQueryParams, oldDirectories).then(function(sales) {
