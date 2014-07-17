@@ -30,6 +30,18 @@ TD.center {
 	text-align: center;
 }
 
+.actions A, .action {
+  background: url(../images/default.png) no-repeat 0 0;
+}
+LI.delete A, A.delete {
+  background: url(../images/delete.png) no-repeat 0 0
+}
+LI.edit A {
+  background: url(../images/edit.png) no-repeat 0 0
+}
+LI.new A, A.new, .action.new {
+  background: url(../images/new.png) no-repeat 0 0
+}
 LI.pricelist A {
   background: url(../images/pricelist_transparent.png) no-repeat 0 0;
 }
