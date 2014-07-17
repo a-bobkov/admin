@@ -195,7 +195,7 @@ describe('app-mocked', function() {
         });
     }
 
-describe('sale', function() {
+ddescribe('sale', function() {
 
     describe('Метод get', function() {
 
@@ -239,7 +239,6 @@ describe('sale', function() {
                         expect(sale.tariff).toBeReference();
                         expect(sale.cardAmount).toBeNumber();
                         expect(sale.count).toBeIntegerOrNull();
-                        expect(sale.isActive.id).toBeBoolean();
                     }
                     expect(sale.cardId).toBeInteger();
                     expect(sale.dealer).toBeReference();
@@ -249,6 +248,7 @@ describe('sale', function() {
                     expect(sale.activeTo).toBeDate();
                     expect(sale.amount).toBeNumber();
                     expect(sale.siteAmount).toBeNumber();
+                    expect(sale.isActive.id).toBeBoolean();
                     expect(sale.info).toBeString();
                 })
             });

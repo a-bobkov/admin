@@ -1568,7 +1568,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             count: null,
             activeFrom: '2014-05-01',
             activeTo: '2014-05-31',
-            isActive: true,
+            isActive: false,
             date: '2014-04-25',
             amount: 4720,
             siteAmount: 4000,
@@ -1655,6 +1655,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             date: '2014-04-20',
             amount: 300.00,
             siteAmount: 200.00,
+            isActive: true,
             info: 'Доплата на сайте irr.ru за выделение рамкой'
         },
         {
@@ -1704,6 +1705,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             date: '2014-04-25',
             amount: 1000,
             siteAmount: 500,
+            isActive: false,
             info: 'Доплата на сайте cars.ru за промоушн'
         }
     ], multiplyCoef, function(i, len) {
