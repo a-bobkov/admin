@@ -1097,7 +1097,7 @@ describe('sale', function() {
             });
         });
 
-        iit('сохранять данные нового расширения расширения', function() {
+        it('сохранять данные нового расширения расширения', function() {
             var answer = {};
             var sale;
             var addSaleData;
@@ -1358,50 +1358,47 @@ describe('sale', function() {
             runSync(answer, function() {
                 return salesLoader.loadItems({
                     filters: [
-                        { fields: ['type'], type: 'equal', value: 'card' }
+                        { fields: ['type'], type: 'equal', value: 'addcard' }
                     ],
                     orders: ['-id']
-                }).then(function(sales) {
-                    var salesItems = sales.getItems();
+                }).then(function(addSales) {
+                    var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
                     return $q.all({
-                        addSales: salesLoader.loadItems({
+                        sales: salesLoader.loadItems({
                             filters: [
-                                { fields: ['type'], type: 'equal', value: 'addcard' },
-                                { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                                { fields: ['type'], type: 'equal', value: 'card' },
+                                { fields: ['cardId'], type: 'in', value: addSaleParentIds }
                             ]
                         }),
                         extraSales: salesLoader.loadItems({
                             filters: [
                                 { fields: ['type'], type: 'equal', value: 'extra' },
-                                { fields: ['cardId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                                { fields: ['cardId'], type: 'in', value: addSaleParentIds }
                             ]
                         })
                     }).then(function(collections) {
-                        var addSaleParentIds = _.pluck(collections.addSales.getItems(), 'parentId');
-                        _.remove(salesItems, function(sale) {
-                            return !_.contains(addSaleParentIds, sale.cardId); 
-                        });
-                        expect(collections.extraSales.getParams().pager.total).not.toBeGreaterThan(100);
+                        var salesItems = collections.sales.getItems();
                         var extraSaleCardIds = _.pluck(collections.extraSales.getItems(), 'cardId');
                         _.remove(salesItems, function(sale) {
                             return _.contains(extraSaleCardIds, sale.cardId); 
                         });
-                        expect(salesItems.length).toBeTruthy();
-                        return sales;
+                        var sale = salesItems[0];
+                        expect(sale).toBeDefined();
+                        console.log('Удаляемая продажа:', sale);
+                        console.log('Расширение удаляемой продажи:', _.find(addSales.getItems(), {parentId: sale.cardId}));
+                        return collections.sales;
                     });
                 });
             });
 
             runSync(answer, function() {
-                var saleItems = answer.respond.getItems();
-                var sale = saleItems[0];
+                var sale = answer.respond.getItems()[0];
                 return sale.remove();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Невозможно удалить продажу с расширением или доплатой.');
+                expect(errorResponse.message).toEqual('Невозможно удалить продажу с расширением или доплатой.');
             });
         });
 
@@ -1411,50 +1408,47 @@ describe('sale', function() {
             runSync(answer, function() {
                 return salesLoader.loadItems({
                     filters: [
-                        { fields: ['type'], type: 'equal', value: 'card' }
+                        { fields: ['type'], type: 'equal', value: 'extra' }
                     ],
                     orders: ['-id']
-                }).then(function(sales) {
-                    var salesItems = sales.getItems();
+                }).then(function(extraSales) {
+                    var extraSalesItems = extraSales.getItems();
                     return $q.all({
                         addSales: salesLoader.loadItems({
                             filters: [
                                 { fields: ['type'], type: 'equal', value: 'addcard' },
-                                { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                                { fields: ['parentId'], type: 'in', value: _.pluck(extraSalesItems, 'cardId') }
                             ]
                         }),
-                        extraSales: salesLoader.loadItems({
+                        sales: salesLoader.loadItems({
                             filters: [
-                                { fields: ['type'], type: 'equal', value: 'extra' },
-                                { fields: ['cardId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                                { fields: ['type'], type: 'equal', value: 'card' },
+                                { fields: ['cardId'], type: 'in', value: _.pluck(extraSalesItems, 'cardId') }
                             ]
                         })
                     }).then(function(collections) {
+                        var salesItems = collections.sales.getItems();
                         var addSaleParentIds = _.pluck(collections.addSales.getItems(), 'parentId');
                         _.remove(salesItems, function(sale) {
                             return _.contains(addSaleParentIds, sale.cardId); 
                         });
-                        expect(collections.extraSales.getParams().pager.total).not.toBeGreaterThan(100);
-                        var extraSaleCardIds = _.pluck(collections.extraSales.getItems(), 'cardId');
-                        _.remove(salesItems, function(sale) {
-                            return !_.contains(extraSaleCardIds, sale.cardId); 
-                        });
-                        expect(salesItems.length).toBeTruthy();
-                        return sales;
+                        var sale = salesItems[0];
+                        expect(sale).toBeDefined();
+                        console.log('Удаляемая карточка:', sale);
+                        console.log('Доплата удаляемой карточки:', _.find(extraSales.getItems(), {cardId: sale.cardId}));
+                        return collections.sales;
                     });
                 });
             });
 
             runSync(answer, function() {
-                var saleItems = answer.respond.getItems();
-                var sale = saleItems[0];
+                var sale = answer.respond.getItems()[0];
                 return sale.remove();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Невозможно удалить продажу с расширением или доплатой.');
+                expect(errorResponse.message).toEqual('Невозможно удалить продажу с расширением или доплатой.');
             });
         });
 
@@ -1497,7 +1491,7 @@ describe('sale', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Продажа не найдена.');
             });
         });
 
@@ -1565,7 +1559,7 @@ describe('sale', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Продажа не найдена.');
             });
         });
     });
