@@ -906,7 +906,7 @@ ddescribe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
                     siteAmount: Math.floor(Math.random() * 100000) / 100,
                     info: 'Комментарий'
                 };
@@ -959,7 +959,7 @@ ddescribe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
                     siteAmount: Math.floor(Math.random() * 100000) / 100,
                     info: 'Комментарий'
                 };
@@ -974,7 +974,7 @@ ddescribe('sale', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.activeFrom.errors).toEqual(['Дата activeFrom должна быть меньше или равна дате activeTo.']);
+                expect(errorResponse.errors.children.activeFrom.errors).toContain('Дата activeFrom должна быть меньше или равна дате activeTo.');
             });
         });
 
@@ -1010,7 +1010,7 @@ ddescribe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
                     siteAmount: Math.floor(Math.random() * 100000) / 100,
                     info: 'Комментарий'
                 };
@@ -1075,7 +1075,7 @@ ddescribe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
                     siteAmount: Math.floor(Math.random() * 100000) / 100,
                     info: 'Комментарий'
                 };
@@ -1203,7 +1203,7 @@ ddescribe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: !sale.isActive,
                     date: date.toISOString().slice(0, 10),
-                    amount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
                     siteAmount: Math.floor(Math.random() * 100000) / 100,
                     info: sale.info + '1'
                 };

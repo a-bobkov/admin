@@ -35,6 +35,9 @@ beforeEach(function() {
         toBeMemberOf: function (array) {
             return _.contains(array, this.actual);
         },
+        toContain: function (member) {
+            return _.contains(this.actual, member);
+        },
         toBeDate: function () {
             return _.isDate(this.actual);
         },

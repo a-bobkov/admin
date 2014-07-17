@@ -115,13 +115,11 @@
 	        <tr>
 	            <th><label for="saleAmount">Стоимость</label></th>
 	            <td>
-	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' ui-greater-or-equal="saleEdited.cardAmount" ng-required='true' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleAmount.$invalid'>
 					    <li id='saleAmountErrorRequired' ng-show="formSale.saleAmount.$error.required">Необходимо ввести стоимость.</li>
 					    <li id='saleAmountErrorPattern' ng-show="formSale.saleAmount.$error.pattern">Стоимость должна быть в формате 1234567,89</li>
-					</ul>
-					<ul class="warning_list" ng-show='saleEdited.amount < saleEdited.cardAmount'>
-					    <li id='saleEditAmountWarningLessCard' ng-show="saleEdited.amount < saleEdited.cardAmount">Стоимость меньше цены по тарифу.</li>
+					    <li id='saleEditAmountErrorLessCard' ng-show="formSale.saleAmount.$error.greaterOrEqual">Стоимость должна быть не меньше цены по тарифу.</li>
 					</ul>
 	           </td>
 	        </tr>

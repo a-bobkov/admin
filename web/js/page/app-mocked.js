@@ -1754,23 +1754,37 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 this.cardId = this.id;
             }
         }, function validation(item) {
-            if (item.type.id === 'card') {
+            var hasErrors;
+            var children = {};
+            function pushError(errorField, errorText) {
+                hasErrors = true;
+                if (!children[errorField]) {
+                    children[errorField] = {errors: []};
+                }
+                children[errorField].errors.push(errorText);
+            }
+            if (_.contains('card', 'addcard'), item.type.id) {
                 if (item.activeFrom > item.activeTo) {
-                    return {children: {activeFrom: {errors: ['Дата activeFrom должна быть меньше или равна дате activeTo.']}}};
-                } else {
-                    var crossSales = _.filter(sales.getItems(), function(sale) {
-                        return (sale.type === item.type)
-                            && (sale.dealer.id === item.dealer.id)
-                            && (sale.site.id === item.site.id)
-                            && !(sale.activeTo < item.activeFrom || sale.activeFrom > item.activeTo);
-                    });
-                    if (crossSales.length) {
-                        return {children: {activeFrom: {errors: ['В диапазоне от ' + item.activeFrom.toISOString().slice(0, 10)
-                            + ' до ' + item.activeTo.toISOString().slice(0, 10) + ' уже находятся продажи (' + crossSales.length + ').']}}};
-                    }
+                    pushError('activeFrom', 'Дата activeFrom должна быть меньше или равна дате activeTo.');
+                }
+
+                if (item.amount < item.cardAmount) {
+                    pushError('amount', 'Стоимость продажи не должна быть меньше цены карточки.');
                 }
             }
-            return null;
+            if (_.contains('card'), item.type.id) {
+                var crossSales = _.filter(sales.getItems(), function(sale) {
+                    return (sale.type === item.type)
+                        && (sale.dealer.id === item.dealer.id)
+                        && (sale.site.id === item.site.id)
+                        && !(sale.activeTo < item.activeFrom || sale.activeFrom > item.activeTo);
+                });
+                if (crossSales.length) {
+                    pushError('activeFrom', 'В диапазоне от ' + item.activeFrom.toISOString().slice(0, 10)
+                        + ' до ' + item.activeTo.toISOString().slice(0, 10) + ' уже находятся продажи (' + crossSales.length + ').');
+                }
+            }
+            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexSalesPut = /^\/api2\/sales\/(?:([^\/]+))$/;
