@@ -527,7 +527,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.date, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -547,7 +546,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.date, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -567,7 +565,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.dealer.id, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -587,7 +584,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.dealer.id, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -607,7 +603,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.site.id, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -627,7 +622,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.site.id, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -647,7 +641,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.count, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -667,7 +660,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.count, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -687,7 +679,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.amount, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -707,7 +698,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.amount, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -727,7 +717,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.siteAmount, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -747,7 +736,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.siteAmount, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -767,7 +755,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.activeFrom, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -787,7 +774,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.activeFrom, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -807,7 +793,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.activeTo, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -827,7 +812,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.activeTo, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -847,7 +831,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.isActive, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -867,7 +850,6 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    console.log(sale.isActive, sale.id);
                     expect(sale.id).toEqual(sales[saleIdx].id);
                 });
             });
@@ -1452,6 +1434,48 @@ describe('sale', function() {
             });
         });
 
+        it('выдавать ошибку при удалении расширения, имеющего расширение', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'addcard' }
+                    ],
+                    orders: ['-id']
+                }).then(function(sales) {
+                    var salesItems = sales.getItems();
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(salesItems, function(sale) {
+                            return !_.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        var sale = salesItems[0];
+                        expect(sale).toBeDefined();
+                        console.log('Удаляемое расширение:', sale);
+                        console.log('Расширение удаляемого расширения:', _.find(addSales.getItems(), {parentId: sale.cardId}));
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var saleItems = answer.respond.getItems();
+                var sale = saleItems[0];
+                return sale.remove();
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Невозможно удалить продажу с расширением или доплатой.');
+            });
+        });
+
         it('удалять расширение, не имеющее расширений', function() {
             var answer = {};
             var saleData;
@@ -1492,49 +1516,6 @@ describe('sale', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Продажа не найдена.');
-            });
-        });
-
-        it('выдавать ошибку при удалении расширения, имеющего расширение', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    filters: [
-                        { fields: ['type'], type: 'equal', value: 'addcard' }
-                    ],
-                    orders: ['-id']
-                }).then(function(sales) {
-                    var salesItems = sales.getItems();
-                    return salesLoader.loadItems({
-                        filters: [
-                            { fields: ['type'], type: 'equal', value: 'addcard' },
-                            { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
-                        ]
-                    }).then(function(addSales) {
-                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
-                        _.remove(salesItems, function(sale) {
-                            return !_.contains(addSaleParentIds, sale.cardId); 
-                        });
-                        var sale = salesItems[0];
-                        expect(sale).toBeDefined();
-                        console.log('Удаляемое расширение:', sale);
-                        console.log('Расширение удаляемого расширения:', _.find(addSales.getItems(), {parentId: sale.cardId}));
-                        return sales;
-                    });
-                });
-            });
-
-            runSync(answer, function() {
-                var saleItems = answer.respond.getItems();
-                var sale = saleItems[0];
-                return sale.remove();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors).toEqual('Невозможно удалить продажу с расширением или доплатой.');
             });
         });
 

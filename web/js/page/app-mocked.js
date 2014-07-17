@@ -453,8 +453,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             if (validationError) {
                 return [400, {
                     status: 'error',
-                    message: 'Validation Failed',
-                    errors: validationError
+                    message: validationError
                 }];
             } else {
                 items.splice(idx, 1);
