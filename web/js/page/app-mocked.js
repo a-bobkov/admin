@@ -357,7 +357,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         } else {
             return [404, {
                 status: 'error',
-                message: 'Not Found',
+                message: collection.notFoundMessage || 'Not Found',
                 errors: 'Не найден ' + itemName + ' с id: ' + id
             }];
         }
@@ -413,7 +413,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         if (idx === -1) {
             return [404, {
                 status: 'error',
-                message: 'Not Found',
+                message: collection.notFoundMessage || 'Not Found',
                 errors: 'Не найден элемент с id: ' + id
             }];
         }
@@ -466,7 +466,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         } else {
             return [404, {
                 status: 'error',
-                message: 'Not Found',
+                message: collection.notFoundMessage || 'Not Found',
                 errors: 'Не найден элемент с id: ' + id
             }];
         }
@@ -1715,6 +1715,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             this.parentId = this.parentId + i * len;
         }
     })).resolveRefs({dealers: dealers, sites: sites, tariffs: tariffs});
+    sales.notFoundMessage = 'Продажа не найдена.';
 
     function multiplyArrFn(arr, coef, fn) {
         coef = coef || 1;
@@ -1763,7 +1764,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 }
                 children[errorField].errors.push(errorText);
             }
-            if (_.contains('card', 'addcard'), item.type.id) {
+            if (_.contains(['card', 'addcard'], item.type.id)) {
                 if (item.activeFrom > item.activeTo) {
                     pushError('activeFrom', 'Дата activeFrom должна быть меньше или равна дате activeTo.');
                 }
@@ -1772,7 +1773,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                     pushError('amount', 'Стоимость продажи не должна быть меньше цены карточки.');
                 }
             }
-            if (_.contains('card'), item.type.id) {
+            if (_.contains(['card'], item.type.id)) {
                 var crossSales = _.filter(sales.getItems(), function(sale) {
                     return (sale.type === item.type)
                         && (sale.dealer.id === item.dealer.id)

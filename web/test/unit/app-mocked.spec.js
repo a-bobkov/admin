@@ -195,7 +195,7 @@ describe('app-mocked', function() {
         });
     }
 
-ddescribe('sale', function() {
+describe('sale', function() {
 
     describe('Метод get', function() {
 
@@ -920,7 +920,6 @@ ddescribe('sale', function() {
 
             runs(function() {
                 var sale = answer.respond;
-                expect(sale.id).toEqual(sale.cardId);
                 _.forEach(sale.serialize(), function(value, key) {
                     if (!_.contains(['id', 'cardId'], key)) {
                         expect(value).toEqual(saleData[key]);
@@ -1039,7 +1038,76 @@ ddescribe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'card' }
-                    ]
+                    ],
+                    orders: ['-id']
+                }).then(function(sales) {
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(sales.getItems(), function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                var activeTo = _.clone(sale.activeTo);
+                var date = new Date;
+                date.setUTCHours(0, 0, 0, 0);
+                addSaleData = {
+                    type: 'addcard',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    parentId: sale.cardId,
+                    cardAmount: Math.floor(Math.random() * 100000) / 100,
+                    count: Math.floor(Math.random() * 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
+                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    info: 'Комментарий'
+                };
+                var addSale = new Sale(addSaleData);
+                return addSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var addSale = answer.respond;
+                _.forEach(addSale.serialize(), function(value, key) {
+                    if (!_.contains(['id', 'cardId'], key)) {
+                        expect(value).toEqual(addSaleData[key]);
+                    }
+                });
+            });
+        });
+
+        iit('сохранять данные нового расширения расширения', function() {
+            var answer = {};
+            var sale;
+            var addSaleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'addcard' }
+                    ],
+                    orders: ['-id']
                 }).then(function(sales) {
                     return salesLoader.loadItems({
                         filters: [
@@ -1106,7 +1174,8 @@ ddescribe('sale', function() {
                 return salesLoader.loadItems({
                     filters: [
                         { fields: ['type'], type: 'equal', value: 'card' }
-                    ]
+                    ],
+                    orders: ['-id']
                 });
             });
 
@@ -1126,6 +1195,7 @@ ddescribe('sale', function() {
                     date: date.toISOString().slice(0, 10),
                     amount: Math.floor(Math.random() * 100000) / 100,
                     siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    isActive: sale.isActive.id,
                     info: 'Комментарий'
                 };
                 var extraSale = new Sale(extraSaleData);
@@ -1278,7 +1348,7 @@ ddescribe('sale', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Продажа не найдена.');
             });
         });
 
