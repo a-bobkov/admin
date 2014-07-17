@@ -53,7 +53,7 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
          */
         this.query = function(params) {
             if (_.contains(['sales', 'tariffs', 'tariffrates', 'sites'], url.replace(/\/(\w+)$/, '$1'))) {
-                var paramsPager =  _.pick(params, 'pager');
+                var paramsPager = _.assign({}, params.pager);
                 var paramsFiltersOrdersFields = _.pick(params, ['filters', 'fields', 'orders']);
                 if (!_.isEmpty(paramsFiltersOrdersFields)) {
                     return Api.post(url, paramsFiltersOrdersFields, paramsPager).then(
