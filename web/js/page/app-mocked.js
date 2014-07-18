@@ -1477,10 +1477,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexDealerTariffsQuery = /^\/api2\/dealertariffs(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerTariffsQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealerTariffsQuery, dealerTariffs.getItems(), 'dealerTariffs', DealerTariffs);
+        return processQueryUrlSort(url, regexDealerTariffsQuery, dealerTariffs.getItems(), 'dealerTariffs', DealerTariffs);
     });
     $httpBackend.whenPOST(regexDealerTariffsQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealerTariffsQuery, data, dealerTariffs, 'dealerTariffs', DealerTariffs);
+        return processPostQuerySort(url, regexDealerTariffsQuery, data, dealerTariffs, 'dealerTariffs', DealerTariffs);
     });
     var regexDealerTariffsGet = /^\/api2\/dealertariffs\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerTariffsGet).respond(function(method, url, data) {

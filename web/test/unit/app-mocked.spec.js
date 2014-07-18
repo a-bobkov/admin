@@ -195,6 +195,191 @@ describe('app-mocked', function() {
         });
     }
 
+describe('dealerTariff', function() {
+
+    describe('Метод get', function() {
+
+        it('возвращать те же значения, что и query', function() {
+            var answer = {};
+            var dealerTariff;
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                dealerTariff = answer.respond.getItems()[0];
+                return dealerTariffsLoader.loadItems(dealerTariff.id);
+            });
+
+            runs(function() {
+                var dealerTariffEqual = answer.respond;
+                expect(dealerTariffEqual).toMatch(dealerTariff);
+            });
+        });
+    });
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(dealerTariff) {
+                    expect(dealerTariff.id).toBeInteger();
+                    expect(dealerTariff.dealer).toBeReference();
+                    expect(dealerTariff.site).toBeReference();
+                    expect(dealerTariff.tariff).toBeReference();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            var answer = {};
+            var dealerTariff;
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                dealerTariff = answer.respond.getItems()[0];
+                return dealerTariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: dealerTariff.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var dealerTariffs = answer.respond.getItems();
+                expect(dealerTariffs.length).toBe(1);
+                expect(dealerTariffs[0]).toEqual(dealerTariff);
+            });
+        });
+
+        it('equal - фильтровать по равенству dealer заданному значению', function() {
+            var answer = {};
+            var dealerTariff;
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                dealerTariff = answer.respond.getItems()[0];
+                return dealerTariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['dealer'], type: 'equal', value: dealerTariff.dealer.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var dealerTariffs = answer.respond.getItems();
+                expect(dealerTariffs.length).toBeTruthy();
+                _.forEach(dealerTariffs, function(dealerTariffEqual) {
+                    expect(dealerTariffEqual.dealer).toEqual(dealerTariff.dealer);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству site заданному значению', function() {
+            var answer = {};
+            var dealerTariff;
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                dealerTariff = answer.respond.getItems()[0];
+                return dealerTariffsLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: dealerTariff.site.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var dealerTariffs = answer.respond.getItems();
+                expect(dealerTariffs.length).toBeTruthy();
+                _.forEach(dealerTariffs, function(dealerTariffEqual) {
+                    expect(dealerTariffEqual.site).toEqual(dealerTariff.site);
+                });
+            });
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems({
+                    orders: ['+id']
+                });
+            });
+
+            runs(function() {
+                var dealerTariffs = answer.respond.getItems();
+                expect(dealerTariffs.length).toBeTruthy();
+                expect(_.pluck(dealerTariffs, 'id')).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('сортировать по id по убыванию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems({
+                    orders: ['-id']
+                });
+            });
+
+            runs(function() {
+                var dealerTariffs = answer.respond.getItems();
+                expect(dealerTariffs.length).toBeTruthy();
+                expect(_.pluck(dealerTariffs, 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+
+        it('сортировать по site по возрастанию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems({
+                    orders: ['+site']
+                });
+            });
+
+            runs(function() {
+                var dealerTariffs = answer.respond.getItems();
+                expect(dealerTariffs.length).toBeTruthy();
+                expect(_.pluck(_.pluck(dealerTariffs, 'site'), 'id')).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('сортировать по site по убыванию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerTariffsLoader.loadItems({
+                    orders: ['-site']
+                });
+            });
+
+            runs(function() {
+                var dealerTariffs = answer.respond.getItems();
+                expect(dealerTariffs.length).toBeTruthy();
+                expect(_.pluck(_.pluck(dealerTariffs, 'site'), 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+    });
+});
+
 describe('sale', function() {
 
     describe('Метод get', function() {
