@@ -39,6 +39,7 @@ describe('app-mocked', function() {
     var salesLoader;
     var Sales;
     var Sale;
+    var saleStatuses;
     var saleTypes;
     var SiteBalances;
 
@@ -156,6 +157,7 @@ describe('app-mocked', function() {
         salesLoader = injector.get('salesLoader');
         Sales = injector.get('Sales');
         Sale = injector.get('Sale');
+        saleStatuses = injector.get('saleStatuses');
         saleTypes = injector.get('saleTypes');
         SiteBalances = injector.get('SiteBalances');
 
@@ -1470,6 +1472,55 @@ describe('sale', function() {
                 var sale = answer.respond;
                 _.forEach(sale.serialize(), function(value, key) {
                     expect(value).toEqual(saleData[key]);
+                });
+            });
+        });
+
+        it('деактивировать активированную нерасширенную карточку', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' },
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ],
+                    orders: ['-activeTo']
+                }).then(function(sales) {
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(sales.getItems(), function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                console.log(sale);
+                var construction = {
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                };
+                sale.resolveRefs(construction);
+                sale.isActive = saleStatuses.get(false);
+                return sale.save(construction);
+            });
+
+            runs(function() {
+                var equalSale = answer.respond;
+                _.forEach(sale, function(value, key) {
+                    console.log(key, value, equalSale[key]);
+                    expect(value).toEqual(equalSale[key]);
                 });
             });
         });
