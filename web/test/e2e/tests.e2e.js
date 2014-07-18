@@ -1253,10 +1253,10 @@ describe('User App', function() {
         it('Изменение пользователя-администратора (с превращением в сайт)', function() {
             var usersSelector = by.repeater('user in users');
             var usersData = {};
+            expect(element.all(usersSelector).count()).toBeTruthy();
             browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className =''});");
             mapText(element.all(by.name('groupName'))).then(function(respond) {
                 usersData.group = respond;
-                console.log(usersData.group);
             });
             browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className ='hide'});");
 
@@ -1328,10 +1328,10 @@ describe('User App', function() {
         it('Изменение пользователя-дилера', function() {
             var usersSelector = by.repeater('user in users');
             var usersData = {};
+            expect(element.all(usersSelector).count()).toBeTruthy();
             browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className =''});");
             mapText(element.all(by.name('groupName'))).then(function(respond) {
                 usersData.group = respond;
-                console.log(usersData.group);
             });
             browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className ='hide'});");
 
