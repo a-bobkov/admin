@@ -1558,7 +1558,7 @@ describe('Sale App', function() {
 
     describe('Одиночный выбор значений, загружаемых с сервера', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
+            browser.get('admin.html#/salelist?archive=true&type=card&orders=date;-id&itemsPerPage=15');
         });
 
         it('заменяет в карточке дилера с помощью загружающего контрола', function() {
@@ -2082,7 +2082,7 @@ describe('Sale App', function() {
 
     describe('Редактирование карточки', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=card&archive=true&itemsPerPage=15');
+            browser.get('admin.html#/salelist?archive=true&type=card&orders=date;-id&itemsPerPage=15');
             element.all(by.id('SaleListRowEdit')).get(0).click();
         });
 
@@ -3554,6 +3554,9 @@ describe('Sale App', function() {
             element.all(salesSelector.column('sale.activeTo')).get(0).getText().then(function(respond) {
                 saleData.activeToText = respond;
             });
+            element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(respond) {
+                saleData.isActiveText = respond;
+            });
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
             browser.controlFlow().execute(function() {
@@ -3612,7 +3615,7 @@ describe('Sale App', function() {
                 expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
             });
             element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
-                expect(isActiveText).toBeFalsy();
+                expect(isActiveText).toBe(saleData.isActiveText);
             });
             expect(element.all(by.id('SaleListRowAdd')).get(0).isDisplayed()).toBeFalsy();
             expect(element.all(by.id('SaleListRowExtra')).get(0).isDisplayed()).toBeFalsy();
