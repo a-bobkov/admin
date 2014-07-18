@@ -420,6 +420,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
 
     function saveRemoveDealerSiteLogin(dealerSiteLogin) {
         if (dealerSiteLogin.login) {
+            dealerSiteLogin.loginError = false;
             return dealerSiteLogin.save($scope).then(function(dealerSiteLogin) {
                 // $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ ' + dealerSiteLogin.name();
             });
