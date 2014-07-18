@@ -295,9 +295,9 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
         function getPhone(idx, name) {
             var phone = $scope.dealerEditedPhones[idx];
-            $scope.dealerEdited[name] = phone.phoneNumber;
-            $scope.dealerEdited[name + 'From'] = phone.phoneFrom;
-            $scope.dealerEdited[name + 'To'] = phone.phoneTo;
+            $scope.dealerEdited[name] = phone.phoneNumber || null;
+            $scope.dealerEdited[name + 'From'] = phone.phoneFrom || null;
+            $scope.dealerEdited[name + 'To'] = phone.phoneTo || null;
         }
 
         getPhone(0, 'phone');

@@ -45,6 +45,9 @@ LI.new A, A.new, .action.new {
 LI.pricelist A {
   background: url(../images/pricelist_transparent.png) no-repeat 0 0;
 }
+LI.switch A {
+  background: url(../images/switch.png) no-repeat 0 0
+}
 
 th, td {padding: 4px 4px 4px 4px;}
 
