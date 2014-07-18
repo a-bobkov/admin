@@ -169,5 +169,5 @@ CollectionError.prototype = new Error();
 CollectionError.prototype.constructor = CollectionError;
 
 Number.prototype.ceil = function(places) {  // found on http://stackoverflow.com/a/19722641/3745041
-  return +(Math.round(this + "e+" + places)  + "e-" + places);
+  return +(Math.ceil(this + "e+" + places)  + "e-" + places);
 }

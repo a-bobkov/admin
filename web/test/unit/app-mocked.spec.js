@@ -1087,7 +1087,7 @@ describe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + randomAmount(1, 1000),
+                    amount: randomAmount(1000, 2000),
                     siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
@@ -1139,7 +1139,7 @@ describe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + randomAmount(1, 1000),
+                    amount: randomAmount(1000, 2000),
                     siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
@@ -1190,7 +1190,7 @@ describe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + randomAmount(1, 1000),
+                    amount: randomAmount(1000, 2000),
                     siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
@@ -1256,7 +1256,7 @@ describe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + randomAmount(1, 1000),
+                    amount: randomAmount(1000, 2000),
                     siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
@@ -1324,7 +1324,7 @@ describe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + randomAmount(1, 1000),
+                    amount: randomAmount(1000, 2000),
                     siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
@@ -1374,7 +1374,7 @@ describe('sale', function() {
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + randomAmount(1, 1000),
+                    amount: randomAmount(1000, 2000),
                     siteAmount: randomAmount(1, 1000),
                     isActive: sale.isActive.id,
                     info: 'Комментарий'
@@ -1454,7 +1454,7 @@ describe('sale', function() {
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: !sale.isActive,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + randomAmount(1, 1000),
+                    amount: randomAmount(1000, 2000),
                     siteAmount: randomAmount(1, 1000),
                     info: sale.info + '1'
                 };
