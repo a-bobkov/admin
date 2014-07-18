@@ -55,6 +55,14 @@ describe('app-mocked', function() {
         }
     }
 
+    function randomAmount(min, max) {
+        return (Math.random() * (max - min) + min).ceil(2);
+    }
+
+    function randomInt(min, max) {
+        return (Math.random() * (max - min) + min).ceil(0);
+    }
+
     function sortByOrders(array, orders) {
 
         function convert(value) {
@@ -419,9 +427,12 @@ describe('sale', function() {
                     expect(sale.type.id).toBeMemberOf(['card', 'addcard', 'extra']);
                     if (sale.type === 'addcard') {
                         expect(sale.parentId).toBeInteger();
+                        expect(sale.tariff).toBeReferenceOrNull();
+                    }
+                    if (sale.type === 'card') {
+                        expect(sale.tariff).toBeReference();
                     }
                     if (sale.type.id === 'card' || sale.type.id === 'addcard') {
-                        expect(sale.tariff).toBeReference();
                         expect(sale.cardAmount).toBeNumber();
                         expect(sale.count).toBeIntegerOrNull();
                     }
@@ -1049,6 +1060,9 @@ describe('sale', function() {
 
             runSync(answer, function() {
                 return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'in', value: ['card', 'addcard'] }
+                    ],
                     orders: ['-activeTo']
                 });
             });
@@ -1067,14 +1081,14 @@ describe('sale', function() {
                     dealer: {id: sale.dealer.id},
                     site: {id: sale.site.id},
                     tariff: {id: sale.tariff.id},
-                    cardAmount: Math.floor(Math.random() * 100000) / 100,
-                    count: Math.floor(Math.random() * 100),
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
-                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + randomAmount(1, 1000),
+                    siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
                 var newSale = new Sale(saleData);
@@ -1119,14 +1133,14 @@ describe('sale', function() {
                     dealer: {id: sale.dealer.id},
                     site: {id: sale.site.id},
                     tariff: {id: sale.tariff.id},
-                    cardAmount: Math.floor(Math.random() * 100000) / 100,
-                    count: Math.floor(Math.random() * 100),
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
-                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + randomAmount(1, 1000),
+                    siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
                 var newSale = new Sale(saleData);
@@ -1170,14 +1184,14 @@ describe('sale', function() {
                     dealer: {id: sale.dealer.id},
                     site: {id: sale.site.id},
                     tariff: {id: sale.tariff.id},
-                    cardAmount: Math.floor(Math.random() * 100000) / 100,
-                    count: Math.floor(Math.random() * 100),
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
-                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + randomAmount(1, 1000),
+                    siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
                 var newSale = new Sale(saleData);
@@ -1236,14 +1250,14 @@ describe('sale', function() {
                     site: {id: sale.site.id},
                     tariff: {id: sale.tariff.id},
                     parentId: sale.cardId,
-                    cardAmount: Math.floor(Math.random() * 100000) / 100,
-                    count: Math.floor(Math.random() * 100),
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
-                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + randomAmount(1, 1000),
+                    siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
                 var addSale = new Sale(addSaleData);
@@ -1304,14 +1318,14 @@ describe('sale', function() {
                     site: {id: sale.site.id},
                     tariff: {id: sale.tariff.id},
                     parentId: sale.cardId,
-                    cardAmount: Math.floor(Math.random() * 100000) / 100,
-                    count: Math.floor(Math.random() * 100),
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: false,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
-                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + randomAmount(1, 1000),
+                    siteAmount: randomAmount(1, 1000),
                     info: 'Комментарий'
                 };
                 var addSale = new Sale(addSaleData);
@@ -1360,8 +1374,8 @@ describe('sale', function() {
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     date: date.toISOString().slice(0, 10),
-                    amount: Math.floor(Math.random() * 100000) / 100,
-                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + randomAmount(1, 1000),
+                    siteAmount: randomAmount(1, 1000),
                     isActive: sale.isActive.id,
                     info: 'Комментарий'
                 };
@@ -1434,14 +1448,14 @@ describe('sale', function() {
                     dealer: {id: otherSale.dealer.id},
                     site: {id: otherSale.site.id},
                     tariff: {id: otherSale.tariff.id},
-                    cardAmount: Math.floor(Math.random() * 100000) / 100,
-                    count: Math.floor(Math.random() * 100),
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
                     activeFrom: activeFrom.toISOString().slice(0, 10),
                     activeTo: activeTo.toISOString().slice(0, 10),
                     isActive: !sale.isActive,
                     date: date.toISOString().slice(0, 10),
-                    amount: 1000 + Math.floor(Math.random() * 100000) / 100,
-                    siteAmount: Math.floor(Math.random() * 100000) / 100,
+                    amount: 1000 + randomAmount(1, 1000),
+                    siteAmount: randomAmount(1, 1000),
                     info: sale.info + '1'
                 };
                 var newSale = new Sale(saleData);
