@@ -2272,14 +2272,14 @@ describe('Sale App', function() {
             expect(element(by.id('saleAmountErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит ошибку, если amount меньше cardAmount', function() {
-            var cardAmountElem = element(by.model('saleEdited.cardAmount'));
-            cardAmountElem.clear();
-            cardAmountElem.sendKeys('10');
+        it('выводит ошибку, если cardAmount больше amount', function() {
             var amountElem = element(by.model('saleEdited.amount'));
             amountElem.clear();
             amountElem.sendKeys('9');
-            expect(element(by.id('saleEditAmountErrorLessCard')).isDisplayed()).toBeTruthy();
+            var cardAmountElem = element(by.model('saleEdited.cardAmount'));
+            cardAmountElem.clear();
+            cardAmountElem.sendKeys('10');
+            expect(element(by.id('saleCardAmountErrorLessAmount')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение siteAmount', function() {

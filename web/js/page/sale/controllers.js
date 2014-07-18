@@ -994,6 +994,23 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
+.directive('uiLessOrEqual', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        scope: {
+            _oneValue: '=ngModel',
+            _otherValue: '=uiLessOrEqual',
+            _required: '=ngRequired'
+        },
+        link: function (scope, elem, attrs, ctrl) {
+            scope.$watch('[_oneValue, _otherValue]', function() {
+                ctrl.$setValidity('lessOrEqual', !scope._required || !scope._otherValue || scope._oneValue <= scope._otherValue);
+            }, true);
+        }
+    };
+})
+
 .directive('isActive', function() {
     return {
         restrict: 'A',

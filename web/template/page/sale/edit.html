@@ -105,21 +105,21 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleCardAmount">Цена по тарифу</label></th>
 	            <td>
-	                <input class="span-8" type="number" ng-pattern="/^\d{1,6}(?:[,\.]\d{0,2})?$/" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' ng-required='!saleEdited.isExtra()' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" ng-pattern="/^\d{1,6}(?:[,\.]\d{0,2})?$/" name="saleCardAmount" id="saleCardAmount" ng-model='saleEdited.cardAmount' ng-required='!saleEdited.isExtra()' ui-less-or-equal="saleEdited.amount" ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleCardAmount.$invalid'>
 					    <li id='saleCardAmountErrorRequired' ng-show="formSale.saleCardAmount.$error.required">Необходимо ввести цену по тарифу.</li>
 					    <li id='saleCardAmountErrorPattern' ng-show="formSale.saleCardAmount.$error.pattern">Цена должна быть в формате 123456,78</li>
+					    <li id='saleCardAmountErrorLessAmount' ng-show="formSale.saleCardAmount.$error.lessOrEqual">Стоимость продажи не должна быть меньше цены карточки.</li>
 					</ul>
 	           </td>
 	        </tr>
 	        <tr>
 	            <th><label for="saleAmount">Стоимость</label></th>
 	            <td>
-	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' ui-greater-or-equal="saleEdited.cardAmount" ng-required='true' ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="saleAmount" id="saleAmount" ng-model='saleEdited.amount' required ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleAmount.$invalid'>
 					    <li id='saleAmountErrorRequired' ng-show="formSale.saleAmount.$error.required">Необходимо ввести стоимость.</li>
 					    <li id='saleAmountErrorPattern' ng-show="formSale.saleAmount.$error.pattern">Стоимость должна быть в формате 1234567,89</li>
-					    <li id='saleEditAmountErrorLessCard' ng-show="formSale.saleAmount.$error.greaterOrEqual">Стоимость должна быть не меньше цены по тарифу.</li>
 					</ul>
 	           </td>
 	        </tr>
