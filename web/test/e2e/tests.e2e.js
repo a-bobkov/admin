@@ -2304,6 +2304,16 @@ describe('Sale App', function() {
             expect(element(by.id('saleSiteAmountErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
+        it('выводит ошибку, если siteAmount больше amount', function() {
+            var amountElem = element(by.model('saleEdited.amount'));
+            amountElem.clear();
+            amountElem.sendKeys('9');
+            var siteAmountElem = element(by.model('saleEdited.siteAmount'));
+            siteAmountElem.clear();
+            siteAmountElem.sendKeys('10');
+            expect(element(by.id('saleSiteAmountErrorLessAmount')).isDisplayed()).toBeTruthy();
+        });
+
         it('выводит значение info', function() {
             expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toBeTruthy();
         });

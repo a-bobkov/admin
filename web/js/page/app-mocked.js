@@ -1767,9 +1767,11 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 if (item.activeFrom > item.activeTo) {
                     pushError('activeFrom', 'Дата activeFrom должна быть меньше или равна дате activeTo.');
                 }
-
-                if (item.amount < item.cardAmount) {
-                    pushError('amount', 'Стоимость продажи не должна быть меньше цены карточки.');
+                if (item.cardAmount > item.amount) {
+                    pushError('cardAmount', 'Стоимость продажи не должна быть меньше цены карточки.');
+                }
+                if (item.siteAmount > item.amount) {
+                    pushError('siteAmount', 'Стоимость продажи не должна быть меньше себестоимости.');
                 }
             }
             if (_.contains(['card'], item.type.id)) {

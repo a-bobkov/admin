@@ -126,13 +126,11 @@
 	        <tr>
 	            <th><label for="saleSiteAmount">Себестоимость</label></th>
 	            <td>
-	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="saleSiteAmount" id="saleSiteAmount" ng-model='saleEdited.siteAmount' ng-required='true' ui-less-or-equal="saleEdited.amount" ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleSiteAmount.$invalid'>
 					    <li id='saleSiteAmountErrorRequired' ng-show="formSale.saleSiteAmount.$error.required">Необходимо ввести себестоимость.</li>
 					    <li id='saleSiteAmountErrorPattern' ng-show="formSale.saleSiteAmount.$error.pattern">Себестоимость должна быть в формате 1234567,89</li>
-					</ul>
-					<ul class="warning_list" ng-show='saleEdited.siteAmount >= saleEdited.amount'>
-					    <li id='saleEditSiteAmountWarningGreaterAmount' ng-show="saleEdited.siteAmount > saleEdited.amount">Себестоимость больше стоимости.</li>
+					    <li id='saleSiteAmountErrorLessAmount' ng-show="formSale.saleSiteAmount.$error.lessOrEqual">Стоимость продажи не должна быть меньше себестоимости.</li>
 					</ul>
 	           </td>
 	        </tr>
