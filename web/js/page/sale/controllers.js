@@ -185,7 +185,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                                 if (!directories.tariffs.get(directories.parentSale.tariff.id)) {
                                     selectedTariffIds.push(directories.parentSale.tariff.id);
                                 }
-                                if (directories.sale && !directories.tariffs.get(directories.sale.tariff.id)) {
+                                if (directories.sale && directories.sale.tariff && !directories.tariffs.get(directories.sale.tariff.id)) {
                                     selectedTariffIds.push(directories.sale.tariff.id);
                                 }
                                 if (directories.addSale && !directories.tariffs.get(directories.addSale.tariff.id)) {
