@@ -205,19 +205,19 @@ describe('app-mocked', function() {
         });
     }
 
-    function checkSortingSale(orders) {
+    function checkSorting(loader, orders) {
         var answer = {};
 
         runSync(answer, function() {
             return $q.all({
-                sales1: salesLoader.loadItems({
+                collection1: loader.loadItems({
                     orders: orders,
                     pager: {
                         per_page: 25,
                         page: 1
                     }
                 }),
-                sales2: salesLoader.loadItems({
+                collection2: loader.loadItems({
                     orders: orders,
                     pager: {
                         per_page: 25,
@@ -228,14 +228,14 @@ describe('app-mocked', function() {
         });
 
         runs(function() {
-            var sales1 = answer.respond.sales1.getItems();
-            expect(sales1.length).toBeTruthy();
-            expect(_.pluck(sortByOrders(_.clone(sales1), orders), 'id')).toEqual(_.pluck(sales1, 'id'));
-            var sales2 = answer.respond.sales2.getItems();
-            expect(sales2.length).toBeTruthy();
-            expect(_.pluck(sortByOrders(_.clone(sales2), orders), 'id')).toEqual(_.pluck(sales2, 'id'));
-            var sales = _.union(sales1, sales2);
-            expect(_.pluck(sortByOrders(_.clone(sales), orders), 'id')).toEqual(_.pluck(sales, 'id'));
+            var array1 = answer.respond.collection1.getItems();
+            expect(array1.length).toBeTruthy();
+            expect(_.pluck(sortByOrders(_.clone(array1), orders), 'id')).toEqual(_.pluck(array1, 'id'));
+            var array2 = answer.respond.collection2.getItems();
+            expect(array2.length).toBeTruthy();
+            expect(_.pluck(sortByOrders(_.clone(array2), orders), 'id')).toEqual(_.pluck(array2, 'id'));
+            var array = _.union(array1, array2);
+            expect(_.pluck(sortByOrders(_.clone(array), orders), 'id')).toEqual(_.pluck(array, 'id'));
         });
     }
 
@@ -714,91 +714,91 @@ describe('sale', function() {
         });
 
         it('сортировать по id по возрастанию', function() {
-            checkSortingSale(['+id']);
+            checkSorting(salesLoader, ['+id']);
         });
 
         it('сортировать по id по убыванию', function() {
-            checkSortingSale(['-id']);
+            checkSorting(salesLoader, ['-id']);
         });
 
         it('сортировать по date по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+date', '-id']);
+            checkSorting(salesLoader, ['+date', '-id']);
         });
 
         it('сортировать по date по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-date', '-id']);
+            checkSorting(salesLoader, ['-date', '-id']);
         });
 
         it('сортировать по dealer по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+dealer', '-id']);
+            checkSorting(salesLoader, ['+dealer', '-id']);
         });
 
         it('сортировать по dealer по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-dealer', '-id']);
+            checkSorting(salesLoader, ['-dealer', '-id']);
         });
 
         it('сортировать по site по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+site', '-id']);
+            checkSorting(salesLoader, ['+site', '-id']);
         });
 
         it('сортировать по site по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-site', '-id']);
+            checkSorting(salesLoader, ['-site', '-id']);
         });
 
         it('сортировать по type по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+type', '-id']);
+            checkSorting(salesLoader, ['+type', '-id']);
         });
 
         it('сортировать по type по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-type', '-id']);
+            checkSorting(salesLoader, ['-type', '-id']);
         });
 
         it('сортировать по count по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+count', '-id']);
+            checkSorting(salesLoader, ['+count', '-id']);
         });
 
         it('сортировать по count по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-count', '-id']);
+            checkSorting(salesLoader, ['-count', '-id']);
         });
 
         it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+amount', '-id']);
+            checkSorting(salesLoader, ['+amount', '-id']);
         });
 
         it('сортировать по amount по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-amount', '-id']);
+            checkSorting(salesLoader, ['-amount', '-id']);
         });
 
         it('сортировать по siteAmount по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+siteAmount', '-id']);
+            checkSorting(salesLoader, ['+siteAmount', '-id']);
         });
 
         it('сортировать по siteAmount по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-siteAmount', '-id']);
+            checkSorting(salesLoader, ['-siteAmount', '-id']);
         });
 
         it('сортировать по activeFrom по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+activeFrom', '-id']);
+            checkSorting(salesLoader, ['+activeFrom', '-id']);
         });
 
         it('сортировать по activeFrom по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-activeFrom', '-id']);
+            checkSorting(salesLoader, ['-activeFrom', '-id']);
         });
 
         it('сортировать по activeTo по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+activeTo', '-id']);
+            checkSorting(salesLoader, ['+activeTo', '-id']);
         });
 
         it('сортировать по activeTo по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-activeTo', '-id']);
+            checkSorting(salesLoader, ['-activeTo', '-id']);
         });
 
         it('сортировать по isActive по возрастанию, затем по id по убыванию', function() {
-            checkSortingSale(['+isActive', '-id']);
+            checkSorting(salesLoader, ['+isActive', '-id']);
         });
 
         it('сортировать по isActive по убыванию, затем по id по убыванию', function() {
-            checkSortingSale(['-isActive', '-id']);
+            checkSorting(salesLoader, ['-isActive', '-id']);
         });
     });
 
