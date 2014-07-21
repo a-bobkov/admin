@@ -17,6 +17,10 @@ var getSelectedOptionElem = function(elem) {
     return elem.element(by.css('option:checked'));
 }
 
+var setDate = function(id, model, value) {
+    browser.executeScript('var s = angular.element(document.getElementById("' + id + '")).scope(); s.' + model + ' = "' + value + '"; s.$apply();');
+}
+
 var mapText = function(q) {
     return q.map(function(elm) {
         return elm.getText();
@@ -1910,6 +1914,7 @@ describe('Sale App', function() {
         it('переходит к url создания расширения для карточки по ссылке в "расширить"', function() {
             var setElem = element(by.select('patterns.type'));
             setSelect(setElem, 1);
+            element.all(by.id('SaleListTableHeaderRef')).get(6).click();
             var saleAdd = element.all(by.id('SaleListRowAdd'));
             mapIsDisplayed(saleAdd).then(function(displayed) {
                 var saleIdx = displayed.indexOf(true);
@@ -2027,13 +2032,11 @@ describe('Sale App', function() {
         it('накладывает фильтр по архиву', function() {
             var archive = element(by.model('patterns.archive'));
             expect(archive.isSelected()).toBeTruthy();
-            mapText(element.all(by.repeater('sale in sales').column('sale.activeTo'))).then(function(data) {
-                expect(data.length).toBeTruthy();
+            element.all(by.id('SaleListTableHeaderRef')).get(6).click();
+            element.all(by.repeater('sale in sales').column('sale.activeTo')).get(0).getText().then(function(activeToText) {
+                var activeTo = activeToText.replace(regexpDate, '20$3-$2-$1');
                 var today = new Date().toISOString().slice(0, 10);
-                expect(_.any(data, function(value) {
-                    var date = value.replace(/(\d+)\.(\d+)\.(\d+)/, '20$3-$2-$1');
-                    return date < today;
-                })).toBeTruthy();
+                expect(activeTo < today);
             });
         });
 
@@ -2165,7 +2168,8 @@ describe('Sale App', function() {
         });
 
         it('выводит ошибку, если date пустое', function() {
-            element(by.model('saleEdited.date')).sendKeys('0');
+            expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeFalsy();
+            setDate('saleDate', 'saleEdited.date', '');
             expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
@@ -2864,14 +2868,14 @@ describe('Sale App', function() {
             var dealerElem = element(by.model('saleEdited.dealer'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            dealerElemSearch.sendKeys('7');
+            dealerElemSearch.sendKeys('5');
             var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2);
             dealerElemDrop.click();
 
             var siteElem = element(by.model('saleEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('17');
+            siteElemSearch.sendKeys('1');
             var siteElemDrop = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
             siteElemDrop.click();
 
