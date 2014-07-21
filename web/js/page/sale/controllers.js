@@ -424,7 +424,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 
     $scope.isAddable = function(sale) {
-        return (sale.isCard() || sale.isAddcard()) && $scope.addSales && !_.find($scope.addSales.getItems(), {parentId: sale.cardId});
+        return (sale.isCard() || sale.isAddcard()) && sale.tariff && !_.find($scope.addSales.getItems(), {parentId: sale.cardId});
     }
 
     var ls = $location.search();
