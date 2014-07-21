@@ -205,6 +205,40 @@ describe('app-mocked', function() {
         });
     }
 
+    function checkSortingSale(orders) {
+        var answer = {};
+
+        runSync(answer, function() {
+            return $q.all({
+                sales1: salesLoader.loadItems({
+                    orders: orders,
+                    pager: {
+                        per_page: 25,
+                        page: 1
+                    }
+                }),
+                sales2: salesLoader.loadItems({
+                    orders: orders,
+                    pager: {
+                        per_page: 25,
+                        page: 2
+                    }
+                })
+            });
+        });
+
+        runs(function() {
+            var sales1 = answer.respond.sales1.getItems();
+            expect(sales1.length).toBeTruthy();
+            expect(_.pluck(sortByOrders(_.clone(sales1), orders), 'id')).toEqual(_.pluck(sales1, 'id'));
+            var sales2 = answer.respond.sales2.getItems();
+            expect(sales2.length).toBeTruthy();
+            expect(_.pluck(sortByOrders(_.clone(sales2), orders), 'id')).toEqual(_.pluck(sales2, 'id'));
+            var sales = _.union(sales1, sales2);
+            expect(_.pluck(sortByOrders(_.clone(sales), orders), 'id')).toEqual(_.pluck(sales, 'id'));
+        });
+    }
+
 describe('dealerTariff', function() {
 
     describe('Метод get', function() {
@@ -680,377 +714,91 @@ describe('sale', function() {
         });
 
         it('сортировать по id по возрастанию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: ['+id']
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                expect(_.pluck(sales, 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSortingSale(['+id']);
         });
 
         it('сортировать по id по убыванию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                expect(_.pluck(sales, 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSortingSale(['-id']);
         });
 
         it('сортировать по date по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+date', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+date', '-id']);
         });
 
         it('сортировать по date по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-date', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-date', '-id']);
         });
 
         it('сортировать по dealer по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+dealer', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+dealer', '-id']);
         });
 
         it('сортировать по dealer по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-dealer', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-dealer', '-id']);
         });
 
         it('сортировать по site по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+site', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+site', '-id']);
         });
 
         it('сортировать по site по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-site', '-id'];
+            checkSortingSale(['-site', '-id']);
+        });
 
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
+        it('сортировать по type по возрастанию, затем по id по убыванию', function() {
+            checkSortingSale(['+type', '-id']);
+        });
 
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+        it('сортировать по type по убыванию, затем по id по убыванию', function() {
+            checkSortingSale(['-type', '-id']);
         });
 
         it('сортировать по count по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+count', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+count', '-id']);
         });
 
         it('сортировать по count по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-count', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-count', '-id']);
         });
 
         it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+amount', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+amount', '-id']);
         });
 
         it('сортировать по amount по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-amount', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-amount', '-id']);
         });
 
         it('сортировать по siteAmount по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+siteAmount', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+siteAmount', '-id']);
         });
 
         it('сортировать по siteAmount по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-siteAmount', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-siteAmount', '-id']);
         });
 
         it('сортировать по activeFrom по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+activeFrom', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+activeFrom', '-id']);
         });
 
         it('сортировать по activeFrom по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-activeFrom', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-activeFrom', '-id']);
         });
 
         it('сортировать по activeTo по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+activeTo', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+activeTo', '-id']);
         });
 
         it('сортировать по activeTo по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-activeTo', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-activeTo', '-id']);
         });
 
         it('сортировать по isActive по возрастанию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['+isActive', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['+isActive', '-id']);
         });
 
         it('сортировать по isActive по убыванию, затем по id по убыванию', function() {
-            var answer = {};
-            var orders = ['-isActive', '-id'];
-
-            runSync(answer, function() {
-                return salesLoader.loadItems({
-                    orders: orders
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sortByOrders(_.cloneDeep(sales), orders), function(sale, saleIdx) {
-                    expect(sale.id).toEqual(sales[saleIdx].id);
-                });
-            });
+            checkSortingSale(['-isActive', '-id']);
         });
     });
 
