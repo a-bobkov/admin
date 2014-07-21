@@ -1665,6 +1665,52 @@ describe('tariffRate', function() {
             });
         });
 
+        it('equal - фильтровать по tariff равно заданному значению', function() {
+            var answer = {};
+            var tariffRate;
+
+            runSync(answer, function() {
+                return tariffRatesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                tariffRate = answer.respond.getItems()[0];
+                return tariffRatesLoader.loadItems({
+                    filters: [
+                        { fields: ['tariff'], type: 'equal', value: tariffRate.tariff.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var tariffRates = answer.respond.getItems();
+                expect(tariffRates.length).toBeTruthy();
+                _.forEach(tariffRates, function(tariffRateEqual) {
+                    expect(tariffRateEqual.tariff).toEqual(tariffRate.tariff);
+                });
+            });
+        });
+
+        it('in - фильтровать по city равно null', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return tariffRatesLoader.loadItems({
+                    filters: [
+                        { fields: ['city'], type: 'in', value: [null] }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var tariffRates = answer.respond.getItems();
+                expect(tariffRates.length).toBeTruthy();
+                _.forEach(tariffRates, function(tariffRateEqual) {
+                    expect(tariffRateEqual.city).toEqual(null);
+                });
+            });
+        });
+
         it('сортировать по id по возрастанию', function() {
             var answer = {};
             var tariffRate;
