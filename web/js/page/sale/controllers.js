@@ -675,7 +675,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 { fields: ['id'], type: 'equal', value: $scope.saleEdited.dealer.id }
             ]
         };
-        var oldDirectories = _.pick($scope, ['cities', 'markets', 'metros', 'managers']);
+        var oldDirectories = _.pick($scope, ['cities', 'markets', 'metros', 'managers', 'billingCompanies']);
         dealersLoader.loadItems(dealerQueryParams, oldDirectories).then(function(dealers) {
             $scope.city = dealers.getItems()[0].city;
         });
