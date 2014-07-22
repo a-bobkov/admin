@@ -41,7 +41,7 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleTariff">{{tariffFieldTitle}}</label></th>
 	            <td>
-		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates) for opt in tariffs.getItems()' ng-disabled='!saleEdited.site || addSale' ng-required='!saleEdited.isExtra()' is-active>
+		            <select class="span-8" id="saleTariff" name="saleTariff" ng-model='saleEdited.tariff' ng-options='opt.name(city, tariffRates) for opt in tariffs.getItems() | filter: activeRateTariffs(saleEdited.tariff)' ng-disabled='!saleEdited.site || addSale' ng-required='!saleEdited.isExtra()' is-active>
 		            </select>
 					<ul class="error_list" ng-show='formSaleKey.saleTariff.$invalid'>
 					    <li id='saleEditTariffErrorRequired' ng-show="formSaleKey.saleTariff.$error.required">Необходимо выбрать тариф.</li>

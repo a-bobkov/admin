@@ -821,6 +821,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $location.path('/salelist');
         });
     };
+
+    $scope.activeRateTariffs = function(selectedTariff) {
+        return function(tariff) {
+            return (tariff === selectedTariff || tariff.isActive && tariff.getLastRate($scope.city, $scope.tariffRates));
+        }
+    }
 })
 
 .controller('SaleAddcardEditCtrl', function($scope, $rootScope, $location, $window, data,
@@ -923,6 +929,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $location.path('/salelist');
         });
     };
+
+    $scope.activeRateTariffs = function(selectedTariff) {
+        return function(tariff) {
+            return (tariff === selectedTariff || tariff.isActive && tariff.getLastRate($scope.city, $scope.tariffRates));
+        }
+    }
 })
 
 .controller('SaleExtraEditCtrl', function($scope, $rootScope, $location, $window, data,
