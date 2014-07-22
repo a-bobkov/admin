@@ -90,7 +90,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             };
                             return $q.all(toResolve).then(function(salesData) {
                                 _.assign(directories, salesData);
-                                var tariffIds = _.pluck(_.pluck(directories.addSales.getItems(), 'tariff'), 'id');
+                                var tariffIds = _.pluck(_.compact(_.pluck(directories.addSales.getItems(), 'tariff')), 'id');
                                 tariffIds.push(directories.sale.tariff.id);
                                 toResolve = {
                                     selectedTariffs: tariffsLoader.loadItems({
@@ -748,11 +748,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             return;
         }
         var activeTo = _.clone(activeFrom);
-        activeTo.setDate(activeTo.getDate() - 1);
         if (tariff.periodUnit.id === 'day') {
             activeTo.setDate(activeTo.getDate() + tariff.period);
+            activeTo.setDate(activeTo.getDate() - 1);
         } else if (tariff.periodUnit.id === 'month') {
             activeTo.setMonth(activeTo.getMonth() + tariff.period);
+            activeTo.setDate(activeTo.getDate() - 1);
         } else {
             throw Error('Неизвестное значение единицы периода тарифа: ' + tariff.periodUnit);
         }
@@ -1013,6 +1014,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                             { fields: ['activeFrom'], type: 'lessOrEqual', value: scope.saleEdited.activeTo.toISOString().slice(0, 10) }
                         ]
                     }).then(function(crossCards) {
+                        if (scope.saleEdited.id) {
+                            _.remove(crossCards.getItems(), {id: scope.saleEdited.id});
+                        }
                         ctrl.$setValidity('crossCards', !crossCards.getItems().length);
                     });
                 }
