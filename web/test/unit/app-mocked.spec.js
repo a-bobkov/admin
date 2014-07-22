@@ -673,7 +673,7 @@ describe('sale', function() {
             });
         });
 
-        it('equal - фильтровать по activeTo меньше или равно заданного значения', function() {
+        it('equal - фильтровать по activeFrom меньше или равно заданного значения', function() {
             var answer = {};
             var sale;
 
@@ -685,7 +685,7 @@ describe('sale', function() {
                 sale = answer.respond.getItems()[0];
                 return salesLoader.loadItems({
                     filters: [
-                        { fields: ['activeTo'], type: 'lessOrEqual', value: sale.activeTo.toISOString().slice(0, 10) }
+                        { fields: ['activeFrom'], type: 'lessOrEqual', value: sale.activeFrom.toISOString().slice(0, 10) }
                     ]
                 });
             });
@@ -694,7 +694,7 @@ describe('sale', function() {
                 var sales = answer.respond.getItems();
                 expect(sales.length).toBeTruthy();
                 _.forEach(sales, function(saleEqual) {
-                    expect(saleEqual.activeTo).not.toBeGreaterThan(sale.activeTo);
+                    expect(saleEqual.activeFrom).not.toBeGreaterThan(sale.activeFrom);
                 });
             });
         });
