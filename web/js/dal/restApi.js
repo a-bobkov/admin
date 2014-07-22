@@ -52,7 +52,7 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
          * @returns {Promise}
          */
         this.query = function(params) {
-            if (_.contains(['sales', 'tariffs', 'tariffrates', 'dealertariffs', 'sites'], url.replace(/\/(\w+)$/, '$1'))) {
+            if (_.contains(['/sales', '/tariffs', '/tariffrates', '/dealertariffs', '/sites', '/report/sitebalances'], url)) {
                 if (params) {
                     var paramsPager = _.assign({}, params.pager);
                 }

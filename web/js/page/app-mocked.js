@@ -1831,13 +1831,9 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexSiteBalancesQuery = /^\/api2\/report\/sitebalances(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexSiteBalancesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexSiteBalancesQuery, siteBalances.getItems(), 'siteBalances', SiteBalances);
+        return processQueryUrlSort(url, regexSiteBalancesQuery, siteBalances.getItems(), 'siteBalances', SiteBalances);
     });
     $httpBackend.whenPOST(regexSiteBalancesQuery).respond(function(method, url, data) {
-        siteBalances.getItems()[0].saleBalance += Math.floor(Math.random() * 1000000) / 100;
-        siteBalances.getItems()[0].purchaseBalance += Math.floor(Math.random() * 1000000) / 100;
-        siteBalances.getItems()[1].saleBalance += Math.floor(Math.random() * 1000000) / 100;
-        siteBalances.getItems()[1].purchaseBalance += Math.floor(Math.random() * 1000000) / 100;
-        return processPostQuery(url, regexSiteBalancesQuery, data, siteBalances, 'siteBalances', SiteBalances);
+        return processPostQuerySort(url, regexSiteBalancesQuery, data, siteBalances, 'siteBalances', SiteBalances);
     });
 };

@@ -42,6 +42,7 @@ describe('app-mocked', function() {
     var saleStatuses;
     var saleTypes;
     var SiteBalances;
+    var siteBalancesLoader;
 
     try {
         var ngMock = angular.module('ngMock');
@@ -160,6 +161,7 @@ describe('app-mocked', function() {
         saleStatuses = injector.get('saleStatuses');
         saleTypes = injector.get('saleTypes');
         SiteBalances = injector.get('SiteBalances');
+        siteBalancesLoader = injector.get('siteBalancesLoader');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
@@ -238,6 +240,86 @@ describe('app-mocked', function() {
             expect(_.pluck(sortByOrders(_.clone(array), orders), 'id')).toEqual(_.pluck(array, 'id'));
         });
     }
+
+describe('sitebalance', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return siteBalancesLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(siteBalance) {
+                    expect(siteBalance.site).toBeReference();
+                    expect(siteBalance.saleBalance).toBeNumber();
+                    expect(siteBalance.purchaseBalance).toBeNumber();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству site заданному значению', function() {
+            var answer = {};
+            var siteBalance;
+
+            runSync(answer, function() {
+                return siteBalancesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                siteBalance = answer.respond.getItems()[0];
+                return siteBalancesLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: siteBalance.site.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var siteBalances = answer.respond.getItems();
+                expect(siteBalances.length).toBeTruthy();
+                _.forEach(siteBalances, function(siteBalanceEqual) {
+                    expect(siteBalanceEqual.site).toEqual(siteBalance.site);
+                });
+            });
+        });
+
+        it('сортировать по site по возрастанию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return siteBalancesLoader.loadItems({
+                    orders: ['+site']
+                });
+            });
+
+            runs(function() {
+                var siteBalances = answer.respond.getItems();
+                expect(siteBalances.length).toBeTruthy();
+                expect(_.pluck(_.pluck(siteBalances, 'site'), 'id')).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('сортировать по site по убыванию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return siteBalancesLoader.loadItems({
+                    orders: ['-site']
+                });
+            });
+
+            runs(function() {
+                var siteBalances = answer.respond.getItems();
+                expect(siteBalances.length).toBeTruthy();
+                expect(_.pluck(_.pluck(siteBalances, 'site'), 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+    });
+});
 
 describe('dealerTariff', function() {
 
