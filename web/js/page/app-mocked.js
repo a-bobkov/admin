@@ -182,6 +182,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             return _.any(itemValues, function(value) {
                 return (value >= filter.value);
             });
+        } else if (filter.type === 'lessOrEqual') {
+            return _.any(itemValues, function(value) {
+                return (value <= filter.value);
+            });
         }
         return true;
     }
