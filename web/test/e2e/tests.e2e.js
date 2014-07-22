@@ -17,8 +17,12 @@ var getSelectedOptionElem = function(elem) {
     return elem.element(by.css('option:checked'));
 }
 
+var clearDate = function(id, model) {
+    browser.executeScript('var s = angular.element(document.getElementById("' + id + '")).scope(); s.' + model + ' = ""; s.$apply();');
+}
+
 var setDate = function(id, model, value) {
-    browser.executeScript('var s = angular.element(document.getElementById("' + id + '")).scope(); s.' + model + ' = "' + value + '"; s.$apply();');
+    browser.executeScript('var s = angular.element(document.getElementById("' + id + '")).scope(); s.' + model + ' = new Date("' + value + '"); s.$apply();');
 }
 
 var mapText = function(q) {
@@ -2168,8 +2172,9 @@ describe('Sale App', function() {
         });
 
         it('выводит ошибку, если date пустое', function() {
-            expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeFalsy();
-            setDate('saleDate', 'saleEdited.date', '');
+            browser.waitForAngular();
+            // expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeFalsy();
+            clearDate('saleDate', 'saleEdited.date');
             expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
@@ -2340,9 +2345,7 @@ describe('Sale App', function() {
         });
 
         it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
-            element(by.id('saleEditCancel')).click();
-            setSelect(element(by.select('patterns.isActive')), 2);
-
+            browser.get('admin.html#/salelist?archive=true&type=card&isActive=false&orders=id&itemsPerPage=15');
             var noDefaultTariffSum = 0;
             var isDefaultTariffSum = 0;
             var sales = element.all(by.id('SaleListRowEdit'));
@@ -2574,6 +2577,7 @@ describe('Sale App', function() {
         });
 
         it('выводит начальные значения полей', function() {
+            browser.get('admin.html#/salelist?archive=true&orders=id&itemsPerPage=15');
             var saleElems = by.repeater('sale in sales');
             var sales = {};
             mapText(element.all(saleElems.column('sale.dealer.idName'))).then(function(respond) {
@@ -2763,9 +2767,13 @@ describe('Sale App', function() {
                 });
             });
             browser.controlFlow().execute(function() {
-                _.forEach(numberCases, function(value, key) {
-                    expect(value).toBeTruthy();
-                });
+                expect(numberCases.isTariff).toBeTruthy();
+                expect(numberCases.noTariff).toBeTruthy();
+                expect(numberCases.noDealerTariff).toBeTruthy();
+                expect(numberCases.isTariffLimited).toBeTruthy();
+                expect(numberCases.isTariffUnlimited).toBeTruthy();
+                expect(numberCases.isInterval).toBeTruthy();
+                expect(numberCases.isAddAdd).toBeTruthy();
             });
         });
     });
@@ -3026,9 +3034,10 @@ describe('Sale App', function() {
                 setSelect(tariffElem, tariffIdx);
             });
 
-            element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(activeTo) {
-                var activeFrom = activeTo.replace(regexpDateISO, '$3$2$1');
-                element(by.model('saleEdited.activeFrom')).sendKeys(activeFrom);
+            element(by.model('saleEdited.activeTo')).getAttribute('value').then(function(activeToText) {
+                // var activeFrom = activeTo.replace(regexpDateISO, '$3$2$1');
+                // element(by.model('saleEdited.activeFrom')).sendKeys(activeFrom);
+                setDate('saleActiveFrom', 'saleEdited.activeFrom', activeToText);
             });
 
             browser.controlFlow().execute(function() {
@@ -3242,6 +3251,7 @@ describe('Sale App', function() {
         });
 
         it('Активация и дезактивация карточек и расширений', function() {
+            browser.get('admin.html#/salelist?archive=true&orders=id&itemsPerPage=15');
             var sales = by.repeater('sale in sales');
             mapText(element.all(sales.column('sale.type'))).then(function(typeArr) {
                 mapText(element.all(sales.column('sale.isActive'))).then(function(isActiveArr) {
@@ -3441,8 +3451,25 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
+            var tariffParentText;
+            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(tariffText) {
+                tariffParentText = tariffText;
+            });
+
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            mapText(getSelectOptions(tariffElem)).then(function(options) {
+                function tariffPrice(tariffText) {
+                    return parseFloat(tariffText.replace(regexpTariff, '$1'));
+                }
+                var tariffIdx = _.findIndex(options, function(value) {
+                    return !!value && tariffPrice(value) > tariffPrice(tariffParentText);
+                })
+                expect(tariffIdx).not.toBe(-1);
+                setSelect(tariffElem, tariffIdx);
+            });
+
             browser.controlFlow().execute(function() {
-                var newAmount = parseFloatRu(preAmountText) + 1;
+                var newAmount = parseFloatRu(preAmountText) + 1000;
                 var amountElem = element(by.model('saleEdited.amount'));
                 amountElem.clear();
                 amountElem.sendKeys(newAmount.toString());
@@ -3521,9 +3548,9 @@ describe('Sale App', function() {
             element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
                 expect(isActiveText).toBe(saleData.isActiveText);
             });
-            element.all(by.id('SaleListRowAdd')).get(0).isDisplayed().then(function(isDisplayed) {
-                expect(isDisplayed).toBe(saleData.addIsDisplayed);
-            });
+            // element.all(by.id('SaleListRowAdd')).get(0).isDisplayed().then(function(isDisplayed) {
+            //     expect(isDisplayed).toBe(saleData.addIsDisplayed);
+            // });
             element.all(by.id('SaleListRowExtra')).get(0).isDisplayed().then(function(isDisplayed) {
                 expect(isDisplayed).toBe(saleData.extraIsDisplayed);
             });

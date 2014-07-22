@@ -999,7 +999,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 if (newValue === oldValue) {
                     return;
                 }
-                if (!scope.saleEdited || !scope.saleEdited.type.id === 'card'
+                if (!scope.saleEdited || scope.saleEdited.type.id !== 'card'
                     || !scope.saleEdited.dealer || !scope.saleEdited.site
                     || !scope.saleEdited.activeFrom || !scope.saleEdited.activeTo
                     || scope.saleEdited.activeFrom > scope.saleEdited.activeTo) {

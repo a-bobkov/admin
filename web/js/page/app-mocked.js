@@ -1355,7 +1355,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             city: null,
             activeFrom: '2014-01-01',
             rate: 2550,
-            siteRate: 2000,
+            siteRate: 2100,
             info: 'Общий'
         },
         {
