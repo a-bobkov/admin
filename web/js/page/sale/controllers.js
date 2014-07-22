@@ -977,6 +977,38 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
+.directive('uiCrossCards', function(salesLoader) {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            scope.$watch('[saleEdited.dealer, saleEdited.site, saleEdited.activeFrom, saleEdited.activeTo]', function getCrossCards(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+                if (!scope.saleEdited || !scope.saleEdited.type.id === 'card'
+                    || !scope.saleEdited.dealer || !scope.saleEdited.site
+                    || !scope.saleEdited.activeFrom || !scope.saleEdited.activeTo
+                    || scope.saleEdited.activeFrom > scope.saleEdited.activeTo) {
+                    ctrl.$setValidity('crossCards', true);
+                } else {
+                    salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'card' },
+                            { fields: ['dealer'], type: 'equal', value: scope.saleEdited.dealer.id },
+                            { fields: ['site'], type: 'equal', value: scope.saleEdited.site.id },
+                            { fields: ['activeTo'], type: 'greaterOrEqual', value: scope.saleEdited.activeFrom.toISOString().slice(0, 10) },
+                            { fields: ['activeFrom'], type: 'lessOrEqual', value: scope.saleEdited.activeTo.toISOString().slice(0, 10) }
+                        ]
+                    }).then(function(crossCards) {
+                        ctrl.$setValidity('crossCards', !crossCards.getItems().length);
+                    });
+                }
+            }, true);
+        }
+    };
+})
+
 .directive('uiGreaterOrEqual', function() {
     return {
         restrict: 'A',

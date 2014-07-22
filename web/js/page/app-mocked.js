@@ -1779,7 +1779,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                     return (sale.type === item.type)
                         && (sale.dealer.id === item.dealer.id)
                         && (sale.site.id === item.site.id)
-                        && !(sale.activeTo < item.activeFrom || sale.activeFrom > item.activeTo);
+                        && (sale.activeTo >= item.activeFrom) && (sale.activeFrom <= item.activeTo);
                 });
                 if (crossSales.length) {
                     pushError('activeFrom', 'В диапазоне от ' + item.activeFrom.toISOString().slice(0, 10)

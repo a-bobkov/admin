@@ -82,10 +82,11 @@
 	        <tr ng-show='!saleEdited.isExtra()'>
 	            <th><label for="saleActiveFrom">С</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' ng-required='!saleEdited.isExtra()' ui-greater-or-equal="parentSale.activeFrom" ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="date" name="saleActiveFrom" id="saleActiveFrom" ng-model='saleEdited.activeFrom' ng-required='!saleEdited.isExtra()' ui-greater-or-equal="parentSale.activeFrom" ui-cross-cards ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleActiveFrom.$invalid'>
 					    <li id='saleActiveFromErrorRequired' ng-show="formSale.saleActiveFrom.$error.required">Необходимо ввести дату.</li>
 					    <li id='saleActiveFromErrorGreater' ng-show="formSale.saleActiveFrom.$error.greaterOrEqual">Дата должна быть не ранее даты начала родительской карточки: {{parentSale.activeFrom | date:'shortDate'}}</li>
+					    <li id='saleActiveFromErrorCrossCards' ng-show="formSale.saleActiveFrom.$error.crossCards">По паре "Салон-Сайт" между датами "С" и "По" не должно быть других карточек.</li>
 					</ul>
 					<ul class="warning_list" ng-show='saleEdited.isCard()'>
 					    <li id='saleEditActiveFromWarningDifferent' ng-show='saleEdited.activeTo - activeTo(saleEdited.activeFrom, saleEdited.tariff)'>Разница дат "По" - "С" не соответствует тарифу.</li>
