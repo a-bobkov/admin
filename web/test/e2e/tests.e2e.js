@@ -4874,6 +4874,12 @@ describe('DealerSite App', function() {
             element(by.id('dealerSiteEditSave')).click();
 
             element(by.id('DealerSiteListRowDelete')).click();
+            browser.wait(function() {
+                return browser.switchTo().alert().then(
+                    function() { return true; },
+                    function() { return false; }
+                );
+            });
             browser.switchTo().alert().accept();
 
             expect(element.all(dealerSitesSelector).count()).toBe(0);
