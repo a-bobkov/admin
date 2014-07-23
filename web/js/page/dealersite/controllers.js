@@ -338,7 +338,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             check = dealerSiteLoginsLoader.loadItemsDealerSite(dealerSite.dealer.id, dealerSite.site.id).then(function(dealerSiteLogins) {
                 var invalid = invalidFields(dealerSite, dealerSiteLogins);
                 if (invalid) {
-                    alert("Для разблокирования необходимо заполнить поля формы регистрации: " + invalid.join(', '));
+                    alert("Для разблокирования необходимо заполнить поля формы регистрации: " + invalid.join('; '));
                 }
                 return !invalid;
             });
