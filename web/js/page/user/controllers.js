@@ -222,6 +222,12 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             return value;
         }
     }
+
+    $scope.switchUser = function(user) {
+        if ($location.host().match(/maxposter.ru$/)) {
+            $window.location.href = $location.protocol() + '://'+ $location.host() + '/user/' + user.id + '/switch';
+        }
+    }
 })
 
 .controller('UserCtrl', function($scope, $rootScope, $location, $window, data,
