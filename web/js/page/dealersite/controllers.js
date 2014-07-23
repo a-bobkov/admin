@@ -149,8 +149,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     });
 }])
 
-.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, 
-    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader) {
+.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, $q, data,
+    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader, salesLoader, dealerTariffsLoader) {
 
     _.assign($scope, data);
     $scope.dealerSiteStatuses = dealerSiteStatuses;
@@ -305,17 +305,42 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     };
 
     $scope.removeDealerSite = function(dealerSite) {
-        var confirmMessage,
-            noticeMessage;
-
-        confirmMessage = 'Вы действительно хотите отменить экспорт ';
-        noticeMessage = 'Удалена регистрация ';
-        if (confirm(confirmMessage + dealerSite.name() + '?')) {
-            dealerSite.remove().then(function() {
-                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
-                $location.path('/dealersitelist?');
-            });
-        }
+        var today = new Date;
+        today.setUTCHours(0, 0, 0, 0);
+        $q.all({
+            sales: salesLoader.loadItems({
+                filters: [
+                    { fields: ['type'], type: 'equal', value: 'card' },
+                    { fields: ['dealer'], type: 'equal', value: dealerSite.dealer.id },
+                    { fields: ['site'], type: 'equal', value: dealerSite.site.id },
+                    { fields: ['activeTo'], type: 'greaterOrEqual', value: today.toISOString().slice(0, 10) }
+                ]
+            }),
+            dealerTariff: dealerTariffsLoader.loadItemDealerSite(dealerSite.dealer.id, dealerSite.site.id)
+        }).then(function(respond) {
+            var alertText = "Удаление невозможно, так как";
+            var noRemove = false;
+            if (respond.sales.getItems().length) {
+                noRemove = true;
+                alertText += "\nу салона есть активная карточка";
+            }
+            if (respond.dealerTariff) {
+                noRemove = true;
+                alertText += "\nу салона есть активный тариф";
+            }
+            if (noRemove) {
+                alert(alertText);
+            } else {
+                var confirmMessage = 'Вы действительно хотите отменить экспорт ';
+                var noticeMessage = 'Удалена регистрация ';
+                if (confirm(confirmMessage + dealerSite.name() + '?')) {
+                    dealerSite.remove().then(function() {
+                        $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
+                        $location.path('/dealersitelist?');
+                    });
+                }
+            }
+        });
     };
     
     $scope.publicUrlText = function(dealerSite) {
