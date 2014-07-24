@@ -967,6 +967,69 @@ describe('sale', function() {
             });
         });
 
+        it('выдавать ошибки, если сайт неактивный или не совпадает с тарифом или тариф неактивный', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return $q.all({
+                    sites: sitesLoader.loadItems(),
+                    tariffs: tariffsLoader.loadItems({
+                        filters: [
+                            {fields: ['isActive'], type: 'equal', value: false}
+                        ]
+                    }),
+                    sales: salesLoader.loadItems({
+                        orders: ['-activeTo']
+                    })
+                });
+            });
+
+            runSync(answer, function() {
+                var site = _.find(answer.respond.sites.getItems(), {isActive: false});
+                var tariff = _.find(answer.respond.tariffs.getItems(), function(tariff) {
+                    return tariff.site.id !== site.id;
+                });
+                var sale = answer.respond.sales.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: site.id},
+                    tariff: {id: tariff.id},
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: randomAmount(1000, 2000),
+                    siteAmount: randomAmount(1, 1000),
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.site.children.id.errors).toContain('Сайт ' + saleData.site.id +' не активен.');
+                expect(errorResponse.errors.children.tariff.children.id.errors).toContain('Тариф ' + saleData.tariff.id +' не активен.');
+                expect(errorResponse.errors.errors).toContain('Сайт у тарифа должен совпадать с указанным сайтом.');
+            });
+        });
+
         it('выдавать ошибку, если дата начала > даты конца', function() {
             var answer = {};
             var saleData;
