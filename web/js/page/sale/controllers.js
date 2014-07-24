@@ -906,9 +906,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         var intervalParent = ($scope.parentSale.activeTo - $scope.parentSale.activeFrom) / (1000 * 60 * 60 * 24) + 1;
         var intervalNew = Math.max(($scope.saleEdited.activeTo - $scope.saleEdited.activeFrom) / (1000 * 60 * 60 * 24) + 1, 0);
         var k = intervalNew / intervalParent;
-        var dealer = $scope.saleEdited.dealer;
-        var rateNew = $scope.saleEdited.tariff.getLastRate(dealer, $scope.tariffRates);
-        var rateParent = $scope.tariffParent.getLastRate(dealer, $scope.tariffRates);
+        var rateNew = $scope.saleEdited.tariff.getLastRate($scope.city, $scope.tariffRates);
+        var rateParent = $scope.tariffParent.getLastRate($scope.city, $scope.tariffRates);
         $scope.saleEdited.cardAmount = Math.ceil((rateNew.rate - rateParent.rate) * k * 100) / 100;
         $scope.saleEdited.amount = $scope.saleEdited.cardAmount;
         $scope.saleEdited.siteAmount = Math.ceil((rateNew.siteRate - rateParent.siteRate) * k * 100) / 100;

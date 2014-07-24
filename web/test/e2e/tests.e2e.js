@@ -2475,7 +2475,7 @@ describe('Sale App', function() {
 
     describe('Редактирование расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=addcard&archive=true&itemsPerPage=15');
+            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=id&itemsPerPage=15');
             element.all(by.id('SaleListRowEdit')).get(0).click();
         });
 
@@ -2504,7 +2504,16 @@ describe('Sale App', function() {
         });
 
         it('выводит ошибку, если activeFrom меньше activeFrom родительской карточки', function() {
-            element(by.model('saleEdited.activeFrom')).sendKeys('010101');
+            var tariffElem = element(by.model('saleEdited.tariff'));
+            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+                var tariffIdx = _.findIndex(options, function(value) {
+                    return !!value;
+                })
+                expect(tariffIdx).not.toBe(-1);
+                setSelect(tariffElem, tariffIdx);
+            });
+
+            setDate('saleActiveFrom', 'saleEdited.activeFrom', '2001-01-01');
             expect(element(by.id('saleActiveFromErrorGreater')).isDisplayed()).toBeTruthy();
         });
 
