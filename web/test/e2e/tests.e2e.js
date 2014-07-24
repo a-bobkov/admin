@@ -264,11 +264,9 @@ describe('User App', function() {
             mapText(element.all(usersSelector.column('user.email'))).then(function(respond) {
                 usersData.email = respond;
             });
-            browser.executeScript("_.forEach(document.getElementsByName('dealerCompanyName'), function(value){value.className =''});");
-            mapText(element.all(by.name('dealerCompanyName'))).then(function(respond) {
+            mapText(element.all(usersSelector.column('user.dealer.companyName'))).then(function(respond) {
                 usersData.name = respond;
             });
-            browser.executeScript("_.forEach(document.getElementsByName('dealerCompanyName'), function(value){value.className ='hide'});");
             browser.controlFlow().execute(function() {
                 _.forEach(testValues.toLowerCase().split(' '), function(testValue) {
                     _.forEach(usersData.id, function(value, userIdx) {
@@ -286,11 +284,9 @@ describe('User App', function() {
             expect(statusElem.isSelected()).toBeTruthy();
 
             var usersData={};
-            browser.executeScript("_.forEach(document.getElementsByName('userStatus'), function(el){el.className =''});");
-            mapText(element.all(by.name('userStatus'))).then(function(respond) {
+            mapText(element.all(by.model('user.status'))).then(function(respond) {
                 usersData.status = respond;
             });
-            browser.executeScript("_.forEach(document.getElementsByName('userStatus'), function(el){el.className ='hide'});");
 
             browser.controlFlow().execute(function() {
                 _.forEach(usersData.status, function(userStatus) {
@@ -309,11 +305,9 @@ describe('User App', function() {
             });
 
             var usersData={};
-            browser.executeScript("_.forEach(document.getElementsByName('dealerManager'), function(el){el.className =''});");
-            mapText(element.all(by.name('dealerManager'))).then(function(respond) {
+            mapText(element.all(by.model('user.dealer.manager'))).then(function(respond) {
                 usersData.manager = respond;
             });
-            browser.executeScript("_.forEach(document.getElementsByName('dealerManager'), function(el){el.className ='hide'});");
 
             browser.controlFlow().execute(function() {
                 _.forEach(usersData.manager, function(dealerManager) {
@@ -1262,16 +1256,14 @@ describe('User App', function() {
             var usersSelector = by.repeater('user in users');
             var usersData = {};
             expect(element.all(usersSelector).count()).toBeTruthy();
-            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className =''});");
-            mapText(element.all(by.name('groupName'))).then(function(respond) {
+            mapText(element.all(usersSelector.column('user.group'))).then(function(respond) {
                 usersData.group = respond;
             });
-            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className ='hide'});");
 
             var count;
             var userData = {};
             browser.controlFlow().execute(function() {
-                count = _.indexOf(usersData.group, 'admin');
+                count = _.indexOf(usersData.group, 'Администратор');
                 expect(count).not.toBe(-1);
                 element.all(usersSelector.column('user.lastLogin')).get(count).getText().then(function(respond) {
                     userData.lastLogin = respond;
@@ -1337,16 +1329,14 @@ describe('User App', function() {
             var usersSelector = by.repeater('user in users');
             var usersData = {};
             expect(element.all(usersSelector).count()).toBeTruthy();
-            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className =''});");
-            mapText(element.all(by.name('groupName'))).then(function(respond) {
+            mapText(element.all(usersSelector.column('user.group'))).then(function(respond) {
                 usersData.group = respond;
             });
-            browser.executeScript("_.forEach(document.getElementsByName('groupName'), function(value){value.className ='hide'});");
 
             var count;
             var userData = {};
             browser.controlFlow().execute(function() {
-                count = _.indexOf(usersData.group, 'dealer');
+                count = _.indexOf(usersData.group, 'Автосалон');
                 expect(count).not.toBe(-1);
                 element.all(usersSelector.column('user.id')).get(count).getText().then(function(respond) {
                     userData.id = respond;
