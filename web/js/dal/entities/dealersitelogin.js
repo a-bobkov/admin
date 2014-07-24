@@ -70,6 +70,14 @@ angular.module('max.dal.entities.dealersitelogin', ['max.dal.entities.collection
     this.loadItem = function(id, directories) {
         return entityLoader.loadItem(id, directories, dealerSiteLoginApi, DealerSiteLogin);
     };
+    this.loadItemsDealerSite = function(dealerId, siteId, directories) {
+        return this.loadItems({
+            filters: [
+                { fields: ['dealer'], type: 'equal', value: dealerId },
+                { fields: ['site'], type: 'equal', value: siteId }
+            ]
+        }, directories);
+    };
 })
 
 .factory('DealerSiteLoginType', function(Item) {

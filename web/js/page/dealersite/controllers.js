@@ -149,8 +149,24 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     });
 }])
 
-.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, data, 
-    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader) {
+.constant('DealerSiteRequiredFields', {
+    1:  {                   publicUrl: true },
+    2:  {                   publicUrl: true, site: true },
+    4:  { externalId: true },
+    5:  { externalId: true, publicUrl: true, site: true },
+    6:  { externalId: true, publicUrl: true, site: true, ftp: true },
+    7:  {                   publicUrl: true },
+    9:  {                   publicUrl: true },
+    11: {                   publicUrl: true },
+    13: { externalId: true },
+    14: {                                    site: true },
+    16: {                   publicUrl: true },
+    17: {                   publicUrl: true }
+})
+
+.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, $q, data,
+    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader, salesLoader, dealerTariffsLoader, dealerSiteLoginsLoader,
+    DealerSiteRequiredFields) {
 
     _.assign($scope, data);
     $scope.dealerSiteStatuses = dealerSiteStatuses;
@@ -279,43 +295,104 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         }
     });
 
+    function invalidFields(dealerSite, dealerSiteLogins) {
+        var invalid = [];
+        if (DealerSiteRequiredFields[dealerSite.site.id]["externalId"] && !dealerSite.externalId) {
+            invalid.push(['Код салона на сайте']);
+        }
+        if (DealerSiteRequiredFields[dealerSite.site.id]["publicUrl"] && !dealerSite.publicUrl) {
+            invalid.push(['Страница на сайте']);
+        }
+        var dealerSiteLoginSite = _.find(dealerSiteLogins.getItems(), {type: 'site'});
+        if (DealerSiteRequiredFields[dealerSite.site.id]["site"] && !(dealerSiteLoginSite && dealerSiteLoginSite.login)) {
+            invalid.push(['Логин на сайте']);
+        }
+        if (DealerSiteRequiredFields[dealerSite.site.id]["site"] && !(dealerSiteLoginSite && dealerSiteLoginSite.password)) {
+            invalid.push(['Пароль на сайте']);
+        }
+        var dealerSiteLoginFtp = _.find(dealerSiteLogins.getItems(), {type: 'ftp'});
+        if (DealerSiteRequiredFields[dealerSite.site.id]["ftp"] && !(dealerSiteLoginFtp && dealerSiteLoginFtp.login)) {
+            invalid.push(['Логин для ftp']);
+        }
+        if (DealerSiteRequiredFields[dealerSite.site.id]["ftp"] && !(dealerSiteLoginFtp && dealerSiteLoginFtp.password)) {
+            invalid.push(['Пароль для ftp']);
+        }
+        return invalid;
+    }
+
     $scope.toggleDealerSiteStatus = function(dealerSite) {
         var confirmMessage,
             noticeMessage,
             newStatus;
+        var check;
 
         if (dealerSite.isActive.id === true) {
             confirmMessage = 'Блокировать регистрацию ';
             noticeMessage = 'Блокирована регистрация ';
             newStatus = dealerSiteStatuses.get(false);
+            check = $q.when(true);
         } else {
             confirmMessage = 'Разблокировать регистрацию ';
             noticeMessage = 'Разблокирована регистрация ';
             newStatus = dealerSiteStatuses.get(true);
-        }
-        if (confirm(confirmMessage + dealerSite.name() + '?')) {
-            var dealerSiteEdited = new DealerSite;
-            angular.extend(dealerSiteEdited, dealerSite);
-            dealerSiteEdited.isActive = newStatus;
-            dealerSiteEdited.save(data).then(function() {
-                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
-                $location.path('/dealersitelist?');
+            check = dealerSiteLoginsLoader.loadItemsDealerSite(dealerSite.dealer.id, dealerSite.site.id).then(function(dealerSiteLogins) {
+                var invalid = invalidFields(dealerSite, dealerSiteLogins);
+                if (invalid) {
+                    alert("Для разблокирования необходимо заполнить поля формы регистрации: " + invalid.join('; '));
+                }
+                return !invalid;
             });
         }
+        check.then(function(valid) {
+            if (valid && confirm(confirmMessage + dealerSite.name() + '?')) {
+                var dealerSiteEdited = new DealerSite;
+                angular.extend(dealerSiteEdited, dealerSite);
+                dealerSiteEdited.isActive = newStatus;
+                dealerSiteEdited.save(data).then(function() {
+                    $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
+                    $location.path('/dealersitelist?');
+                });
+            }
+        });
     };
 
     $scope.removeDealerSite = function(dealerSite) {
-        var confirmMessage,
-            noticeMessage;
-
-        confirmMessage = 'Вы действительно хотите отменить экспорт ';
-        noticeMessage = 'Удалена регистрация ';
-        if (confirm(confirmMessage + dealerSite.name() + '?')) {
-            dealerSite.remove().then(function() {
-                $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
-                $location.path('/dealersitelist?');
-            });
-        }
+        var today = new Date;
+        today.setUTCHours(0, 0, 0, 0);
+        $q.all({
+            sales: salesLoader.loadItems({
+                filters: [
+                    { fields: ['type'], type: 'equal', value: 'card' },
+                    { fields: ['dealer'], type: 'equal', value: dealerSite.dealer.id },
+                    { fields: ['site'], type: 'equal', value: dealerSite.site.id },
+                    { fields: ['activeTo'], type: 'greaterOrEqual', value: today.toISOString().slice(0, 10) }
+                ]
+            }),
+            dealerTariff: dealerTariffsLoader.loadItemDealerSite(dealerSite.dealer.id, dealerSite.site.id)
+        }).then(function(respond) {
+            var alertText = "Удаление невозможно, так как";
+            var noRemove = false;
+            if (respond.sales.getItems().length) {
+                noRemove = true;
+                alertText += "\nу салона есть активная карточка";
+            }
+            if (respond.dealerTariff) {
+                noRemove = true;
+                alertText += "\nу салона есть активный тариф";
+            }
+            if (noRemove) {
+                alert(alertText);
+            } else {
+                var confirmMessage = 'Вы действительно хотите отменить экспорт ';
+                var noticeMessage = 'Удалена регистрация ';
+                if (confirm(confirmMessage + dealerSite.name() + '?')) {
+                    dealerSite.remove().then(function() {
+                        $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
+                        $location.path('/dealersitelist?');
+                    });
+                }
+            }
+        });
     };
     
     $scope.publicUrlText = function(dealerSite) {
@@ -325,34 +402,19 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     }
 
     $scope.editDealerSite = function(dealerSite) {
-        if (dealerSite.isActive.id === true) {
-            $location.path('/dealersites/' + dealerSite.id + '/edit');
-        }
+        $location.path('/dealersites/' + dealerSite.id + '/edit').search('');
     };
 })
 
 .controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, $q, data, 
-    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader, DealerSiteLogin, dealerSiteLoginTypes, dealerSiteLoginsLoader) {
+    DealerSite, dealerSiteStatuses, DealerSiteRequiredFields, dealersLoader, sitesLoader, DealerSiteLogin, 
+    dealerSiteLoginTypes, dealerSiteLoginsLoader) {
 
     _.assign($scope, data);
     $scope.dealerSiteStatuses = dealerSiteStatuses;
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
-
-    $scope.requiredFields = {
-        1:  {                   publicUrl: true },
-        2:  {                   publicUrl: true, site: true },
-        4:  { externalId: true },
-        5:  { externalId: true, publicUrl: true, site: true },
-        6:  { externalId: true, publicUrl: true, site: true, ftp: true },
-        7:  {                   publicUrl: true },
-        9:  {                   publicUrl: true },
-        11: {                   publicUrl: true },
-        13: { externalId: true },
-        14: {                                    site: true },
-        16: {                   publicUrl: true },
-        17: {                   publicUrl: true }
-    };
+    $scope.requiredFields = DealerSiteRequiredFields;
 
     if ($scope.dealerSite) {
         makeDealerSiteCopy();

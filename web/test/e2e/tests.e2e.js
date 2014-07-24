@@ -4651,6 +4651,118 @@ describe('DealerSite App', function() {
             });
         });
 
+        it('Очистка регистрационных данных и доступа и получение отказа в активации', function() {
+            var dealerSitesSelector = by.repeater('dealerSite in dealerSites');
+            var dealerSiteData = {};
+            mapIsDisplayed(element.all(by.id('DealerSiteListRowEdit'))).then(function(isDisplayedArray) {
+                var position = _.indexOf(isDisplayedArray, true);
+                element.all(dealerSitesSelector.column('dealerSite.dealer')).get(position).getText().then(function(respond) {
+                    dealerSiteData.dealerText = respond;
+                });
+                element.all(dealerSitesSelector.column('dealerSite.site')).get(position).getText().then(function(respond) {
+                    dealerSiteData.siteText = respond;
+                });
+
+                var dealerElem = element(by.id('DealerSiteListFilterDealers'));
+                var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
+                dealerElemSearch.click().then(function() {
+                    dealerElemSearch.sendKeys(dealerSiteData.dealerText.replace(regexpIdName, '$1'));
+                });
+                dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+
+                var siteElem = element(by.id('DealerSiteListFilterSites'));
+                var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
+                siteElemSearch.click().then(function() {
+                    siteElemSearch.sendKeys(dealerSiteData.siteText.replace(regexpIdName, '$1'));
+                });
+                siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            });
+
+            expect(element.all(dealerSitesSelector).count()).toBe(1);
+
+            element.all(by.id('DealerSiteListRowEdit')).get(0).click();
+
+            element(by.model('dealerSiteEdited.externalId')).clear();
+            element(by.model('dealerSiteEdited.publicUrl')).clear();
+            element(by.model('dealerSiteLoginsEdited.site.login')).clear();
+            element(by.model('dealerSiteLoginsEdited.site.password')).clear();
+            setSelect(element(by.model('dealerSiteEdited.isActive')), 1);
+
+            var dealerElem = element(by.model('dealerSiteEdited.dealer'));
+            var siteElem = element(by.model('dealerSiteEdited.site'));
+
+            var dealerSiteData = {};
+            dealerElem.element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                dealerSiteData.dealerText = respond;
+            });
+            siteElem.element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
+                dealerSiteData.siteText = respond;
+            });
+            element(by.model('dealerSiteEdited.externalId')).getAttribute('value').then(function(respond) {
+                dealerSiteData.externalId = respond;
+            });
+            element(by.model('dealerSiteEdited.publicUrl')).getAttribute('value').then(function(respond) {
+                dealerSiteData.publicUrl = respond;
+            });
+            element(by.model('dealerSiteLoginsEdited.site.login')).getAttribute('value').then(function(respond) {
+                dealerSiteData.siteLogin = respond;
+            });
+            element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value').then(function(respond) {
+                dealerSiteData.sitePassword = respond;
+            });
+            getSelectedOptionElem(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
+                dealerSiteData.isActiveText = respond;
+            });
+
+            element(by.id('dealerSiteEditSave')).click();
+
+            element.all(dealerSitesSelector.column('dealerSite.dealer')).get(0).getText().then(function(respond) {
+                expect(respond).toBe(dealerSiteData.dealerText);
+            });
+            element.all(dealerSitesSelector.column('dealerSite.site')).get(0).getText().then(function(respond) {
+                expect(respond).toBe(dealerSiteData.siteText);
+            });
+            element.all(dealerSitesSelector.column('dealerSite.externalId')).get(0).getText().then(function(respond) {
+                expect(respond).toBe(dealerSiteData.externalId);
+            });
+            element.all(dealerSitesSelector.column('publicUrlText(dealerSite)')).get(0).getText().then(function(respond) {
+                expect(respond).toMatch(/^(Ссылка)?$/);
+            });
+            element.all(dealerSitesSelector.column('publicUrlText(dealerSite)')).get(0).getAttribute('href').then(function(respond) {
+                expect(respond).toBe(dealerSiteData.publicUrl);
+            });
+            element.all(dealerSitesSelector.column('dealerSite.isActive')).get(0).getText().then(function(respond) {
+                expect(respond).toBe(dealerSiteData.isActiveText);
+            });
+            expect(element.all(by.id('DealerSiteListRowEdit')).get(0).isDisplayed()).toBeTruthy();
+
+            element(by.id('DealerSiteListNotice')).getText().then(function(noticeText) {
+                var dealerName = dealerSiteData.dealerText.replace(regexpIdName, '$2');
+                var siteName = dealerSiteData.siteText.replace(regexpIdName, '$2');
+                expect(noticeText).toBe('Сохранена регистрация салона "' + dealerName + '" на сайте "' + siteName + '"');
+            });
+
+            element.all(dealerSitesSelector.column('dealerSite.isActive')).get(0).click();
+            browser.wait(function() {
+                return browser.switchTo().alert().then(
+                    function() { return true; },
+                    function() { return false; }
+                );
+            });
+            var alert = browser.switchTo().alert();
+            expect(alert.getText()).toMatch(/^Для разблокирования необходимо заполнить поля формы регистрации: (.+)/);
+            browser.switchTo().alert().accept();
+
+            element.all(by.id('DealerSiteListRowEdit')).get(0).click();
+
+            element(by.model('dealerSiteLoginsEdited.site.login')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerSiteData.siteLogin);
+            });
+            element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerSiteData.sitePassword);
+            });
+        });
+
         it('Сохранение и удаление доступа', function() {
             var dealerSitesSelector = by.repeater('dealerSite in dealerSites');
             var dealerSiteData = {};
@@ -4762,6 +4874,12 @@ describe('DealerSite App', function() {
             element(by.id('dealerSiteEditSave')).click();
 
             element(by.id('DealerSiteListRowDelete')).click();
+            browser.wait(function() {
+                return browser.switchTo().alert().then(
+                    function() { return true; },
+                    function() { return false; }
+                );
+            });
             browser.switchTo().alert().accept();
 
             expect(element.all(dealerSitesSelector).count()).toBe(0);

@@ -20,14 +20,14 @@
             </tr>
         </thead>
         <tbody id="UserListTable">
-            <tr ng-repeat='user in users.getItems()' ng-click='clickLine(user.id)' ng-class-odd="'odd'" ng-class-even="'even'">
+            <tr ng-repeat='user in users.getItems()' ng-class-odd="'odd'" ng-class-even="'even'">
                 <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.id}}</a></td>
                 <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.email}}</a></td>
                 <td class="date">{{user.lastLogin | date:'shortDate'}}</td>
                 <td>
                     <ul class="actions">
                         <li class="edit"><a href='#/users/{{user.id}}/edit'>изменить</a></li>
-                        <li class="switch"><a href='#/users/{{user.id}}/switch'>войти</a></li>
+                        <li class="switch"><a ng-click='switchUser(user)'>войти</a></li>
                     </ul>
                 </td>
                 <td class="hide" name='dealerCompanyName'>{{user.dealer.companyName}}</td>
