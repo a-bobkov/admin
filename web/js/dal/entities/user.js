@@ -80,6 +80,16 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
             return (this.group && this.group.id == 3);
         };
 
+        User.prototype.groupName = function() {
+            var name = this.group.description;
+            if (this.isDealer()) {
+                name += ': ' + this.dealer.companyName;
+            } else if (this.isSite()) {
+                name += ': ' + this.site.name;
+            }
+            return name;
+        };
+
         User.prototype.save = function(directories) {
             if (this.id) {
                 return userApi.update(this.serialize()).then(function(respond) {

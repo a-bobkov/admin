@@ -65,6 +65,7 @@ var regexpUrl = /^http:\/\/[\w\.-\/]+$/;
 var regexpIdName = /^(\d+): (.+)$/;
 var regexpTariff = /^(\d+(?:\.\d+)?) руб. за (\d+) +(мес\.|дн\.)(?:, до (\d+) объявлений)?( \(Н\/А\))?$/;
 var regexpSaleName = /^.+"(.+)".+"(.+)".*$/;
+var regexpUserGroupName = /^([А-Яа-яЁё]+)(?:: (.+))?$/;
 var regexpTotalItems = /^.+: (\d+)$/;
 
 describe('MaxPoster Admin Frontend', function() {
@@ -264,8 +265,12 @@ describe('User App', function() {
             mapText(element.all(usersSelector.column('user.email'))).then(function(respond) {
                 usersData.email = respond;
             });
-            mapText(element.all(usersSelector.column('user.dealer.companyName'))).then(function(respond) {
-                usersData.name = respond;
+            mapText(element.all(usersSelector.column('user.groupName()'))).then(function(respond) {
+                usersData.name = _.map(respond, function(value) {
+                    var group = value.replace(regexpUserGroupName, '$1');
+                    var dealerName = (group === 'Автосалон') ? value.replace(regexpUserGroupName, '$2') : '';
+                    return dealerName;
+                });
             });
             browser.controlFlow().execute(function() {
                 _.forEach(testValues.toLowerCase().split(' '), function(testValue) {
@@ -1330,7 +1335,10 @@ describe('User App', function() {
             var usersData = {};
             expect(element.all(usersSelector).count()).toBeTruthy();
             mapText(element.all(usersSelector.column('user.group'))).then(function(respond) {
-                usersData.group = respond;
+                usersData.group = _.map(respond, function(value) {
+                    var group = value.replace(regexpUserGroupName, '$1');
+                    return group;
+                });
             });
 
             var count;

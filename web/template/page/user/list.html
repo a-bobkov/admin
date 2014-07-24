@@ -54,10 +54,9 @@
                 <th ng-repeat='column in sortableColumns' id="UserListTableHeader" ng-class='{"active": sorting.column === column.id}' ng-style='{width: column.width}'>
                     <a ng-click='changeSorting(column.id)' id="UserListTableHeaderRef">{{column.name}}</a><span id="UserListTableHeaderDir">{{sortingMark(column.id)}}</span>
                 </th>
-                <th>Название компании</th>
+                <th>Название</th>
                 <th>Статус</th>
                 <th>Менеджер</th>
-                <th>Группа</th>
                 <th>Действия</th>
             </tr>
         </thead>
@@ -66,10 +65,9 @@
                 <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.id}}</a></td>
                 <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.email}}</a></td>
                 <td class="date">{{user.lastLogin | date:'shortDate'}}</td>
-                <td class="text">{{user.dealer.companyName}}</td>
+                <td class="text">{{user.groupName()}}</td>
                 <td class="text">{{user.status.nameMale}}</td>
                 <td class="text">{{user.dealer.manager.name}}</td>
-                <td class="text" name='groupName'>{{user.group.description}}</td>
                 <td>
                     <ul class="actions">
                         <li class="edit"><a href='#/users/{{user.id}}/edit'>изменить</a></li>
