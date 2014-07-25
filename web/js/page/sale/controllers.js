@@ -925,12 +925,15 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.saleEdited.siteAmount = Math.ceil((rateNew.siteRate - rateParent.siteRate) * k * 100) / 100;
     }, true);
 
-    $scope.$watch('saleEdited.count', function setInfo(newValue, oldValue) {
+    $scope.$watch('saleEdited.tariff', function setInfo(newValue, oldValue) {
         if (newValue === oldValue && $scope.sale) {
             return;
         }
-        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за размещение ' +
-            ($scope.saleEdited.count ? $scope.saleEdited.count : 'неограниченно') + ' объявлений.'; 
+        if (!$scope.saleEdited.site || !$scope.saleEdited.tariff) {
+            return;
+        }
+        $scope.saleEdited.info = 'Доплата на сайте ' + $scope.saleEdited.site.name + ' за расширение до ' +
+            ($scope.saleEdited.tariff.count ? $scope.saleEdited.tariff.count : 'неограниченно') + ' объявлений.'; 
     });
 
 
