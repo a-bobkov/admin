@@ -4,13 +4,13 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-        Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances);
+        Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances);
 });
 
 /**
@@ -19,7 +19,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances) {
 
     var userDirectories = new Construction({
         groups: new Groups([
@@ -1835,5 +1835,22 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     });
     $httpBackend.whenPOST(regexSiteBalancesQuery).respond(function(method, url, data) {
         return processPostQuerySort(url, regexSiteBalancesQuery, data, siteBalances, 'siteBalances', SiteBalances);
+    });
+
+    var dealerBalances = new DealerBalances(multiplyArrFn([
+        {
+            dealer: {id: 3},
+            balance: 100000
+        }
+    ], multiplyCoef, function(i, len) {
+        this.dealer = { id: dealers.getItems()[i].id };
+    })).resolveRefs({dealers: dealers});
+
+    var regexDealerBalancesQuery = /^\/api2\/report\/dealerbalances(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealerBalancesQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexDealerBalancesQuery, dealerBalances.getItems(), 'dealerBalances', DealerBalances);
+    });
+    $httpBackend.whenPOST(regexDealerBalancesQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexDealerBalancesQuery, data, dealerBalances, 'dealerBalances', DealerBalances);
     });
 };

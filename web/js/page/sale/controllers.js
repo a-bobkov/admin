@@ -7,7 +7,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         'max.dal.entities.dealertariff',
         'max.dal.entities.tariffrate',
         'max.dal.entities.sale',
-        'max.dal.entities.sitebalance'
+        'max.dal.entities.sitebalance',
+        'max.dal.entities.dealerbalance'
     ])
 
 .config(['$routeProvider', function($routeProvider) {
@@ -603,7 +604,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
-.controller('SaleCardEditCtrl', function($scope, $rootScope, $location, $window, data,
+.service('SaleCommonCtrl', function($rootScope, $location, dealerBalancesLoader) {
+    this.saveSaleEdited = function($scope, data) {
+        dealerBalancesLoader.loadItemDealer($scope.saleEdited.dealer.id).then(function(dealerBalance) {
+            var balance = dealerBalance && dealerBalance.balance || 0;
+            var newBalance = balance - $scope.saleEdited.amount + ((data.sale && data.sale.dealer.id === $scope.saleEdited.dealer.id) ? data.sale.amount : 0);
+            if (newBalance >= 0 || (newBalance < 0 && confirm('После сохранения баланс клиента будет отрицательным (' + newBalance.ceil(2) + ' руб)! Продолжить сохранение?'))) {
+                $scope.saleEdited.save($scope).then(function(sale) {
+                    $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
+                    $location.path('/salelist').search('');
+                });
+            }
+        });
+    };
+})
+
+.controller('SaleCardEditCtrl', function($scope, $rootScope, $location, $window, data, SaleCommonCtrl,
     Sale, saleStatuses, dealersLoader, sitesLoader, salesLoader, tariffsLoader, dealerTariffsLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
@@ -816,11 +832,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }, true);
 
     $scope.saveSaleEdited = function() {
-        $scope.saleEdited.save($scope).then(function(sale) {
-            $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
-            $location.search('');
-            $location.path('/salelist');
-        });
+        SaleCommonCtrl.saveSaleEdited($scope, data);
     };
 
     $scope.activeRateTariffs = function(selectedTariff) {
@@ -830,7 +842,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }
 })
 
-.controller('SaleAddcardEditCtrl', function($scope, $rootScope, $location, $window, data,
+.controller('SaleAddcardEditCtrl', function($scope, $rootScope, $location, $window, data, SaleCommonCtrl,
     Sale, saleStatuses, dealersLoader, sitesLoader, salesLoader, tariffsLoader, usersLoader, tariffRatesLoader) {
 
     _.assign($scope, data);
@@ -923,11 +935,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
 
     $scope.saveSaleEdited = function() {
-        $scope.saleEdited.save($scope).then(function(sale) {
-            $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
-            $location.search('');
-            $location.path('/salelist');
-        });
+        SaleCommonCtrl.saveSaleEdited($scope, data);
     };
 
     $scope.activeRateTariffs = function(selectedTariff) {
@@ -937,7 +945,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }
 })
 
-.controller('SaleExtraEditCtrl', function($scope, $rootScope, $location, $window, data,
+.controller('SaleExtraEditCtrl', function($scope, $rootScope, $location, $window, data, SaleCommonCtrl,
     Sale, dealersLoader, sitesLoader) {
 
     _.assign($scope, data);
@@ -981,11 +989,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 
     $scope.saveSaleEdited = function() {
-        $scope.saleEdited.save($scope).then(function(sale) {
-            $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
-            $location.search('');
-            $location.path('/salelist');
-        });
+        SaleCommonCtrl.saveSaleEdited($scope, data);
     };
 })
 
