@@ -1,6 +1,6 @@
 # Реализация клиента для кабинета MaxPoster
 
-## Установка и настрока
+## Установка и настройка
 
 1. Скопировать код из репозитория
 ```
@@ -31,4 +31,11 @@ webdriver-manager start
 ```
 cp config/karma.conf.js-distrib config/karma.conf.js
 cp config/protractor.conf.js-distrib config/protractor.conf.js
+```
+
+5. Установить Grunt's command line interface (CLI)
+
+```
+npm update -g npm
+npm install -g grunt-cli
 ```
