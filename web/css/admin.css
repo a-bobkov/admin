@@ -14,6 +14,11 @@ table.multi-parameters th {
 	width: 10%;
 }
 
+.filterInput {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 body {
   overflow-y: scroll;
 }

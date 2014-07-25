@@ -1,14 +1,52 @@
-<h1>Список пользователей</h1>
-
-<div class="span-6">
-    <h3 id="UserListNumberUsers">Количество записей: {{totalItems}}</h3>
-</div>
-
-<div class="append-bottom">
-    <input id='UserListAddUserUp' type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
-</div>
-
-<div class="span-16">
+<div class="span-24">
+    <table>
+        <tr>
+            <td class="first">
+            <div class="span-7">
+                <h1>Список пользователей</h1>
+                <h3 id="UserListNumberUsers">Количество записей: {{totalItems}}</h3>
+                <input id='UserListAddUserUp' type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
+            </div>
+            </td>
+            <td class="last">
+            <fieldset class="span-12 right sale">
+                <legend>Фильтр</legend>
+                <table class='multi-parameters'>
+                    <tbody>
+                        <tr>
+                            <th><label for="sf_guard_user_filters_complex">Текст</label></th>
+                            <td colspan="3">
+                                <input class='filterInput' type="text" ng-model='patterns.complex' id="sf_guard_user_filters_complex" placeholder='Части кода, мэйла, названия через пробел'/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th rowspan="2"><label for="sf_guard_user_filters_status">Статус</label></th>
+                            <td rowspan="2">
+                                <div id='UserStatusesFilter' ui-checkboxgroup="userStatuses.getItems()" ui-checkboxgroup-selected="patterns.status">
+                                </div>
+                            </td>
+                            <th><label for="sf_guard_user_filters_manager_id">Менеджер</label></th>
+                            <td>
+                                <select class='filterInput' ng-model='patterns.manager' ng-options='opt.name for opt in managers.getItems()' id='sf_guard_user_filters_manager_id' >
+                                    <option value='' selected="selected"></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <ul class="actions">
+                                    <li class="list">
+                                        <a ng-click='setPatternsDefault()' id='UserListFilterSetDefault'>Сбросить</a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            </td>
+        </tr>
+    </table>
     <div class="notice" id='savedUserListNotice' ng-show='savedUserListNotice'>{{savedUserListNotice}}</div>
     <table class="list">
         <thead>
@@ -16,6 +54,9 @@
                 <th ng-repeat='column in sortableColumns' id="UserListTableHeader" ng-class='{"active": sorting.column === column.id}' ng-style='{width: column.width}'>
                     <a ng-click='changeSorting(column.id)' id="UserListTableHeaderRef">{{column.name}}</a><span id="UserListTableHeaderDir">{{sortingMark(column.id)}}</span>
                 </th>
+                <th>Название</th>
+                <th>Статус</th>
+                <th>Менеджер</th>
                 <th>Действия</th>
             </tr>
         </thead>
@@ -24,16 +65,15 @@
                 <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.id}}</a></td>
                 <td class="text"><a href='#/users/{{user.id}}/edit'>{{user.email}}</a></td>
                 <td class="date">{{user.lastLogin | date:'shortDate'}}</td>
+                <td class="text">{{user.groupName()}}</td>
+                <td class="text">{{user.status.nameMale}}</td>
+                <td class="text">{{user.dealer.manager.name}}</td>
                 <td>
                     <ul class="actions">
                         <li class="edit"><a href='#/users/{{user.id}}/edit'>изменить</a></li>
                         <li class="switch"><a ng-click='switchUser(user)'>войти</a></li>
                     </ul>
                 </td>
-                <td class="hide" name='dealerCompanyName'>{{user.dealer.companyName}}</td>
-                <td class="hide" name='userStatus'>{{user.status.nameMale}}</td>
-                <td class="hide" name='dealerManager'>{{user.dealer.manager.name}}</td>
-                <td class="hide" name='groupName'>{{user.group.name}}</td>
             </tr>
         </tbody>
     </table>
@@ -41,46 +81,4 @@
     <div class="append-bottom">
         <input id='UserListAddUserDown' type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
     </div>
-</div>
-<div class="span-8 last">
-    <fieldset class="span-8 last">
-        <legend>Фильтр</legend>
-        <table>
-            <tfoot>
-                <tr>
-                    <td>
-                        <ul class="actions">
-                            <li class="list">
-                                <a ng-click='setPatternsDefault()' id='UserListFilterSetDefault'>Сбросить</a>
-                            </li>
-                        </ul>
-                    </td>
-                    <td><input type="submit" value="Фильтровать"/></td>
-                </tr>
-            </tfoot>
-            <tbody>
-                <tr>
-                    <th><label for="sf_guard_user_filters_complex">Код, email, название</label></th>
-                    <td>
-                        <input type="text" ng-model='patterns.complex' id="sf_guard_user_filters_complex" placeholder='через пробелы и запятые'/>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="sf_guard_user_filters_status">Статус</label></th>
-                    <td>
-                        <div id='UserStatusesFilter' ui-checkboxgroup="userStatuses.getItems()" ui-checkboxgroup-selected="patterns.status">
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="sf_guard_user_filters_manager_id">Менеджер</label></th>
-                    <td>
-                        <select ng-model='patterns.manager' ng-options='opt.name for opt in managers.getItems()' id='sf_guard_user_filters_manager_id' >
-                            <option value='' selected="selected"></option>
-                        </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </fieldset>
 </div>
