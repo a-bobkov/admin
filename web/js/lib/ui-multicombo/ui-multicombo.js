@@ -110,10 +110,14 @@ angular.module("ui.multicombo", [])
                 var choicesId = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'id' : 'id';
                 var choicesName = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'companyName' : 'name';
                 var choicesFields = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? ['dealer_list_name'] : [];
+                var filters = _.invoke($scope._search && $scope._search.split(' '), function() {
+                    return { fields: [choicesId, choicesName], type: 'contain', value: this };
+                });
+                if ($scope._choicesLoader.constructor.name === 'dealersLoader') {
+                    filters.push({fields: ['isActive'], type: 'equal', value: true});
+                }
                 $scope._choicesLoader.loadItems({
-                    filters: _.invoke($scope._search && $scope._search.split(' '), function() {
-                        return { fields: [choicesId, choicesName], type: 'contain', value: this };
-                    }),
+                    filters: filters,
                     fields: choicesFields,
                     pager: {
                         per_page: 9
