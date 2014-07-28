@@ -967,21 +967,76 @@ describe('sale', function() {
             });
         });
 
+        it('принимать неограниченное количество (null)', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'in', value: ['card', 'addcard'] }
+                    ],
+                    orders: ['-activeTo']
+                });
+            });
+
+            runSync(answer, function() {
+                var sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: randomAmount(1, 1000),
+                    count: null,
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: randomAmount(1000, 2000),
+                    siteAmount: randomAmount(1, 1000),
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var sale = answer.respond;
+                _.forEach(sale.serialize(), function(value, key) {
+                    if (!_.contains(['id', 'cardId'], key)) {
+                        expect(value).toEqual(saleData[key]);
+                    }
+                });
+            });
+        });
+
         it('выдавать ошибки, если сайт неактивный или не совпадает с тарифом или тариф неактивный', function() {
             var answer = {};
             var saleData;
 
             runSync(answer, function() {
                 return $q.all({
-                    sites: sitesLoader.loadItems(),
+                    sales: salesLoader.loadItems({
+                        orders: ['-activeTo']
+                    }),
                     tariffs: tariffsLoader.loadItems({
                         filters: [
                             {fields: ['isActive'], type: 'equal', value: false}
                         ]
                     }),
-                    sales: salesLoader.loadItems({
-                        orders: ['-activeTo']
-                    })
+                    sites: sitesLoader.loadItems()
                 });
             });
 
@@ -1027,6 +1082,109 @@ describe('sale', function() {
                 expect(errorResponse.errors.children.site.children.id.errors).toContain('Сайт ' + saleData.site.id +' не активен.');
                 expect(errorResponse.errors.children.tariff.children.id.errors).toContain('Тариф ' + saleData.tariff.id +' не активен.');
                 expect(errorResponse.errors.errors).toContain('Сайт у тарифа должен совпадать с указанным сайтом.');
+            });
+        });
+
+        it('выдавать ошибку, если отрицательные числа', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: ['-activeTo']
+                });
+            });
+
+            runSync(answer, function() {
+                var sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: -1,
+                    count: -1,
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: -1,
+                    siteAmount: -1,
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.count.errors).toContain('Значение должно быть больше чем 0.');
+                expect(errorResponse.errors.children.cardAmount.errors).toContain('Значение должно быть больше или равно 0.');
+                expect(errorResponse.errors.children.amount.errors).toContain('Значение должно быть больше или равно 0.');
+                expect(errorResponse.errors.children.siteAmount.errors).toContain('Значение должно быть больше или равно 0.');
+            });
+        });
+
+        it('выдавать ошибку, если суммы слишком большие', function() {
+            var answer = {};
+            var saleData;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    orders: ['-activeTo']
+                });
+            });
+
+            runSync(answer, function() {
+                var sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: 1000000,
+                    count: 1,
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: 10000000,
+                    siteAmount: 10000000,
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.cardAmount.errors).toContain('Значение должно быть меньше чем 1000000.');
+                expect(errorResponse.errors.children.amount.errors).toContain('Значение должно быть меньше чем 10000000.');
+                expect(errorResponse.errors.children.siteAmount.errors).toContain('Значение должно быть меньше чем 10000000.');
             });
         });
 
