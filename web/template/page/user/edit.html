@@ -7,10 +7,11 @@
 	        <tr>
 	            <th><label for="user_email">Email</label></th>
 	            <td>
-	                <input class="span-6 required" type="email" name="user_email" ng-model="userEdited.email" maxlength="50" required/>
+	                <input class="span-6 required" type="email" name="user_email" ng-model="userEdited.email" maxlength="50" required ui-user-email-unique/>
 					<ul class="error_list" ng-show='formUser.user_email.$invalid'>
 					    <li id='UserEditEmailErrorRequired' ng-show="formUser.user_email.$error.required">Необходимо ввести адрес электронной почты.</li>
 					    <li id='UserEditEmailErrorEmail' ng-show="formUser.user_email.$error.email">Адрес электронной почты должен быть вида: aaa@bbb.cc</li>
+					    <li id='UserEditEmailErrorUnique' ng-show="formUser.user_email.$error.unique">Адрес электронной почты должен быть уникальным среди пользователей.</li>
 					</ul>
 	            </td>
 	        </tr>
