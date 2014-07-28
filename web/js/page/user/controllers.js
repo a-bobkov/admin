@@ -465,4 +465,30 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             }, true);
         }
     };
-});
+})
+
+.directive('uiUserEmailUnique', function(usersLoader){
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            scope.$watch('userEdited.email', function (newValue, oldValue) {
+                if (newValue === oldValue || !newValue) {
+                    ctrl.$setValidity('unique', true);
+                    return;
+                }
+                usersLoader.loadItems({
+                    filters: [
+                        { type: 'equal', fields: ['email'], value: newValue }
+                    ]
+                }).then(function(users) {
+                    var doubleItem = _.find(users.getItems(), function(user) {
+                        return (user.id !== scope.userEdited.id);
+                    });
+                    ctrl.$setValidity('unique', doubleItem === undefined);
+                });
+            });
+        }
+    };
+})
+;
