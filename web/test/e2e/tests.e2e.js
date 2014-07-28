@@ -2767,7 +2767,13 @@ describe('Sale App', function() {
                     element(by.model('saleEdited.siteAmount')).getAttribute('value').then(function(siteAmountText) {
                         expect(!!siteAmountText).toBe(!!tariffText);
                     });
-                    expect(element(by.model('saleEdited.info')).getAttribute('value')).toBeTruthy();
+                    element(by.model('saleEdited.info')).getAttribute('value').then(function(info) {
+                        if (!tariffText) {
+                            expect(info).toBeFalsy();  // если тариф не выбран, то комментарий пустой
+                        } else {
+                            expect(info).toBeTruthy();
+                        }
+                    });
                     expect(element(by.model('saleEdited.isActive')).element(by.css('option:checked')).getText()).toBe('Н\/А');
 
                     element(by.id('saleEditCancel')).click();

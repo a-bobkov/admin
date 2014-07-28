@@ -43,6 +43,8 @@ describe('app-mocked', function() {
     var saleTypes;
     var SiteBalances;
     var siteBalancesLoader;
+    var DealerBalances;
+    var dealerBalancesLoader;
 
     try {
         var ngMock = angular.module('ngMock');
@@ -115,7 +117,8 @@ describe('app-mocked', function() {
     beforeEach(function() {
         var modules = ['ng', 'max.dal.entities.user', 'max.dal.entities.collection', 
             'max.dal.entities.dealersite', 'max.dal.entities.dealersitelogin', 
-            'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale', 'max.dal.entities.sitebalance'];
+            'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale',
+            'max.dal.entities.sitebalance', 'max.dal.entities.dealerbalance'];
         if (ngMock) {
             modules.push('ngMock');
         }
@@ -162,13 +165,15 @@ describe('app-mocked', function() {
         saleTypes = injector.get('saleTypes');
         SiteBalances = injector.get('SiteBalances');
         siteBalancesLoader = injector.get('siteBalancesLoader');
+        DealerBalances = injector.get('DealerBalances');
+        dealerBalancesLoader = injector.get('dealerBalancesLoader');
 
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, 3, Construction,
                 User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-                Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances);
+                Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
@@ -240,6 +245,85 @@ describe('app-mocked', function() {
             expect(_.pluck(sortByOrders(_.clone(array), orders), 'id')).toEqual(_.pluck(array, 'id'));
         });
     }
+
+describe('dealerbalance', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerBalancesLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(dealerBalance) {
+                    expect(dealerBalance.dealer).toBeReference();
+                    expect(dealerBalance.balance).toBeNumber();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству dealer заданному значению', function() {
+            var answer = {};
+            var dealerBalance;
+
+            runSync(answer, function() {
+                return dealerBalancesLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                dealerBalance = answer.respond.getItems()[0];
+                return dealerBalancesLoader.loadItems({
+                    filters: [
+                        { fields: ['dealer'], type: 'equal', value: dealerBalance.dealer.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var dealerBalances = answer.respond.getItems();
+                expect(dealerBalances.length).toBeTruthy();
+                _.forEach(dealerBalances, function(dealerBalanceEqual) {
+                    expect(dealerBalanceEqual.dealer).toEqual(dealerBalance.dealer);
+                });
+            });
+        });
+
+        it('сортировать по dealer по возрастанию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerBalancesLoader.loadItems({
+                    orders: ['+dealer']
+                });
+            });
+
+            runs(function() {
+                var dealerBalances = answer.respond.getItems();
+                expect(dealerBalances.length).toBeTruthy();
+                expect(_.pluck(_.pluck(dealerBalances, 'dealer'), 'id')).toBeSorted('AscendingNumbers');
+            });
+        });
+
+        it('сортировать по dealer по убыванию', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealerBalancesLoader.loadItems({
+                    orders: ['-dealer']
+                });
+            });
+
+            runs(function() {
+                var dealerBalances = answer.respond.getItems();
+                expect(dealerBalances.length).toBeTruthy();
+                expect(_.pluck(_.pluck(dealerBalances, 'dealer'), 'id')).toBeSorted('DescendingNumbers');
+            });
+        });
+    });
+});
 
 describe('sitebalance', function() {
 
