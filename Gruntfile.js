@@ -7,8 +7,8 @@ module.exports = function(grunt) {
             }
         },
         admin: {
-            dev: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js'],
-            pro: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js']
+            dev: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js', 'web/js/mock/**/*.js'],
+            prod: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js']
         }
     });
 
@@ -18,9 +18,10 @@ module.exports = function(grunt) {
         var scriptsStr = '';
         var that = this;
         files.forEach(function(file) {
+            file = file.replace(/^web\//, '');
             if (that.target === 'dev') {
                 scriptsStr += '    <script src="' + file + '"></script>\n';
-            } else if (that.target === 'pro') {
+            } else if (that.target === 'prod') {
                 scriptsStr += '    <script src="' + file + '?bust=' + now + '"></script>\n';
             }
         });
@@ -33,6 +34,6 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('dev', ['admin:dev']);
-    grunt.registerTask('pro', ['admin:pro']);
-    grunt.registerTask('default', ['admin:pro']);
+    grunt.registerTask('prod', ['admin:prod']);
+    grunt.registerTask('default', ['admin:prod']);
 };
