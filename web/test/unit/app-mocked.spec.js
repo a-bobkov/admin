@@ -46,6 +46,10 @@ describe('app-mocked', function() {
     var DealerBalances;
     var dealerBalancesLoader;
 
+    var billingCreditsLoader;
+    var BillingCredits;
+    var BillingCredit;
+
     try {
         var ngMock = angular.module('ngMock');
     } catch(err) {}
@@ -67,6 +71,8 @@ describe('app-mocked', function() {
         return (Math.random() * (max - min) + min).ceil(0);
     }
 
+    var regexpOrder = /^([+-]?)(\w+)$/;
+
     function sortByOrders(array, orders) {
 
         function convert(value) {
@@ -80,8 +86,6 @@ describe('app-mocked', function() {
                 return value;
             }
         }
-
-        var regexpOrder = /^([+-]?)(\w+)$/;
 
         function compareByOrders(a, b, ordersIndex) {
             ordersIndex = ordersIndex || 0;
@@ -118,7 +122,8 @@ describe('app-mocked', function() {
         var modules = ['ng', 'max.dal.entities.user', 'max.dal.entities.collection', 
             'max.dal.entities.dealersite', 'max.dal.entities.dealersitelogin', 
             'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale',
-            'max.dal.entities.sitebalance', 'max.dal.entities.dealerbalance'];
+            'max.dal.entities.sitebalance', 'max.dal.entities.dealerbalance',
+            'max.dal.entities.billingcredit'];
         if (ngMock) {
             modules.push('ngMock');
         }
@@ -168,12 +173,17 @@ describe('app-mocked', function() {
         DealerBalances = injector.get('DealerBalances');
         dealerBalancesLoader = injector.get('dealerBalancesLoader');
 
+        billingCreditsLoader = injector.get('billingCreditsLoader');
+        BillingCredits = injector.get('BillingCredits');
+        BillingCredit = injector.get('BillingCredit');
+
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
-            setHttpMock($httpBackend, 3, Construction,
+            setHttpMock($httpBackend, 20, Construction,
                 User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-                Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances);
+                Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
+                BillingCredits, BillingCredit);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
@@ -220,14 +230,14 @@ describe('app-mocked', function() {
                 collection1: loader.loadItems({
                     orders: orders,
                     pager: {
-                        per_page: 25,
+                        per_page: 10,
                         page: 1
                     }
                 }),
                 collection2: loader.loadItems({
                     orders: orders,
                     pager: {
-                        per_page: 25,
+                        per_page: 10,
                         page: 2
                     }
                 })
@@ -237,14 +247,173 @@ describe('app-mocked', function() {
         runs(function() {
             var array1 = answer.respond.collection1.getItems();
             expect(array1.length).toBeTruthy();
-            expect(_.pluck(sortByOrders(_.clone(array1), orders), 'id')).toEqual(_.pluck(array1, 'id'));
             var array2 = answer.respond.collection2.getItems();
             expect(array2.length).toBeTruthy();
-            expect(_.pluck(sortByOrders(_.clone(array2), orders), 'id')).toEqual(_.pluck(array2, 'id'));
             var array = _.union(array1, array2);
-            expect(_.pluck(sortByOrders(_.clone(array), orders), 'id')).toEqual(_.pluck(array, 'id'));
+            _.forEach(orders, function(order) {
+                var field = order.replace(regexpOrder, '$2');
+                console.log(field);
+                console.log(_.pluck(array1, field), _.pluck(sortByOrders(_.clone(array1), orders), field));
+                expect(_.pluck(array1, field)).toEqual(_.pluck(sortByOrders(_.clone(array1), orders), field));
+                expect(_.pluck(array2, field)).toEqual(_.pluck(sortByOrders(_.clone(array2), orders), field));
+                expect(_.pluck(array, field)).toEqual(_.pluck(sortByOrders(_.clone(array), orders), field));
+            });
         });
     }
+
+describe('billingcredit', function() {
+
+    describe('Метод get', function() {
+
+        it('возвращать те же значения, что и query', function() {
+            var answer = {};
+            var billingCredit;
+
+            runSync(answer, function() {
+                return billingCreditsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingCredit = answer.respond.getItems()[0];
+                return billingCreditsLoader.loadItems(billingCredit.id);
+            });
+
+            runs(function() {
+                var billingCreditEqual = answer.respond;
+                expect(billingCreditEqual).toMatch(billingCredit);
+            });
+        });
+    });
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return billingCreditsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(billingCredit) {
+                    expect(billingCredit.id).toBeInteger();
+                    expect(billingCredit.dealer).toBeReference();
+                    expect(billingCredit.expiresAt).toBeDate();
+                    expect(billingCredit.amount).toBeNumber();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            var answer = {};
+            var billingCredit;
+
+            runSync(answer, function() {
+                return billingCreditsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingCredit = answer.respond.getItems()[0];
+                return billingCreditsLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: billingCredit.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var billingCredits = answer.respond.getItems();
+                expect(billingCredits.length).toBe(1);
+                expect(billingCredits[0]).toEqual(billingCredit);
+            });
+        });
+
+        it('equal - фильтровать по равенству dealer заданному значению', function() {
+            var answer = {};
+            var billingCredit;
+
+            runSync(answer, function() {
+                return billingCreditsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingCredit = answer.respond.getItems()[0];
+                return billingCreditsLoader.loadItems({
+                    filters: [
+                        { fields: ['dealer'], type: 'equal', value: billingCredit.dealer.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var billingCredits = answer.respond.getItems();
+                expect(billingCredits.length).toBeTruthy();
+                _.forEach(billingCredits, function(billingCreditEqual) {
+                    expect(billingCreditEqual.dealer).toEqual(billingCredit.dealer);
+                });
+            });
+        });
+
+        it('equal - фильтровать по expiresAt равно заданному значению', function() {
+            var answer = {};
+            var billingCredit;
+
+            runSync(answer, function() {
+                return billingCreditsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingCredit = answer.respond.getItems()[0];
+                return billingCreditsLoader.loadItems({
+                    filters: [
+                        { fields: ['expiresAt'], type: 'equal', value: billingCredit.expiresAt.toISOString().slice(0, 10) }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var billingCredits = answer.respond.getItems();
+                expect(billingCredits.length).toBeTruthy();
+                _.forEach(billingCredits, function(billingCreditEqual) {
+                    expect(billingCreditEqual.expiresAt).not.toBeLessThan(billingCredit.expiresAt);
+                });
+            });
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(billingCreditsLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(billingCreditsLoader, ['-id']);
+        });
+
+        it('сортировать по dealer по возрастанию', function() {
+            checkSorting(billingCreditsLoader, ['+dealer']);
+        });
+
+        it('сортировать по dealer по убыванию', function() {
+            checkSorting(billingCreditsLoader, ['-dealer']);
+        });
+
+        it('сортировать по amount по возрастанию', function() {
+            checkSorting(billingCreditsLoader, ['+amount']);
+        });
+
+        it('сортировать по amount по убыванию', function() {
+            checkSorting(billingCreditsLoader, ['-amount']);
+        });
+
+        it('сортировать по expiresAt по возрастанию', function() {
+            checkSorting(billingCreditsLoader, ['+expiresAt']);
+        });
+
+        it('сортировать по expiresAt по убыванию', function() {
+            checkSorting(billingCreditsLoader, ['-expiresAt']);
+        });
+
+    });
+});
 
 describe('dealerbalance', function() {
 
