@@ -67,5 +67,14 @@ angular.module('max.dal.entities.billingcredit', ['max.dal.entities.collection',
     this.loadItem = function(id, directories) {
         return entityLoader.loadItem(id, directories, billingCreditApi, BillingCredit);
     };
+    this.loadItemDealer = function(dealerId, directories) {
+        return this.loadItems({
+            filters: [
+                { fields: ['dealer'], type: 'equal', value: dealerId }
+            ]
+        }, directories).then(function(billingCredits) {
+            return billingCredits.getItems()[0];
+        });
+    };
 })
 ;
