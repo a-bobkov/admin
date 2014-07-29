@@ -419,6 +419,9 @@ describe('billingcredit', function() {
 
             runSync(answer, function() {
                 return dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ],
                     order: {
                         order_field: 'id',
                         order_direction: 'desc'

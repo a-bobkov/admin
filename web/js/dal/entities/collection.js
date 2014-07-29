@@ -163,7 +163,7 @@ var CollectionError = function(message, response) {
     if (response) {
         this.response = response;
     }
-    console.log(this.message);
+    console.log(this.message, this.stack);
 }
 CollectionError.prototype = new Error();
 CollectionError.prototype.constructor = CollectionError;
