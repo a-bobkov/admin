@@ -1,0 +1,48 @@
+<h1>{{actionName}}</h1>
+<form name="formBillingCredit" autocomplete="off" novalidate>
+	<fieldset class="span-24">
+	    <legend>Ключевые поля</legend>
+	    <table class='parameters'>
+	        <tr>
+	            <th><label for="billingCreditDealer">Салон</label></th>
+	            <td>
+                    <div id="billingCreditDealer" name="billingCreditDealer" ng-model='billingCreditEdited.dealer' ui-mcombo-loader="dealersLoader" ui-mcombo-choices="dealers" ui-dealer-unique required>
+                    </div>
+					<ul class="error_list" ng-show='formBillingCredit.billingCreditDealer.$invalid'>
+					    <li id='billingCreditDealerErrorRequired' ng-show="formBillingCredit.billingCreditDealer.$error.required">Необходимо выбрать салон.</li>
+					    <li id='billingCreditDealerErrorUnique' ng-show="formBillingCredit.billingCreditDealer.$error.unique">Для данного салона есть другой кредитный лимит.</li>
+					</ul>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+	<fieldset class="span-24">
+	    <legend>Атрибуты</legend>
+	    <table class='parameters'>
+	        <tr>
+	            <th><label for="billingCreditAmount">Сумма</label></th>
+	            <td>
+	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="billingCreditAmount" id="billingCreditAmount" ng-model='billingCreditEdited.amount' required>
+					<ul class="error_list" ng-show='formBillingCredit.billingCreditAmount.$invalid'>
+					    <li id='billingCreditAmountErrorRequired' ng-show="formBillingCredit.billingCreditAmount.$error.required">Необходимо ввести сумму кредитного лимита.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr>
+	            <th><label for="billingCreditExpiresAt">Срок окончания</label></th>
+	            <td>
+	                <input class="span-8" type="date" name="billingCreditExpiresAt" id="billingCreditExpiresAt" ng-model='billingCreditEdited.expiresAt' required>
+					<ul class="error_list" ng-show='formBillingCredit.billingCreditExpiresAt.$invalid'>
+					    <li id='billingCreditExpiresAtErrorRequired' ng-show="formBillingCredit.billingCreditExpiresAt.$error.required">Необходимо ввести последнюю дату действия кредитного лимита.</li>
+					</ul>
+	           </td>
+	        </tr>
+	    </table>
+	</fieldset>
+    <div class="span-10 prepend-top clear">
+	    <ul class="actions row">
+	        <li class="list"><a ng-click='cancelBillingCreditEdited()'>Отменить</a></li>
+	        <li class="save"><input type="submit" value="Сохранить" ng-click='saveBillingCreditEdited()' ng-disabled='formBillingCredit.$invalid'></li>
+	    </ul>
+	</div>
+</form>
