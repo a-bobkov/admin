@@ -252,8 +252,6 @@ describe('app-mocked', function() {
             var array = _.union(array1, array2);
             _.forEach(orders, function(order) {
                 var field = order.replace(regexpOrder, '$2');
-                console.log(field);
-                console.log(_.pluck(array1, field), _.pluck(sortByOrders(_.clone(array1), orders), field));
                 expect(_.pluck(array1, field)).toEqual(_.pluck(sortByOrders(_.clone(array1), orders), field));
                 expect(_.pluck(array2, field)).toEqual(_.pluck(sortByOrders(_.clone(array2), orders), field));
                 expect(_.pluck(array, field)).toEqual(_.pluck(sortByOrders(_.clone(array), orders), field));
@@ -411,7 +409,136 @@ describe('billingcredit', function() {
         it('сортировать по expiresAt по убыванию', function() {
             checkSorting(billingCreditsLoader, ['-expiresAt']);
         });
+    });
 
+    describe('Метод post', function() {
+
+        it('сохранять данные нового кредитного лимита', function() {
+            var answer = {};
+            var billingCreditData;
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems({
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    },
+                    fields: ['dealer_list_name']
+                }).then(function(dealers) {
+                    var dealerIds = _.pluck(dealers.getItems(), 'id');
+                    return billingCreditsLoader.loadItems({
+                        filters: [
+                            { fields: ['dealer'], type: 'in', value: dealerIds }
+                        ]
+                    }).then(function(billingCredits) {
+                        return _.difference(dealerIds, _.pluck(_.pluck(billingCredits.getItems(), 'dealer'), 'id'));
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var dealerId = answer.respond[0];
+                var expiresAt = new Date;
+                    expiresAt.setUTCHours(0, 0, 0, 0);
+                billingCreditData = {
+                    dealer: {id: dealerId},
+                    amount: randomAmount(1000, 2000),
+                    expiresAt: expiresAt.toISOString().slice(0, 10)
+                };
+                var newBillingCredit = new BillingCredit(billingCreditData);
+                return newBillingCredit.save({
+                    dealers: new Dealers([{id: dealerId}])
+                });
+            });
+
+            runs(function() {
+                var billingCredit = answer.respond;
+                _.forEach(billingCredit.serialize(), function(value, key) {
+                    if (!_.contains(['id'], key)) {
+                        expect(value).toEqual(billingCreditData[key]);
+                    }
+                });
+            });
+        });
+    });
+
+    describe('Метод put', function() {
+
+        it('изменять данные кредитного лимита', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems({
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'desc'
+                    },
+                    fields: ['dealer_list_name']
+                }).then(function(dealers) {
+                    return billingCreditsLoader.loadItems({
+                        filters: [
+                            { fields: ['dealer'], type: 'in', value: _.pluck(dealers.getItems(), 'id') }
+                        ],
+                        orders: ['-id']
+                    }, {dealers: dealers}).then(function(billingCredits) {
+                        return {
+                            freeDealer: _.difference(dealers.getItems(), _.pluck(billingCredits.getItems(), 'dealer'))[0],
+                            billingCredit: billingCredits.getItems()[0],
+                            dealers: dealers
+                        };
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var freeDealer = answer.respond.freeDealer;
+                var billingCredit = answer.respond.billingCredit;
+                var dealers = answer.respond.dealers;
+                billingCredit.dealer = freeDealer;
+                billingCredit.amount = randomAmount(1000, 2000);
+                billingCredit.expiresAt = billingCredit.expiresAt.setDate()(billingCredit.expiresAt.getDate() + 1);
+                return {
+                    billingCredit: billingCredit,
+                    savedBillingCredit: billingCredit.save({dealers: dealers})
+                };
+            });
+
+            runs(function() {
+                var billingCredit = answer.respond.billingCredit;
+                var savedBillingCredit = answer.respond.savedBillingCredit;
+                _.forEach(billingCredit, function(value, key) {
+                    expect(value).toEqual(savedBillingCredit[key]);
+                });
+            });
+        });
+    });
+
+    describe('Метод remove', function() {
+
+        it('удалять кредитный лимит', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return billingCreditsLoader.loadItems({
+                    orders: ['-id']
+                }).then(function(billingCredits) {
+                    return billingCredits.getItems()[0];
+                });
+            });
+
+            runSync(answer, function() {
+                var billingCredit = answer.respond;
+                return billingCredit.remove().then(function(respond) {
+                    expect(respond).toEqual(null);
+                    return billingCreditsLoader.loadItem(billingCredit.id);
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Кредитный лимит не найден.');
+            });
+        });
     });
 });
 
