@@ -8,7 +8,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
 .config(['$routeProvider', function($routeProvider) {
 
     $routeProvider
-    .when('/billingсreditlist', {
+    .when('/billingcreditlist', {
         templateUrl: 'template/page/billingcredit/list.html',
         controller: 'BillingCreditListCtrl',
         reloadOnSearch: false,
@@ -22,7 +22,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
                 if (!_.isEmpty(ls.dealers)) {
                     toResolve.dealers = dealersLoader.loadItems({
                         filters: [
-                            { fields: ['id'], type: 'in', value: ls.dealers.split(';') }
+                            { fields: ['id'], type: 'in', value: ls.dealers.split(';') } // user.id
                         ],
                         fields: ['dealer_list_name']
                     });
@@ -267,12 +267,12 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
     $scope.saveBillingCreditEdited = function() {
         $scope.billingCreditEdited.save($scope).then(function(billingCredit) {
             $rootScope.savedBillingCreditListNotice = 'Сохранен кредитный лимит ' + billingCredit.name();
-            $location.path('/billingсreditlist').search('');
+            $location.path('/billingcreditlist').search('');
         });
     };
 
     $scope.cancelBillingCreditEdited = function() {
-        $location.path('/billingсreditlist').search('');
+        $location.path('/billingcreditlist').search('');
     };
 })
 
