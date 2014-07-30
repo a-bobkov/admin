@@ -8,6 +8,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         'max.dal.entities.tariffrate',
         'max.dal.entities.sale',
         'max.dal.entities.sitebalance',
+        'max.dal.entities.billingcredit',
         'max.dal.entities.dealerbalance'
     ])
 
@@ -604,12 +605,18 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 })
 
-.service('SaleCommonCtrl', function($rootScope, $location, dealerBalancesLoader) {
-    this.saveSaleEdited = function($scope, data) {
-        dealerBalancesLoader.loadItemDealer($scope.saleEdited.dealer.id).then(function(dealerBalance) {
-            var balance = dealerBalance && dealerBalance.balance || 0;
-            var newBalance = balance - $scope.saleEdited.amount + ((data.sale && data.sale.dealer.id === $scope.saleEdited.dealer.id) ? data.sale.amount : 0);
-            if (newBalance >= 0 || (newBalance < 0 && confirm('После сохранения баланс клиента будет отрицательным (' + newBalance.ceil(2) + ' руб)! Продолжить сохранение?'))) {
+.service('SaleCommonCtrl', function($rootScope, $location, $q, dealerBalancesLoader, billingCreditsLoader) {
+    this.saveSaleEdited = function($scope) {
+        $q.all({
+            dealerBalance: dealerBalancesLoader.loadItemDealer($scope.saleEdited.dealer.id),
+            billingCredit: billingCreditsLoader.loadItemDealer($scope.saleEdited.dealer.id)
+        }).then(function(collections) {
+            var today = new Date;
+            today.setUTCHours(0, 0, 0, 0);
+            var balance = collections.dealerBalance && collections.dealerBalance.balance || 0;
+            var limit = collections.billingCredit && collections.billingCredit.expiresAt >= today && -collections.billingCredit.amount || 0;
+            var newBalance = balance - $scope.saleEdited.amount + (($scope.sale && $scope.sale.dealer.id === $scope.saleEdited.dealer.id) ? $scope.sale.amount : 0);
+            if (newBalance >= limit || (newBalance < limit && confirm('После сохранения баланс клиента будет меньше лимита (' + newBalance.ceil(2) + ' < ' + limit.ceil(2) + ')! Продолжить сохранение?'))) {
                 $scope.saleEdited.save($scope).then(function(sale) {
                     $rootScope.savedSaleListNotice = 'Сохранена продажа ' + sale.name();
                     $location.path('/salelist').search('');
@@ -832,7 +839,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     }, true);
 
     $scope.saveSaleEdited = function() {
-        SaleCommonCtrl.saveSaleEdited($scope, data);
+        SaleCommonCtrl.saveSaleEdited($scope);
     };
 
     $scope.activeRateTariffs = function(selectedTariff) {
@@ -938,7 +945,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
 
     $scope.saveSaleEdited = function() {
-        SaleCommonCtrl.saveSaleEdited($scope, data);
+        SaleCommonCtrl.saveSaleEdited($scope);
     };
 
     $scope.activeRateTariffs = function(selectedTariff) {
@@ -992,7 +999,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 
     $scope.saveSaleEdited = function() {
-        SaleCommonCtrl.saveSaleEdited($scope, data);
+        SaleCommonCtrl.saveSaleEdited($scope);
     };
 })
 

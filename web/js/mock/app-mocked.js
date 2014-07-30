@@ -4,13 +4,15 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 .run(function($httpBackend, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
+    BillingCredits, BillingCredit) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-        Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances);
+        Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
+        BillingCredits, BillingCredit);
 });
 
 /**
@@ -19,7 +21,8 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 function setHttpMock($httpBackend, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
-    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances) {
+    Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
+    BillingCredits, BillingCredit) {
 
     var userDirectories = new Construction({
         groups: new Groups([
@@ -1853,5 +1856,45 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     });
     $httpBackend.whenPOST(regexDealerBalancesQuery).respond(function(method, url, data) {
         return processPostQuerySort(url, regexDealerBalancesQuery, data, dealerBalances, 'dealerBalances', DealerBalances);
+    });
+
+    var billingCredits = new BillingCredits(multiplyArrFn([
+        {
+            id: 1,
+            dealer: {id: 3},
+            amount: 2500,
+            expiresAt: '2014-12-31'
+        }
+    ], multiplyCoef, function(i, len) {
+        this.dealer = { id: dealers.getItems()[i].id };
+    })).resolveRefs({dealers: dealers});
+    billingCredits.notFoundMessage = 'Кредитный лимит не найден.';
+
+    var regexBillingCreditsQuery = /^\/api2\/billingcredits(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexBillingCreditsQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexBillingCreditsQuery, billingCredits.getItems(), 'billingCredits', BillingCredits);
+    });
+    $httpBackend.whenPOST(regexBillingCreditsQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexBillingCreditsQuery, data, billingCredits, 'billingCredits', BillingCredits);
+    });
+    var regexBillingCreditsGet = /^\/api2\/billingcredits\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexBillingCreditsGet).respond(function(method, url, data) {
+        return processGet(url, regexBillingCreditsGet, billingCredits, 'billingCredit');
+    });
+    var regexBillingCreditsPost = /^\/api2\/billingcredits\/new$/;
+    $httpBackend.whenPOST(regexBillingCreditsPost).respond(function(method, url, data) {
+        return processPost(data, billingCredits, 'billingCredit', BillingCredit, {
+            dealers: dealers
+        });
+    });
+    var regexBillingCreditsPut = /^\/api2\/billingcredits\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexBillingCreditsPut).respond(function(method, url, data) {
+        return processPut(url, regexBillingCreditsPut, data, billingCredits, 'billingCredit', BillingCredit, {
+            dealers: dealers
+        });
+    });
+    var regexBillingCreditsDelete = /^\/api2\/billingcredits\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexBillingCreditsDelete).respond(function(method, url, data) {
+        return processDelete(url, regexBillingCreditsDelete, billingCredits);
     });
 };
