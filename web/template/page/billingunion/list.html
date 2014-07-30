@@ -1,0 +1,78 @@
+<div class="span-24">
+    <table>
+        <tr>
+            <td class="first">
+            <div class="span-9">
+                <h1>Список группировок салонов</h1>
+                <h3>Количество группировок: {{totalItems}}</h3>
+                <input id='addBillingUnionUp' type="submit" value="Добавить группировку" ng-click='newBillingUnion()'/>
+            </div>
+            </td>
+            <td class="last">
+            <fieldset class="span-14 last right sale">
+                <legend>Фильтр</legend>
+                <table class='multi-parameters'>
+                    <tbody>
+                        <tr>
+                            <th><label for="filterSites">Сайты</label></th>
+                            <td width="80%">
+                                <div id="filterSites" ng-model="patterns.sites" ui-mcombo-loader="sitesLoader" ui-mcombo-choices="ss">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="filterMasterDealers">Салоны-плательщики</label></th>
+                            <td width="80%">
+                                <div id="filterMasterDealers" ng-model="patterns.masterDealers" ui-mcombo-loader="dealersLoader" ui-mcombo-choices="ds1">
+                                </div>
+                            </td>
+                            <td>
+                                <ul class="actions">
+                                    <li class="list">
+                                        <a ng-click='setPatternsDefault()'>Сбросить</a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="filterSlaveDealers">Дочерние салоны</label></th>
+                            <td width="80%">
+                                <div id="filterSlaveDealers" ng-model="patterns.slaveDealers" ui-mcombo-loader="dealersLoader" ui-mcombo-choices="ds2">
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            </td>
+        </tr>
+    </table>
+    <div class="notice" ng-show='savedBillingUnionListNotice'>{{savedBillingUnionListNotice}}</div>
+    <table class="list">
+        <thead>
+            <tr>
+				<th ng-repeat='column in sortableColumns' ng-class='{"active": sortingColumn() === column.id}' ng-style='{width: column.width}'>
+            		<a ng-click='changeSorting(column.id)'>{{column.name}}</a><span>{{sortingMark(column.id)}}</span>
+                </th>
+                <th colspan="2">Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat='billingUnion in billingUnions.getItems()' ng-class-odd="'odd'" ng-class-even="'even'">
+                <td class="text">{{billingUnion.site.idName()}}</td>
+                <td class="text">{{billingUnion.masterDealer.idName()}}</td>
+                <td class="text">{{billingUnion.slaveDealer.idName()}}</td>
+                <td>
+                    <ul class="actions">
+                        <li class="edit"><a ng-click='editBillingUnion(billingUnion)'>изменить</a></li>
+                        <li class="delete"><a ng-click='removeBillingUnion(billingUnion)'>удалить</a></li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div pagination on-select-page='onSelectPage(page)' total-items="totalItems" page="paging.currentPage" items-per-page="paging.itemsPerPage" max-size='maxSizePaging' boundary-links="true"></div>
+    <div class="append-bottom">
+        <input type="submit" value="Добавить группировку" ng-click='newBillingUnion()'/>
+    </div>
+</div>

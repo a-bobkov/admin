@@ -114,6 +114,17 @@ var Collection = (function() {
             return this.serialize();
         });
     };
+    Collection.prototype.uniteItem = function(item) {
+        var items = this.getItems();
+        var itemIdx = _.findIndex(items, {id: item.id});
+        if (itemIdx !== -1) {
+            items[itemIdx] = item;
+        } else {
+            items.push(item);
+        }
+        return this;
+    };
+
     return Collection;
 }());
 return Collection;

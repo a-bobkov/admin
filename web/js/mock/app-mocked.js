@@ -1903,10 +1903,16 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             id: 1,
             site: {id: 1},
             masterDealer: {id: 3},
-            slaveDealer: {id: 3}
+            slaveDealer: {id: 4}
+        },
+        {
+            id: 2,
+            site: {id: 2},
+            masterDealer: {id: 4},
+            slaveDealer: {id: 5}
         }
     ], multiplyCoef, function(i, len) {
-        this.slaveDealer = { id: dealers.getItems()[i+1].id };
+        this.slaveDealer = { id: dealers.getItems()[i+2].id };
     })).resolveRefs({sites: sites, dealers: dealers});
     billingUnions.notFoundMessage = 'Группировка салонов не найдена.';
 

@@ -1,0 +1,53 @@
+<h1>{{actionName}}</h1>
+<form name="formBillingUnion" autocomplete="off" novalidate>
+	<fieldset class="span-24">
+	    <legend>Ключевые поля</legend>
+	    <table class='parameters'>
+	        <tr>
+	            <th><label for="billingUnionSite">Салон</label></th>
+	            <td>
+                    <div id="billingUnionSite" name="billingUnionSite" ng-model='billingUnionEdited.site' ui-mcombo-loader="sitesLoader" ui-mcombo-choices="sites" required>
+                    </div>
+					<ul class="error_list" ng-show='formBillingUnion.billingUnionSite.$invalid'>
+					    <li id='billingUnionSiteErrorRequired' ng-show="formBillingUnion.billingUnionSite.$error.required">Необходимо выбрать сайт.</li>
+					</ul>
+	            </td>
+	        </tr>
+	        <tr>
+	            <th><label for="billingUnionSlaveDealer">Дочерний салон</label></th>
+	            <td>
+                    <div id="billingUnionSlaveDealer" name="billingUnionSlaveDealer" ng-model='billingUnionEdited.slaveDealer' ui-mcombo-loader="dealersLoader" ui-mcombo-choices="slaveDealers" ui-site-slave-dealer-unique ui-site-slave-dealer-master required>
+                    </div>
+					<ul class="error_list" ng-show='formBillingUnion.billingUnionSlaveDealer.$invalid'>
+					    <li id='billingUnionDealerErrorRequired' ng-show="formBillingUnion.billingUnionSlaveDealer.$error.required">Необходимо выбрать дочерний салон.</li>
+					    <li id='billingUnionDealerErrorUnique' ng-show="formBillingUnion.billingUnionSlaveDealer.$error.unique">Для данного салона и сайта есть другая группировка.</li>
+					    <li id='billingUnionDealerErrorMaster' ng-show="formBillingUnion.billingUnionSlaveDealer.$error.master">Данный салон является плательщиком в другой группировке по данному сайту!</li>
+					</ul>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+	<fieldset class="span-24">
+	    <legend>Атрибуты</legend>
+	    <table class='parameters'>
+	        <tr>
+	            <th><label for="billingUnionMasterDealer">Салон-плательщик</label></th>
+	            <td>
+                    <div id="billingUnionMasterDealer" name="billingUnionMasterDealer" ng-model='billingUnionEdited.masterDealer' ui-mcombo-loader="dealersLoader" ui-mcombo-choices="masterDealers" ui-site-master-dealer-slave ui-dealers-equal required>
+                    </div>
+					<ul class="error_list" ng-show='formBillingUnion.billingUnionMasterDealer.$invalid'>
+					    <li id='billingUnionDealerErrorRequired' ng-show="formBillingUnion.billingUnionMasterDealer.$error.required">Необходимо выбрать салон-плательщик.</li>
+					    <li id='billingUnionDealerErrorSlave' ng-show="formBillingUnion.billingUnionMasterDealer.$error.slave">Данный салон является дочерним в другой группировке по данному сайту!</li>
+					    <li id='billingUnionDealerErrorEqual' ng-show="formBillingUnion.billingUnionMasterDealer.$error.equal">Необходимо выбрать салон, не совпадающий с дочерним.</li>
+					</ul>
+	            </td>
+	        </tr>
+	    </table>
+	</fieldset>
+    <div class="span-10 prepend-top clear">
+	    <ul class="actions row">
+	        <li class="list"><a ng-click='cancelBillingUnionEdited()'>Отменить</a></li>
+	        <li class="save"><input type="submit" value="Сохранить" ng-click='saveBillingUnionEdited()' ng-disabled='formBillingUnion.$invalid'></li>
+	    </ul>
+	</div>
+</form>
