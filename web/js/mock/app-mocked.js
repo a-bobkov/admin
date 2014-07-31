@@ -699,7 +699,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 15, name: 'fin-auto.ru', isActive: false},
         {id: 16, name: 'auto.exist.ru', isActive: true},
         {id: 17, name: 'am.ru', isActive: true},
-        {id: 18, name: 'mercedes-benz.ru', isActive: true}
+        {id: 18, name: 'mercedes-benz.ru', isActive: true},
+        {id: 19, name: 'cars.ru', isActive: true}
     ]);
 
     var dealerSites = new DealerSites(multiplyArrFn([

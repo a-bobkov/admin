@@ -336,7 +336,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             noticeMessage = 'Разблокирована регистрация ';
             newStatus = dealerSiteStatuses.get(true);
             check = dealerSiteLoginsLoader.loadItemsDealerSite(dealerSite.dealer.id, dealerSite.site.id).then(function(dealerSiteLogins) {
-                var invalid = invalidFields(dealerSite, dealerSiteLogins);
+                var invalid = DealerSiteRequiredFields[dealerSite.site.id] && invalidFields(dealerSite, dealerSiteLogins);
                 if (invalid) {
                     alert("Для разблокирования необходимо заполнить поля формы регистрации: " + invalid.join('; '));
                 }
