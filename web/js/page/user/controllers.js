@@ -50,7 +50,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     });
 }])
 
-.controller('UserListCtrl', function($scope, $rootScope, $location, $window, data, 
+.controller('UserListCtrl', function($scope, $rootScope, $location, $window, $q, $timeout,  data,
     usersLoader, userStatuses) {
 
     _.assign($scope, data);
@@ -106,20 +106,27 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         $scope.onSelectPage(1);
     }
 
+    var numberLoads = 0;
     $scope.onSelectPage = function(page) {
+        numberLoads++;
         $scope.paging.currentPage = page;
-
         var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
             return value;
         });
         $rootScope.savedUserListLocationSearch = toLocationSearch(searchParams);
-        $location.search($rootScope.savedUserListLocationSearch);
-        usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch), data).then(function(users) {
-            $scope.users = users;
-            $scope.totalItems = users.getParams().pager.total;
-            var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
-            if (topUserList < 0) {
-                window.scrollBy(0, topUserList);
+        $q.all({
+            users: usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch), data),
+            numberLoads: numberLoads,
+            timer: $timeout(function() {}, 300)
+        }).then(function(data) {
+            if (numberLoads === data.numberLoads) {
+                $location.search($rootScope.savedUserListLocationSearch);
+                $scope.users = data.users;
+                $scope.totalItems = data.users.getParams().pager.total;
+                var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
+                if (topUserList < 0) {
+                    window.scrollBy(0, topUserList);
+                }
             }
         });
     };
