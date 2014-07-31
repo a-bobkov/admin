@@ -394,6 +394,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                         { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
                     ]
                 }),
+                extraSales: salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'extra' },
+                        { fields: ['cardId'], type: 'in', value: _.pluck(_.where(salesItems, {type: saleTypes.get('card')}), 'cardId') }
+                    ]
+                }),
                 dealers: dealersLoader.loadItems({
                     filters: [
                         { fields: ['id'], type: 'in', value: _.pluck(_.pluck(salesItems, 'dealer'), 'id') }
@@ -427,6 +433,14 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.isAddable = function(sale) {
         return (sale.isCard() || sale.isAddcard()) && sale.tariff && !_.find($scope.addSales.getItems(), {parentId: sale.cardId});
+    }
+
+    $scope.isRemoveable = function(sale) {
+        var addItems = $scope.addSales.getItems();
+        var extraItems = $scope.extraSales.getItems();
+        return sale.isCard() && !_.find(addItems, {parentId: sale.cardId}) && !_.find(extraItems, {cardId: sale.cardId})
+            || sale.isAddcard() && !_.find(addItems, {parentId: sale.cardId})
+            || sale.isExtra();
     }
 
     var ls = $location.search();

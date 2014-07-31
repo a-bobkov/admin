@@ -104,7 +104,7 @@
                 <td>
                     <ul class="actions">
                         <li class="edit"><a id='SaleListRowEdit' ng-click='editSale(sale)'>изменить</a></li>
-                        <li class="delete"><a id='SaleListRowRemove' ng-click='removeSale(sale)'>удалить</a></li>
+                        <li class="delete" ng-show='isRemoveable(sale)'><a id='SaleListRowRemove' ng-click='removeSale(sale)'>удалить</a></li>
                     </ul>
                 </td>
             </tr>
