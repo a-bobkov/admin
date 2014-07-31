@@ -50,6 +50,10 @@ describe('app-mocked', function() {
     var BillingCredits;
     var BillingCredit;
 
+    var billingUnionsLoader;
+    var BillingUnions;
+    var BillingUnion;
+
     try {
         var ngMock = angular.module('ngMock');
     } catch(err) {}
@@ -123,7 +127,7 @@ describe('app-mocked', function() {
             'max.dal.entities.dealersite', 'max.dal.entities.dealersitelogin', 
             'max.dal.entities.tariff', 'max.dal.entities.tariffrate', 'max.dal.entities.dealertariff', 'max.dal.entities.sale',
             'max.dal.entities.sitebalance', 'max.dal.entities.dealerbalance',
-            'max.dal.entities.billingcredit'];
+            'max.dal.entities.billingcredit', 'max.dal.entities.billingunion'];
         if (ngMock) {
             modules.push('ngMock');
         }
@@ -177,13 +181,17 @@ describe('app-mocked', function() {
         BillingCredits = injector.get('BillingCredits');
         BillingCredit = injector.get('BillingCredit');
 
+        billingUnionsLoader = injector.get('billingUnionsLoader');
+        BillingUnions = injector.get('BillingUnions');
+        BillingUnion = injector.get('BillingUnion');
+
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, 20, Construction,
                 User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
                 Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
-                BillingCredits, BillingCredit);
+                BillingCredits, BillingCredit, BillingUnions, BillingUnion);
         } else {
             $httpBackend = {};
             $httpBackend.flush = function() {};
@@ -258,6 +266,350 @@ describe('app-mocked', function() {
             });
         });
     }
+
+ddescribe('billingunion', function() {
+
+    describe('Метод get', function() {
+
+        it('возвращать те же значения, что и query', function() {
+            var answer = {};
+            var billingUnion;
+
+            runSync(answer, function() {
+                return billingUnionsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingUnion = answer.respond.getItems()[0];
+                return billingUnionsLoader.loadItems(billingUnion.id);
+            });
+
+            runs(function() {
+                var billingUnionEqual = answer.respond;
+                expect(billingUnionEqual).toMatch(billingUnion);
+            });
+        });
+    });
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return billingUnionsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(billingUnion) {
+                    expect(billingUnion.id).toBeInteger();
+                    expect(billingUnion.site).toBeReference();
+                    expect(billingUnion.masterDealer).toBeReference();
+                    expect(billingUnion.slaveDealer).toBeReference();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            var answer = {};
+            var billingUnion;
+
+            runSync(answer, function() {
+                return billingUnionsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingUnion = answer.respond.getItems()[0];
+                return billingUnionsLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: billingUnion.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var billingUnions = answer.respond.getItems();
+                expect(billingUnions.length).toBe(1);
+                expect(billingUnions[0]).toEqual(billingUnion);
+            });
+        });
+
+        it('equal - фильтровать по равенству site заданному значению', function() {
+            var answer = {};
+            var billingUnion;
+
+            runSync(answer, function() {
+                return billingUnionsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingUnion = answer.respond.getItems()[0];
+                return billingUnionsLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: billingUnion.site.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var billingUnions = answer.respond.getItems();
+                expect(billingUnions.length).toBeTruthy();
+                _.forEach(billingUnions, function(billingUnionEqual) {
+                    expect(billingUnionEqual.site).toEqual(billingUnion.site);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству masterDealer заданному значению', function() {
+            var answer = {};
+            var billingUnion;
+
+            runSync(answer, function() {
+                return billingUnionsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingUnion = answer.respond.getItems()[0];
+                return billingUnionsLoader.loadItems({
+                    filters: [
+                        { fields: ['masterDealer'], type: 'equal', value: billingUnion.masterDealer.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var billingUnions = answer.respond.getItems();
+                expect(billingUnions.length).toBeTruthy();
+                _.forEach(billingUnions, function(billingUnionEqual) {
+                    expect(billingUnionEqual.masterDealer).toEqual(billingUnion.masterDealer);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству slaveDealer заданному значению', function() {
+            var answer = {};
+            var billingUnion;
+
+            runSync(answer, function() {
+                return billingUnionsLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                billingUnion = answer.respond.getItems()[0];
+                return billingUnionsLoader.loadItems({
+                    filters: [
+                        { fields: ['slaveDealer'], type: 'equal', value: billingUnion.slaveDealer.id }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var billingUnions = answer.respond.getItems();
+                expect(billingUnions.length).toBeTruthy();
+                _.forEach(billingUnions, function(billingUnionEqual) {
+                    expect(billingUnionEqual.slaveDealer).toEqual(billingUnion.slaveDealer);
+                });
+            });
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(billingUnionsLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(billingUnionsLoader, ['-id']);
+        });
+
+        it('сортировать по site по возрастанию', function() {
+            checkSorting(billingUnionsLoader, ['+site']);
+        });
+
+        it('сортировать по site по убыванию', function() {
+            checkSorting(billingUnionsLoader, ['-site']);
+        });
+
+        it('сортировать по masterDealer по возрастанию', function() {
+            checkSorting(billingUnionsLoader, ['+masterDealer']);
+        });
+
+        it('сортировать по masterDealer по убыванию', function() {
+            checkSorting(billingUnionsLoader, ['-masterDealer']);
+        });
+
+        it('сортировать по slaveDealer по возрастанию', function() {
+            checkSorting(billingUnionsLoader, ['+slaveDealer']);
+        });
+
+        it('сортировать по slaveDealer по убыванию', function() {
+            checkSorting(billingUnionsLoader, ['-slaveDealer']);
+        });
+    });
+
+    describe('Метод post', function() {
+
+        it('сохранять данные новой группировки дилеров', function() {
+            var answer = {};
+            var billingUnionData;
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ],
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'asc'
+                    },
+                    fields: ['dealer_list_name']
+                }).then(function(dealers) {
+                    var dealerIds = _.pluck(dealers.getItems(), 'id');
+                    return $q.all({
+                        masterUnions: billingUnionsLoader.loadItems({
+                            filters: [
+                                { fields: ['masterDealer'], type: 'in', value: dealerIds }
+                            ]
+                        }),
+                        slaveUnions: billingUnionsLoader.loadItems({
+                            filters: [
+                                { fields: ['slaveDealer'], type: 'in', value: dealerIds }
+                            ]
+                        })
+                    }).then(function(collections) {
+                        var unionDealerIds = _.union(_.pluck(_.pluck(collections.masterUnions.getItems(), 'masterDealer'), 'id'),
+                                                   _.pluck(_.pluck(collections.slaveUnions.getItems(), 'slaveDealer'), 'id'));
+                        var freeDealerIds = _.difference(dealerIds, unionDealerIds);
+                        return {
+                            masterDealerId: freeDealerIds[0],
+                            slaveDealerId: freeDealerIds[1],
+                            site: collections.masterUnions.getItems()[0].site
+                        }
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var masterDealerId = answer.respond.masterDealerId;
+                var slaveDealerId = answer.respond.slaveDealerId;
+                var site = answer.respond.site;
+                billingUnionData = {
+                    site: {id: site.id},
+                    masterDealer: {id: masterDealerId},
+                    slaveDealer: {id: slaveDealerId}
+                };
+                var newBillingUnion = new BillingUnion(billingUnionData);
+                return newBillingUnion.save({
+                    dealers: new Dealers([{id: masterDealerId}, {id: slaveDealerId}]),
+                    sites: new Sites([{id: site.id}])
+                });
+            });
+
+            runs(function() {
+                var billingUnion = answer.respond;
+                _.forEach(billingUnion.serialize(), function(value, key) {
+                    if (!_.contains(['id'], key)) {
+                        expect(value).toEqual(billingUnionData[key]);
+                    }
+                });
+            });
+        });
+    });
+
+    describe('Метод put', function() {
+
+        it('изменять данные группировки дилеров', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ],
+                    order: {
+                        order_field: 'id',
+                        order_direction: 'asc'
+                    },
+                    fields: ['dealer_list_name']
+                }).then(function(dealers) {
+                    var dealerIds = _.pluck(dealers.getItems(), 'id');
+                    return $q.all({
+                        masterUnions: billingUnionsLoader.loadItems({
+                            filters: [
+                                { fields: ['masterDealer'], type: 'in', value: dealerIds }
+                            ]
+                        }),
+                        slaveUnions: billingUnionsLoader.loadItems({
+                            filters: [
+                                { fields: ['slaveDealer'], type: 'in', value: dealerIds }
+                            ]
+                        })
+                    }).then(function(collections) {
+                        var unionDealerIds = _.union(_.pluck(_.pluck(collections.masterUnions.getItems(), 'masterDealer'), 'id'),
+                                                   _.pluck(_.pluck(collections.slaveUnions.getItems(), 'slaveDealer'), 'id'));
+                        var freeDealerIds = _.difference(dealerIds, unionDealerIds);
+                        return {
+                            masterDealer: dealers.get(freeDealerIds[0]),
+                            slaveDealer: dealers.get(freeDealerIds[1]),
+                            billingUnion: collections.masterUnions.getItems()[0]
+                        }
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                var masterDealer = answer.respond.masterDealer;
+                var slaveDealer = answer.respond.slaveDealer;
+                var billingUnion = answer.respond.billingUnion;
+                billingUnion.masterDealer = masterDealer;
+                billingUnion.slaveDealer = slaveDealer;
+                return billingUnion.save({
+                    dealers: new Dealers([{id: masterDealer.id}, {id: slaveDealer.id}]),
+                    sites: new Sites([{id: billingUnion.site.id}])
+                }).then(function(savedBillingUnion) {
+                    return {
+                        billingUnion: billingUnion,
+                        savedBillingUnion: savedBillingUnion
+                    };
+                });
+            });
+
+            runs(function() {
+                var billingUnionData = answer.respond.billingUnion.serialize();
+                var savedBillingUnionData = answer.respond.savedBillingUnion.serialize();
+                _.forEach(billingUnionData, function(value, key) {
+                    expect(value).toEqual(savedBillingUnionData[key]);
+                });
+            });
+        });
+    });
+
+    describe('Метод remove', function() {
+
+        it('удалять группировку дилеров', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return billingUnionsLoader.loadItems({
+                    orders: ['-id']
+                }).then(function(billingUnions) {
+                    return billingUnions.getItems()[0];
+                });
+            });
+
+            runSync(answer, function() {
+                var billingUnion = answer.respond;
+                return billingUnion.remove().then(function(respond) {
+                    expect(respond).toEqual(null);
+                    return billingUnionsLoader.loadItem(billingUnion.id);
+                });
+            });
+
+            runs(function() {
+                var errorResponse = answer.respond.response.data;
+                expect(errorResponse.message).toEqual('Группировка салонов не найдена.');
+            });
+        });
+    });
+});
 
 describe('billingcredit', function() {
 

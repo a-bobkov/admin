@@ -5,14 +5,14 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
-    BillingCredits, BillingCredit) {
+    BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
         User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
-        BillingCredits, BillingCredit);
+        BillingCredits, BillingCredit, BillingUnions, BillingUnion);
 });
 
 /**
@@ -22,7 +22,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
-    BillingCredits, BillingCredit) {
+    BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
     var userDirectories = new Construction({
         groups: new Groups([
@@ -1896,5 +1896,51 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var regexBillingCreditsDelete = /^\/api2\/billingcredits\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexBillingCreditsDelete).respond(function(method, url, data) {
         return processDelete(url, regexBillingCreditsDelete, billingCredits);
+    });
+
+    var billingUnions = new BillingUnions(multiplyArrFn([
+        {
+            id: 1,
+            site: {id: 1},
+            masterDealer: {id: 3},
+            slaveDealer: {id: 4}
+        },
+        {
+            id: 2,
+            site: {id: 2},
+            masterDealer: {id: 4},
+            slaveDealer: {id: 5}
+        }
+    ], multiplyCoef, function(i, len) {
+        this.slaveDealer = { id: dealers.getItems()[i+2].id };
+    })).resolveRefs({sites: sites, dealers: dealers});
+    billingUnions.notFoundMessage = 'Группировка салонов не найдена.';
+
+    var regexBillingUnionsQuery = /^\/api2\/billingunions(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexBillingUnionsQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexBillingUnionsQuery, billingUnions.getItems(), 'billingUnions', BillingUnions);
+    });
+    $httpBackend.whenPOST(regexBillingUnionsQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexBillingUnionsQuery, data, billingUnions, 'billingUnions', BillingUnions);
+    });
+    var regexBillingUnionsGet = /^\/api2\/billingunions\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexBillingUnionsGet).respond(function(method, url, data) {
+        return processGet(url, regexBillingUnionsGet, billingUnions, 'billingUnion');
+    });
+    var regexBillingUnionsPost = /^\/api2\/billingunions\/new$/;
+    $httpBackend.whenPOST(regexBillingUnionsPost).respond(function(method, url, data) {
+        return processPost(data, billingUnions, 'billingUnion', BillingUnion, {
+            dealers: dealers
+        });
+    });
+    var regexBillingUnionsPut = /^\/api2\/billingunions\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexBillingUnionsPut).respond(function(method, url, data) {
+        return processPut(url, regexBillingUnionsPut, data, billingUnions, 'billingUnion', BillingUnion, {
+            dealers: dealers
+        });
+    });
+    var regexBillingUnionsDelete = /^\/api2\/billingunions\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexBillingUnionsDelete).respond(function(method, url, data) {
+        return processDelete(url, regexBillingUnionsDelete, billingUnions);
     });
 };
