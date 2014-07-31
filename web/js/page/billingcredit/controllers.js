@@ -140,6 +140,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
             }).then(function(dealers) {
                 construction.dealers = dealers;
                 _.assign($scope, construction.resolveRefs());
+                $scope.groupSelectionAll = $scope.groupSelectionAll ? false : changeGroupSelection(false);
                 var topList = document.getElementById('addBillingCreditUp').getBoundingClientRect().top;
                 if (topList < 0) {
                     window.scrollBy(0, topList);
@@ -236,6 +237,35 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
             });
         }
     };
+
+    function changeGroupSelection(newValue) {
+        $scope.groupSelection = _.map($scope.billingCredits && $scope.billingCredits.getItems(), function() {
+            return newValue;
+        });
+    };
+
+    $scope.$watch('groupSelectionAll', changeGroupSelection);
+
+    $scope.groupOperationsDisabled = function() {
+        return !_.some($scope.groupSelection);
+    }
+
+    $scope.removeSelectedBillingCredits = function() {
+        var confirmMessage = 'Вы действительно хотите удалить выбранные кредитные лимиты?\n';
+        var noticeMessage = 'Удалены кредитные лимиты:\n';
+        var selectedBillingCredits = _.where($scope.billingCredits.getItems(), function(value, idx) {
+            return $scope.groupSelection[idx];
+        });
+        var selectedBillingCreditNames = _.invoke(selectedBillingCredits, 'name').join(';\n') + '.';
+        if (confirm(confirmMessage + selectedBillingCreditNames)) {
+            $q.all(_.map(selectedBillingCredits, function(billingCredit) {
+                return billingCredit.remove();
+            })).then(function() {
+                $scope.savedBillingCreditListNotice = noticeMessage + selectedBillingCreditNames;
+                $scope.onSelectPage();
+            });
+        }
+    }
 })
 
 .controller('BillingCreditEditCtrl', function($scope, $rootScope, $location, $window, data,
