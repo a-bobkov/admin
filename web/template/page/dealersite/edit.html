@@ -43,10 +43,10 @@
 	        <tr>
 	            <th><label for="dealerSitePublicUrl">Страница на сайте</label></th>
 	            <td>
-	                <input class="span-18" type="url" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.publicUrl' maxlength='255' ng-required='requiredFields[dealerSiteEdited.site.id]["publicUrl"] && dealerSiteEdited.isActive.id'>
+	                <input class="span-18" type="text" ng-pattern="/^(http|https):\/\/([\-\S]+\.)+([\-\S]{2,})/" name="dealerSitePublicUrl" id="dealerSitePublicUrl" ng-model='dealerSiteEdited.publicUrl' maxlength='255' ng-required='requiredFields[dealerSiteEdited.site.id]["publicUrl"] && dealerSiteEdited.isActive.id'>
 					<ul class="error_list" ng-show='formDealerSite.dealerSitePublicUrl.$invalid'>
 					    <li id='dealerSitePublicUrlErrorRequired' ng-show="formDealerSite.dealerSitePublicUrl.$error.required">Необходимо ввести значение.</li>
-					    <li id='dealerSitePublicUrlErrorUrl' ng-show="formDealerSite.dealerSitePublicUrl.$error.url">Адрес страницы должен быть вида: http://aaa.bbb.cc</li>
+					    <li id='dealerSitePublicUrlErrorUrl' ng-show="formDealerSite.dealerSitePublicUrl.$error.pattern">Адрес страницы должен быть в формате http://www.mysite.ru (обязательно начиная с "http://")</li>
 					</ul>
 	           </td>
 	        </tr>
