@@ -422,7 +422,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 }).then(function(tariffs) {
                     construction.tariffs = tariffs;
                     _.assign($scope, construction.resolveRefs());
-                    var topSaleList = document.getElementById('SaleListAddSaleUp').getBoundingClientRect().top;
+                    var topElem = document.getElementById('SaleListAddSaleUp');
+                    var topSaleList = topElem && topElem.getBoundingClientRect().top;
                     if (topSaleList < 0) {
                         window.scrollBy(0, topSaleList);
                     }
