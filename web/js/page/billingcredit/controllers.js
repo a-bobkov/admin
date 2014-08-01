@@ -87,9 +87,9 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
     $scope.$watch('patterns', $scope.onPatternChange, true);
 
     $scope.sortableColumns = [
-        {id: "dealer", name: "Салон", width: '70%'},
-        {id: "amount", name: "Сумма, руб.", width: '10%'},
-        {id: "expiresAt", name: "Срок", width: '10%'}
+        {id: "dealer", name: "Салон", width: '45%'},
+        {id: "amount", name: "Сумма, руб.", width: '15%'},
+        {id: "expiresAt", name: "Срок", width: '15%'}
     ];
 
     $scope.sortingColumn = function() {

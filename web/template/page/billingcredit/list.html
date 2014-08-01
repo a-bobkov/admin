@@ -44,7 +44,7 @@
 				<th ng-repeat='column in sortableColumns' ng-class='{"active": sortingColumn() === column.id}' ng-style='{width: column.width}'>
             		<a ng-click='changeSorting(column.id)'>{{column.name}}</a><span>{{sortingMark(column.id)}}</span>
                 </th>
-                <th>Действия</th>
+                <th colspan="2">Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -53,9 +53,13 @@
                 <td class="text">{{billingCredit.dealer.idName()}}</td>
                 <td class="amount">{{billingCredit.amount | number:2}}</td>
                 <td class="date center">{{billingCredit.expiresAt | date:'shortDate'}}</td>
-                <td>
+                <td class="center">
                     <ul class="actions">
                         <li class="edit"><a ng-click='editBillingCredit(billingCredit)'>изменить</a></li>
+                    </ul>
+                </td>
+                <td class="center">
+                    <ul class="actions">
                         <li class="delete"><a ng-click='removeBillingCredit(billingCredit)'>удалить</a></li>
                     </ul>
                 </td>
