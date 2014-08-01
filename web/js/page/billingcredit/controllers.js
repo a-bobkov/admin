@@ -165,7 +165,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
         $scope.setPatternsDefault();
         $scope.sorting = ['expiresAt'];
         $scope.paging = {
-            itemsPerPage: 25
+            itemsPerPage: 100
         };
     }
     $scope.maxSizePaging = 9;
@@ -192,7 +192,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
             return {
                 orders: ['expiresAt'],
                 pager: {
-                    per_page: 25
+                    per_page: 100
                 }
             }
         }
