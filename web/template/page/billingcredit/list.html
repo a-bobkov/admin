@@ -2,9 +2,12 @@
     <table>
         <tr>
             <td class="first">
-            <div class="span-8">
+            <div class="span-10">
                 <h1>Список кредитных лимитов</h1>
-                <h3>Количество: {{totalItems}}</h3>
+                <div class="span-4">
+                    <h3>Количество: {{totalItems}}</h3>
+                    <h6>Итого: {{totalAmount | number:2}}</h5>
+                </div>
                 <input id='addBillingCreditUp' type="submit" value="Добавить лимит" ng-click='newBillingCredit()'/>
             </div>
             </td>

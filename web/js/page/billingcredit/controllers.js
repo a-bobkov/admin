@@ -131,6 +131,9 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
         var queryParams = makeQueryParams($rootScope.savedBillingCreditListLocationSearch);
         billingCreditsLoader.loadItems(queryParams).then(function(billingCredits) {
             $scope.totalItems = billingCredits.getParams().pager.total;
+            $scope.totalAmount = _.reduce(billingCredits.getItems(), function(sum, billingCredit) {
+                return sum + billingCredit.amount;
+            }, $scope.totalAmount = 0);
             var construction = new Construction({billingCredits: billingCredits});
             dealersLoader.loadItems({       // user.id
                 filters: [
