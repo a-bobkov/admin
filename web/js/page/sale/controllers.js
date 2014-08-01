@@ -586,23 +586,19 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 
     $scope.newSaleCard = function() {
-        $location.search('id=new');
-        $location.path('/sale/card');
+        $location.path('/sale/card').search('id=new');
     };
 
     $scope.newSaleAddcard = function(sale) {
-        $location.search('id=new&cardId=' + sale.cardId);
-        $location.path('/sale/addcard');
+        $location.path('/sale/addcard').search('id=new&cardId=' + sale.cardId);
     };
 
     $scope.newSaleExtra = function(sale) {
-        $location.search('id=new&cardId=' + sale.cardId);
-        $location.path('/sale/extra');
+        $location.path('/sale/extra').search('id=new&cardId=' + sale.cardId);
     };
 
-    $scope.editSale = function(sale) {
-        $location.search('id=' + sale.id);
-        $location.path('/sale/' + sale.type.id);
+    $scope.editSaleUrl = function(sale) {
+        return '#/sale/' + sale.type.id + '?id=' + sale.id;
     };
 
     $scope.removeSale = function(sale) {

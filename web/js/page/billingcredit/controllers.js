@@ -223,8 +223,8 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
         $location.path('/billingcredit').search('id=new');
     };
 
-    $scope.editBillingCredit = function(billingCredit) {
-        $location.path('/billingcredit').search('id=' + billingCredit.id);
+    $scope.editBillingCreditUrl = function(billingCredit) {
+        return '#/billingcredit?id=' + billingCredit.id;
     };
 
     $scope.removeBillingCredit = function(billingCredit) {

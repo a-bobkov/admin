@@ -28,7 +28,7 @@
                 <td class="text"><a ng-click='toggleDealerSiteStatus(dealerSite)'>{{dealerSite.isActive.name}}</a></td>
                 <td>
                     <ul class="actions">
-                        <li class="edit"><a id='DealerSiteListRowEdit' ng-click='editDealerSite(dealerSite)'>изменить</a></li>
+                        <li class="edit"><a id='DealerSiteListRowEdit' href={{editDealerSiteUrl(dealerSite)}}>изменить</a></li>
                         <li class="delete"><a id='DealerSiteListRowDelete' ng-click='removeDealerSite(dealerSite)'>удалить</a></li>
                     </ul>
                 </td>

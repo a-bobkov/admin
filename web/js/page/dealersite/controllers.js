@@ -401,8 +401,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         }
     }
 
-    $scope.editDealerSite = function(dealerSite) {
-        $location.path('/dealersites/' + dealerSite.id + '/edit').search('');
+    $scope.editDealerSiteUrl = function(dealerSite) {
+        return '#/dealersites/' + dealerSite.id + '/edit';
     };
 })
 

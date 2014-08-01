@@ -230,6 +230,10 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         }
     }
 
+    $scope.editUserUrl = function(user) {
+        return '#/users/' + user.id + '/edit';
+    };
+
     $scope.switchUser = function(user) {
         if ($location.host().match(/maxposter.ru$/)) {
             $window.location.href = $location.protocol() + '://'+ $location.host() + '/user/' + user.id + '/switch';
