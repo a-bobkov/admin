@@ -114,7 +114,7 @@ describe('User App', function() {
 
     describe('Список пользователей', function() {
         beforeEach(function() {
-            browser.get('admin.html#/userlist?column=id&itemsPerPage=15');
+            browser.get('admin.html#/userlist?orders=id&itemsPerPage=15');
         });
 
         it('показывает количество пользователей', function() {
@@ -168,7 +168,7 @@ describe('User App', function() {
                 return copy;
             }
 
-            var header = ['   ','   ','   '];
+            var header = ['','',''];
             var columns = [
                 {bind: 'id', type: 'Integers', valueFn: takeId},
                 {bind: 'email', type: 'Strings', valueFn: takeString},
@@ -731,7 +731,7 @@ describe('User App', function() {
     describe('Сценарии использования', function() {
 
         beforeEach(function() {
-            browser.get('admin.html#/userlist?column=id&reverse&itemsPerPage=15');
+            browser.get('admin.html#/userlist?orders=-id&itemsPerPage=15');
         });
 
         it('Создание пользователя-администратора', function() {

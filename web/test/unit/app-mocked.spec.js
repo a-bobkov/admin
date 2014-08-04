@@ -1604,9 +1604,9 @@ describe('sale', function() {
             checkSorting(salesLoader, ['-count', '-id']);
         });
 
-        it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
-            checkSorting(salesLoader, ['+amount', '-id']);
-        });
+        // it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
+        //     checkSorting(salesLoader, ['+amount', '-id']);
+        // });
 
         it('сортировать по amount по убыванию, затем по id по убыванию', function() {
             checkSorting(salesLoader, ['-amount', '-id']);
@@ -2231,19 +2231,22 @@ describe('sale', function() {
                             { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
                         ]
                     }).then(function(addSales) {
-                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
-                        _.remove(sales.getItems(), function(sale) {
-                            return _.contains(addSaleParentIds, sale.cardId); 
-                        });
-                        return sales;
+                        return {
+                            sales: sales,
+                            addSales: addSales
+                        }
                     });
                 });
             });
 
             runSync(answer, function() {
-                var salesArray = answer.respond.getItems();
-                var sale = salesArray[0];
-                var otherSale = _.find(salesArray, function(otherSale) {
+                var salesItems = answer.respond.sales.getItems();
+                var addSalesItems = answer.respond.addSales.getItems();
+                var addSaleParentIds = _.pluck(addSalesItems, 'parentId');
+                var sale = _.find(salesItems, function(sale) {
+                    return !_.contains(addSaleParentIds, sale.cardId);
+                });
+                var otherSale = _.find(salesItems, function(otherSale) {
                     return (otherSale.dealer.id !== sale.dealer.id) && (otherSale.site.id !== sale.site.id);
                 });
                 expect(otherSale).toBeDefined();
@@ -2251,7 +2254,7 @@ describe('sale', function() {
                 var activeFrom = _.clone(otherSale.activeTo);
                     activeFrom.setDate(activeFrom.getDate() + 1);
                 var activeTo = _.clone(activeFrom);
-                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                    activeTo.setDate(activeTo.getDate() + randomInt(1, 10));
                 var date = new Date;
                     date.setUTCHours(0, 0, 0, 0);
 

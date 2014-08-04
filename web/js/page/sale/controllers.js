@@ -374,7 +374,6 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         if (page) {
             $scope.paging.currentPage = page;
         }
-
         var searchParams = _.pick(_.assign({}, $scope.patterns, $scope.paging), function(value) {
             return value;
         });

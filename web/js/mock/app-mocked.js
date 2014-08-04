@@ -502,10 +502,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexUserQuery, users.getItems(), 'users', Users);
+        return processQueryUrlSort(url, regexUserQuery, users.getItems(), 'users', Users);
     });
     $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
-        return processPostQuery (url, regexUserQuery, data, users, 'users', Users);
+        return processPostQuerySort(url, regexUserQuery, data, users, 'users', Users);
     });
 
     var regexUserGet = /^\/api2\/users\/(?:([^\/]+))$/;
@@ -902,7 +902,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealersQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
+        return processQueryUrlSort(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
     });
     $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
 
@@ -927,7 +927,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             });
         }
 
-        var respond = processPostQuery(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
+        var respond = processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
         var fields = angular.fromJson(data).fields;
         if (_.size(fields)) {
             respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
