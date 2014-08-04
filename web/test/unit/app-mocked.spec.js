@@ -2344,27 +2344,46 @@ describe('sale', function() {
             runSync(answer, function() {
                 return salesLoader.loadItems({
                     filters: [
-                        { fields: ['type'], type: 'equal', value: 'card' }
+                        { fields: ['type'], type: 'in', value: ['card', 'addcard'] }
                     ],
-                    orders: ['-amount']
-                }).then(function(sales) {
-                    return salesLoader.loadItems({
-                        filters: [
-                            { fields: ['type'], type: 'equal', value: 'addcard' },
-                            { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
-                        ]
-                    }).then(function(addSales) {
-                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
-                        _.remove(sales.getItems(), function(sale) {
-                            return _.contains(addSaleParentIds, sale.cardId); 
-                        });
-                        return sales;
-                    });
+                    orders: ['-activeTo']
                 });
             });
 
             runSync(answer, function() {
                 sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                var saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: randomAmount(1000, 2000),
+                    siteAmount: randomAmount(1, 1000),
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond;
                 var activeFrom = _.clone(sale.activeTo);
                 var activeTo = _.clone(sale.activeTo);
                 var date = new Date;

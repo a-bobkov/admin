@@ -1813,7 +1813,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }
 
             function updateAddsales(parentSale) {
-                console.log(parentSale);
                 var addSale = _.find(items, {
                     type: saleTypes.get('addcard'),
                     parentId: parentSale.cardId
