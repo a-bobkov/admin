@@ -370,7 +370,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
     }
 
-    var processPost = function(data, collection, itemName, itemConstuctor, directories, processId, validation) {
+    var processPost = function(data, collection, itemName, itemConstuctor, directories, process, validation) {
         var items = collection.getItems();
         try {
             var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
@@ -401,8 +401,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         item.id = 1 + _.max(items, function(item) {
             return item.id;
         }).id;
-        if (processId) {
-            processId.call(item);
+        if (process) {
+            process.call(item);
         }
         items.push(item);
         var respond = [200, {
@@ -413,7 +413,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return respond;
     };
 
-    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories) {
+    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories, process) {
         var id = parseInt(url.replace(regex,'$1'));
         var items = collection.getItems();
         var idx = _.findIndex(items, {id: id});
@@ -442,6 +442,9 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }];
         }
 
+        if (process) {
+            process(item, items, idx);
+        }
         items[idx] = item;
         var respond = [200, {
             status: 'success',
@@ -1758,7 +1761,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealers: dealers,
             sites: sites,
             tariffs: tariffs
-        }, function processId() {
+        }, function process() {
             if (this.type.id === 'card' || this.type.id === 'addcard') {
                 this.cardId = this.id;
             }
@@ -1804,6 +1807,24 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealers: dealers,
             sites: sites,
             tariffs: tariffs
+        }, function process(item, items, idx) {
+            if (item.type.id === 'card' && item.activeTo !== items[idx].activeTo) {
+                updateAddsales(item);
+            }
+
+            function updateAddsales(parentSale) {
+                console.log(parentSale);
+                var addSale = _.find(items, {
+                    type: saleTypes.get('addcard'),
+                    parentId: parentSale.cardId
+                });
+                if (!addSale) {
+                    return [];
+                } else {
+                    addSale.activeTo = _.clone(parentSale.activeTo);
+                    return updateAddsales(addSale).concat(addSale);
+                }
+            }
         });
     });
     var regexSalesDelete = /^\/api2\/sales\/(?:([^\/]+))$/;

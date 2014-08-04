@@ -267,7 +267,7 @@ describe('app-mocked', function() {
         });
     }
 
-ddescribe('billingunion', function() {
+describe('billingunion', function() {
 
     describe('Метод get', function() {
 
@@ -2334,6 +2334,81 @@ describe('sale', function() {
                     console.log(key, value, equalSale[key]);
                     expect(value).toEqual(equalSale[key]);
                 });
+            });
+        });
+
+        it('исправлять activeTo в карточке и в расширении', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'card' }
+                    ],
+                    orders: ['-amount']
+                }).then(function(sales) {
+                    return salesLoader.loadItems({
+                        filters: [
+                            { fields: ['type'], type: 'equal', value: 'addcard' },
+                            { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
+                        ]
+                    }).then(function(addSales) {
+                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
+                        _.remove(sales.getItems(), function(sale) {
+                            return _.contains(addSaleParentIds, sale.cardId); 
+                        });
+                        return sales;
+                    });
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                var activeTo = _.clone(sale.activeTo);
+                var date = new Date;
+                date.setUTCHours(0, 0, 0, 0);
+                var addSaleData = {
+                    type: 'addcard',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    parentId: sale.cardId,
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: randomAmount(1000, 2000),
+                    siteAmount: randomAmount(1, 1000),
+                    info: 'Комментарий'
+                };
+                var addSale = new Sale(addSaleData);
+                return addSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runSync(answer, function() {
+                var addSale = answer.respond;
+                sale.activeTo.setDate(sale.activeTo.getDate() + 1);
+                return sale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                }).then(function() {
+                    return salesLoader.loadItem(addSale.id);
+                });
+            });
+
+            runs(function() {
+                var addSale = answer.respond;
+                expect(addSale.activeTo).toEqual(sale.activeTo);
             });
         });
     });
