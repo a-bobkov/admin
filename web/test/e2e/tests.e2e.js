@@ -4062,60 +4062,67 @@ describe('DealerSite App', function() {
 
         it('переходит по верхней кнопке добавления регистрации', function() {
             element.all(by.id('DealerSiteListAddDealerSiteUp')).get(0).click();
-            expect(browser.getCurrentUrl()).toMatch('#\/dealersitenew');
+            expect(browser.getCurrentUrl()).toMatch(/#\/dealersite\?id=new/);
         });
 
         it('переходит по нижней кнопке добавления регистрации', function() {
             element.all(by.id('DealerSiteListAddDealerSiteDown')).get(0).click();
-            expect(browser.getCurrentUrl()).toMatch('#\/dealersitenew');
+            expect(browser.getCurrentUrl()).toMatch(/#\/dealersite\?id=new/);
         });
 
-        it('показывает сортируемые колонки заголовка таблицы регистраций - количество', function() {
-            var sortableColumns = element.all(by.id('DealerSiteListTableHeader'));
-            expect(sortableColumns.count()).toBe(5);
-        });
+        it('показывает знак сортировки и сортирует элементы', function() {
+            function takeInt() {
+                return _.parseInt(this);
+            }
 
-        it('показывает сортируемые колонки заголовка таблицы регистраций - ссылки', function() {
-            var sortableColumnsRef = element.all(by.id('DealerSiteListTableHeaderRef'));
-            expect(sortableColumnsRef.get(0).getText()).toBeTruthy();
-        });
+            function takeFloat() {
+                return parseFloatRu(this);
+            }
 
-        it('показывает сортируемые колонки заголовка таблицы регистраций - знак сортировки', function() {
+            function takeDate() {
+                return this.replace(regexpDate, '20$3-$2-$1');
+            }
+
+            function takeId() {
+                return _.parseInt(this.replace(regexpIdName,'$1'));
+            }
+
+            function takeString() {
+                return this;
+            }
+
+            function setHeader(what, where) {
+                var copy = header.slice(0, 5);
+                copy.splice(where, 1, what);
+                return copy;
+            }
+
+            var header = ['','','','',''];
+            var columns = [
+                {bind: 'dealer.id', type: 'Integers', valueFn: takeId},
+                {bind: 'site.id', type: 'Integers', valueFn: takeId},
+                {bind: 'externalId', type: 'Strings', valueFn: takeString},
+                {bind: 'publicUrl', type: 'Strings', valueFn: takeString},
+                {bind: 'isActive', type: 'Booleans', valueFn: function() {   // сортирует по id, а не по отображаемому наименованию
+                    return [true, false][['Акт', 'Бло'].indexOf(this)];
+                }}
+            ]
+
             var sortableColumnsRef = element.all(by.id('DealerSiteListTableHeaderRef'));
             var sortableColumnsDir = element.all(by.id('DealerSiteListTableHeaderDir'));
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(0).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('↓');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(0).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('↑');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(1).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('↓');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(1).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('↑');
-            expect(sortableColumnsDir.get(2).getText()).toBe('   ');
-
-            expect(sortableColumnsRef.get(2).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('↓');
-
-            expect(sortableColumnsRef.get(2).click());
-            expect(sortableColumnsDir.get(0).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(1).getText()).toBe('   ');
-            expect(sortableColumnsDir.get(2).getText()).toBe('↑');
+            expect(mapText(sortableColumnsDir)).toEqual(header);
+            _.forEach(header, function(value, idx) {
+                sortableColumnsRef.get(idx).click();
+                expect(mapText(sortableColumnsDir)).toEqual(setHeader('↓', idx));
+                mapText(element.all(by.repeater('dealerSite in dealerSites').column('dealerSite.' + columns[idx].bind))).then(function(data) {
+                    expect(_.invoke(data, columns[idx].valueFn)).toBeSortedArrayOf('Ascending' + columns[idx].type);
+                });
+                sortableColumnsRef.get(idx).click();
+                expect(mapText(sortableColumnsDir)).toEqual(setHeader('↑', idx));
+                mapText(element.all(by.repeater('dealerSite in dealerSites').column('dealerSite.' + columns[idx].bind))).then(function(data) {
+                    expect(_.invoke(data, columns[idx].valueFn)).toBeSortedArrayOf('Descending' + columns[idx].type);
+                });
+            });
         });
 
         it('показывает реквизиты регистраций', function() {
@@ -4146,7 +4153,7 @@ describe('DealerSite App', function() {
 
         it('переходит к редактированию регистрации по ссылке в "изменить"', function() {
             element.all(by.id('DealerSiteListRowEdit')).get(0).click();
-            expect(browser.getCurrentUrl()).toMatch(/#\/dealersites\/\d+\/edit/);
+            expect(browser.getCurrentUrl()).toMatch(/#\/dealersite\?id=\d+/);
         });
 
         it('показывает 25 регистраций', function() {
@@ -4225,111 +4232,6 @@ describe('DealerSite App', function() {
                 element(by.id('DealerSiteListFilterSetDefault')).click();
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 900$/);
             }
-        });
-
-        xit('сортирует по возрастанию дилера', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[0].click();
-                mapText(element.all(by.repeater('dealerSite in dealerSites').column('dealerSite.dealer'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingStrings');
-                });
-            });
-        });
-
-        it('сортирует по убыванию дилера', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[0].click();
-                element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                    arr[0].click();
-                    mapText(element.all(by.repeater('dealerSite in dealerSites').column('dealerSite.dealer'))).then(function(data) {
-                        expect(data).toBeSortedArrayOf('DescendingStrings');
-                    });
-                });
-            });
-        });
-
-        it('сортирует по возрастанию сайта', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[1].click();
-                mapText(element.all(by.repeater('dealerSite in dealerSites').column('dealerSite.site'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingStrings');
-                });
-            });
-        });
-
-        it('сортирует по убыванию сайта', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[1].click();
-                element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                    arr[1].click();
-                    mapText(element.all(by.repeater('dealerSite in dealerSites').column('dealerSite.site'))).then(function(data) {
-                        expect(data).toBeSortedArrayOf('DescendingStrings');
-                    });
-                });
-            });
-        });
-
-        it('сортирует по возрастанию кода на сайте', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[2].click();
-                mapText(element.all(by.repeater('dealerSite in dealerSites').column('externalId'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingStrings');
-                });
-            });
-        });
-
-        it('сортирует по убыванию кода на сайте', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[2].click();
-                element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                    arr[2].click();
-                    mapText(element.all(by.repeater('dealerSite in dealerSites').column('externalId'))).then(function(data) {
-                        expect(data).toBeSortedArrayOf('DescendingStrings');
-                    });
-                });
-            });
-        });
-
-        it('сортирует по возрастанию страницы на сайте', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[3].click();
-                mapText(element.all(by.repeater('dealerSite in dealerSites').column('publicUrl'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('AscendingStrings');
-                });
-            });
-        });
-
-        it('сортирует по убыванию страницы на сайте', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[3].click();
-                element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                    arr[3].click();
-                    mapText(element.all(by.repeater('dealerSite in dealerSites').column('publicUrl'))).then(function(data) {
-                        expect(data).toBeSortedArrayOf('DescendingStrings');
-                    });
-                });
-            });
-        });
-
-        it('сортирует по возрастанию статуса', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[4].click();
-                mapText(element.all(by.repeater('dealerSite in dealerSites').column('isActive'))).then(function(data) {
-                    expect(data).toBeSortedArrayOf('DescendingStrings');
-                });
-            });
-        });
-
-        it('сортирует по убыванию статуса', function() {
-            element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                arr[4].click();
-                element.all(by.id('DealerSiteListTableHeaderRef')).then(function(arr) {
-                    arr[4].click();
-                    mapText(element.all(by.repeater('dealerSite in dealerSites').column('isActive'))).then(function(data) {
-                        expect(data).toBeSortedArrayOf('AscendingStrings');
-                    });
-                });
-            });
         });
     });
 
@@ -4460,7 +4362,7 @@ describe('DealerSite App', function() {
 
     describe('Сценарии использования', function() {
         beforeEach(function() {
-            browser.get('admin.html#/dealersitelist?column=id&reverse');
+            browser.get('admin.html#/dealersitelist?orders=-id');
         });
 
         it('Создание нового разрешения на экспорт и доступа', function() {

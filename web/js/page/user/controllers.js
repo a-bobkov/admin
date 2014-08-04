@@ -45,9 +45,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             }
         }
     })
-    .otherwise({
-        redirectTo: '/userlist'
-    });
+;
 }])
 
 .controller('UserListCtrl', function($scope, $rootScope, $location, $window, $q, $timeout,  data,

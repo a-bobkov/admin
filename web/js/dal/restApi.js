@@ -52,32 +52,16 @@ angular.module('max.dal.rest.api', ['max.dal.api'])
          * @returns {Promise}
          */
         this.query = function(params) {
-            if (_.contains(['/sales', '/tariffs', '/tariffrates', '/dealertariffs', '/sites', '/report/sitebalances',
-                '/report/dealerbalances', '/billingcredits', '/billingunions', '/users', '/dealers'], url)) {
-                if (params) {
-                    var paramsPager = _.assign({}, params.pager);
-                }
-                var paramsFiltersOrdersFields = _.pick(params, ['filters', 'fields', 'orders']);
-                if (!_.isEmpty(paramsFiltersOrdersFields)) {
-                    return Api.post(url, paramsFiltersOrdersFields, paramsPager).then(
-                        this._getResponseHandler(collectionName)
-                    );
-                } else {
-                    return Api.get(url, paramsPager).then(
-                        this._getResponseHandler(collectionName)
-                    );
-                }
-            }
             if (params) {
-                var paramsOrderPager =  _.assign({}, params.order, params.pager);
+                var paramsPager = _.assign({}, params.pager);
             }
-            var paramsFiltersFields = _.pick(params, ['filters', 'fields']);
-            if (!_.isEmpty(paramsFiltersFields)) {
-                return Api.post(url, paramsFiltersFields, paramsOrderPager).then(
+            var paramsFiltersOrdersFields = _.pick(params, ['filters', 'fields', 'orders']);
+            if (!_.isEmpty(paramsFiltersOrdersFields)) {
+                return Api.post(url, paramsFiltersOrdersFields, paramsPager).then(
                     this._getResponseHandler(collectionName)
                 );
             } else {
-                return Api.get(url, paramsOrderPager).then(
+                return Api.get(url, paramsPager).then(
                     this._getResponseHandler(collectionName)
                 );
             }

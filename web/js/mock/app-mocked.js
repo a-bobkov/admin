@@ -201,61 +201,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         })
     }
 
-    var processQueryUrl = function(url, regex, arr, collectionName, collectionConstructor) {
-
-        var search = url.replace(regex, '$1');
-        var pairs = search.split('&');
-        var params = {};
-        _.forEach(pairs, function(value) {
-            var param = value.split('=');
-            params[param[0]] = param[1];
-        })
-
-        var order_field = params.order_field || 'id';
-        var order_direction = params.order_direction || 'asc';
-        var per_page = Math.min(params.per_page || 100, 100);
-        var page = params.page || 1;
-
-        var sorted_arr = _.sortBy(arr, function(item) {
-            return getDeepValue(item, order_field.split('.'));
-        });
-
-        if (order_direction === 'desc') {
-            sorted_arr.reverse();
-        }
-        var paged_arr = sorted_arr.slice(per_page * (page - 1), per_page * page);
-
-        var respond = [200, {
-            status: 'success',
-            data: {
-                params: {
-                    filters: [],
-                    order: {
-                        field: order_field,
-                        direction: order_direction
-                    },
-                    pager: {
-                        per_page:   per_page,
-                        page:       page,
-                        total:      arr.length
-                    },
-                    fields: []
-                }
-            }
-        }];
-        respond[1].data[collectionName] = _.invoke(paged_arr, 'serialize');
-
-        return respond;
-    }
-
-    var processPostQuery = function(url, regex, data, collection, collectionName, collectionConstructor) {
-        var filters = angular.fromJson(data).filters;
-        var filtered_arr = filterArr(collection.getItems(), filters);
-        var respond = processQueryUrl(url, regex, filtered_arr, collectionName, collectionConstructor);
-        respond[1].data.params.filters = filters;
-        return respond;
-    }
-
     var processQueryUrlSort = function(url, regex, arr, collectionName, collectionConstructor) {
 
         var search = url.replace(regex, '$1');
@@ -842,10 +787,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
+        return processQueryUrlSort(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
     });
     $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
+        return processPostQuerySort(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
     });
     var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
@@ -872,10 +817,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealerSiteLoginsQuery, dealerSiteLogins.getItems(), 'dealerSiteLogins', DealerSiteLogins);
+        return processQueryUrlSort(url, regexDealerSiteLoginsQuery, dealerSiteLogins.getItems(), 'dealerSiteLogins', DealerSiteLogins);
     });
     $httpBackend.whenPOST(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealerSiteLoginsQuery, data, dealerSiteLogins, 'dealerSiteLogins', DealerSiteLogins);
+        return processPostQuerySort(url, regexDealerSiteLoginsQuery, data, dealerSiteLogins, 'dealerSiteLogins', DealerSiteLogins);
     });
     var regexDealerSiteLoginsGet = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSiteLoginsGet).respond(function(method, url, data) {
@@ -938,10 +883,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexSitesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
+        return processQueryUrlSort(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
     });
     $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexSitesQuery, data, sites, 'sites', Sites);
+        return processPostQuerySort(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 
     var tariffs = new Tariffs([
