@@ -4,7 +4,7 @@
             <td class="first">
             <div class="span-7">
                 <h1>Список пользователей</h1>
-                <h3 id="UserListNumberUsers">Количество записей: {{totalItems}}</h3>
+                <h3 id="UserListNumberUsers">Количество: {{totalItems}}</h3>
                 <input id='UserListAddUserUp' type="submit" value="Добавить пользователя" ng-click='clickNewUser()'/>
             </div>
             </td>
@@ -70,7 +70,7 @@
                 <td class="text">{{user.dealer.manager.name}}</td>
                 <td>
                     <ul class="actions">
-                        <li class="edit"><a href='#/users/{{user.id}}/edit'>изменить</a></li>
+                        <li class="edit"><a href={{editUserUrl(user)}}>изменить</a></li>
                         <li class="switch"><a ng-click='switchUser(user)'>войти</a></li>
                     </ul>
                 </td>

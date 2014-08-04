@@ -87,9 +87,9 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
     $scope.$watch('patterns', $scope.onPatternChange, true);
 
     $scope.sortableColumns = [
-        {id: "dealer", name: "Салон", width: '70%'},
-        {id: "amount", name: "Сумма, руб.", width: '10%'},
-        {id: "expiresAt", name: "Срок", width: '10%'}
+        {id: "dealer", name: "Салон", width: '45%'},
+        {id: "amount", name: "Сумма, руб.", width: '15%'},
+        {id: "expiresAt", name: "Срок", width: '15%'}
     ];
 
     $scope.sortingColumn = function() {
@@ -131,6 +131,9 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
         var queryParams = makeQueryParams($rootScope.savedBillingCreditListLocationSearch);
         billingCreditsLoader.loadItems(queryParams).then(function(billingCredits) {
             $scope.totalItems = billingCredits.getParams().pager.total;
+            $scope.totalAmount = _.reduce(billingCredits.getItems(), function(sum, billingCredit) {
+                return sum + billingCredit.amount;
+            }, $scope.totalAmount = 0);
             var construction = new Construction({billingCredits: billingCredits});
             dealersLoader.loadItems({       // user.id
                 filters: [
@@ -165,7 +168,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
         $scope.setPatternsDefault();
         $scope.sorting = ['expiresAt'];
         $scope.paging = {
-            itemsPerPage: 25
+            itemsPerPage: 100
         };
     }
     $scope.maxSizePaging = 9;
@@ -192,7 +195,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
             return {
                 orders: ['expiresAt'],
                 pager: {
-                    per_page: 25
+                    per_page: 100
                 }
             }
         }
@@ -220,8 +223,8 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
         $location.path('/billingcredit').search('id=new');
     };
 
-    $scope.editBillingCredit = function(billingCredit) {
-        $location.path('/billingcredit').search('id=' + billingCredit.id);
+    $scope.editBillingCreditUrl = function(billingCredit) {
+        return '#/billingcredit?id=' + billingCredit.id;
     };
 
     $scope.removeBillingCredit = function(billingCredit) {

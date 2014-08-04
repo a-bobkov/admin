@@ -4,7 +4,7 @@
             <td class="first">
             <div class="span-6">
                 <h1>Список продаж</h1>
-                <h3 id="SaleListNumberSales">Количество продаж: {{totalItems}}</h3>
+                <h3 id="SaleListNumberSales">Количество: {{totalItems}}</h3>
                 <input id='SaleListAddSaleUp' type="submit" value="Добавить карточку" ng-click='newSaleCard()'/>
                 <input class="right" id='ToggleSiteBalances' title="Контрольные цифры задолженности по auto.ru и irr.ru" type="submit" value="Отчёт" ng-click='toggleSiteBalances()'/>
             </div>
@@ -103,8 +103,8 @@
                 </td>
                 <td>
                     <ul class="actions">
-                        <li class="edit"><a id='SaleListRowEdit' ng-click='editSale(sale)'>изменить</a></li>
-                        <li class="delete"><a id='SaleListRowRemove' ng-click='removeSale(sale)'>удалить</a></li>
+                        <li class="edit"><a id='SaleListRowEdit' href={{editSaleUrl(sale)}}>изменить</a></li>
+                        <li class="delete" ng-show='isRemoveable(sale)'><a id='SaleListRowRemove' ng-click='removeSale(sale)'>удалить</a></li>
                     </ul>
                 </td>
             </tr>

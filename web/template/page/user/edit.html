@@ -155,9 +155,9 @@
 		    <tr>
 		        <th><label for="user_dealer_url">Сайт</label></th>
 		        <td>
-		            <input class="span-8" type="text" ng-pattern="/^http:\/\/([\w-]+\.)+([a-zA-Z]{2,})(\/?|\/\S+)$/" id="user_dealer_url" name="user_dealer_url" ng-model='dealerEdited.url'/>
+		            <input class="span-8" type="text" ng-pattern="/^(http|https):\/\/([\-\S]+\.)+([\-\S]{2,})/" id="user_dealer_url" name="user_dealer_url" ng-model='dealerEdited.url'/>
 					<ul class="error_list" ng-show='formUser.user_dealer_url.$invalid'>
-					    <li id='DealerUrlErrorPattern' ng-show="formUser.user_dealer_url.$error.pattern">Адрес должен быть в формате http://www.mysite.ru (обязательно начиная с "http://")</li>
+					    <li id='DealerUrlErrorPattern' ng-show="formUser.user_dealer_url.$error.pattern">Адрес сайта должен быть в формате http://www.mysite.ru (обязательно начиная с "http://")</li>
 					</ul>
 		        </td>
 		    </tr>

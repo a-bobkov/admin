@@ -394,6 +394,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                         { fields: ['parentId'], type: 'in', value: _.pluck(salesItems, 'cardId') }
                     ]
                 }),
+                extraSales: salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'equal', value: 'extra' },
+                        { fields: ['cardId'], type: 'in', value: _.pluck(_.where(salesItems, {type: saleTypes.get('card')}), 'cardId') }
+                    ]
+                }),
                 dealers: dealersLoader.loadItems({
                     filters: [
                         { fields: ['id'], type: 'in', value: _.pluck(_.pluck(salesItems, 'dealer'), 'id') }
@@ -416,7 +422,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 }).then(function(tariffs) {
                     construction.tariffs = tariffs;
                     _.assign($scope, construction.resolveRefs());
-                    var topSaleList = document.getElementById('SaleListAddSaleUp').getBoundingClientRect().top;
+                    var topElem = document.getElementById('SaleListAddSaleUp');
+                    var topSaleList = topElem && topElem.getBoundingClientRect().top;
                     if (topSaleList < 0) {
                         window.scrollBy(0, topSaleList);
                     }
@@ -427,6 +434,14 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.isAddable = function(sale) {
         return (sale.isCard() || sale.isAddcard()) && sale.tariff && !_.find($scope.addSales.getItems(), {parentId: sale.cardId});
+    }
+
+    $scope.isRemoveable = function(sale) {
+        var addItems = $scope.addSales.getItems();
+        var extraItems = $scope.extraSales.getItems();
+        return sale.isCard() && !_.find(addItems, {parentId: sale.cardId}) && !_.find(extraItems, {cardId: sale.cardId})
+            || sale.isAddcard() && !_.find(addItems, {parentId: sale.cardId})
+            || sale.isExtra();
     }
 
     var ls = $location.search();
@@ -571,23 +586,19 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     };
 
     $scope.newSaleCard = function() {
-        $location.search('id=new');
-        $location.path('/sale/card');
+        $location.path('/sale/card').search('id=new');
     };
 
     $scope.newSaleAddcard = function(sale) {
-        $location.search('id=new&cardId=' + sale.cardId);
-        $location.path('/sale/addcard');
+        $location.path('/sale/addcard').search('id=new&cardId=' + sale.cardId);
     };
 
     $scope.newSaleExtra = function(sale) {
-        $location.search('id=new&cardId=' + sale.cardId);
-        $location.path('/sale/extra');
+        $location.path('/sale/extra').search('id=new&cardId=' + sale.cardId);
     };
 
-    $scope.editSale = function(sale) {
-        $location.search('id=' + sale.id);
-        $location.path('/sale/' + sale.type.id);
+    $scope.editSaleUrl = function(sale) {
+        return '#/sale/' + sale.type.id + '?id=' + sale.id;
     };
 
     $scope.removeSale = function(sale) {

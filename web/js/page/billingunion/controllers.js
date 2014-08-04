@@ -275,8 +275,8 @@ angular.module('BillingUnionApp', ['ngRoute', 'ui.bootstrap.pagination',
         $location.path('/billingunion').search('id=new');
     };
 
-    $scope.editBillingUnion = function(billingUnion) {
-        $location.path('/billingunion').search('id=' + billingUnion.id);
+    $scope.editBillingUnionUrl = function(billingUnion) {
+        return '#/billingunion?id=' + billingUnion.id;
     };
 
     $scope.removeBillingUnion = function(billingUnion) {
