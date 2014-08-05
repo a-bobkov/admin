@@ -60,7 +60,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     }
 
     $scope.clickNewUser = function() {
-        $location.path('/usernew');
+        $location.path('/usernew').search('');
     }
 
     $scope.setPatternsDefault = function() {
@@ -321,7 +321,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
         $scope.userEdited.save(data).then(function(user) {
             $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
-            $location.path('/userlist');
+            $location.path('/userlist').search('');
         });
     };
 
@@ -330,10 +330,10 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             if ($scope.userEdited.id) {
                 $scope.userEdited.remove().then(function() {
                     $rootScope.savedUserListNotice = 'Удалён пользователь с идентификатором: ' + $scope.userEdited.id;
-                    $location.path('/userlist');
+                    $location.path('/userlist').search('');
                 })
             } else {
-                $location.path('/userlist');
+                $location.path('/userlist').search('');
             }
         }
     };

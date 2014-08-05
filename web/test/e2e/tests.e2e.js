@@ -1568,7 +1568,7 @@ describe('Sale App', function() {
         });
 
         it('заменяет в карточке дилера с помощью загружающего контрола', function() {
-            mapIsDisplayed(element.all(by.id('SaleListRowAdd'))).then(function(isDisplayedArray) {
+            mapIsDisplayed(element.all(by.id('SaleListRowRemove'))).then(function(isDisplayedArray) {
                 var saleIdx = isDisplayedArray.indexOf(true);
                 expect(saleIdx).not.toBe(-1);
                 element.all(by.id('SaleListRowEdit')).get(saleIdx).click();
@@ -1927,8 +1927,7 @@ describe('Sale App', function() {
         });
 
         it('переходит к url создания расширения для расширения по ссылке в "расширить"', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 2);
+            setSelect(element(by.select('patterns.type')), 2);
             var saleAdd = element.all(by.id('SaleListRowAdd'));
             mapIsDisplayed(saleAdd).then(function(displayed) {
                 var saleIdx = displayed.indexOf(true);
@@ -1939,8 +1938,7 @@ describe('Sale App', function() {
         });
 
         it('переходит к url создания дополнительной продажи по ссылке в "доплатить"', function() {
-            var setElem = element(by.select('patterns.type'));
-            setSelect(setElem, 1);
+            setSelect(element(by.select('patterns.type')), 1);
             var saleAdd = element.all(by.id('SaleListRowExtra'));
             mapIsDisplayed(saleAdd).then(function(displayed) {
                 var saleIdx = displayed.indexOf(true);
@@ -2088,7 +2086,11 @@ describe('Sale App', function() {
     describe('Редактирование карточки', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist?archive=true&type=card&orders=date;-id&itemsPerPage=15');
-            element.all(by.id('SaleListRowEdit')).get(0).click();
+            mapIsDisplayed(element.all(by.id('SaleListRowRemove'))).then(function(isDisplayedArray) {
+                var saleIdx = isDisplayedArray.indexOf(true);
+                expect(saleIdx).not.toBe(-1);
+                element.all(by.id('SaleListRowEdit')).get(saleIdx).click();
+            });
         });
 
         it('показывает режим работы формы', function() {
@@ -2475,8 +2477,12 @@ describe('Sale App', function() {
 
     describe('Редактирование расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=id&itemsPerPage=15');
-            element.all(by.id('SaleListRowEdit')).get(0).click();
+            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=-id&itemsPerPage=15');
+            mapIsDisplayed(element.all(by.id('SaleListRowRemove'))).then(function(isDisplayedArray) {
+                var saleIdx = isDisplayedArray.indexOf(true);
+                expect(saleIdx).not.toBe(-1);
+                element.all(by.id('SaleListRowEdit')).get(saleIdx).click();
+            });
         });
 
         it('показывает режим работы формы', function() {
@@ -2571,7 +2577,7 @@ describe('Sale App', function() {
 
     describe('Создание расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
+            browser.get('admin.html#/salelist?archive=true&orders=-id&itemsPerPage=15');
         });
 
         it('показывает режим работы формы', function() {
@@ -2584,7 +2590,6 @@ describe('Sale App', function() {
         });
 
         it('выводит начальные значения полей', function() {
-            browser.get('admin.html#/salelist?archive=true&orders=id&itemsPerPage=15');
             var saleElems = by.repeater('sale in sales');
             var sales = {};
             mapText(element.all(saleElems.column('sale.dealer.idName'))).then(function(respond) {
@@ -2870,14 +2875,11 @@ describe('Sale App', function() {
     describe('Сценарии использования', function() {
 
         beforeEach(function() {
-            browser.get('admin.html#/salelist?archive=true&itemsPerPage=15');
+            browser.get('admin.html#/salelist?archive=true&orders=-amount&itemsPerPage=15');
         });
 
         it('Создание карточки', function() {
             var salesSelector = by.repeater('sale in sales');
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
 
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
@@ -3009,9 +3011,7 @@ describe('Sale App', function() {
 
         it('Создание расширения карточки', function() {
             var salesSelector = by.repeater('sale in sales');
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
+
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
                 preAmountText = respond;
@@ -3159,9 +3159,7 @@ describe('Sale App', function() {
 
         it('Создание доплаты', function() {
             var salesSelector = by.repeater('sale in sales');
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
+
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
                 preAmountText = respond;
@@ -3319,13 +3317,10 @@ describe('Sale App', function() {
         });
 
         it('Изменение карточки', function() {
-            setSelect(element(by.model('patterns.type')), 1);
-
             var salesSelector = by.repeater('sale in sales');
 
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
+            setSelect(element(by.model('patterns.type')), 1);
+
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
                 preAmountText = respond;
@@ -3442,13 +3437,10 @@ describe('Sale App', function() {
         });
 
         it('Изменение расширения', function() {
-            setSelect(element(by.select('patterns.type')), 2);
-
             var salesSelector = by.repeater('sale in sales');
 
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
+            setSelect(element(by.select('patterns.type')), 2);
+
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
                 preAmountText = respond;
@@ -3590,12 +3582,10 @@ describe('Sale App', function() {
         });
 
         it('Изменение доплаты', function() {
+            var salesSelector = by.repeater('sale in sales');
+
             setSelect(element(by.select('patterns.type')), 3);
 
-            var salesSelector = by.repeater('sale in sales');
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
                 preAmountText = respond;
@@ -3686,51 +3676,8 @@ describe('Sale App', function() {
             });
         });
 
-        it('Удаление карточки', function() {
-            setSelect(element(by.select('patterns.type')), 1);
-
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
-
-            var totalItems;
-            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
-                totalItems = _.parseInt(totalItemsText.replace(regexpTotalItems, '$1'));
-            });
-
-            var saleRemove;
-            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
-                saleRemove = saleText;
-            });
-
-            element.all(by.id('SaleListRowRemove')).get(0).click();
-
-            var alertSaleParams;
-            var alert = browser.switchTo().alert();
-            alert.getText().then(function(alertText) {
-                alertSaleParams = alertText.replace(regexpSaleName, '$1;$2');
-                alert.accept();
-            });
-
-            var savedSaleListNoticeElem = element(by.id('savedSaleListNotice'));
-            expect(savedSaleListNoticeElem.isDisplayed()).toBeTruthy();
-            savedSaleListNoticeElem.getText().then(function(noticeText) {
-                expect(noticeText.replace(regexpSaleName, '$1;$2')).toBe(alertSaleParams);
-            });
-            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
-                expect(saleText).not.toBe(saleRemove);
-            });
-            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
-                expect(_.parseInt(totalItemsText.replace(regexpTotalItems, '$1'))).toBe(totalItems - 1);
-            });
-        });
-
         it('Удаление расширения', function() {
             setSelect(element(by.select('patterns.type')), 2);
-
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
 
             var totalItems;
             element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
@@ -3767,9 +3714,40 @@ describe('Sale App', function() {
         it('Удаление доплаты', function() {
             setSelect(element(by.select('patterns.type')), 3);
 
-            var amountElem = element.all(by.id('SaleListTableHeaderRef')).get(7);
-            amountElem.click();
-            amountElem.click();
+            var totalItems;
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                totalItems = _.parseInt(totalItemsText.replace(regexpTotalItems, '$1'));
+            });
+
+            var saleRemove;
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                saleRemove = saleText;
+            });
+
+            element.all(by.id('SaleListRowRemove')).get(0).click();
+
+            var alertSaleParams;
+            var alert = browser.switchTo().alert();
+            alert.getText().then(function(alertText) {
+                alertSaleParams = alertText.replace(regexpSaleName, '$1;$2');
+                alert.accept();
+            });
+
+            var savedSaleListNoticeElem = element(by.id('savedSaleListNotice'));
+            expect(savedSaleListNoticeElem.isDisplayed()).toBeTruthy();
+            savedSaleListNoticeElem.getText().then(function(noticeText) {
+                expect(noticeText.replace(regexpSaleName, '$1;$2')).toBe(alertSaleParams);
+            });
+            element.all(by.repeater('sale in sales')).get(0).getText().then(function(saleText) {
+                expect(saleText).not.toBe(saleRemove);
+            });
+            element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
+                expect(_.parseInt(totalItemsText.replace(regexpTotalItems, '$1'))).toBe(totalItems - 1);
+            });
+        });
+
+        it('Удаление карточки', function() {
+            setSelect(element(by.select('patterns.type')), 1);
 
             var totalItems;
             element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
@@ -4126,29 +4104,18 @@ describe('DealerSite App', function() {
         });
 
         it('показывает реквизиты регистраций', function() {
-            expect(element(by.repeater('dealerSite in dealerSites').row(0).column('dealerSite.dealer')).getText()).toMatch(/^\d+:/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(0).column('dealerSite.site')).getText()).toMatch(/^\d+:/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(0).column('externalId')).getText()).toMatchOrEmpty(/^\w+$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(0).column('publicUrl')).getText()).toMatchOrEmpty(/^Ссылка$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(0).column('publicUrl')).getAttribute('href')).toMatchOrEmpty(regexpUrl);
-            expect(element(by.repeater('dealerSite in dealerSites').row(0).column('isActive')).getText()).toMatch(/^Акт$|^Бло$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(0)).getText()).toMatch(/(Акт(?=\s+изменить))|(Бло(?!\s+изменить))/);
-
-            expect(element(by.repeater('dealerSite in dealerSites').row(1).column('dealerSite.dealer')).getText()).toMatch(/^\d+:/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(1).column('dealerSite.site')).getText()).toMatch(/^\d+:/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(1).column('externalId')).getText()).toMatchOrEmpty(/^\w+$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(1).column('publicUrl')).getText()).toMatchOrEmpty(/^Ссылка$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(1).column('publicUrl')).getAttribute('href')).toMatchOrEmpty(regexpUrl);
-            expect(element(by.repeater('dealerSite in dealerSites').row(1).column('isActive')).getText()).toMatch(/^Акт$|^Бло$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(1)).getText()).toMatch(/(Акт(?=\s+изменить))|(Бло(?!\s+изменить))/);
-
-            expect(element(by.repeater('dealerSite in dealerSites').row(2).column('dealerSite.dealer')).getText()).toMatch(/^\d+:/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(2).column('dealerSite.site')).getText()).toMatch(/^\d+:/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(2).column('externalId')).getText()).toMatchOrEmpty(/^\w+$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(2).column('publicUrl')).getText()).toMatchOrEmpty(/^Ссылка$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(2).column('publicUrl')).getAttribute('href')).toMatchOrEmpty(regexpUrl);
-            expect(element(by.repeater('dealerSite in dealerSites').row(2).column('isActive')).getText()).toMatch(/^Акт$|^Бло$/);
-            expect(element(by.repeater('dealerSite in dealerSites').row(2)).getText()).toMatch(/(Акт(?=\s+изменить))|(Бло(?!\s+изменить))/);
+            var dealerSites = by.repeater('dealerSite in dealerSites');
+            element.all(dealerSites).count().then(function(count) {
+                for(var i = count; i--; ) {
+                    var dealerSite = dealerSites.row(i);
+                    expect(element(dealerSite.column('dealerSite.dealer')).getText()).toMatch(regexpIdName);
+                    expect(element(dealerSite.column('dealerSite.site')).getText()).toMatch(regexpIdName);
+                    expect(element(dealerSite.column('dealerSite.externalId')).getText()).toMatchOrEmpty(/^\w+$/);
+                    expect(element(dealerSite.column('publicUrlText')).getText()).toMatchOrEmpty(/^Ссылка$/);
+                    expect(element(dealerSite.column('publicUrlText')).getAttribute('href')).toMatchOrEmpty(regexpUrl);
+                    expect(element(dealerSite.column('dealerSite.isActive')).getText()).toMatch(/^(Акт|Бло)$/);
+                }
+            });
         });
 
         it('переходит к редактированию регистрации по ссылке в "изменить"', function() {

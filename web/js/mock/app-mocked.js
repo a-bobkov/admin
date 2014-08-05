@@ -318,28 +318,12 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var processPost = function(data, collection, itemName, itemConstuctor, directories, process, validation) {
         var items = collection.getItems();
         try {
-            var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
+            var item = (new itemConstuctor((angular.fromJson(data))[itemName])).resolveRefs(directories);
         } catch (err) {     // ошибка ссылочной целостности
             return [400, {
                 status: 'error',
                 message: 'Ошибка при создании',
                 errors: err.message
-            }];
-        }
-
-        var validationError = validation && validation(item);
-        if (validationError) {
-            return [400, {
-                status: 'error',
-                message: 'Validation Failed',
-                errors: validationError
-            }];
-        }
-
-        if (!item.isValid()) {
-            return [400, {
-                status: 'error',
-                message: 'Validation Failed'
             }];
         }
 
@@ -349,6 +333,16 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         if (process) {
             process.call(item);
         }
+
+        var validationError = validation && validation(item, items);
+        if (validationError) {
+            return [400, {
+                status: 'error',
+                message: 'Validation Failed',
+                errors: validationError
+            }];
+        }
+
         items.push(item);
         var respond = [200, {
             status: 'success',
@@ -358,7 +352,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return respond;
     };
 
-    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories, process) {
+    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories, process, validation) {
         var id = parseInt(url.replace(regex,'$1'));
         var items = collection.getItems();
         var idx = _.findIndex(items, {id: id});
@@ -371,7 +365,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
 
         try {
-            var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
+            var item = (new itemConstuctor((angular.fromJson(data))[itemName])).resolveRefs(directories);
         } catch (err) {     // ошибка ссылочной целостности
             return [400, {
                 status: 'error',
@@ -380,16 +374,19 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }];
         }
 
-        if (!item.isValid()) {
-            return [400, {
-                status: 'error',
-                message: 'Validation Failed'
-            }];
-        }
-
         if (process) {
             process(item, items, idx);
         }
+
+        var validationError = validation && validation(item, items, idx);
+        if (validationError) {
+            return [400, {
+                status: 'error',
+                message: 'Validation Failed',
+                errors: validationError
+            }];
+        }
+
         items[idx] = item;
         var respond = [200, {
             status: 'success',
@@ -831,6 +828,27 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPost(data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
             dealers: dealers,
             sites: sites
+        }, function process() {
+        }, function validation(item, items) {
+            var hasErrors;
+            var children = {};
+            function pushError(errorField, errorText) {
+                hasErrors = true;
+                if (!children[errorField]) {
+                    children[errorField] = {errors: []};
+                }
+                children[errorField].errors.push(errorText);
+            }
+            if (!item.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!item.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (_.find(items, {dealer: item.dealer, site: item.site, type: item.type})) {
+                pushError('site', 'Это значение уже используется.');
+            }
+            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSiteLoginsPut = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
@@ -838,6 +856,37 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPut(url, regexDealerSiteLoginsPut, data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
             dealers: dealers,
             sites: sites
+        }, function process() {
+        }, function validation(item, items, idx) {
+            var hasErrors;
+            var children = {};
+            function pushError(errorField, errorText) {
+                hasErrors = true;
+                if (!children[errorField]) {
+                    children[errorField] = {errors: []};
+                }
+                children[errorField].errors.push(errorText);
+            }
+            if (!item.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!item.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (!item.type) {
+                pushError('type', 'Значение не должно быть пустым.');
+            }
+            if (!item.login) {
+                pushError('login', 'Значение не должно быть пустым.');
+            } else if (item.login.length > 100){
+                pushError('login', 'Значение слишком длинное. Должно быть равно 100 символам или меньше.');
+            }
+            if (!item.password) {
+                pushError('password', 'Значение не должно быть пустым.');
+            } else if (item.password.length > 100){
+                pushError('password', 'Значение слишком длинное. Должно быть равно 100 символам или меньше.');
+            }
+            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSiteLoginsDelete = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
