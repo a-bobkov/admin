@@ -2,7 +2,8 @@
 
 angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multicombo',
     'max.dal.entities.dealersite', 
-    'max.dal.entities.dealersitelogin' 
+    'max.dal.entities.dealersitelogin', 
+    'max.dal.entities.user', 
 ])
 
 .config(['$routeProvider', function($routeProvider) {
@@ -44,33 +45,34 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         templateUrl: 'template/page/dealersite/edit.html',
         controller: 'DealerSiteEditCtrl',
         resolve: {
-            data: function(Construction, dealerSitesLoader, dealersLoader, sitesLoader, $location, $q) {
-                var directories = new Construction;
-                var toResolve;
-                var ls = $location.search();
-                if (ls.id === 'new') {
-                    return $q.when();
-                } else {
-                    return dealerSitesLoader.loadItem(ls.id).then(function(dealerSite) {
-                        directories.dealerSite = dealerSite;
-                        return $q.all({
-                            dealers: dealersLoader.loadItems({
-                                filters: [
-                                    { fields: ['id'], type: 'equal', value: dealerSite.dealer.id }
-                                ],
-                                fields: ['dealer_list_name']
-                            }),
-                            sites: sitesLoader.loadItems({
-                                filters: [
-                                    { fields: ['id'], type: 'equal', value: dealerSite.site.id }
-                                ]
-                            })
-                        }).then(function(collections) {
-                            _.assign(directories, collections);
-                            return directories.resolveRefs();
+            data: function(Construction, dealerSitesLoader, dealersLoader, sitesLoader, usersLoader, $location, $q) {
+                return usersLoader.loadDirectories().then(function(directories) {
+                    var toResolve;
+                    var ls = $location.search();
+                    if (ls.id === 'new') {
+                        return directories.resolveRefs();
+                    } else {
+                        return dealerSitesLoader.loadItem(ls.id).then(function(dealerSite) {
+                            directories.dealerSite = dealerSite;
+                            return $q.all({
+                                dealers: dealersLoader.loadItems({
+                                    filters: [
+                                        { fields: ['id'], type: 'equal', value: dealerSite.dealer.id }
+                                    ],
+                                    fields: ['dealer_list_name']
+                                }),
+                                sites: sitesLoader.loadItems({
+                                    filters: [
+                                        { fields: ['id'], type: 'equal', value: dealerSite.site.id }
+                                    ]
+                                })
+                            }).then(function(collections) {
+                                _.assign(directories, collections);
+                                return directories.resolveRefs();
+                            });
                         });
-                    });
-                }
+                    }
+                });
             }
         }
     })
@@ -89,12 +91,13 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     13: { externalId: true },
     14: {                                    site: true },
     16: {                   publicUrl: true },
-    17: {                   publicUrl: true }
+    17: {                   publicUrl: true },
+    19: {                                                             coordinates: true}
 })
 
 .controller('DealerSiteListCtrl', function($scope, $rootScope, $location, $q, data, Construction,
     DealerSite, dealerSiteStatuses, dealerSitesLoader, dealersLoader, sitesLoader, salesLoader, dealerTariffsLoader,
-    dealerSiteLoginsLoader, dealerSiteLoginTypes, DealerSiteRequiredFields, Dealers, Sites) {
+    dealerSiteLoginsLoader, dealerSiteLoginTypes, DealerSiteRequiredFields, Dealers, Sites, usersLoader) {
 
     _.assign($scope, data);
     $scope.dealerSiteStatuses = dealerSiteStatuses;
@@ -283,7 +286,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         }
     }
 
-    function invalidFields(dealerSite, dealerSiteLogins) {
+    function invalidFields(dealerSite, dealerSiteLogins, user) {
         var invalid = [];
         var siteRequiredFields = DealerSiteRequiredFields[dealerSite.site.id];
         if (!siteRequiredFields) {
@@ -309,6 +312,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         if (siteRequiredFields["ftp"] && !(dealerSiteLoginFtp && dealerSiteLoginFtp.password)) {
             invalid.push(['Пароль для ftp']);
         }
+        if (siteRequiredFields["coordinates"] && !(user && user.dealer.latitude)) {
+            invalid.push(['Широта салона']);
+        }
+        if (siteRequiredFields["coordinates"] && !(user && user.dealer.longitude)) {
+            invalid.push(['Долгота салона']);
+        }
         return invalid;
     }
 
@@ -327,8 +336,15 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             confirmMessage = 'Разблокировать регистрацию ';
             noticeMessage = 'Разблокирована регистрация ';
             newStatus = dealerSiteStatuses.get(true);
-            check = dealerSiteLoginsLoader.loadItemsDealerSite(dealerSite.dealer.id, dealerSite.site.id).then(function(dealerSiteLogins) {
-                var invalid = invalidFields(dealerSite, dealerSiteLogins);
+            check = $q.all({
+                dealerSiteLogins: dealerSiteLoginsLoader.loadItemsDealerSite(dealerSite.dealer.id, dealerSite.site.id),
+                users: usersLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: dealerSite.dealer.id }
+                    ]
+                })
+            }).then(function(collections) {
+                var invalid = invalidFields(dealerSite, collections.dealerSiteLogins, collections.users.getItems()[0]);
                 if (invalid.length) {
                     alert("Для разблокирования необходимо заполнить поля формы регистрации: " + invalid.join('; '));
                 }
@@ -403,7 +419,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
 
 .controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, $q, data, 
     DealerSite, dealerSiteStatuses, DealerSiteRequiredFields, dealersLoader, sitesLoader, DealerSiteLogin, 
-    dealerSiteLoginTypes, dealerSiteLoginsLoader, Dealers, Sites) {
+    dealerSiteLoginTypes, dealerSiteLoginsLoader, Dealers, Sites, usersLoader) {
 
     _.assign($scope, data);
     $scope.dealerSiteStatuses = dealerSiteStatuses;
@@ -449,7 +465,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         });
     }
 
-    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', function onDealerSiteChange() {
+    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', function loadDealerSiteLogins() {
         $scope.dealerSiteLoginsEdited = {
             site: new DealerSiteLogin({type: 'site'}),
             ftp: new DealerSiteLogin({type: 'ftp'})
@@ -461,6 +477,16 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
                 makeDealerSiteLoginsCopy();
             });
         }
+    }, true);
+
+    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', function loadUser() {
+        if (!$scope.dealerSiteEdited.dealer || !$scope.dealerSiteEdited.site || !$scope.requiredFields[$scope.dealerSiteEdited.site.id].coordinates) {
+            delete $scope.userEdited;
+            return;
+        }
+        usersLoader.loadItem($scope.dealerSiteEdited.dealer.id, $scope).then(function(user) {
+            $scope.userEdited = user;
+        });
     }, true);
 
     function saveDealerSiteEdited(directories) {
@@ -478,6 +504,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         }
     }
 
+    function saveUserEdited(directories) {
+        if ($scope.userEdited) {
+            return $scope.userEdited.save(directories);
+        }
+    }
+
     $scope.saveDealerSiteEditedWithLogins = function() {
         var directories = {
             dealers: (new Dealers()).uniteItem($scope.dealerSiteEdited.dealer),
@@ -486,7 +518,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         $q.all([
             saveDealerSiteEdited(directories),
             saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.site, directories),
-            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.ftp, directories)
+            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.ftp, directories),
+            saveUserEdited($scope)
         ]).then(function() {
             $location.path('/dealersitelist').search('');
         });

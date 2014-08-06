@@ -45,6 +45,22 @@ var randomMillion = function() {
     return String(Math.floor(Math.random() * 1000000));
 }
 
+Number.prototype.ceil = function(places) {  // found on http://stackoverflow.com/a/19722641/3745041
+    return +(Math.ceil(this + "e+" + places)  + "e-" + places);
+}
+
+function randomCoordinate(min, max) {
+    return (Math.random() * (max - min) + min).ceil(8);
+}
+
+function randomLatitude() {
+    return randomCoordinate(40, 90);
+}
+
+function randomLongitude() {
+    return randomCoordinate(20, 180);
+}
+
 if (browser.baseUrl.match(/maxposter.ru/)) {
     var test_maxposter_ru = true;
     browser.driver.get('http://test.maxposter.ru/');
@@ -815,6 +831,8 @@ describe('User App', function() {
             setSelect(element.all(by.model('phone.phoneTo')).get(2), 22);
 
             element(by.model('dealerEdited.companyInfo')).sendKeys('Описание');
+            element(by.model('dealerEdited.latitude')).sendKeys('11.11');
+            element(by.model('dealerEdited.longitude')).sendKeys('22.22');
 
             var userData = {};
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
@@ -892,6 +910,12 @@ describe('User App', function() {
 
             element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
                 dealerData.companyInfo = respond;
+            });
+            element(by.model('dealerEdited.latitude')).getAttribute('value').then(function(respond) {
+                dealerData.latitude = respond;
+            });
+            element(by.model('dealerEdited.longitude')).getAttribute('value').then(function(respond) {
+                dealerData.longitude = respond;
             });
 
             element(by.id('UserEditSaveUser')).click();
@@ -987,6 +1011,12 @@ describe('User App', function() {
             element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.companyInfo);
             });
+            element(by.model('dealerEdited.latitude')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.latitude);
+            });
+            element(by.model('dealerEdited.longitude')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.longitude);
+            });
 
             element(by.id('UserEditCancel')).click();
             // изменение
@@ -1029,6 +1059,8 @@ describe('User App', function() {
             setSelect(element.all(by.model('phone.phoneTo')).get(2), 0);
 
             element(by.model('dealerEdited.companyInfo')).clear();
+            element(by.model('dealerEdited.latitude')).clear();
+            element(by.model('dealerEdited.longitude')).clear();
 
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 userData.email = respond;
@@ -1105,6 +1137,12 @@ describe('User App', function() {
 
             element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
                 dealerData.companyInfo = respond;
+            });
+            element(by.model('dealerEdited.latitude')).getAttribute('value').then(function(respond) {
+                dealerData.latitude = respond;
+            });
+            element(by.model('dealerEdited.longitude')).getAttribute('value').then(function(respond) {
+                dealerData.longitude = respond;
             });
 
             element(by.id('UserEditSaveUser')).click();
@@ -1199,6 +1237,12 @@ describe('User App', function() {
 
             element(by.model('dealerEdited.companyInfo')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.companyInfo);
+            });
+            element(by.model('dealerEdited.latitude')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.latitude);
+            });
+            element(by.model('dealerEdited.longitude')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerData.longitude);
             });
         });
 
@@ -4332,19 +4376,19 @@ describe('DealerSite App', function() {
             browser.get('admin.html#/dealersitelist?orders=-id');
         });
 
-        it('Создание нового разрешения на экспорт и доступа', function() {
+        it('Создание нового разрешения на экспорт, доступа и изменение координат', function() {
             var dealerSitesSelector = by.repeater('dealerSite in dealerSites');
 
             var dealerElem = element(by.id('DealerSiteListFilterDealers'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            dealerElemSearch.sendKeys('3');
+            dealerElemSearch.sendKeys('5');
             dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
 
             var siteElem = element(by.id('DealerSiteListFilterSites'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('17');
+            siteElemSearch.sendKeys('19');
             siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(dealerSitesSelector).count()).toBe(0);
@@ -4353,19 +4397,23 @@ describe('DealerSite App', function() {
             var dealerElem = element(by.model('dealerSiteEdited.dealer'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            dealerElemSearch.sendKeys('3');
+            dealerElemSearch.sendKeys('5');
             dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
 
             var siteElem = element(by.model('dealerSiteEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            siteElemSearch.sendKeys('17');
+            siteElemSearch.sendKeys('19');
             siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             element(by.model('dealerSiteEdited.externalId')).sendKeys(randomMillion());
             element(by.model('dealerSiteEdited.publicUrl')).sendKeys('http://www.protractor.ru/' + randomMillion());
             element(by.model('dealerSiteLoginsEdited.site.login')).sendKeys(randomMillion());
             element(by.model('dealerSiteLoginsEdited.site.password')).sendKeys(randomMillion());
+            element(by.model('userEdited.dealer.latitude')).clear();
+            element(by.model('userEdited.dealer.latitude')).sendKeys(randomLatitude());
+            element(by.model('userEdited.dealer.longitude')).clear();
+            element(by.model('userEdited.dealer.longitude')).sendKeys(randomLongitude());
 
             var dealerSiteData = {};
             dealerElem.element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
@@ -4388,6 +4436,12 @@ describe('DealerSite App', function() {
             });
             getSelectedOptionElem(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
                 dealerSiteData.isActiveText = respond;
+            });
+            element(by.model('userEdited.dealer.latitude')).getAttribute('value').then(function(respond) {
+                dealerSiteData.latitude = respond;
+            });
+            element(by.model('userEdited.dealer.longitude')).getAttribute('value').then(function(respond) {
+                dealerSiteData.longitude = respond;
             });
 
             element(by.id('dealerSiteEditSave')).click();
@@ -4426,6 +4480,12 @@ describe('DealerSite App', function() {
             });
             element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerSiteData.sitePassword);
+            });
+            element(by.model('userEdited.dealer.latitude')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerSiteData.latitude);
+            });
+            element(by.model('userEdited.dealer.longitude')).getAttribute('value').then(function(respond) {
+                expect(respond).toBe(dealerSiteData.longitude);
             });
         });
 

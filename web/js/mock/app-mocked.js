@@ -24,6 +24,18 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
+    function randomCoordinate(min, max) {
+        return (Math.random() * (max - min) + min).ceil(8);
+    }
+
+    function randomLatitude() {
+        return randomCoordinate(40, 90);
+    }
+
+    function randomLongitude() {
+        return randomCoordinate(20, 180);
+    }
+
     var userDirectories = new Construction({
         groups: new Groups([
             {id: 1, name: 'admin', description: 'Администратор'},
@@ -141,6 +153,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
     ], multiplyCoef, function(i, len) {
         this.email = i + this.email;
+        if (this.dealer) {
+            this.dealer.latitude = randomLatitude();
+            this.dealer.longitude = randomLongitude();
+        }
     })).resolveRefs(userDirectories);
     
     function getDeepValue(item, field) {
@@ -645,7 +661,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 16, name: 'auto.exist.ru', isActive: true},
         {id: 17, name: 'am.ru', isActive: true},
         {id: 18, name: 'mercedes-benz.ru', isActive: true},
-        {id: 19, name: 'cars.ru', isActive: true}
+        {id: 19, name: 'carsguru.ru', isActive: true}
     ]);
 
     var dealerSites = new DealerSites(multiplyArrFn([

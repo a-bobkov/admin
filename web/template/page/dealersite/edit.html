@@ -86,6 +86,28 @@
 					</ul>
 	           </td>
 	        </tr>
+	        <tr ng-show='requiredFields[dealerSiteEdited.site.id].coordinates' >
+	            <th><label for="dealerSiteDealerLatitude">Широта салона</label></th>
+	            <td>
+	                <input class="span-8" type="number" ng-pattern="/^\d{1,2}(?:[,\.]\d{0,8})?$/" max="90" name="dealerSiteDealerLatitude" id="dealerSiteDealerLatitude" ng-model='userEdited.dealer.latitude' ng-required='requiredFields[dealerSiteEdited.site.id].coordinates && dealerSiteEdited.isActive.id'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSiteDealerLatitude.$invalid'>
+					    <li id='dealerSiteDealerLatitudeErrorRequired' ng-show="formDealerSite.dealerSiteDealerLatitude.$error.required">Необходимо ввести широту.</li>
+					    <li id='dealerSiteDealerLatitudeErrorPattern' ng-show="formDealerSite.dealerSiteDealerLatitude.$error.pattern">Широта должна быть в формате: 12,34567809</li>
+					    <li id='dealerSiteDealerLatitudeErrorMax' ng-show="formDealerSite.dealerSiteDealerLatitude.$error.max">Широта должна быть не больше 90.</li>
+					</ul>
+	           </td>
+	        </tr>
+	        <tr ng-show='requiredFields[dealerSiteEdited.site.id].coordinates'>
+	            <th><label for="dealerSiteDealerLongitude">Долгота салона</label></th>
+	            <td>
+	                <input class="span-8" type="number" ng-pattern="/^\d{1,3}(?:[,\.]\d{0,8})?$/" max="180" name="dealerSiteDealerLongitude" id="dealerSiteDealerLongitude" ng-model='userEdited.dealer.longitude' ng-required='requiredFields[dealerSiteEdited.site.id].coordinates && dealerSiteEdited.isActive.id'>
+					<ul class="error_list" ng-show='formDealerSite.dealerSiteDealerLongitude.$invalid'>
+					    <li id='dealerSiteDealerLongitudeErrorRequired' ng-show="formDealerSite.dealerSiteDealerLongitude.$error.required">Необходимо ввести долготу.</li>
+					    <li id='dealerSiteDealerLongitudeErrorPattern' ng-show="formDealerSite.dealerSiteDealerLongitude.$error.pattern">Долгота должна быть в формате: 112,34567809</li>
+					    <li id='dealerSiteDealerLongitudeErrorMax' ng-show="formDealerSite.dealerSiteDealerLongitude.$error.max">Долгота должна быть не больше 180.</li>
+					</ul>
+	           </td>
+	        </tr>
 	    </table>
 	</fieldset>
 
