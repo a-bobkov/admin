@@ -24,141 +24,22 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
-    function randomCoordinate(min, max) {
-        return (Math.random() * (max - min) + min).ceil(8);
-    }
+    function multiplyArrFn(arr, coef, fn) {
+        coef = coef || 1;
+        var multiplyArray = [];
 
-    function randomLatitude() {
-        return randomCoordinate(40, 90);
-    }
-
-    function randomLongitude() {
-        return randomCoordinate(20, 180);
-    }
-
-    var userDirectories = new Construction({
-        groups: new Groups([
-            {id: 1, name: 'admin', description: 'Администратор'},
-            {id: 2, name: 'dealer', description: 'Автосалон'},
-            {id: 3, name: 'site', description: 'Автосайт'}
-        ]),
-        managers: new Managers([
-            {id: 1, name: 'Катя'},
-            {id: 2, name: 'Инна'},
-            {id: 4, name: 'Потеряшки'},
-            {id: 0, name: ''}
-        ]),
-        billingCompanies: new BillingCompanies([
-            {id: 1, name: 'Макспостер, ООО'},
-            {id: 2, name: 'Харитонов, ИП'}
-        ]),
-        cities: new Cities([
-            {id: 1, name: 'Москва'},
-            {id: 2, name: 'Питер'},
-            {id: 6, name: 'Екатеринбург'}
-        ]),
-        markets: new Markets([
-            {id: 4, name: 'Рынок один в москве', city: {id: 1}},
-            {id: 7, name: 'Рынок два в москве', city: {id: 1}},
-            {id: 8, name: 'Рынок один в питере', city: {id: 2}},
-            {id: 9, name: 'Рынок два в питере', city: {id: 2}}
-        ]),
-        metros: new Metros([
-            {id: 8, name: 'Метро один в москве', city: {id: 1}},
-            {id: 9, name: 'Метро два в москве', city: {id: 1}},
-            {id: 10, name: 'Метро один в питере', city: {id: 2}},
-            {id: 11, name: 'Метро два в питере', city: {id: 2}}
-        ]),
-        sites: new Sites([
-            {id: 1,  name: 'drom.ru'},
-            {id: 2,  name: 'bibika.ru'},
-            {id: 3,  name: 'autorambler.ru'},
-            {id: 4,  name: 'auto.mail.ru'},
-            {id: 5,  name: 'auto.ru'},
-            {id: 6,  name: 'irr.ru'},
-            {id: 7,  name: 'chance.ru'},
-            {id: 8,  name: 'auto.yandex.ru'},
-            {id: 9,  name: 'auto.dmir.ru'},
-            {id: 10, name: 'auto-mos.ru'},
-            {id: 11, name: 'cars.ru'},
-            {id: 12, name: 'usedcars.ru'},
-            {id: 13, name: 'quto.ru'},
-            {id: 14, name: 'avito.ru'},
-            {id: 15, name: 'fin-auto.ru'},
-            {id: 16, name: 'auto.exist.ru'},
-            {id: 17, name: 'am.ru'},
-            {id: 18, name: 'mercedes-benz.ru'}
-        ])
-    }).resolveRefs();
-
-    var users = new Users(multiplyArrFn([
-        {
-            id: 5,
-            email: 'demo@maxposter.ru',
-            lastLogin: '2013-12-01',
-            status: 'active',
-            group: {id: 2},
-            dealer: {
-                id: 5,
-                companyName: 'Демокомпания',
-                city: {id: 2},
-                market: {id: 8},
-                metro: {id: 10},
-                address: '191040, Лиговский проспект, 150, оф.505',
-                fax: '+7(812)232-4123',
-                email: 'demo@demo.ru',
-                url: 'http://www.w3schools.com',
-                contactName: 'Аверин Константин Петрович',
-                phone: '+7(812)232-4123',
-                phoneFrom: 10,
-                phoneTo: 20,
-                phone2: '+7(812)232-4124',
-                phone2From: 11,
-                phone2To: 21,
-                phone3: '+7(812)232-4125',
-                phone3From: 7,
-                phone3To: 15,
-                companyInfo: 'Здесь может быть произвольный текст...',
-                billingCompany: {id: 1},
-                manager: {id: 1}
-            }
-        },
-        {id: 1, email: 'a-bobkov@ab.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 1,
-            companyName: 'Ещё одна компания',
-            manager: {id: 2},
-            phone: '+7(812)232-4123',
-            phoneFrom: null,
-            phoneTo: null
-        }},
-        {id: 2, email: 'a-bobkov@abb.com', lastLogin: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 1}},
-        {id: 3, email: 'a-bobkov@abc.com', lastLogin: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
-            id: 3, companyName: 'Другая компания', manager: {id: 1}}},
-        {id: 4, email: 'a-bobkov@act.com', lastLogin: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 5}},
-        {id: 6, email: 'a-bobkov@abe.com', lastLogin: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
-            id: 6, companyName: 'Крутая компания', manager: {id: 2}}},
-        {id: 7, email: 'a-bobkov@abf.com', lastLogin: '2010-01-12', status: 'inactive', group: {id: 2}, dealer: {
-            id: 7, companyName: 'Auto', manager: {id: 2}}},
-        {id: 8, email: 'a-bobkov@abg.com', lastLogin: '2010-08-07', status: 'active', group: {id: 1}},
-        {id: 9, email: 'a-bobkov@abh.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 9, companyName: 'Битые корыта', manager: {id: 1}}},
-        {id: 10, email: 'a-bobkov@abi.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 10, companyName: 'Два в одном', manager: {id: 2}}},
-        {id: 11, email: 'a-bobkov@abj.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 1}},
-        {id: 12, email: 'a-bobkov@abk.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 12, companyName: 'Авто-мото', manager: {id: 0}}},
-        {id: 13, email: 'a-bobkov@abl.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 13, companyName: 'Свет', manager: {id: 4}}},
-        {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 6}},
-        {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
-    ], multiplyCoef, function(i, len) {
-        this.email = i + this.email;
-        if (this.dealer) {
-            this.dealer.latitude = randomLatitude();
-            this.dealer.longitude = randomLongitude();
+        for (var i = 0; i < coef; i++) {
+            _.forEach(_.cloneDeep(arr), function(value) {
+                value.id = value.id + i * arr.length;
+                if (fn) {
+                    fn.call(value, i, arr.length);
+                }
+                multiplyArray.push(value);
+            });
         }
-    })).resolveRefs(userDirectories);
-    
+        return multiplyArray;
+    }
+
     function getDeepValue(item, field) {
         var value = item[field.shift()];
         if (field.length && value) {
@@ -439,51 +320,93 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
     };
 
-    var regexUserDirectories = /^\/api2\/combined\/users$/;
-    $httpBackend.whenGET(regexUserDirectories).respond(function(method, url, data) {
-        try {
-            var directories = _.mapValues(userDirectories, function(directory) {
-               return directory.serialize();
-            });
-        } catch (err) {
-            return [400, {
-                status: 'error',
-                message: 'Ошибка при загрузке справочников',
-                errors: err.message
-            }];
-        }
-        return [200, {
-            status: 'success',
-            data: directories
-        }];
+    var groups = new Groups([
+        {id: 1, name: 'admin', description: 'Администратор'},
+        {id: 2, name: 'dealer', description: 'Автосалон'},
+        {id: 3, name: 'site', description: 'Автосайт'}
+    ]);
+
+    var regexGroupsQuery = /^\/api2\/groups(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexGroupsQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexGroupsQuery, groups.getItems(), 'groups', Groups);
+    });
+    $httpBackend.whenPOST(regexGroupsQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexGroupsQuery, data, groups, 'groups', Groups);
     });
 
-    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexUserQuery, users.getItems(), 'users', Users);
+    var managers = new Managers([
+        {id: 1, name: 'Катя'},
+        {id: 2, name: 'Света'},
+        {id: 4, name: 'Потеряшки'}
+    ]);
+
+    var regexManagersQuery = /^\/api2\/managers(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexManagersQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexManagersQuery, managers.getItems(), 'managers', Managers);
     });
-    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
-        return processPostQuerySort(url, regexUserQuery, data, users, 'users', Users);
+    $httpBackend.whenPOST(regexManagersQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexManagersQuery, data, managers, 'managers', Managers);
     });
 
-    var regexUserGet = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenGET(regexUserGet).respond(function(method, url, data) {
-        return processGet(url, regexUserGet, users, 'user');
+    var cities = new Cities([
+        {id: 1, name: 'Москва'},
+        {id: 2, name: 'Санкт-Петербург'},
+        {id: 3, name: 'Томск'},
+        {id: 4, name: 'Новосибирск'},
+        {id: 6, name: 'Екатеринбург'},
+        {id: 7, name: 'Петрозаводск'},
+        {id: 8, name: 'Сочи'},
+        {id: 9, name: 'Чебоксары'},
+        {id: 10, name: 'Котлас'},
+        {id: 11, name: 'Мурманск'},
+        {id: 12, name: 'Волгоград'},
+        {id: 13, name: 'Коломна'}
+    ]);
+
+    var regexCitiesQuery = /^\/api2\/cities(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexCitiesQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexCitiesQuery, cities.getItems(), 'cities', Cities);
+    });
+    $httpBackend.whenPOST(regexCitiesQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexCitiesQuery, data, cities, 'cities', Cities);
     });
 
-    var regexUserPost = /^\/api2\/users\/new$/;
-    $httpBackend.whenPOST(regexUserPost).respond(function(method, url, data) {
-        return processPost(data, users, 'user', User, userDirectories);
+    var markets = new Markets([
+        {id: 4, name: 'Рынок один в москве', city: {id: 1}},
+        {id: 7, name: 'Рынок два в москве', city: {id: 1}},
+        {id: 8, name: 'Рынок один в питере', city: {id: 2}},
+        {id: 9, name: 'Рынок два в питере', city: {id: 2}}
+    ]).resolveRefs({cities: cities});
+
+    var regexMarketsQuery = /^\/api2\/markets(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexMarketsQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexMarketsQuery, markets.getItems(), 'markets', Markets);
+    });
+    $httpBackend.whenPOST(regexMarketsQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexMarketsQuery, data, markets, 'markets', Markets);
     });
 
-    var regexUserPut = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenPUT(regexUserPut).respond(function(method, url, data) {
-        return processPut(url, regexUserPut, data, users, 'user', User, userDirectories);
-    });
+    var metros = new Metros([
+        {id: 8, name: 'Метро один в москве', city: {id: 1}},
+        {id: 9, name: 'Метро два в москве', city: {id: 1}},
+        {id: 18, name: 'Метро три в москве', city: {id: 1}},
+        {id: 19, name: 'Метро четыре в москве', city: {id: 1}},
+        {id: 28, name: 'Метро пять в москве', city: {id: 1}},
+        {id: 29, name: 'Метро шесть в москве', city: {id: 1}},
+        {id: 10, name: 'Метро один в питере', city: {id: 2}},
+        {id: 11, name: 'Метро два в питере', city: {id: 2}},
+        {id: 20, name: 'Метро три в питере', city: {id: 2}},
+        {id: 21, name: 'Метро четыре в питере', city: {id: 2}},
+        {id: 30, name: 'Метро пять в питере', city: {id: 2}},
+        {id: 31, name: 'Метро шесть в питере', city: {id: 2}}
+    ]).resolveRefs({cities: cities});
 
-    var regexUserDelete = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenDELETE(regexUserDelete).respond(function(method, url, data) {
-        return processDelete(url, regexUserDelete, users);
+    var regexMetrosQuery = /^\/api2\/metros(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexMetrosQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexMetrosQuery, metros.getItems(), 'metros', Metros);
+    });
+    $httpBackend.whenPOST(regexMetrosQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexMetrosQuery, data, metros, 'metros', Metros);
     });
 
     var dealers = new Dealers([
@@ -639,7 +562,43 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 223, companyName: 'Автосалон "Эльва Моторс" официальный дилер SsangYong и FIAT', city: {id: 1}, isActive: true},
         {id: 413, companyName: 'Смольнинский Автоцентр - официальный дилер VOLVO', city: {id: 1}, isActive: true},
         {id: 553, companyName: 'Официальный дилер FORD компания ЗАО «ЕВРО-МОТОРС».', city: {id: 1}, isActive: true}
-    ]).resolveRefs(userDirectories);
+    ]).resolveRefs({cities: cities});
+
+    var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealersQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
+    });
+    $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
+
+        var applyFields = function(arr, fields) {
+            return _.map(arr, function(item) {
+                var newItem = {};
+                _.forEach(fields, function(group) {
+                    if (group === 'dealer_list_name') {
+                        newItem.id = item.id;
+                        if (item.companyName) {
+                            newItem.companyName = item.companyName;
+                        }
+                    }
+                });
+                return newItem;
+            });
+        }
+
+        var knownFields = function(fields) {
+            return _.filter(fields, function(group) {
+                return (group === 'dealer_list_name');
+            });
+        }
+
+        var respond = processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
+        var fields = angular.fromJson(data).fields;
+        if (_.size(fields)) {
+            respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
+            respond[1].data.params.fields = knownFields(fields);
+        }
+        return respond;
+    });
 
     var sites = new Sites([
         {id: 0,  name: 'maxposter.ru', isActive: true},
@@ -663,6 +622,151 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 18, name: 'mercedes-benz.ru', isActive: true},
         {id: 19, name: 'carsguru.ru', isActive: true}
     ]);
+
+    var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexSitesQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
+    });
+    $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexSitesQuery, data, sites, 'sites', Sites);
+    });
+
+    var userDirectories = new Construction({
+        groups: groups,
+        managers: managers,
+        cities: cities,
+        markets: markets,
+        metros: metros,
+        sites: sites,
+        billingCompanies: new BillingCompanies([
+            {id: 1, name: 'Макспостер, ООО'},
+            {id: 2, name: 'Харитонов, ИП'}
+        ])
+    });
+
+    var users = new Users(multiplyArrFn([
+        {
+            id: 5,
+            email: 'demo@maxposter.ru',
+            lastLogin: '2013-12-01',
+            status: 'active',
+            group: {id: 2},
+            dealer: {
+                id: 5,
+                companyName: 'Демокомпания',
+                city: {id: 2},
+                market: {id: 8},
+                metro: {id: 10},
+                address: '191040, Лиговский проспект, 150, оф.505',
+                fax: '+7(812)232-4123',
+                email: 'demo@demo.ru',
+                url: 'http://www.w3schools.com',
+                contactName: 'Аверин Константин Петрович',
+                phone: '+7(812)232-4123',
+                phoneFrom: 10,
+                phoneTo: 20,
+                phone2: '+7(812)232-4124',
+                phone2From: 11,
+                phone2To: 21,
+                phone3: '+7(812)232-4125',
+                phone3From: 7,
+                phone3To: 15,
+                companyInfo: 'Здесь может быть произвольный текст...',
+                billingCompany: {id: 1},
+                manager: {id: 1}
+            }
+        },
+        {id: 1, email: 'a-bobkov@ab.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 1,
+            companyName: 'Ещё одна компания',
+            manager: {id: 2},
+            phone: '+7(812)232-4123',
+            phoneFrom: null,
+            phoneTo: null
+        }},
+        {id: 2, email: 'a-bobkov@abb.com', lastLogin: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 1}},
+        {id: 3, email: 'a-bobkov@abc.com', lastLogin: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
+            id: 3, companyName: 'Другая компания', manager: {id: 1}}},
+        {id: 4, email: 'a-bobkov@act.com', lastLogin: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 5}},
+        {id: 6, email: 'a-bobkov@abe.com', lastLogin: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
+            id: 6, companyName: 'Крутая компания', manager: {id: 2}}},
+        {id: 7, email: 'a-bobkov@abf.com', lastLogin: '2010-01-12', status: 'inactive', group: {id: 2}, dealer: {
+            id: 7, companyName: 'Auto', manager: {id: 2}}},
+        {id: 8, email: 'a-bobkov@abg.com', lastLogin: '2010-08-07', status: 'active', group: {id: 1}},
+        {id: 9, email: 'a-bobkov@abh.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 9, companyName: 'Битые корыта', manager: {id: 1}}},
+        {id: 10, email: 'a-bobkov@abi.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 10, companyName: 'Два в одном', manager: {id: 2}}},
+        {id: 11, email: 'a-bobkov@abj.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 1}},
+        {id: 12, email: 'a-bobkov@abk.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 12, companyName: 'Авто-мото', manager: {id: 4}}},
+        {id: 13, email: 'a-bobkov@abl.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 13, companyName: 'Свет', manager: {id: 4}}},
+        {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 6}},
+        {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
+    ], multiplyCoef, function(i, len) {
+        function randomCoordinate(min, max) {
+            return (Math.random() * (max - min) + min).ceil(8);
+        }
+        function randomLatitude() {
+            return randomCoordinate(40, 90);
+        }
+        function randomLongitude() {
+            return randomCoordinate(20, 180);
+        }
+        this.email = i + this.email;
+        if (this.dealer) {
+            this.dealer.latitude = randomLatitude();
+            this.dealer.longitude = randomLongitude();
+        }
+    })).resolveRefs(userDirectories);
+    
+    var regexUserDirectories = /^\/api2\/combined\/users$/;
+    $httpBackend.whenGET(regexUserDirectories).respond(function(method, url, data) {
+        try {
+            var directories = _.mapValues(userDirectories, function(directory) {
+               return directory.serialize();
+            });
+        } catch (err) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при загрузке справочников',
+                errors: err.message
+            }];
+        }
+        return [200, {
+            status: 'success',
+            data: directories
+        }];
+    });
+
+    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexUserQuery, users.getItems(), 'users', Users);
+    });
+    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexUserQuery, data, users, 'users', Users);
+    });
+
+    var regexUserGet = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexUserGet).respond(function(method, url, data) {
+        return processGet(url, regexUserGet, users, 'user');
+    });
+
+    var regexUserPost = /^\/api2\/users\/new$/;
+    $httpBackend.whenPOST(regexUserPost).respond(function(method, url, data) {
+        return processPost(data, users, 'user', User, userDirectories);
+    });
+
+    var regexUserPut = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexUserPut).respond(function(method, url, data) {
+        return processPut(url, regexUserPut, data, users, 'user', User, userDirectories);
+    });
+
+    var regexUserDelete = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexUserDelete).respond(function(method, url, data) {
+        return processDelete(url, regexUserDelete, users);
+    });
 
     var dealerSites = new DealerSites(multiplyArrFn([
         {
@@ -748,6 +852,36 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         this.dealer = { id: dealers.getItems()[i].id };
     })).resolveRefs({dealers: dealers, sites: sites});
 
+    var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
+    });
+    $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
+    });
+    var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
+        return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
+    });
+    var regexDealerSitesPost = /^\/api2\/dealersites\/new$/;
+    $httpBackend.whenPOST(regexDealerSitesPost).respond(function(method, url, data) {
+        return processPost(data, dealerSites, 'dealerSite', DealerSite, {
+            dealers: dealers,
+            sites: sites
+        });
+    });
+    var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexDealerSitesPut).respond(function(method, url, data) {
+        return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
+            dealers: dealers,
+            sites: sites
+        });
+    });
+    var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexDealerSitesDelete).respond(function(method, url, data) {
+        return processDelete(url, regexDealerSitesDelete, dealerSites);
+    });
+
     var dealerSiteLogins = new DealerSiteLogins(multiplyArrFn([
         {
             id: 1,
@@ -797,36 +931,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     ], multiplyCoef, function(i, len) {
         this.dealer = { id: dealers.getItems()[i].id };
     })).resolveRefs({dealers: dealers, sites: sites});
-
-    var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
-    });
-    $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processPostQuerySort(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
-    });
-    var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
-    $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
-        return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
-    });
-    var regexDealerSitesPost = /^\/api2\/dealersites\/new$/;
-    $httpBackend.whenPOST(regexDealerSitesPost).respond(function(method, url, data) {
-        return processPost(data, dealerSites, 'dealerSite', DealerSite, {
-            dealers: dealers,
-            sites: sites
-        });
-    });
-    var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
-    $httpBackend.whenPUT(regexDealerSitesPut).respond(function(method, url, data) {
-        return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
-            dealers: dealers,
-            sites: sites
-        });
-    });
-    var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
-    $httpBackend.whenDELETE(regexDealerSitesDelete).respond(function(method, url, data) {
-        return processDelete(url, regexDealerSitesDelete, dealerSites);
-    });
 
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
@@ -908,50 +1012,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var regexDealerSiteLoginsDelete = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexDealerSiteLoginsDelete).respond(function(method, url, data) {
         return processDelete(url, regexDealerSiteLoginsDelete, dealerSiteLogins);
-    });
-
-    var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexDealersQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
-    });
-    $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
-
-        var applyFields = function(arr, fields) {
-            return _.map(arr, function(item) {
-                var newItem = {};
-                _.forEach(fields, function(group) {
-                    if (group === 'dealer_list_name') {
-                        newItem.id = item.id;
-                        if (item.companyName) {
-                            newItem.companyName = item.companyName;
-                        }
-                    }
-                });
-                return newItem;
-            });
-        }
-
-        var knownFields = function(fields) {
-            return _.filter(fields, function(group) {
-                return (group === 'dealer_list_name');
-            });
-        }
-
-        var respond = processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
-        var fields = angular.fromJson(data).fields;
-        if (_.size(fields)) {
-            respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
-            respond[1].data.params.fields = knownFields(fields);
-        }
-        return respond;
-    });
-
-    var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexSitesQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
-    });
-    $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
-        return processPostQuerySort(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 
     var tariffs = new Tariffs([
@@ -1738,22 +1798,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     })).resolveRefs({dealers: dealers, sites: sites, tariffs: tariffs});
     sales.notFoundMessage = 'Продажа не найдена.';
 
-    function multiplyArrFn(arr, coef, fn) {
-        coef = coef || 1;
-        var multiplyArray = [];
-
-        for (var i = 0; i < coef; i++) {
-            _.forEach(_.cloneDeep(arr), function(value) {
-                value.id = value.id + i * arr.length;
-                if (fn) {
-                    fn.call(value, i, arr.length);
-                }
-                multiplyArray.push(value);
-            });
-        }
-        return multiplyArray;
-    }
-
     var regexSalesQuery = /^\/api2\/sales(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexSalesQuery).respond(function(method, url, data) {
         return processQueryUrlSort(url, regexSalesQuery, sales.getItems(), 'sales', Sales);
@@ -1961,12 +2005,14 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var regexBillingUnionsPost = /^\/api2\/billingunions\/new$/;
     $httpBackend.whenPOST(regexBillingUnionsPost).respond(function(method, url, data) {
         return processPost(data, billingUnions, 'billingUnion', BillingUnion, {
+            sites: sites,
             dealers: dealers
         });
     });
     var regexBillingUnionsPut = /^\/api2\/billingunions\/(?:([^\/]+))$/;
     $httpBackend.whenPUT(regexBillingUnionsPut).respond(function(method, url, data) {
         return processPut(url, regexBillingUnionsPut, data, billingUnions, 'billingUnion', BillingUnion, {
+            sites: sites,
             dealers: dealers
         });
     });

@@ -25,6 +25,18 @@ angular.module('max.dal.entities.market', ['max.dal.entities.collection'])
         Collection.call(this, itemsData, queryParams, Market, Markets);
     };
     _.assign(Markets.prototype, Collection.prototype);
+    Markets.prototype.lowerName = 'markets';
     return Markets;
+})
+
+.factory('marketApi', function(RestApi, Api) {
+    var marketApi = new RestApi('markets', 'market');
+    return marketApi;
+})
+
+.service('marketsLoader', function marketsLoader(entityLoader, marketApi, Market, Markets) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, marketApi, Markets);
+    };
 })
 ;

@@ -15,6 +15,18 @@ angular.module('max.dal.entities.group', ['max.dal.entities.collection'])
         Collection.call(this, itemsData, queryParams, Group, Groups);
     };
     _.assign(Groups.prototype, Collection.prototype);
+    Groups.prototype.lowerName = 'groups';
     return Groups;
+})
+
+.factory('groupApi', function(RestApi, Api) {
+    var groupApi = new RestApi('groups', 'group');
+    return groupApi;
+})
+
+.service('groupsLoader', function groupsLoader(entityLoader, groupApi, Group, Groups) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, groupApi, Groups);
+    };
 })
 ;

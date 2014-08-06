@@ -16,6 +16,18 @@ angular.module('max.dal.entities.city', ['max.dal.entities.collection'])
         Collection.call(this, itemsData, queryParams, City, Cities);
     };
     _.assign(Cities.prototype, Collection.prototype);
+    Cities.prototype.lowerName = 'cities';
     return Cities;
+})
+
+.factory('cityApi', function(RestApi, Api) {
+    var cityApi = new RestApi('cities', 'city');
+    return cityApi;
+})
+
+.service('citiesLoader', function citiesLoader(entityLoader, cityApi, City, Cities) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, cityApi, Cities);
+    };
 })
 ;

@@ -18,6 +18,11 @@ describe('app-mocked', function() {
         Markets,
         Market,
         BillingCompanies,
+        citiesLoader,
+        marketsLoader,
+        metrosLoader,
+        groupsLoader,
+        managersLoader,
 
         dealerSitesLoader,
         dealersLoader,
@@ -149,6 +154,11 @@ describe('app-mocked', function() {
         Markets = injector.get('Markets');
         Market = injector.get('Market');
         BillingCompanies = injector.get('BillingCompanies');
+        citiesLoader = injector.get('citiesLoader');
+        marketsLoader = injector.get('marketsLoader');
+        metrosLoader = injector.get('metrosLoader');
+        groupsLoader = injector.get('groupsLoader');
+        managersLoader = injector.get('managersLoader');
 
         dealerSitesLoader = injector.get('dealerSitesLoader');
         DealerSites = injector.get('DealerSites');
@@ -295,6 +305,145 @@ describe('app-mocked', function() {
             });
         });
     };
+
+describe('city', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return citiesLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(city) {
+                    expect(city.name).toBeTruthy();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(citiesLoader, ['id']);
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(citiesLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(citiesLoader, ['-id']);
+        });
+    });
+});
+
+describe('market', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return marketsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(market) {
+                    expect(market.name).toBeTruthy();
+                    expect(market.city).toBeReference();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(marketsLoader, ['id']);
+        });
+    });
+});
+
+describe('metro', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return metrosLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(metro) {
+                    expect(metro.name).toBeTruthy();
+                    expect(metro.city).toBeReference();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(metrosLoader, ['id']);
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(metrosLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(metrosLoader, ['-id']);
+        });
+    });
+});
+
+describe('group', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return groupsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(group) {
+                    expect(group.name).toBeTruthy();
+                    expect(group.description).toBeTruthy();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(groupsLoader, ['id']);
+        });
+    });
+});
+
+describe('manager', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return managersLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(manager) {
+                    expect(manager.name).toBeTruthy();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(managersLoader, ['id']);
+        });
+    });
+});
 
 describe('billingunion', function() {
 
@@ -3132,7 +3281,7 @@ describe('dealersite, dealersitelogin', function() {
 
     describe('Методы CRUD должны', function() {
 
-        iit('post - сохранять новый dealersite', function() {
+        it('post - сохранять новый dealersite', function() {
             var answer = {};
             var directories = {};
             var sites;

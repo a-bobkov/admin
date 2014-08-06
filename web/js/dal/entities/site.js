@@ -2,11 +2,6 @@
 
 angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal.rest.api'])
 
-.factory('siteApi', function(RestApi, Api) {
-    var siteApi = new RestApi('sites', 'site');
-    return siteApi;
-})
-
 .factory('Site', function(Item) {
     function Site(itemData) {
         Item.call(this, itemData);
@@ -26,6 +21,11 @@ angular.module('max.dal.entities.site', ['max.dal.entities.collection', 'max.dal
     _.assign(Sites.prototype, Collection.prototype);
     Sites.prototype.lowerName = 'sites';
     return Sites;
+})
+
+.factory('siteApi', function(RestApi, Api) {
+    var siteApi = new RestApi('sites', 'site');
+    return siteApi;
 })
 
 .service('sitesLoader', function sitesLoader(entityLoader, siteApi, Site, Sites) {
