@@ -281,13 +281,22 @@ describe('app-mocked', function() {
         var answer = {};
         var item;
 
+        function serialize(value) {
+            if (_.isDate(value)) {
+                return value.toISOString().slice(0,10);
+            } else if (_.isObject(value)) {
+                return value.id;
+            } else {
+                return value;
+            }
+        }
+
         runSync(answer, function() {
             return loader.loadItems().then(function(collection) {
                 item = collection.getItems()[0];
                 return loader.loadItems({
                     filters: _.map(fields, function(field) {
-                        var itemValue = _.isObject(item[field]) ? item[field].id : item[field];
-                        return { fields: [field], type: 'equal', value: itemValue };
+                        return { fields: [field], type: 'equal', value: serialize(item[field]) };
                     })
                 });
             });
@@ -297,14 +306,13 @@ describe('app-mocked', function() {
             var items = answer.respond.getItems();
             expect(items.length).toBeTruthy();
             _.forEach(fields, function(field) {
-                var itemValue = _.isObject(item[field]) ? item[field].id : item[field];
+                var itemValue = serialize(item[field]);
                 _.forEach(items, function(itemEqual) {
-                    var itemEqualValue = _.isObject(itemEqual[field]) ? itemEqual[field].id : itemEqual[field];
-                    expect(itemEqualValue).toEqual(itemValue);
+                    expect(serialize(itemEqual[field])).toEqual(itemValue);
                 })
             });
         });
-    };
+    }
 
 describe('city', function() {
 
@@ -1406,17 +1414,17 @@ describe('sale', function() {
             checkSorting(salesLoader, ['-type', '-id']);
         });
 
-        it('сортировать по count по возрастанию, затем по id по убыванию', function() {
-            checkSorting(salesLoader, ['+count', '-id']);
-        });
+        // it('сортировать по count по возрастанию, затем по id по убыванию', function() {
+        //     checkSorting(salesLoader, ['+count', '-id']);
+        // });
 
         it('сортировать по count по убыванию, затем по id по убыванию', function() {
             checkSorting(salesLoader, ['-count', '-id']);
         });
 
-        // it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
-        //     checkSorting(salesLoader, ['+amount', '-id']);
-        // });
+        it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
+            checkSorting(salesLoader, ['+amount', '-id']);
+        });
 
         it('сортировать по amount по убыванию, затем по id по убыванию', function() {
             checkSorting(salesLoader, ['-amount', '-id']);
@@ -2781,347 +2789,347 @@ describe('tariff', function() {
     });
 });
 
-describe('dealersite, dealersitelogin', function() {
+describe('dealersitelogin', function() {
 
-    describe('dealersitelogin', function() {
+    it('equal - по равенству dealer и site заданным значениям', function() {
+        checkFilterEqual(dealerSiteLoginsLoader, ['dealer', 'site']);
+    });
 
-        it('equal - по равенству dealer и site заданным значениям', function() {
-            checkFilterEqual(dealerSiteLoginsLoader, ['dealer', 'site']);
-        });
+    it('post - сохранять новый dealersitelogin', function() {
+        var answer = {};
+        var directories = {};
+        var siteId;
+        var freeDealerId;
 
-        it('post - сохранять новый dealersitelogin', function() {
-            var answer = {};
-            var directories = {};
-            var siteId;
-            var freeDealerId;
-
-            runSync(answer, function() {
-                return $q.all({
-                    sites: sitesLoader.loadItems(),
-                    dealers: dealersLoader.loadItems({
-                        orders: ['-id'],
-                        fields: ['dealer_list_name']
-                    })
-                });
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond);
-                siteId = directories.sites.getItems()[1].id;
-                var dealerIds = _.pluck(directories.dealers.getItems(), 'id');
-                return dealerSiteLoginsLoader.loadItems({
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: siteId },
-                        { fields: ['dealer'], type: 'in', value: dealerIds }
-                    ]
-                }, directories).then(function(dealerSiteLogins) {
-                    var dealerSiteLoginsDealerIds = _.pluck(_.pluck(dealerSiteLogins.getItems(), 'dealer'), 'id');
-                    return _.difference(dealerIds, dealerSiteLoginsDealerIds);
-                });
-            });
-
-            runSync(answer, function() {
-                freeDealerId = answer.respond[0];
-                var newDealerSiteLogin = new DealerSiteLogin({
-                    dealer: {id: freeDealerId},
-                    site: {id: siteId},
-                    type: 'site',
-                    login: 'a11111',
-                    password: 'p22222'
-                });
-                return newDealerSiteLogin.save(directories);
-            });
-
-            runSync(answer, function() {
-                var newDealerSiteLogin = answer.respond;
-                return dealerSiteLoginsLoader.loadItem(newDealerSiteLogin.id);
-            });
-
-            runs(function() {
-                var newDealerSiteLogin = answer.respond;
-                expect(newDealerSiteLogin.dealer.id).toEqual(freeDealerId);
-                expect(newDealerSiteLogin.site.id).toEqual(siteId);
-                expect(newDealerSiteLogin.type.id).toEqual('site');
-                expect(newDealerSiteLogin.login).toEqual('a11111');
-                expect(newDealerSiteLogin.password).toEqual('p22222');
+        runSync(answer, function() {
+            return $q.all({
+                sites: sitesLoader.loadItems(),
+                dealers: dealersLoader.loadItems({
+                    orders: ['-id'],
+                    fields: ['dealer_list_name']
+                })
             });
         });
 
-        it('post - выдавать ошибку, если такая комбинация dealer, site, type уже есть', function() {
-            var answer = {};
-            var directories = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                directories.dealerSiteLogins = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
-                return $q.all({
-                    sites: sitesLoader.loadItems({
-                        filters: [
-                            { fields: ['id'], type: 'equal', value: dealerSiteLogin.site.id }
-                        ]
-                    }),
-                    dealers: dealersLoader.loadItems({
-                        filters: [
-                            { fields: ['id'], type: 'equal', value: dealerSiteLogin.dealer.id }
-                        ],
-                        fields: ['dealer_list_name']
-                    })
-                });
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond);
-                var dealerSiteLoginCopy = new DealerSiteLogin({
-                    dealer: {id: dealerSiteLogin.dealer.id},
-                    site: {id: dealerSiteLogin.site.id},
-                    type: dealerSiteLogin.type.id
-                }, directories);
-                return dealerSiteLoginCopy.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+        runSync(answer, function() {
+            _.assign(directories, answer.respond);
+            siteId = directories.sites.getItems()[1].id;
+            var dealerIds = _.pluck(directories.dealers.getItems(), 'id');
+            return dealerSiteLoginsLoader.loadItems({
+                filters: [
+                    { fields: ['site'], type: 'equal', value: siteId },
+                    { fields: ['dealer'], type: 'in', value: dealerIds }
+                ]
+            }, directories).then(function(dealerSiteLogins) {
+                var dealerSiteLoginsDealerIds = _.pluck(_.pluck(dealerSiteLogins.getItems(), 'dealer'), 'id');
+                return _.difference(dealerIds, dealerSiteLoginsDealerIds);
             });
         });
 
-        it('put - сохранять изменения атрибутов dealersitelogin', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
+        runSync(answer, function() {
+            freeDealerId = answer.respond[0];
+            var newDealerSiteLogin = new DealerSiteLogin({
+                dealer: {id: freeDealerId},
+                site: {id: siteId},
+                type: 'site',
+                login: 'a11111',
+                password: 'p22222'
             });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
-                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save({
-                    dealers: new Dealers([{id: dealerSiteLogin.dealer.id}]),
-                    sites: new Sites([{id: dealerSiteLogin.site.id}])
-                });
-            });
-
-            runSync(answer, function() {
-                var savedDealerSiteLogin = answer.respond;
-                return dealerSiteLoginsLoader.loadItem(savedDealerSiteLogin.id);
-            });
-
-            runs(function() {
-                var savedDealerSiteLogin = answer.respond;
-                expect(savedDealerSiteLogin.login).toEqual(dealerSiteLogin.login);
-                expect(savedDealerSiteLogin.password).toEqual(dealerSiteLogin.password);
-            });
+            return newDealerSiteLogin.save(directories);
         });
 
-        it('put - выдавать ошибку если нет значения в поле dealer', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.dealer = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.errors).toEqual(['Значение не должно быть пустым.']);
-            });
+        runSync(answer, function() {
+            var newDealerSiteLogin = answer.respond;
+            return dealerSiteLoginsLoader.loadItem(newDealerSiteLogin.id);
         });
 
-        it('put - выдавать ошибку если нет значения в поле site', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.site = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку если нет значения в поле type', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.type = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.type.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку если нет значения в поле login', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = null;
-                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.login.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку при длине значения login больше 100', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
-                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.login.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
-            });
-        });
-
-        it('put - выдавать ошибку если нет значения в поле password', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
-                dealerSiteLogin.password = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.password.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку при длине значения password больше 100', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
-                dealerSiteLogin.password = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.password.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
-            });
-        });
-
-        it('remove - удалять dealersitelogin', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                return dealerSiteLogin.remove();
-            });
-
-            runs(function() {
-                expect(answer.respond).toEqual(null);
-            });
-
-            runSync(answer, function() {
-                var savedDealerSiteLogin = answer.respond;
-                return dealerSiteLoginsLoader.loadItem(dealerSiteLogin.id);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
-            });
+        runs(function() {
+            var newDealerSiteLogin = answer.respond;
+            expect(newDealerSiteLogin.dealer.id).toEqual(freeDealerId);
+            expect(newDealerSiteLogin.site.id).toEqual(siteId);
+            expect(newDealerSiteLogin.type.id).toEqual('site');
+            expect(newDealerSiteLogin.login).toEqual('a11111');
+            expect(newDealerSiteLogin.password).toEqual('p22222');
         });
     });
 
-    describe('Методы query должны фильтровать dealersite', function() {
+    it('post - выдавать ошибку, если такая комбинация dealer, site, type уже есть', function() {
+        var answer = {};
+        var directories = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            directories.dealerSiteLogins = answer.respond;
+            dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+            return $q.all({
+                sites: sitesLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: dealerSiteLogin.site.id }
+                    ]
+                }),
+                dealers: dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'equal', value: dealerSiteLogin.dealer.id }
+                    ],
+                    fields: ['dealer_list_name']
+                })
+            });
+        });
+
+        runSync(answer, function() {
+            _.assign(directories, answer.respond);
+            var dealerSiteLoginCopy = new DealerSiteLogin({
+                dealer: {id: dealerSiteLogin.dealer.id},
+                site: {id: dealerSiteLogin.site.id},
+                type: dealerSiteLogin.type.id
+            }, directories);
+            return dealerSiteLoginCopy.save(directories);
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.errors).toEqual(['Логин салона по указанному сайту уже существует.']);
+        });
+    });
+
+    it('put - сохранять изменения атрибутов dealersitelogin', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+            dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+            return dealerSiteLogin.save({
+                dealers: new Dealers([{id: dealerSiteLogin.dealer.id}]),
+                sites: new Sites([{id: dealerSiteLogin.site.id}])
+            });
+        });
+
+        runSync(answer, function() {
+            var savedDealerSiteLogin = answer.respond;
+            return dealerSiteLoginsLoader.loadItem(savedDealerSiteLogin.id);
+        });
+
+        runs(function() {
+            var savedDealerSiteLogin = answer.respond;
+            expect(savedDealerSiteLogin.login).toEqual(dealerSiteLogin.login);
+            expect(savedDealerSiteLogin.password).toEqual(dealerSiteLogin.password);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле dealer', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.dealer = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.dealer.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле site', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.site = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.site.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле type', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.type = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.type.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле login', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = null;
+            dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.login.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку при длине значения login больше 100', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
+            dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.login.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле password', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+            dealerSiteLogin.password = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.password.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку при длине значения password больше 100', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+            dealerSiteLogin.password = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.password.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+        });
+    });
+
+    it('remove - удалять dealersitelogin', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            return dealerSiteLogin.remove();
+        });
+
+        runs(function() {
+            expect(answer.respond).toEqual(null);
+        });
+
+        runSync(answer, function() {
+            var savedDealerSiteLogin = answer.respond;
+            return dealerSiteLoginsLoader.loadItem(dealerSiteLogin.id);
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Not Found');
+        });
+    });
+});
+
+describe('dealersite', function() {
+
+    describe('Методы query должны фильтровать', function() {
 
         it('equal - по равенству dealer заданному значению', function() {
             checkFilterEqual(tariffsLoader, ['dealer']);
@@ -3228,7 +3236,7 @@ describe('dealersite, dealersitelogin', function() {
         });
     });
 
-    describe('Методы query должны сортировать dealersite', function() {
+    describe('Методы query должны сортировать', function() {
 
         it('по возрастанию id', function() {
             checkSorting(dealerSitesLoader, ['+id']);
