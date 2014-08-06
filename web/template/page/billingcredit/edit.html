@@ -22,9 +22,10 @@
 	        <tr>
 	            <th><label for="billingCreditAmount">Сумма</label></th>
 	            <td>
-	                <input class="span-8" type="number" ng-pattern="/^\d{1,7}(?:[,\.]\d{0,2})?$/" name="billingCreditAmount" id="billingCreditAmount" ng-model='billingCreditEdited.amount' required>
+	                <input class="span-8" type="number" min="0.01" max="999999.99" name="billingCreditAmount" id="billingCreditAmount" ng-model='billingCreditEdited.amount' required>
 					<ul class="error_list" ng-show='formBillingCredit.billingCreditAmount.$invalid'>
 					    <li id='billingCreditAmountErrorRequired' ng-show="formBillingCredit.billingCreditAmount.$error.required">Необходимо ввести сумму кредитного лимита.</li>
+					    <li id='billingCreditAmountErrorMinMax' ng-show="formBillingCredit.billingCreditAmount.$error.min || formBillingCredit.billingCreditAmount.$error.max">Cумма кредитного лимита должна быть от 0,01 до 999999,99</li>
 					</ul>
 	           </td>
 	        </tr>
