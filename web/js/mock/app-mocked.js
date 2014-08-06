@@ -201,61 +201,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         })
     }
 
-    var processQueryUrl = function(url, regex, arr, collectionName, collectionConstructor) {
-
-        var search = url.replace(regex, '$1');
-        var pairs = search.split('&');
-        var params = {};
-        _.forEach(pairs, function(value) {
-            var param = value.split('=');
-            params[param[0]] = param[1];
-        })
-
-        var order_field = params.order_field || 'id';
-        var order_direction = params.order_direction || 'asc';
-        var per_page = Math.min(params.per_page || 100, 100);
-        var page = params.page || 1;
-
-        var sorted_arr = _.sortBy(arr, function(item) {
-            return getDeepValue(item, order_field.split('.'));
-        });
-
-        if (order_direction === 'desc') {
-            sorted_arr.reverse();
-        }
-        var paged_arr = sorted_arr.slice(per_page * (page - 1), per_page * page);
-
-        var respond = [200, {
-            status: 'success',
-            data: {
-                params: {
-                    filters: [],
-                    order: {
-                        field: order_field,
-                        direction: order_direction
-                    },
-                    pager: {
-                        per_page:   per_page,
-                        page:       page,
-                        total:      arr.length
-                    },
-                    fields: []
-                }
-            }
-        }];
-        respond[1].data[collectionName] = _.invoke(paged_arr, 'serialize');
-
-        return respond;
-    }
-
-    var processPostQuery = function(url, regex, data, collection, collectionName, collectionConstructor) {
-        var filters = angular.fromJson(data).filters;
-        var filtered_arr = filterArr(collection.getItems(), filters);
-        var respond = processQueryUrl(url, regex, filtered_arr, collectionName, collectionConstructor);
-        respond[1].data.params.filters = filters;
-        return respond;
-    }
-
     var processQueryUrlSort = function(url, regex, arr, collectionName, collectionConstructor) {
 
         var search = url.replace(regex, '$1');
@@ -370,10 +315,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
     }
 
-    var processPost = function(data, collection, itemName, itemConstuctor, directories, processId, validation) {
+    var processPost = function(data, collection, itemName, itemConstuctor, directories, process, validation) {
         var items = collection.getItems();
         try {
-            var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
+            var item = (new itemConstuctor((angular.fromJson(data))[itemName])).resolveRefs(directories);
         } catch (err) {     // ошибка ссылочной целостности
             return [400, {
                 status: 'error',
@@ -382,7 +327,14 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }];
         }
 
-        var validationError = validation && validation(item);
+        item.id = 1 + _.max(items, function(item) {
+            return item.id;
+        }).id;
+        if (process) {
+            process.call(item);
+        }
+
+        var validationError = validation && validation(item, items);
         if (validationError) {
             return [400, {
                 status: 'error',
@@ -391,19 +343,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }];
         }
 
-        if (!item.isValid()) {
-            return [400, {
-                status: 'error',
-                message: 'Validation Failed'
-            }];
-        }
-
-        item.id = 1 + _.max(items, function(item) {
-            return item.id;
-        }).id;
-        if (processId) {
-            processId.call(item);
-        }
         items.push(item);
         var respond = [200, {
             status: 'success',
@@ -413,7 +352,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return respond;
     };
 
-    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories) {
+    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories, process, validation) {
         var id = parseInt(url.replace(regex,'$1'));
         var items = collection.getItems();
         var idx = _.findIndex(items, {id: id});
@@ -426,7 +365,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
 
         try {
-            var item = new itemConstuctor((angular.fromJson(data))[itemName], directories);
+            var item = (new itemConstuctor((angular.fromJson(data))[itemName])).resolveRefs(directories);
         } catch (err) {     // ошибка ссылочной целостности
             return [400, {
                 status: 'error',
@@ -435,10 +374,16 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }];
         }
 
-        if (!item.isValid()) {
+        if (process) {
+            process(item, items, idx);
+        }
+
+        var validationError = validation && validation(item, items, idx);
+        if (validationError) {
             return [400, {
                 status: 'error',
-                message: 'Validation Failed'
+                message: 'Validation Failed',
+                errors: validationError
             }];
         }
 
@@ -499,10 +444,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexUserQuery, users.getItems(), 'users', Users);
+        return processQueryUrlSort(url, regexUserQuery, users.getItems(), 'users', Users);
     });
     $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
-        return processPostQuery (url, regexUserQuery, data, users, 'users', Users);
+        return processPostQuerySort(url, regexUserQuery, data, users, 'users', Users);
     });
 
     var regexUserGet = /^\/api2\/users\/(?:([^\/]+))$/;
@@ -839,10 +784,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
+        return processQueryUrlSort(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
     });
     $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
+        return processPostQuerySort(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
     });
     var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
@@ -869,10 +814,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealerSiteLoginsQuery, dealerSiteLogins.getItems(), 'dealerSiteLogins', DealerSiteLogins);
+        return processQueryUrlSort(url, regexDealerSiteLoginsQuery, dealerSiteLogins.getItems(), 'dealerSiteLogins', DealerSiteLogins);
     });
     $httpBackend.whenPOST(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexDealerSiteLoginsQuery, data, dealerSiteLogins, 'dealerSiteLogins', DealerSiteLogins);
+        return processPostQuerySort(url, regexDealerSiteLoginsQuery, data, dealerSiteLogins, 'dealerSiteLogins', DealerSiteLogins);
     });
     var regexDealerSiteLoginsGet = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
     $httpBackend.whenGET(regexDealerSiteLoginsGet).respond(function(method, url, data) {
@@ -883,6 +828,27 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPost(data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
             dealers: dealers,
             sites: sites
+        }, function process() {
+        }, function validation(item, items) {
+            var hasErrors;
+            var children = {};
+            function pushError(errorField, errorText) {
+                hasErrors = true;
+                if (!children[errorField]) {
+                    children[errorField] = {errors: []};
+                }
+                children[errorField].errors.push(errorText);
+            }
+            if (!item.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!item.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (_.find(items, {dealer: item.dealer, site: item.site, type: item.type})) {
+                pushError('site', 'Это значение уже используется.');
+            }
+            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSiteLoginsPut = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
@@ -890,6 +856,37 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPut(url, regexDealerSiteLoginsPut, data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
             dealers: dealers,
             sites: sites
+        }, function process() {
+        }, function validation(item, items, idx) {
+            var hasErrors;
+            var children = {};
+            function pushError(errorField, errorText) {
+                hasErrors = true;
+                if (!children[errorField]) {
+                    children[errorField] = {errors: []};
+                }
+                children[errorField].errors.push(errorText);
+            }
+            if (!item.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!item.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (!item.type) {
+                pushError('type', 'Значение не должно быть пустым.');
+            }
+            if (!item.login) {
+                pushError('login', 'Значение не должно быть пустым.');
+            } else if (item.login.length > 100){
+                pushError('login', 'Значение слишком длинное. Должно быть равно 100 символам или меньше.');
+            }
+            if (!item.password) {
+                pushError('password', 'Значение не должно быть пустым.');
+            } else if (item.password.length > 100){
+                pushError('password', 'Значение слишком длинное. Должно быть равно 100 символам или меньше.');
+            }
+            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSiteLoginsDelete = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
@@ -899,7 +896,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealersQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
+        return processQueryUrlSort(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
     });
     $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
 
@@ -924,7 +921,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             });
         }
 
-        var respond = processPostQuery(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
+        var respond = processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
         var fields = angular.fromJson(data).fields;
         if (_.size(fields)) {
             respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
@@ -935,10 +932,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
     var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexSitesQuery).respond(function(method, url, data) {
-        return processQueryUrl(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
+        return processQueryUrlSort(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
     });
     $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
-        return processPostQuery(url, regexSitesQuery, data, sites, 'sites', Sites);
+        return processPostQuerySort(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 
     var tariffs = new Tariffs([
@@ -1758,7 +1755,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealers: dealers,
             sites: sites,
             tariffs: tariffs
-        }, function processId() {
+        }, function process() {
             if (this.type.id === 'card' || this.type.id === 'addcard') {
                 this.cardId = this.id;
             }
@@ -1804,6 +1801,23 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealers: dealers,
             sites: sites,
             tariffs: tariffs
+        }, function process(item, items, idx) {
+            if (item.type.id === 'card' && item.activeTo !== items[idx].activeTo) {
+                updateAddsales(item);
+            }
+
+            function updateAddsales(parentSale) {
+                var addSale = _.find(items, {
+                    type: saleTypes.get('addcard'),
+                    parentId: parentSale.cardId
+                });
+                if (!addSale) {
+                    return [];
+                } else {
+                    addSale.activeTo = _.clone(parentSale.activeTo);
+                    return updateAddsales(addSale).concat(addSale);
+                }
+            }
         });
     });
     var regexSalesDelete = /^\/api2\/sales\/(?:([^\/]+))$/;

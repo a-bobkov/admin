@@ -36,21 +36,19 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 var ls = $location.search();
                 var toResolve = {};
                 if (!_.isEmpty(ls.dealers)) {
-                    var dealerQueryParams = {
+                    toResolve.dealers = dealersLoader.loadItems({
                         filters: [
                             { fields: ['id'], type: 'in', value: ls.dealers.split(';') }
                         ],
                         fields: ['dealer_list_name']
-                    };
-                    toResolve.dealers = dealersLoader.loadItems(dealerQueryParams);
+                    });
                 }
                 if (!_.isEmpty(ls.sites)) {
-                    var siteQueryParams = {
+                    toResolve.sites = sitesLoader.loadItems({
                         filters: [
                             { fields: ['id'], type: 'in', value: ls.sites.split(';') }
                         ]
-                    };
-                    toResolve.sites = sitesLoader.loadItems(siteQueryParams);
+                    });
                 }
                 return $q.all(toResolve).then(function(construction) {
                     return new Construction(construction).resolveRefs();
@@ -292,8 +290,6 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         delete $rootScope.savedSaleListNotice;
     }
 
-    var regexpOrder = /^([+-]?)(\w+)$/;
-
     $scope.toggleSiteBalances = function() {
         if (!$scope.showSiteBalances) {
             $q.all({
@@ -327,7 +323,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         };
     }
 
-    $scope.onPatternChange = function (newValue, oldValue) {
+    $scope.onPatternChange = function () {
         onSortingChange();
     };
 
@@ -345,6 +341,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         {id: "siteAmount", name: "Себестоим, руб.", width: '7.5%'},
         {id: "isActive", name: "Статус", width: '5%'}
     ];
+
+    var regexpOrder = /^([+-]?)(\w+)$/;
 
     $scope.sortingColumn = function() {
         return $scope.sorting[0].replace(regexpOrder, '$2');
@@ -374,7 +372,6 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         if (page) {
             $scope.paging.currentPage = page;
         }
-
         var searchParams = _.pick(_.assign({}, $scope.patterns, $scope.paging), function(value) {
             return value;
         });
@@ -423,9 +420,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                     construction.tariffs = tariffs;
                     _.assign($scope, construction.resolveRefs());
                     var topElem = document.getElementById('SaleListAddSaleUp');
-                    var topSaleList = topElem && topElem.getBoundingClientRect().top;
-                    if (topSaleList < 0) {
-                        window.scrollBy(0, topSaleList);
+                    var topList = topElem && topElem.getBoundingClientRect().top;
+                    if (topList < 0) {
+                        window.scrollBy(0, topList);
                     }
                 });
             });

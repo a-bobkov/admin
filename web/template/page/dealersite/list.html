@@ -13,7 +13,7 @@
     <table class="list">
         <thead>
             <tr>
-				<th ng-repeat='column in sortableColumns' id="DealerSiteListTableHeader" ng-class='{"active": sorting.column === column.id}' ng-style='{width: column.width}'>
+				<th ng-repeat='column in sortableColumns' id="DealerSiteListTableHeader" ng-class='{"active": sortingColumn() === column.id}' ng-style='{width: column.width}'>
             		<a ng-click='changeSorting(column.id)' id="DealerSiteListTableHeaderRef">{{column.name}}</a><span id="DealerSiteListTableHeaderDir">{{sortingMark(column.id)}}</span>
                 </th>
                 <th>Действия</th>

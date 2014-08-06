@@ -51,7 +51,7 @@
     <table class="list">
         <thead>
             <tr>
-                <th ng-repeat='column in sortableColumns' id="UserListTableHeader" ng-class='{"active": sorting.column === column.id}' ng-style='{width: column.width}'>
+                <th ng-repeat='column in sortableColumns' id="UserListTableHeader" ng-class='{"active": sortingColumn() === column.id}' ng-style='{width: column.width}'>
                     <a ng-click='changeSorting(column.id)' id="UserListTableHeaderRef">{{column.name}}</a><span id="UserListTableHeaderDir">{{sortingMark(column.id)}}</span>
                 </th>
                 <th>Название</th>

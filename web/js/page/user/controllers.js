@@ -45,9 +45,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             }
         }
     })
-    .otherwise({
-        redirectTo: '/userlist'
-    });
+;
 }])
 
 .controller('UserListCtrl', function($scope, $rootScope, $location, $window, $q, $timeout,  data,
@@ -62,7 +60,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     }
 
     $scope.clickNewUser = function() {
-        $location.path('/usernew');
+        $location.path('/usernew').search('');
     }
 
     $scope.setPatternsDefault = function() {
@@ -85,19 +83,24 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         {id: "lastLogin", name: "Был на сайте", width: '10%'}
     ];
 
+    var regexpOrder = /^([+-]?)(\w+)$/;
+
+    $scope.sortingColumn = function() {
+        return $scope.sorting[0].replace(regexpOrder, '$2');
+    }
+
     $scope.sortingMark = function(column) {
-        if (column === $scope.sorting.column) {
-            return ($scope.sorting.reverse) ? ' ↑': ' ↓';
+        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+            return ($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? ' ↑' : ' ↓';
         }
-        return '\u00A0\u00A0\u00A0';
+        return '   ';
     }
 
     $scope.changeSorting = function(column) {
-        if (column === $scope.sorting.column) {
-            $scope.sorting.reverse = !$scope.sorting.reverse;
+        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+            $scope.sorting[0] = (($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? '' : '-') + column;
         } else {
-            $scope.sorting.column = column;
-            $scope.sorting.reverse = false;
+            $scope.sorting = [column];
         }
         onSortingChange();
     }
@@ -109,10 +112,13 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     var numberLoads = 0;
     $scope.onSelectPage = function(page) {
         numberLoads++;
-        $scope.paging.currentPage = page;
-        var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
+        if (page) {
+            $scope.paging.currentPage = page;
+        }
+        var searchParams = _.pick(_.assign({}, $scope.patterns, $scope.paging), function(value) {
             return value;
         });
+        searchParams.orders = $scope.sorting;
         $rootScope.savedUserListLocationSearch = toLocationSearch(searchParams);
         $q.all({
             users: usersLoader.loadItems(makeQueryParams($rootScope.savedUserListLocationSearch), data),
@@ -143,20 +149,14 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
                 }),
             manager: $scope.managers.get(ls.manager)
         };
-        $scope.sorting = {
-            column: ls.column,
-            reverse: !!ls.reverse
-        };
+        $scope.sorting = ls.orders && ls.orders.split(';') || ['id'];
         $scope.paging = {
             currentPage: _.parseInt(ls.currentPage),
             itemsPerPage: _.parseInt(ls.itemsPerPage)
         };
     } else {
         $scope.setPatternsDefault();
-        $scope.sorting = {
-            column: 'id',
-            reverse: false
-        };
+        $scope.sorting = ['id'];
         $scope.paging = {
             itemsPerPage: 25
         };
@@ -167,10 +167,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         if (_.size(ls)) {
             var queryParams = {
                 filters: [],
-                order: {
-                    order_field: ls.column,
-                    order_direction: ls.reverse ? 'desc': 'asc'
-                },
+                orders: ls.orders.split(';'),
                 pager: {
                     page: ls.currentPage,
                     per_page: ls.itemsPerPage
@@ -205,6 +202,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
                 filters: [
                     { type: 'in', fields: ['status'], value: ['active'] }
                 ],
+                orders: ['id'],
                 pager: {
                     per_page: 25
                 }
@@ -219,14 +217,14 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             }).join(';');
         } else if (_.isObject(value)) {
             if (value.id !== undefined) {
-                return value.id;
+                return toLocationSearch(value.id);
             } else {
                 return _.mapValues(value, function(value) {
                     return toLocationSearch(value);
                 });
             }
         } else {
-            return value;
+            return String(value);
         }
     }
 
@@ -323,7 +321,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 
         $scope.userEdited.save(data).then(function(user) {
             $rootScope.savedUserListNotice = 'Сохранён пользователь с идентификатором: ' + user.id;
-            $location.path('/userlist');
+            $location.path('/userlist').search('');
         });
     };
 
@@ -332,10 +330,10 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             if ($scope.userEdited.id) {
                 $scope.userEdited.remove().then(function() {
                     $rootScope.savedUserListNotice = 'Удалён пользователь с идентификатором: ' + $scope.userEdited.id;
-                    $location.path('/userlist');
+                    $location.path('/userlist').search('');
                 })
             } else {
-                $location.path('/userlist');
+                $location.path('/userlist').search('');
             }
         }
     };

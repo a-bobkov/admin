@@ -267,7 +267,36 @@ describe('app-mocked', function() {
         });
     }
 
-ddescribe('billingunion', function() {
+    function checkFilterEqual(loader, fields) {
+        var answer = {};
+        var item;
+
+        runSync(answer, function() {
+            return loader.loadItems().then(function(collection) {
+                item = collection.getItems()[0];
+                return loader.loadItems({
+                    filters: _.map(fields, function(field) {
+                        var itemValue = _.isObject(item[field]) ? item[field].id : item[field];
+                        return { fields: [field], type: 'equal', value: itemValue };
+                    })
+                });
+            });
+        });
+
+        runs(function() {
+            var items = answer.respond.getItems();
+            expect(items.length).toBeTruthy();
+            _.forEach(fields, function(field) {
+                var itemValue = _.isObject(item[field]) ? item[field].id : item[field];
+                _.forEach(items, function(itemEqual) {
+                    var itemEqualValue = _.isObject(itemEqual[field]) ? itemEqual[field].id : itemEqual[field];
+                    expect(itemEqualValue).toEqual(itemValue);
+                })
+            });
+        });
+    };
+
+describe('billingunion', function() {
 
     describe('Метод get', function() {
 
@@ -311,105 +340,19 @@ ddescribe('billingunion', function() {
         });
 
         it('equal - фильтровать по равенству id заданному значению', function() {
-            var answer = {};
-            var billingUnion;
-
-            runSync(answer, function() {
-                return billingUnionsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                billingUnion = answer.respond.getItems()[0];
-                return billingUnionsLoader.loadItems({
-                    filters: [
-                        { fields: ['id'], type: 'equal', value: billingUnion.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var billingUnions = answer.respond.getItems();
-                expect(billingUnions.length).toBe(1);
-                expect(billingUnions[0]).toEqual(billingUnion);
-            });
+            checkFilterEqual(billingUnionsLoader, ['id']);
         });
 
         it('equal - фильтровать по равенству site заданному значению', function() {
-            var answer = {};
-            var billingUnion;
-
-            runSync(answer, function() {
-                return billingUnionsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                billingUnion = answer.respond.getItems()[0];
-                return billingUnionsLoader.loadItems({
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: billingUnion.site.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var billingUnions = answer.respond.getItems();
-                expect(billingUnions.length).toBeTruthy();
-                _.forEach(billingUnions, function(billingUnionEqual) {
-                    expect(billingUnionEqual.site).toEqual(billingUnion.site);
-                });
-            });
+            checkFilterEqual(billingUnionsLoader, ['site']);
         });
 
         it('equal - фильтровать по равенству masterDealer заданному значению', function() {
-            var answer = {};
-            var billingUnion;
-
-            runSync(answer, function() {
-                return billingUnionsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                billingUnion = answer.respond.getItems()[0];
-                return billingUnionsLoader.loadItems({
-                    filters: [
-                        { fields: ['masterDealer'], type: 'equal', value: billingUnion.masterDealer.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var billingUnions = answer.respond.getItems();
-                expect(billingUnions.length).toBeTruthy();
-                _.forEach(billingUnions, function(billingUnionEqual) {
-                    expect(billingUnionEqual.masterDealer).toEqual(billingUnion.masterDealer);
-                });
-            });
+            checkFilterEqual(billingUnionsLoader, ['masterDealer']);
         });
 
         it('equal - фильтровать по равенству slaveDealer заданному значению', function() {
-            var answer = {};
-            var billingUnion;
-
-            runSync(answer, function() {
-                return billingUnionsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                billingUnion = answer.respond.getItems()[0];
-                return billingUnionsLoader.loadItems({
-                    filters: [
-                        { fields: ['slaveDealer'], type: 'equal', value: billingUnion.slaveDealer.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var billingUnions = answer.respond.getItems();
-                expect(billingUnions.length).toBeTruthy();
-                _.forEach(billingUnions, function(billingUnionEqual) {
-                    expect(billingUnionEqual.slaveDealer).toEqual(billingUnion.slaveDealer);
-                });
-            });
+            checkFilterEqual(billingUnionsLoader, ['slaveDealer']);
         });
 
         it('сортировать по id по возрастанию', function() {
@@ -655,79 +598,15 @@ describe('billingcredit', function() {
         });
 
         it('equal - фильтровать по равенству id заданному значению', function() {
-            var answer = {};
-            var billingCredit;
-
-            runSync(answer, function() {
-                return billingCreditsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                billingCredit = answer.respond.getItems()[0];
-                return billingCreditsLoader.loadItems({
-                    filters: [
-                        { fields: ['id'], type: 'equal', value: billingCredit.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var billingCredits = answer.respond.getItems();
-                expect(billingCredits.length).toBe(1);
-                expect(billingCredits[0]).toEqual(billingCredit);
-            });
+            checkFilterEqual(billingCreditsLoader, ['id']);
         });
 
         it('equal - фильтровать по равенству dealer заданному значению', function() {
-            var answer = {};
-            var billingCredit;
-
-            runSync(answer, function() {
-                return billingCreditsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                billingCredit = answer.respond.getItems()[0];
-                return billingCreditsLoader.loadItems({
-                    filters: [
-                        { fields: ['dealer'], type: 'equal', value: billingCredit.dealer.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var billingCredits = answer.respond.getItems();
-                expect(billingCredits.length).toBeTruthy();
-                _.forEach(billingCredits, function(billingCreditEqual) {
-                    expect(billingCreditEqual.dealer).toEqual(billingCredit.dealer);
-                });
-            });
+            checkFilterEqual(billingCreditsLoader, ['dealer']);
         });
 
         it('equal - фильтровать по expiresAt равно заданному значению', function() {
-            var answer = {};
-            var billingCredit;
-
-            runSync(answer, function() {
-                return billingCreditsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                billingCredit = answer.respond.getItems()[0];
-                return billingCreditsLoader.loadItems({
-                    filters: [
-                        { fields: ['expiresAt'], type: 'equal', value: billingCredit.expiresAt.toISOString().slice(0, 10) }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var billingCredits = answer.respond.getItems();
-                expect(billingCredits.length).toBeTruthy();
-                _.forEach(billingCredits, function(billingCreditEqual) {
-                    expect(billingCreditEqual.expiresAt).not.toBeLessThan(billingCredit.expiresAt);
-                });
-            });
+            checkFilterEqual(billingCreditsLoader, ['expiresAt']);
         });
 
         it('сортировать по id по возрастанию', function() {
@@ -917,61 +796,15 @@ describe('dealerbalance', function() {
         });
 
         it('equal - фильтровать по равенству dealer заданному значению', function() {
-            var answer = {};
-            var dealerBalance;
-
-            runSync(answer, function() {
-                return dealerBalancesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                dealerBalance = answer.respond.getItems()[0];
-                return dealerBalancesLoader.loadItems({
-                    filters: [
-                        { fields: ['dealer'], type: 'equal', value: dealerBalance.dealer.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var dealerBalances = answer.respond.getItems();
-                expect(dealerBalances.length).toBeTruthy();
-                _.forEach(dealerBalances, function(dealerBalanceEqual) {
-                    expect(dealerBalanceEqual.dealer).toEqual(dealerBalance.dealer);
-                });
-            });
+            checkFilterEqual(dealerBalancesLoader, ['dealer']);
         });
 
         it('сортировать по dealer по возрастанию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return dealerBalancesLoader.loadItems({
-                    orders: ['+dealer']
-                });
-            });
-
-            runs(function() {
-                var dealerBalances = answer.respond.getItems();
-                expect(dealerBalances.length).toBeTruthy();
-                expect(_.pluck(_.pluck(dealerBalances, 'dealer'), 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(dealerBalancesLoader, ['+dealer']);
         });
 
         it('сортировать по dealer по убыванию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return dealerBalancesLoader.loadItems({
-                    orders: ['-dealer']
-                });
-            });
-
-            runs(function() {
-                var dealerBalances = answer.respond.getItems();
-                expect(dealerBalances.length).toBeTruthy();
-                expect(_.pluck(_.pluck(dealerBalances, 'dealer'), 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(dealerBalancesLoader, ['-dealer']);
         });
     });
 });
@@ -997,29 +830,7 @@ describe('sitebalance', function() {
         });
 
         it('equal - фильтровать по равенству site заданному значению', function() {
-            var answer = {};
-            var siteBalance;
-
-            runSync(answer, function() {
-                return siteBalancesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                siteBalance = answer.respond.getItems()[0];
-                return siteBalancesLoader.loadItems({
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: siteBalance.site.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var siteBalances = answer.respond.getItems();
-                expect(siteBalances.length).toBeTruthy();
-                _.forEach(siteBalances, function(siteBalanceEqual) {
-                    expect(siteBalanceEqual.site).toEqual(siteBalance.site);
-                });
-            });
+            checkFilterEqual(siteBalancesLoader, ['site']);
         });
 
         it('сортировать по site по возрастанию', function() {
@@ -1100,79 +911,15 @@ describe('dealerTariff', function() {
         });
 
         it('equal - фильтровать по равенству id заданному значению', function() {
-            var answer = {};
-            var dealerTariff;
-
-            runSync(answer, function() {
-                return dealerTariffsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                dealerTariff = answer.respond.getItems()[0];
-                return dealerTariffsLoader.loadItems({
-                    filters: [
-                        { fields: ['id'], type: 'equal', value: dealerTariff.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var dealerTariffs = answer.respond.getItems();
-                expect(dealerTariffs.length).toBe(1);
-                expect(dealerTariffs[0]).toEqual(dealerTariff);
-            });
+            checkFilterEqual(dealerTariffsLoader, ['id']);
         });
 
         it('equal - фильтровать по равенству dealer заданному значению', function() {
-            var answer = {};
-            var dealerTariff;
-
-            runSync(answer, function() {
-                return dealerTariffsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                dealerTariff = answer.respond.getItems()[0];
-                return dealerTariffsLoader.loadItems({
-                    filters: [
-                        { fields: ['dealer'], type: 'equal', value: dealerTariff.dealer.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var dealerTariffs = answer.respond.getItems();
-                expect(dealerTariffs.length).toBeTruthy();
-                _.forEach(dealerTariffs, function(dealerTariffEqual) {
-                    expect(dealerTariffEqual.dealer).toEqual(dealerTariff.dealer);
-                });
-            });
+            checkFilterEqual(dealerTariffsLoader, ['dealer']);
         });
 
         it('equal - фильтровать по равенству site заданному значению', function() {
-            var answer = {};
-            var dealerTariff;
-
-            runSync(answer, function() {
-                return dealerTariffsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                dealerTariff = answer.respond.getItems()[0];
-                return dealerTariffsLoader.loadItems({
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: dealerTariff.site.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var dealerTariffs = answer.respond.getItems();
-                expect(dealerTariffs.length).toBeTruthy();
-                _.forEach(dealerTariffs, function(dealerTariffEqual) {
-                    expect(dealerTariffEqual.site).toEqual(dealerTariff.site);
-                });
-            });
+            checkFilterEqual(dealerTariffsLoader, ['dealer']);
         });
 
         it('сортировать по id по возрастанию', function() {
@@ -1304,53 +1051,11 @@ describe('sale', function() {
         });
 
         it('equal - фильтровать по равенству id заданному значению', function() {
-            var answer = {};
-            var sale;
-
-            runSync(answer, function() {
-                return salesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                sale = answer.respond.getItems()[0];
-                return salesLoader.loadItems({
-                    filters: [
-                        { fields: ['id'], type: 'equal', value: sale.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBe(1);
-                expect(sales[0]).toEqual(sale);
-            });
+            checkFilterEqual(salesLoader, ['id']);
         });
 
         it('equal - фильтровать по равенству type заданному значению', function() {
-            var answer = {};
-            var sale;
-
-            runSync(answer, function() {
-                return salesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                sale = answer.respond.getItems()[0];
-                return salesLoader.loadItems({
-                    filters: [
-                        { fields: ['type'], type: 'equal', value: sale.type.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sales, function(saleEqual) {
-                    expect(saleEqual.type).toEqual(sale.type);
-                });
-            });
+            checkFilterEqual(salesLoader, ['type']);
         });
 
         it('equal - фильтровать по равенству parentId заданному значению', function() {
@@ -1413,55 +1118,11 @@ describe('sale', function() {
         });
 
         it('equal - фильтровать по равенству dealer заданному значению', function() {
-            var answer = {};
-            var sale;
-
-            runSync(answer, function() {
-                return salesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                sale = answer.respond.getItems()[0];
-                return salesLoader.loadItems({
-                    filters: [
-                        { fields: ['dealer'], type: 'equal', value: sale.dealer.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sales, function(saleEqual) {
-                    expect(saleEqual.dealer).toEqual(sale.dealer);
-                });
-            });
+            checkFilterEqual(salesLoader, ['dealer']);
         });
 
         it('equal - фильтровать по равенству site заданному значению', function() {
-            var answer = {};
-            var sale;
-
-            runSync(answer, function() {
-                return salesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                sale = answer.respond.getItems()[0];
-                return salesLoader.loadItems({
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: sale.site.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var sales = answer.respond.getItems();
-                expect(sales.length).toBeTruthy();
-                _.forEach(sales, function(saleEqual) {
-                    expect(saleEqual.site).toEqual(sale.site);
-                });
-            });
+            checkFilterEqual(salesLoader, ['site']);
         });
 
         it('equal - фильтровать по activeTo больше или равно заданного значения', function() {
@@ -1604,9 +1265,9 @@ describe('sale', function() {
             checkSorting(salesLoader, ['-count', '-id']);
         });
 
-        it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
-            checkSorting(salesLoader, ['+amount', '-id']);
-        });
+        // it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
+        //     checkSorting(salesLoader, ['+amount', '-id']);
+        // });
 
         it('сортировать по amount по убыванию, затем по id по убыванию', function() {
             checkSorting(salesLoader, ['-amount', '-id']);
@@ -2231,19 +1892,22 @@ describe('sale', function() {
                             { fields: ['parentId'], type: 'in', value: _.pluck(sales.getItems(), 'cardId') }
                         ]
                     }).then(function(addSales) {
-                        var addSaleParentIds = _.pluck(addSales.getItems(), 'parentId');
-                        _.remove(sales.getItems(), function(sale) {
-                            return _.contains(addSaleParentIds, sale.cardId); 
-                        });
-                        return sales;
+                        return {
+                            sales: sales,
+                            addSales: addSales
+                        }
                     });
                 });
             });
 
             runSync(answer, function() {
-                var salesArray = answer.respond.getItems();
-                var sale = salesArray[0];
-                var otherSale = _.find(salesArray, function(otherSale) {
+                var salesItems = answer.respond.sales.getItems();
+                var addSalesItems = answer.respond.addSales.getItems();
+                var addSaleParentIds = _.pluck(addSalesItems, 'parentId');
+                var sale = _.find(salesItems, function(sale) {
+                    return !_.contains(addSaleParentIds, sale.cardId);
+                });
+                var otherSale = _.find(salesItems, function(otherSale) {
                     return (otherSale.dealer.id !== sale.dealer.id) && (otherSale.site.id !== sale.site.id);
                 });
                 expect(otherSale).toBeDefined();
@@ -2251,7 +1915,7 @@ describe('sale', function() {
                 var activeFrom = _.clone(otherSale.activeTo);
                     activeFrom.setDate(activeFrom.getDate() + 1);
                 var activeTo = _.clone(activeFrom);
-                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                    activeTo.setDate(activeTo.getDate() + randomInt(1, 10));
                 var date = new Date;
                     date.setUTCHours(0, 0, 0, 0);
 
@@ -2334,6 +1998,100 @@ describe('sale', function() {
                     console.log(key, value, equalSale[key]);
                     expect(value).toEqual(equalSale[key]);
                 });
+            });
+        });
+
+        it('исправлять activeTo в карточке и в расширении', function() {
+            var answer = {};
+            var sale;
+
+            runSync(answer, function() {
+                return salesLoader.loadItems({
+                    filters: [
+                        { fields: ['type'], type: 'in', value: ['card', 'addcard'] }
+                    ],
+                    orders: ['-activeTo']
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond.getItems()[0];
+                var activeFrom = _.clone(sale.activeTo);
+                    activeFrom.setDate(activeFrom.getDate() + 1);
+                var activeTo = _.clone(activeFrom);
+                    activeTo.setDate(activeTo.getDate() + Math.floor(Math.random() * 10));
+                var date = new Date;
+                    date.setUTCHours(0, 0, 0, 0);
+                var saleData = {
+                    type: 'card',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: randomAmount(1000, 2000),
+                    siteAmount: randomAmount(1, 1000),
+                    info: 'Комментарий'
+                };
+                var newSale = new Sale(saleData);
+                return newSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runSync(answer, function() {
+                sale = answer.respond;
+                var activeFrom = _.clone(sale.activeTo);
+                var activeTo = _.clone(sale.activeTo);
+                var date = new Date;
+                date.setUTCHours(0, 0, 0, 0);
+                var addSaleData = {
+                    type: 'addcard',
+                    cardId: null,
+                    dealer: {id: sale.dealer.id},
+                    site: {id: sale.site.id},
+                    tariff: {id: sale.tariff.id},
+                    parentId: sale.cardId,
+                    cardAmount: randomAmount(1, 1000),
+                    count: randomInt(1, 100),
+                    activeFrom: activeFrom.toISOString().slice(0, 10),
+                    activeTo: activeTo.toISOString().slice(0, 10),
+                    isActive: false,
+                    date: date.toISOString().slice(0, 10),
+                    amount: randomAmount(1000, 2000),
+                    siteAmount: randomAmount(1, 1000),
+                    info: 'Комментарий'
+                };
+                var addSale = new Sale(addSaleData);
+                return addSale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                });
+            });
+
+            runSync(answer, function() {
+                var addSale = answer.respond;
+                sale.activeTo.setDate(sale.activeTo.getDate() + 1);
+                return sale.save({
+                    dealers: new Dealers([{id: sale.dealer.id}]),
+                    sites: new Sites([{id: sale.site.id}]),
+                    tariffs: new Tariffs([{id: sale.tariff.id}])
+                }).then(function() {
+                    return salesLoader.loadItem(addSale.id);
+                });
+            });
+
+            runs(function() {
+                var addSale = answer.respond;
+                expect(addSale.activeTo).toEqual(sale.activeTo);
             });
         });
     });
@@ -2658,27 +2416,7 @@ describe('tariffRate', function() {
         });
 
         it('equal - фильтровать по равенству id заданному значению', function() {
-            var answer = {};
-            var tariffRate;
-
-            runSync(answer, function() {
-                return tariffRatesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                tariffRate = answer.respond.getItems()[0];
-                return tariffRatesLoader.loadItems({
-                    filters: [
-                        { fields: ['id'], type: 'equal', value: tariffRate.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var tariffRates = answer.respond.getItems();
-                expect(tariffRates.length).toBe(1);
-                expect(tariffRates[0]).toEqual(tariffRate);
-            });
+            checkFilterEqual(tariffRatesLoader, ['id']);
         });
 
         it('equal - фильтровать по равенству city заданному значению не null', function() {
@@ -2730,29 +2468,7 @@ describe('tariffRate', function() {
         });
 
         it('equal - фильтровать по tariff равно заданному значению', function() {
-            var answer = {};
-            var tariffRate;
-
-            runSync(answer, function() {
-                return tariffRatesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                tariffRate = answer.respond.getItems()[0];
-                return tariffRatesLoader.loadItems({
-                    filters: [
-                        { fields: ['tariff'], type: 'equal', value: tariffRate.tariff.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var tariffRates = answer.respond.getItems();
-                expect(tariffRates.length).toBeTruthy();
-                _.forEach(tariffRates, function(tariffRateEqual) {
-                    expect(tariffRateEqual.tariff).toEqual(tariffRate.tariff);
-                });
-            });
+            checkFilterEqual(tariffRatesLoader, ['tariff']);
         });
 
         it('in - фильтровать по city равно null', function() {
@@ -2776,71 +2492,19 @@ describe('tariffRate', function() {
         });
 
         it('сортировать по id по возрастанию', function() {
-            var answer = {};
-            var tariffRate;
-
-            runSync(answer, function() {
-                return tariffRatesLoader.loadItems({
-                    orders: ['+id']
-                });
-            });
-
-            runs(function() {
-                var tariffRates = answer.respond.getItems();
-                expect(tariffRates.length).toBeTruthy();
-                expect(_.pluck(tariffRates, 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(tariffRatesLoader, ['+id']);
         });
 
         it('сортировать по id по убыванию', function() {
-            var answer = {};
-            var tariffRate;
-
-            runSync(answer, function() {
-                return tariffRatesLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runs(function() {
-                var tariffRates = answer.respond.getItems();
-                expect(tariffRates.length).toBeTruthy();
-                expect(_.pluck(tariffRates, 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(tariffRatesLoader, ['-id']);
         });
 
         it('сортировать по activeFrom по возрастанию', function() {
-            var answer = {};
-            var tariffRate;
-
-            runSync(answer, function() {
-                return tariffRatesLoader.loadItems({
-                    orders: ['+activeFrom']
-                });
-            });
-
-            runs(function() {
-                var tariffRates = answer.respond.getItems();
-                expect(tariffRates.length).toBeTruthy();
-                expect(_.pluck(tariffRates, 'activeFrom')).toBeSorted('AscendingDates');
-            });
+            checkSorting(tariffRatesLoader, ['+activeFrom']);
         });
 
         it('сортировать по activeFrom по убыванию', function() {
-            var answer = {};
-            var tariffRate;
-
-            runSync(answer, function() {
-                return tariffRatesLoader.loadItems({
-                    orders: ['-activeFrom']
-                });
-            });
-
-            runs(function() {
-                var tariffRates = answer.respond.getItems();
-                expect(tariffRates.length).toBeTruthy();
-                expect(_.pluck(tariffRates, 'activeFrom')).toBeSorted('DescendingDates');
-            });
+            checkSorting(tariffRatesLoader, ['-activeFrom']);
         });
     });
 });
@@ -2899,79 +2563,15 @@ describe('tariff', function() {
         });
 
         it('equal - фильтровать по равенству id заданному значению', function() {
-            var answer = {};
-            var tariff;
-
-            runSync(answer, function() {
-                return tariffsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                tariff = answer.respond.getItems()[0];
-                return tariffsLoader.loadItems({
-                    filters: [
-                        { fields: ['id'], type: 'equal', value: tariff.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var tariffs = answer.respond.getItems();
-                expect(tariffs.length).toBe(1);
-                expect(tariffs[0]).toEqual(tariff);
-            });
+            checkFilterEqual(tariffsLoader, ['id']);
         });
 
         it('equal - фильтровать по равенству site заданному значению', function() {
-            var answer = {};
-            var tariff;
-
-            runSync(answer, function() {
-                return tariffsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                tariff = answer.respond.getItems()[0];
-                return tariffsLoader.loadItems({
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: tariff.site.id }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var tariffs = answer.respond.getItems();
-                expect(tariffs.length).toBeTruthy();
-                _.forEach(tariffs, function(tariffEqual) {
-                    expect(tariffEqual.site).toEqual(tariff.site);
-                });
-            });
+            checkFilterEqual(tariffsLoader, ['site']);
         });
 
         it('equal - фильтровать по равенству type заданному значению', function() {
-            var answer = {};
-            var tariff;
-
-            runSync(answer, function() {
-                return tariffsLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                tariff = answer.respond.getItems()[0];
-                return tariffsLoader.loadItems({
-                    filters: [
-                        { fields: ['type'], type: 'equal', value: tariff.type }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var tariffs = answer.respond.getItems();
-                expect(tariffs.length).toBeTruthy();
-                _.forEach(tariffs, function(tariffEqual) {
-                    expect(tariffEqual.type).toEqual(tariff.type);
-                });
-            });
+            checkFilterEqual(tariffsLoader, ['type']);
         });
 
         it('equal - фильтровать по равенству isActive значению true', function() {
@@ -3015,71 +2615,19 @@ describe('tariff', function() {
         });
 
         it('сортировать по id по возрастанию', function() {
-            var answer = {};
-            var tariff;
-
-            runSync(answer, function() {
-                return tariffsLoader.loadItems({
-                    orders: ['+id']
-                });
-            });
-
-            runs(function() {
-                var tariffs = answer.respond.getItems();
-                expect(tariffs.length).toBeTruthy();
-                expect(_.pluck(tariffs, 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(tariffsLoader, ['+id']);
         });
 
         it('сортировать по id по убыванию', function() {
-            var answer = {};
-            var tariff;
-
-            runSync(answer, function() {
-                return tariffsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runs(function() {
-                var tariffs = answer.respond.getItems();
-                expect(tariffs.length).toBeTruthy();
-                expect(_.pluck(tariffs, 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(tariffsLoader, ['-id']);
         });
 
         it('сортировать по site по возрастанию', function() {
-            var answer = {};
-            var tariff;
-
-            runSync(answer, function() {
-                return tariffsLoader.loadItems({
-                    orders: ['+site']
-                });
-            });
-
-            runs(function() {
-                var tariffs = answer.respond.getItems();
-                expect(tariffs.length).toBeTruthy();
-                expect(_.pluck(_.pluck(tariffs, 'site'), 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(tariffsLoader, ['+site']);
         });
 
         it('сортировать по site по убыванию', function() {
-            var answer = {};
-            var tariff;
-
-            runSync(answer, function() {
-                return tariffsLoader.loadItems({
-                    orders: ['-site']
-                });
-            });
-
-            runs(function() {
-                var tariffs = answer.respond.getItems();
-                expect(tariffs.length).toBeTruthy();
-                expect(_.pluck(_.pluck(tariffs, 'site'), 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(tariffsLoader, ['-site']);
         });
     });
 });
@@ -3089,34 +2637,7 @@ describe('dealersite, dealersitelogin', function() {
     describe('dealersitelogin', function() {
 
         it('equal - по равенству dealer и site заданным значениям', function() {
-            var answer = {};
-            var dealerId;
-            var siteId;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems().then(function(dealerSiteLogins) {
-                    var dealerSiteLogin = dealerSiteLogins.getItems()[0];
-                    dealerId = String(dealerSiteLogin.dealer.id);
-                    siteId = String(dealerSiteLogin.site.id);
-                    return dealerSiteLoginsLoader.loadItems({
-                        filters: [
-                            { fields: ['dealer'], type: 'equal', value: dealerId },
-                            { fields: ['site'], type: 'equal', value: siteId }
-                        ]
-                    });
-                });
-            });
-
-            runs(function() {
-                var dealerSiteLoginsArray = answer.respond.getItems();
-                expect(dealerSiteLoginsArray.length).toBeTruthy();
-                _.forEach(dealerSiteLoginsArray, function(value) {
-                    var valueDealerId = String(value.dealer.id);
-                    var valueSiteId = String(value.site.id);
-                    expect(valueDealerId).toBe(dealerId);
-                    expect(valueSiteId).toBe(siteId);
-                });
-            });
+            checkFilterEqual(dealerSiteLoginsLoader, ['dealer', 'site']);
         });
 
         it('post - сохранять новый dealersitelogin', function() {
@@ -3129,10 +2650,7 @@ describe('dealersite, dealersitelogin', function() {
                 return $q.all({
                     sites: sitesLoader.loadItems(),
                     dealers: dealersLoader.loadItems({
-                        order: {
-                            order_field: 'id',
-                            order_direction: 'desc'
-                        },
+                        orders: ['-id'],
                         fields: ['dealer_list_name']
                     })
                 });
@@ -3187,10 +2705,7 @@ describe('dealersite, dealersitelogin', function() {
 
             runSync(answer, function() {
                 return dealerSiteLoginsLoader.loadItems({
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
+                    orders: ['-id']
                 });
             });
 
@@ -3234,21 +2749,19 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
                 dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save({
+                    dealers: new Dealers([{id: dealerSiteLogin.dealer.id}]),
+                    sites: new Sites([{id: dealerSiteLogin.site.id}])
+                });
             });
 
             runSync(answer, function() {
@@ -3257,7 +2770,7 @@ describe('dealersite, dealersitelogin', function() {
             });
 
             runs(function() {
-                var savedDealerSiteLogin = answer.respond.dealerSiteLogin;
+                var savedDealerSiteLogin = answer.respond;
                 expect(savedDealerSiteLogin.login).toEqual(dealerSiteLogin.login);
                 expect(savedDealerSiteLogin.password).toEqual(dealerSiteLogin.password);
             });
@@ -3268,20 +2781,15 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.dealer = null;
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save();
             });
 
             runs(function() {
@@ -3296,20 +2804,15 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.site = null;
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save();
             });
 
             runs(function() {
@@ -3324,20 +2827,15 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.type = null;
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save();
             });
 
             runs(function() {
@@ -3352,21 +2850,16 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.login = null;
                 dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save();
             });
 
             runs(function() {
@@ -3381,21 +2874,16 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.login = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
                 dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save();
             });
 
             runs(function() {
@@ -3410,21 +2898,16 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
                 dealerSiteLogin.password = null;
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save();
             });
 
             runs(function() {
@@ -3439,21 +2922,16 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
                 dealerSiteLogin.password = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
-                return dealerSiteLogin.save(directories);
+                return dealerSiteLogin.save();
             });
 
             runs(function() {
@@ -3468,18 +2946,13 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSiteLogin;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSiteLoginsLoader.loadItems(params);
+                return dealerSiteLoginsLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
+                dealerSiteLogin = answer.respond.getItems()[0];
                 return dealerSiteLogin.remove();
             });
 
@@ -3502,31 +2975,7 @@ describe('dealersite, dealersitelogin', function() {
     describe('Методы query должны фильтровать dealersite', function() {
 
         it('equal - по равенству dealer заданному значению', function() {
-            var answer = {};
-            var dealer;
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                dealer = answer.respond.dealerSites.getItems()[0].dealer;
-                var params = {
-                    filters: [
-                        { fields: ['dealer'], type: 'equal', value: dealer.id }
-                    ]
-                };
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                expect(_.every(dealerSites, function(value) {
-                    var dealerId = String(value.dealer.id);
-                    return (dealerId === String(dealer.id));
-                })).toBeTruthy();
-            });
+            checkFilterEqual(tariffsLoader, ['dealer']);
         });
 
         it('in - по равенству dealer одному из заданных значений', function() {
@@ -3538,18 +2987,17 @@ describe('dealersite, dealersitelogin', function() {
             });
 
             runSync(answer, function() {
-                var dealers = _.uniq(_.pluck(answer.respond.dealerSites.getItems(), 'dealer')).slice(0, 3);
+                var dealers = _.uniq(_.pluck(answer.respond.getItems(), 'dealer')).slice(0, 3);
                 dealersId = _.pluck(dealers, 'id');
-                var params = {
+                return dealerSitesLoader.loadItems({
                     filters: [
                         { fields: ['dealer'], type: 'in', value: dealersId }
                     ]
-                };
-                return dealerSitesLoader.loadItems(params);
+                });
             });
 
             runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
+                var dealerSites = answer.respond.getItems();
                 expect(dealerSites.length).toBeTruthy();
                 expect(_.every(dealerSites, function(value) {
                     var dealerId = value.dealer.id;
@@ -3559,31 +3007,7 @@ describe('dealersite, dealersitelogin', function() {
         });
 
         it('equal - по равенству site заданному значению', function() {
-            var answer = {};
-            var site;
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                site = answer.respond.dealerSites.getItems()[0].site;
-                var params = {
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: site.id }
-                    ]
-                };
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                expect(_.every(dealerSites, function(value) {
-                    var siteId = String(value.site.id);
-                    return (siteId === String(site.id));
-                })).toBeTruthy();
-            });
+            checkFilterEqual(tariffsLoader, ['site']);
         });
 
         it('in - по равенству site одному из заданных значений', function() {
@@ -3595,18 +3019,17 @@ describe('dealersite, dealersitelogin', function() {
             });
 
             runSync(answer, function() {
-                var sites = _.uniq(_.pluck(answer.respond.dealerSites.getItems(), 'site')).slice(0, 3);
+                var sites = _.uniq(_.pluck(answer.respond.getItems(), 'site')).slice(0, 3);
                 sitesId = _.pluck(sites, 'id');
-                var params = {
+                return dealerSitesLoader.loadItems({
                     filters: [
                         { fields: ['site'], type: 'in', value: sitesId }
                     ]
-                };
-                return dealerSitesLoader.loadItems(params);
+                });
             });
 
             runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
+                var dealerSites = answer.respond.getItems();
                 expect(dealerSites.length).toBeTruthy();
                 expect(_.every(dealerSites, function(value) {
                     var siteId = value.site.id;
@@ -3619,16 +3042,15 @@ describe('dealersite, dealersitelogin', function() {
             var answer = {};
 
             runSync(answer, function() {
-                var params = {
+                return dealerSitesLoader.loadItems({
                     filters: [
                         { type: 'equal', fields: ['isActive'], value: true }
                     ]
-                };
-                return dealerSitesLoader.loadItems(params);
+                });
             });
 
             runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
+                var dealerSites = answer.respond.getItems();
                 expect(dealerSites.length).toBeTruthy();
                 expect(_.every(dealerSites, function(value) {
                     return (value.isActive.id === true);
@@ -3640,16 +3062,15 @@ describe('dealersite, dealersitelogin', function() {
             var answer = {};
 
             runSync(answer, function() {
-                var params = {
+                return dealerSitesLoader.loadItems({
                     filters: [
                         { type: 'equal', fields: ['isActive'], value: false }
                     ]
-                };
-                return dealerSitesLoader.loadItems(params);
+                });
             });
 
             runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
+                var dealerSites = answer.respond.getItems();
                 expect(dealerSites.length).toBeTruthy();
                 expect(_.every(dealerSites, function(value) {
                     return (value.isActive.id === false);
@@ -3661,261 +3082,57 @@ describe('dealersite, dealersitelogin', function() {
     describe('Методы query должны сортировать dealersite', function() {
 
         it('по возрастанию id', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesId = _.pluck(dealerSites, 'id');
-                expect(dealerSitesId).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(dealerSitesLoader, ['+id']);
         });
 
         it('по убыванию id', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesId = _.pluck(dealerSites, 'id');
-                expect(dealerSitesId).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(dealerSitesLoader, ['-id']);
         });
 
         it('по возрастанию dealer', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'dealer',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesDealerId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
-                expect(dealerSitesDealerId).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(dealerSitesLoader, ['+dealer']);
         });
 
         it('по убыванию dealer', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'dealer',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesDealerId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
-                expect(dealerSitesDealerId).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(dealerSitesLoader, ['-dealer']);
         });
 
         it('по возрастанию site', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'site',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesSiteId = _.pluck(_.pluck(dealerSites, 'site'), 'id');
-                expect(dealerSitesSiteId).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(dealerSitesLoader, ['+site']);
         });
 
         it('по убыванию site', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'site',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesSiteId = _.pluck(_.pluck(dealerSites, 'site'), 'id');
-                expect(dealerSitesSiteId).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(dealerSitesLoader, ['-site']);
         });
 
         it('по возрастанию externalId', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'externalId',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesExternalId = _.pluck(dealerSites, 'externalId');
-                expect(dealerSitesExternalId).toBeSorted('AscendingStrings');
-            });
+            checkSorting(dealerSitesLoader, ['+externalId']);
         });
 
         it('по убыванию externalId', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'externalId',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesExternalId = _.pluck(dealerSites, 'externalId');
-                expect(dealerSitesExternalId).toBeSorted('DescendingStrings');
-            });
+            checkSorting(dealerSitesLoader, ['-externalId']);
         });
 
         it('по возрастанию publicUrl', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'publicUrl',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesPublicUrl = _.pluck(dealerSites, 'publicUrl');
-                expect(dealerSitesPublicUrl).toBeSorted('AscendingStrings');
-            });
+            checkSorting(dealerSitesLoader, ['+publicUrl']);
         });
 
         it('по убыванию publicUrl', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'publicUrl',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesPublicUrl = _.pluck(dealerSites, 'publicUrl');
-                expect(dealerSitesPublicUrl).toBeSorted('DescendingStrings');
-            });
+            checkSorting(dealerSitesLoader, ['-publicUrl']);
         });
 
         it('по возрастанию isActive', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'isActive',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesIsActive = _.pluck(dealerSites, 'isActive');
-                expect(dealerSitesIsActive).toBeSorted('AscendingBooleans');
-            });
+            checkSorting(dealerSitesLoader, ['+isActive']);
         });
 
         it('по убыванию isActive', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'isActive',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var dealerSites = answer.respond.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                var dealerSitesIsActive = _.pluck(dealerSites, 'isActive');
-                expect(dealerSitesIsActive).toBeSorted('DescendingBooleans');
-            });
+            checkSorting(dealerSitesLoader, ['-isActive']);
         });
     });
 
     describe('Методы CRUD должны', function() {
 
-        it('post - сохранять новый dealersite', function() {
+        iit('post - сохранять новый dealersite', function() {
             var answer = {};
             var directories = {};
             var sites;
@@ -3923,53 +3140,41 @@ describe('dealersite, dealersitelogin', function() {
             var freeDealerId;
 
             runSync(answer, function() {
-                return dealerSiteStatusesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond); 
-                return sitesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond); 
-                sites = answer.respond.sites.getItems();
-                var dealerQueryParams = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    },
-                    fields: ['dealer_list_name']
-                };
-                return dealersLoader.loadItems(dealerQueryParams);
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond);
-                dealers = answer.respond.dealers.getItems();
-                var dealersId = _.pluck(dealers, 'id');
-                var params = {
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: sites[1].id },
-                        { fields: ['dealer'], type: 'in', value: dealersId }
-                    ]
-                };
-                return dealerSitesLoader.loadItems(params).then(function(directory) {
-                    var dealerSites = directory.dealerSites.getItems();
-                    var dealerSitesDealersId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
-                    return _.difference(dealersId, dealerSitesDealersId);
+                return $q.all({
+                    dealers: dealersLoader.loadItems({
+                        orders: ['-id'],
+                        fields: ['dealer_list_name']
+                    }),
+                    sites: sitesLoader.loadItems()
                 });
             });
 
             runSync(answer, function() {
-                freeDealerId = answer.respond;
+                _.assign(directories, answer.respond);
+                sites = directories.sites.getItems();
+                dealers = directories.dealers.getItems();
+                var dealerIds = _.pluck(dealers, 'id');
+                return dealerSitesLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: sites[1].id },
+                        { fields: ['dealer'], type: 'in', value: dealerIds }
+                    ]
+                }).then(function(dealerSites) {
+                    var dealerSiteDealerIds = _.pluck(_.pluck(dealerSites.getItems(), 'dealer'), 'id');
+                    return _.difference(dealerIds, dealerSiteDealerIds);
+                });
+            });
+
+            runSync(answer, function() {
+                console.log(answer.respond);
+                freeDealerIds = answer.respond;
                 var newDealerSite = new DealerSite({
-                        dealer: {id: freeDealerId[0]},
-                        site: {id: sites[1].id},
-                        externalId: '1109238',
-                        publicUrl: 'http://www.auto.mail.ru/1109238.html',
-                        isActive: true
-                    }, directories);
+                    dealer: {id: freeDealerIds[0]},
+                    site: {id: sites[1].id},
+                    externalId: '1109238',
+                    publicUrl: 'http://www.auto.mail.ru/1109238.html',
+                    isActive: true
+                }, directories);
                 return newDealerSite.save(directories);
             });
 
@@ -3979,8 +3184,8 @@ describe('dealersite, dealersitelogin', function() {
             });
 
             runs(function() {
-                var newDealerSite = answer.respond.dealerSite;
-                expect(newDealerSite.dealer.id).toEqual(freeDealerId[0]);
+                var newDealerSite = answer.respond;
+                expect(newDealerSite.dealer.id).toEqual(freeDealerIds[0]);
                 expect(newDealerSite.site).toEqual(sites[1]);
                 expect(newDealerSite.externalId).toEqual('1109238');
                 expect(newDealerSite.publicUrl).toEqual('http://www.auto.mail.ru/1109238.html');

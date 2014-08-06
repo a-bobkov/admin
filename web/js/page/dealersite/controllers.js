@@ -7,146 +7,74 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
 
 .config(['$routeProvider', function($routeProvider) {
 
-    function makeQueryParams(ls) {
-        if (_.size(ls)) {
-            var queryParams = {
-                filters: [],
-                order: {
-                    order_field: ls.column,
-                    order_direction: ls.reverse ? 'desc': 'asc'
-                },
-                pager: {
-                    page: ls.currentPage,
-                    per_page: ls.itemsPerPage
-                }
-            };
-            if (ls.dealers) {
-                queryParams.filters.push({
-                    fields: ['dealer'],
-                    type: 'in',
-                    value: ls.dealers.split(';')
-                });
-            }
-            if (ls.sites) {
-                queryParams.filters.push({
-                    fields: ['site'],
-                    type: 'in',
-                    value: ls.sites.split(';')
-                });
-            }
-            if (ls.isActive !== undefined) {
-                queryParams.filters.push({
-                    fields: ['isActive'],
-                    type: 'equal',
-                    value: ls.isActive
-                });
-            }
-            return queryParams;
-        } else {
-            return {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                },
-                pager: {
-                    per_page: 25
-                }
-            }
-        }
-    }
-
-    function getFilterFieldsValue(filters, fields) {
-        var filter = _.find(filters, {fields: fields});
-        if (filter) {
-            return filter.value;
-        }
-    }
-
     $routeProvider
     .when('/dealersitelist', {
         templateUrl: 'template/page/dealersite/list.html',
         controller: 'DealerSiteListCtrl',
+        reloadOnSearch: false,
         resolve: {
-            data: function(dealerSitesLoader, dealersLoader, sitesLoader, Construction, $q, $location, $rootScope) {
-                if (!_.isEmpty($rootScope.savedDealerSiteListLocationSearch)) {
+            data: function(dealersLoader, sitesLoader, $rootScope, $location, $q, Construction) {
+                if (_.isEmpty($location.search()) && !_.isEmpty($rootScope.savedDealerSiteListLocationSearch)) {
                     $location.search($rootScope.savedDealerSiteListLocationSearch);
                 }
-                return dealerSitesLoader.loadItems(makeQueryParams($rootScope.savedDealerSiteListLocationSearch)).then(function(dealerSites) {
-                    var construction = new Construction({dealerSites: dealerSites});
-
-                    var queryParams = dealerSites.getParams();
-                    var dealerIds = getFilterFieldsValue(queryParams && queryParams.filters, ['dealer']);
-                    if (_.isEmpty(dealerIds)) {
-                        dealerIds = _.pluck(_.pluck(dealerSites.getItems(), 'dealer'), 'id');
-                    }
-                    var dealerQueryParams = {
+                var ls = $location.search();
+                var toResolve = {};
+                if (!_.isEmpty(ls.dealers)) {
+                    toResolve.dealers = dealersLoader.loadItems({
                         filters: [
-                            { type: 'in', fields: ['id'], value: dealerIds }    // user.id
+                            { fields: ['id'], type: 'in', value: ls.dealers.split(';') }
                         ],
-                        fields: [ 'dealer_list_name' ]
-                    };
-
-                    var siteIds = getFilterFieldsValue(queryParams && queryParams.filters, ['site']);
-                    if (_.isEmpty(siteIds)) {
-                        siteIds = _.pluck(_.pluck(dealerSites.getItems(), 'site'), 'id');
-                    }
-                    var siteQueryParams = {
+                        fields: ['dealer_list_name']
+                    });
+                }
+                if (!_.isEmpty(ls.sites)) {
+                    toResolve.sites = sitesLoader.loadItems({
                         filters: [
-                            { type: 'in', fields: ['id'], value: siteIds }
+                            { fields: ['id'], type: 'in', value: ls.sites.split(';') }
                         ]
-                    };
-
-                    return $q.all({
-                        dealers: dealersLoader.loadItems(dealerQueryParams),
-                        sites: sitesLoader.loadItems(siteQueryParams)
-                    }).then(function(directories) {
-                        _.assign(construction, directories);
-                        return construction.resolveRefs();
                     });
+                }
+                return $q.all(toResolve).then(function(construction) {
+                    return new Construction(construction).resolveRefs();
                 });
             }
         }
     })
-    .when('/dealersites/:id/edit', {
+    .when('/dealersite', {       // ?id=new - создание новой регистрации; ?id=5 - редактирование регистрации
         templateUrl: 'template/page/dealersite/edit.html',
         controller: 'DealerSiteEditCtrl',
         resolve: {
-            data: function(dealerSitesLoader, dealersLoader, sitesLoader, Construction, $location, $q) {
-                var id = parseInt($location.$$path.replace(/^\/dealersites\/(?:([^\/]+))\/edit$/,'$1'));
-                return dealerSitesLoader.loadItem(id).then(function(dealerSite) {
-                    var construction = new Construction({dealerSite: dealerSite});
-                    return $q.all({
-                        dealers: dealersLoader.loadItems({
-                            filters: [
-                                { type: 'equal', fields: ['id'], value: dealerSite.dealer.id }  // user.id
-                            ],
-                            fields: [ 'dealer_list_name' ]
-                        }),
-                        sites: sitesLoader.loadItems({
-                            filters: [
-                                { type: 'equal', fields: ['id'], value: dealerSite.site.id }
-                            ]
-                        })
-                    }).then(function(directories) {
-                        _.assign(construction, directories);
-                        return construction.resolveRefs();
+            data: function(Construction, dealerSitesLoader, dealersLoader, sitesLoader, $location, $q) {
+                var directories = new Construction;
+                var toResolve;
+                var ls = $location.search();
+                if (ls.id === 'new') {
+                    return $q.when();
+                } else {
+                    return dealerSitesLoader.loadItem(ls.id).then(function(dealerSite) {
+                        directories.dealerSite = dealerSite;
+                        return $q.all({
+                            dealers: dealersLoader.loadItems({
+                                filters: [
+                                    { fields: ['id'], type: 'equal', value: dealerSite.dealer.id }
+                                ],
+                                fields: ['dealer_list_name']
+                            }),
+                            sites: sitesLoader.loadItems({
+                                filters: [
+                                    { fields: ['id'], type: 'equal', value: dealerSite.site.id }
+                                ]
+                            })
+                        }).then(function(collections) {
+                            _.assign(directories, collections);
+                            return directories.resolveRefs();
+                        });
                     });
-                });
+                }
             }
         }
     })
-    .when('/dealersitenew', {
-        templateUrl: 'template/page/dealersite/edit.html',
-        controller: 'DealerSiteEditCtrl',
-        resolve: {
-            data: function($q) {
-                return $q.when();
-            }
-        }
-    })
-    .otherwise({
-        redirectTo: '/dealersitelist'
-    });
+;
 }])
 
 .constant('DealerSiteRequiredFields', {
@@ -164,9 +92,9 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     17: {                   publicUrl: true }
 })
 
-.controller('DealerSiteListCtrl', function($scope, $rootScope, $filter, $location, $window, $timeout, $q, data,
-    DealerSite, dealerSiteStatuses, dealersLoader, sitesLoader, salesLoader, dealerTariffsLoader, dealerSiteLoginsLoader,
-    DealerSiteRequiredFields) {
+.controller('DealerSiteListCtrl', function($scope, $rootScope, $location, $q, data, Construction,
+    DealerSite, dealerSiteStatuses, dealerSitesLoader, dealersLoader, sitesLoader, salesLoader, dealerTariffsLoader,
+    dealerSiteLoginsLoader, dealerSiteLoginTypes, DealerSiteRequiredFields, Dealers, Sites) {
 
     _.assign($scope, data);
     $scope.dealerSiteStatuses = dealerSiteStatuses;
@@ -179,7 +107,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     }
 
     $scope.clickNewDealerSite = function() {
-        $location.path('/dealersitenew');
+        $location.path('/dealersite').search('id=new');
     }
 
     $scope.setPatternsDefault = function() {
@@ -190,10 +118,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         };
     }
 
-    $scope.onPatternChange = function (newValue, oldValue) {
-        if (newValue !== oldValue) {
-            onSortingChange();
-        }
+    $scope.onPatternChange = function () {
+        onSortingChange();
     };
 
     $scope.$watch('patterns', $scope.onPatternChange, true);
@@ -206,21 +132,25 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         {id: "isActive", name: "Статус", width: '12.5%'}
     ];
 
+    var regexpOrder = /^([+-]?)(\w+)$/;
+
+    $scope.sortingColumn = function() {
+        return $scope.sorting[0].replace(regexpOrder, '$2');
+    }
+
     $scope.sortingMark = function(column) {
-        if (column === $scope.sorting.column) {
-            return ($scope.sorting.reverse) ? ' ↑': ' ↓';
+        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+            return ($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? ' ↑' : ' ↓';
         }
-        return '\u00A0\u00A0\u00A0';
+        return '   ';
     }
 
     $scope.changeSorting = function(column) {
-        if (column === $scope.sorting.column) {
-            $scope.sorting.reverse = !$scope.sorting.reverse;
+        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+            $scope.sorting[0] = (($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? '' : '-') + column;
         } else {
-            $scope.sorting.column = column;
-            $scope.sorting.reverse = false;
+            $scope.sorting = [column];
         }
-        $rootScope.savedDealerSiteListSorting = $scope.sorting;
         onSortingChange();
     }
 
@@ -229,92 +159,154 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     }
 
     $scope.onSelectPage = function(page) {
-        $scope.paging.currentPage = page;
-
-        var searchParams = _.pick(_.extend({}, $scope.patterns, $scope.sorting, $scope.paging), function(value) {
+        if (page) {
+            $scope.paging.currentPage = page;
+        }
+        var searchParams = _.pick(_.assign({}, $scope.patterns, $scope.paging), function(value) {
             return value;
         });
-        $rootScope.savedDealerSiteListLocationSearch = toUrlSearch(searchParams);
-        $location.path('/dealersitelist?');
-    }
+        searchParams.orders = $scope.sorting;
+        $rootScope.savedDealerSiteListLocationSearch = toLocationSearch(searchParams);
+        $location.search($rootScope.savedDealerSiteListLocationSearch);
 
-    function getFilterFieldsValue(filters, fields) {
-        var filter = _.find(filters, {fields: fields});
-        if (filter) {
-            return filter.value;
+        var dealerSiteQueryParams = makeQueryParams($rootScope.savedDealerSiteListLocationSearch);
+        dealerSitesLoader.loadItems(dealerSiteQueryParams).then(function(dealerSites) {
+            $scope.totalItems = dealerSites.getParams().pager.total;
+            var construction = new Construction({dealerSites: dealerSites});
+            var dealerSitesItems = dealerSites.getItems();
+            $q.all({
+                dealers: dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'in', value: _.pluck(_.pluck(dealerSitesItems, 'dealer'), 'id') }
+                    ],
+                    fields: ['dealer_list_name']
+                }),
+                sites: sitesLoader.loadItems({
+                    filters: [
+                        { fields: ['id'], type: 'in', value: _.pluck(_.pluck(dealerSitesItems, 'site'), 'id') }
+                    ]
+                })
+            }).then(function(collections) {
+                _.assign(construction, collections);
+                _.assign($scope, construction.resolveRefs());
+                var topElem = document.getElementById('DealerSiteListAddDealerSiteUp');
+                var topList = topElem && topElem.getBoundingClientRect().top;
+                if (topList < 0) {
+                    window.scrollBy(0, topList);
+                }
+            });
+        });
+    };
+
+    var ls = $location.search();
+    if (_.size(ls)) {
+        $scope.patterns = {
+            dealers: (!ls.dealers) ? [] : _.invoke(ls.dealers.split(';'), function() {
+                return $scope.dealers.get(_.parseInt(this));
+            }),
+            sites: (!ls.sites) ? [] : _.invoke(ls.sites.split(';'), function() {
+                return $scope.sites.get(_.parseInt(this));
+            }),
+            isActive: dealerSiteStatuses.get((ls.isActive === 'true') ? true : (ls.isActive === 'false') ? false : null)
+        };
+        $scope.sorting = ls.orders && ls.orders.split(';') || ['-id'];
+        $scope.paging = {
+            currentPage: _.parseInt(ls.currentPage),
+            itemsPerPage: _.parseInt(ls.itemsPerPage)
+        };
+    } else {
+        $scope.setPatternsDefault();
+        $scope.sorting = ['-id'];
+        $scope.paging = {
+            itemsPerPage: 25
+        };
+    }
+    $scope.maxSizePaging = 9;
+
+    function makeQueryParams(ls) {
+        if (_.size(ls)) {
+            var queryParams = {
+                filters: [],
+                orders: ls.orders.split(';'),
+                pager: {
+                    page: ls.currentPage,
+                    per_page: ls.itemsPerPage
+                }
+            };
+            if (!_.isEmpty(ls.dealers)) {
+                queryParams.filters.push({
+                    fields: ['dealer'],
+                    type: 'in',
+                    value: ls.dealers.split(';')
+                });
+            }
+            if (!_.isEmpty(ls.sites)) {
+                queryParams.filters.push({
+                    fields: ['site'],
+                    type: 'in',
+                    value: ls.sites.split(';')
+                });
+            }
+            if (ls.isActive === 'true' || ls.isActive === 'false') {
+                queryParams.filters.push({
+                    fields: ['isActive'],
+                    type: 'equal',
+                    value: (ls.isActive === 'true') ? true : false
+                });
+            }
+            return queryParams;
+        } else {
+            return {
+                orders: ['-id'],
+                pager: {
+                    per_page: 25
+                }
+            }
         }
     }
 
-    var params = $scope.dealerSites.getParams();
-    $scope.patterns = {
-        dealers: _.invoke(getFilterFieldsValue(params.filters, ['dealer']), function() {
-                return $scope.dealers.get(_.parseInt(this));
-            }),
-        sites: _.invoke(getFilterFieldsValue(params.filters, ['site']), function() {
-                return $scope.sites.get(_.parseInt(this));
-            }),
-        isActive: dealerSiteStatuses.get(getFilterFieldsValue(params.filters, ['isActive']))
-    };
-    $scope.sorting = {
-        column: params.order.field,
-        reverse: (params.order.direction === 'desc')
-    };
-    $scope.paging = {
-        currentPage: _.parseInt(params.pager.page),
-        itemsPerPage: _.parseInt(params.pager.per_page)
-    };
-    $scope.totalItems = _.parseInt(params.pager.total);
-    $scope.maxSizePaging = 9;
-
-    function toUrlSearch(value) {
+    function toLocationSearch(value) {
         if (_.isArray(value)) {
             return _.invoke(value, function() {
-                return toUrlSearch(this);
+                return toLocationSearch(this);
             }).join(';');
         } else if (_.isObject(value)) {
             if (value.id !== undefined) {
-                return value.id;
+                return toLocationSearch(value.id);
             } else {
                 return _.mapValues(value, function(value) {
-                    return toUrlSearch(value);
+                    return toLocationSearch(value);
                 });
             }
         } else {
-            return value;
+            return String(value);
         }
     }
 
-    $scope.$on('$routeChangeStart', function() {
-        $rootScope.savedDealerSiteListFocus = document.activeElement.id;
-    });
-
-    $timeout(function() {   // ожидание построения DOM
-        var top = document.getElementById('DealerSiteListAddDealerSiteUp').getBoundingClientRect().top;
-        if (top < 0) {
-            window.scrollBy(0, top);
-        }
-    });
-
     function invalidFields(dealerSite, dealerSiteLogins) {
         var invalid = [];
-        if (DealerSiteRequiredFields[dealerSite.site.id]["externalId"] && !dealerSite.externalId) {
+        var siteRequiredFields = DealerSiteRequiredFields[dealerSite.site.id];
+        if (!siteRequiredFields) {
+            return invalid;
+        }
+        if (siteRequiredFields["externalId"] && !dealerSite.externalId) {
             invalid.push(['Код салона на сайте']);
         }
-        if (DealerSiteRequiredFields[dealerSite.site.id]["publicUrl"] && !dealerSite.publicUrl) {
+        if (siteRequiredFields["publicUrl"] && !dealerSite.publicUrl) {
             invalid.push(['Страница на сайте']);
         }
-        var dealerSiteLoginSite = _.find(dealerSiteLogins.getItems(), {type: 'site'});
-        if (DealerSiteRequiredFields[dealerSite.site.id]["site"] && !(dealerSiteLoginSite && dealerSiteLoginSite.login)) {
+        var dealerSiteLoginSite = _.find(dealerSiteLogins.getItems(), {type: dealerSiteLoginTypes.get('site')});
+        if (siteRequiredFields["site"] && !(dealerSiteLoginSite && dealerSiteLoginSite.login)) {
             invalid.push(['Логин на сайте']);
         }
-        if (DealerSiteRequiredFields[dealerSite.site.id]["site"] && !(dealerSiteLoginSite && dealerSiteLoginSite.password)) {
+        if (siteRequiredFields["site"] && !(dealerSiteLoginSite && dealerSiteLoginSite.password)) {
             invalid.push(['Пароль на сайте']);
         }
-        var dealerSiteLoginFtp = _.find(dealerSiteLogins.getItems(), {type: 'ftp'});
-        if (DealerSiteRequiredFields[dealerSite.site.id]["ftp"] && !(dealerSiteLoginFtp && dealerSiteLoginFtp.login)) {
+        var dealerSiteLoginFtp = _.find(dealerSiteLogins.getItems(), {type: dealerSiteLoginTypes.get('ftp')});
+        if (siteRequiredFields["ftp"] && !(dealerSiteLoginFtp && dealerSiteLoginFtp.login)) {
             invalid.push(['Логин для ftp']);
         }
-        if (DealerSiteRequiredFields[dealerSite.site.id]["ftp"] && !(dealerSiteLoginFtp && dealerSiteLoginFtp.password)) {
+        if (siteRequiredFields["ftp"] && !(dealerSiteLoginFtp && dealerSiteLoginFtp.password)) {
             invalid.push(['Пароль для ftp']);
         }
         return invalid;
@@ -336,11 +328,11 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             noticeMessage = 'Разблокирована регистрация ';
             newStatus = dealerSiteStatuses.get(true);
             check = dealerSiteLoginsLoader.loadItemsDealerSite(dealerSite.dealer.id, dealerSite.site.id).then(function(dealerSiteLogins) {
-                var invalid = DealerSiteRequiredFields[dealerSite.site.id] && invalidFields(dealerSite, dealerSiteLogins);
-                if (invalid) {
+                var invalid = invalidFields(dealerSite, dealerSiteLogins);
+                if (invalid.length) {
                     alert("Для разблокирования необходимо заполнить поля формы регистрации: " + invalid.join('; '));
                 }
-                return !invalid;
+                return !invalid.length;
             });
         }
         check.then(function(valid) {
@@ -348,9 +340,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
                 var dealerSiteEdited = new DealerSite;
                 angular.extend(dealerSiteEdited, dealerSite);
                 dealerSiteEdited.isActive = newStatus;
-                dealerSiteEdited.save(data).then(function() {
-                    $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
-                    $location.path('/dealersitelist?');
+                dealerSiteEdited.save({
+                    dealers: (new Dealers()).uniteItem(dealerSiteEdited.dealer),
+                    sites: (new Sites()).uniteItem(dealerSiteEdited.site)
+                }).then(function(dealerSite) {
+                    $scope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
+                    $scope.onSelectPage();
                 });
             }
         });
@@ -387,8 +382,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
                 var noticeMessage = 'Удалена регистрация ';
                 if (confirm(confirmMessage + dealerSite.name() + '?')) {
                     dealerSite.remove().then(function() {
-                        $rootScope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
-                        $location.path('/dealersitelist?');
+                        $scope.savedDealerSiteListNotice = noticeMessage + dealerSite.name();
+                        $scope.onSelectPage();
                     });
                 }
             }
@@ -402,13 +397,13 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     }
 
     $scope.editDealerSiteUrl = function(dealerSite) {
-        return '#/dealersites/' + dealerSite.id + '/edit';
+        return '#/dealersite/?id=' + dealerSite.id;
     };
 })
 
 .controller('DealerSiteEditCtrl', function($scope, $rootScope, $location, $window, $q, data, 
     DealerSite, dealerSiteStatuses, DealerSiteRequiredFields, dealersLoader, sitesLoader, DealerSiteLogin, 
-    dealerSiteLoginTypes, dealerSiteLoginsLoader) {
+    dealerSiteLoginTypes, dealerSiteLoginsLoader, Dealers, Sites) {
 
     _.assign($scope, data);
     $scope.dealerSiteStatuses = dealerSiteStatuses;
@@ -430,6 +425,12 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         _.assign($scope.dealerSiteEdited, $scope.dealerSite);
     }
 
+    function makeDealerSiteNew() {
+        $scope.actionName = "Создание";
+        $scope.dealerSiteEdited = new DealerSite;
+        $scope.dealerSiteEdited.isActive = dealerSiteStatuses.get(true);
+    }
+
     function makeDealerSiteLoginsCopy() {
         _.assign($scope.dealerSiteLoginsEdited.site, {
             dealer: $scope.dealerSiteEdited.dealer,
@@ -448,58 +449,46 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         });
     }
 
-    function onDealerSiteChange() {
+    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', function onDealerSiteChange() {
         $scope.dealerSiteLoginsEdited = {
             site: new DealerSiteLogin({type: 'site'}),
             ftp: new DealerSiteLogin({type: 'ftp'})
         };
         if ($scope.dealerSiteEdited.dealer && $scope.dealerSiteEdited.site) {
-            dealerSiteLoginsLoader.loadItems({
-                filters: [
-                    { type: 'equal', fields: ['dealer'], value: $scope.dealerSiteEdited.dealer.id },
-                    { type: 'equal', fields: ['site'], value: $scope.dealerSiteEdited.site.id }
-                ]
-            }, $scope).then(function(dealerSiteLogins) {
+            dealerSiteLoginsLoader.loadItemsDealerSite($scope.dealerSiteEdited.dealer.id, $scope.dealerSiteEdited.site.id,
+                $scope).then(function(dealerSiteLogins) {
                 $scope.dealerSiteLogins = dealerSiteLogins;
                 makeDealerSiteLoginsCopy();
             });
         }
-    }
+    }, true);
 
-    function makeDealerSiteNew() {
-        $scope.actionName = "Создание";
-        $scope.dealerSiteEdited = new DealerSite;
-        $scope.dealerSiteEdited.isActive = dealerSiteStatuses.get(true);
-    }
-
-    $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', onDealerSiteChange, true);
-
-    function saveDealerSiteEdited() {
-        return $scope.dealerSiteEdited.save($scope).then(function(dealerSite) {
+    function saveDealerSiteEdited(directories) {
+        return $scope.dealerSiteEdited.save(directories).then(function(dealerSite) {
             $rootScope.savedDealerSiteListNotice = 'Сохранена регистрация ' + dealerSite.name();
         });
     }
 
-    function saveRemoveDealerSiteLogin(dealerSiteLogin) {
+    function saveRemoveDealerSiteLogin(dealerSiteLogin, directories) {
         if (dealerSiteLogin.login) {
             dealerSiteLogin.loginError = false;
-            return dealerSiteLogin.save($scope).then(function(dealerSiteLogin) {
-                // $rootScope.savedDealerSiteListNotice += '.\nСохранён доступ ' + dealerSiteLogin.name();
-            });
+            return dealerSiteLogin.save(directories);
         } else if (dealerSiteLogin.id) {
-            return dealerSiteLogin.remove($scope).then(function() {
-                // $rootScope.savedDealerSiteListNotice += '.\nУдалён доступ ' + dealerSiteLogin.name();
-            });
+            return dealerSiteLogin.remove();
         }
     }
 
     $scope.saveDealerSiteEditedWithLogins = function() {
+        var directories = {
+            dealers: (new Dealers()).uniteItem($scope.dealerSiteEdited.dealer),
+            sites: (new Sites()).uniteItem($scope.dealerSiteEdited.site)
+        }
         $q.all([
-            saveDealerSiteEdited(),
-            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.site),
-            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.ftp)
+            saveDealerSiteEdited(directories),
+            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.site, directories),
+            saveRemoveDealerSiteLogin($scope.dealerSiteLoginsEdited.ftp, directories)
         ]).then(function() {
-            $location.path('/dealersitelist');
+            $location.path('/dealersitelist').search('');
         });
     };
 })
