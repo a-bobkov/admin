@@ -25,7 +25,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
     function randomCoordinate(min, max) {
-        return (Math.random() * (max - min) + min).ceil(6);
+        return (Math.random() * (max - min) + min).ceil(8);
     }
 
     function randomLatitude() {
@@ -154,8 +154,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     ], multiplyCoef, function(i, len) {
         this.email = i + this.email;
         if (this.dealer) {
-            this.dealer.lat = randomLatitude();
-            this.dealer.lng = randomLongitude();
+            this.dealer.latitude = randomLatitude();
+            this.dealer.longitude = randomLongitude();
         }
     })).resolveRefs(userDirectories);
     
@@ -661,7 +661,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 16, name: 'auto.exist.ru', isActive: true},
         {id: 17, name: 'am.ru', isActive: true},
         {id: 18, name: 'mercedes-benz.ru', isActive: true},
-        {id: 19, name: 'cars.ru', isActive: true}
+        {id: 19, name: 'carsguru.ru', isActive: true}
     ]);
 
     var dealerSites = new DealerSites(multiplyArrFn([
