@@ -2858,7 +2858,7 @@ describe('dealersitelogin', function() {
         runs(function() {
             var errorResponse = answer.respond.response.data;
             expect(errorResponse.message).toEqual('Validation Failed');
-            expect(errorResponse.errors.children.dealer.errors).toEqual(['Значение не должно быть пустым.']);
+            expect(errorResponse.errors.children.dealer.children.id.errors).toContain('Значение не должно быть пустым.');
         });
     });
 
@@ -2881,7 +2881,7 @@ describe('dealersitelogin', function() {
         runs(function() {
             var errorResponse = answer.respond.response.data;
             expect(errorResponse.message).toEqual('Validation Failed');
-            expect(errorResponse.errors.children.site.errors).toEqual(['Значение не должно быть пустым.']);
+            expect(errorResponse.errors.children.site.children.id.errors).toEqual(['Значение не должно быть пустым.']);
         });
     });
 
