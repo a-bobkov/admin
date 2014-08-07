@@ -24,6 +24,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
+    var regexpUrl = /^(http|https):\/\/([\-\S]+\.)+([\-\S]{2,})/;
+
     function multiplyArrFn(arr, coef, fn) {
         coef = coef || 1;
         var multiplyArray = [];
@@ -868,6 +870,27 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPost(data, dealerSites, 'dealerSite', DealerSite, {
             dealers: dealers,
             sites: sites
+        }, function process() {
+        }, function validation(item, items) {
+            var hasErrors;
+            var children = {};
+            function pushError(errorField, errorText) {
+                hasErrors = true;
+                if (!children[errorField]) {
+                    children[errorField] = {errors: []};
+                }
+                children[errorField].errors.push(errorText);
+            }
+            if (!item.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!item.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (_.find(items, {dealer: item.dealer, site: item.site})) {
+                pushError('site', 'Это значение уже используется.');
+            }
+            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
@@ -875,6 +898,38 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
             dealers: dealers,
             sites: sites
+        }, function process() {
+        }, function validation(item, items) {
+            var hasErrors;
+            var children = {};
+            function pushError(errorField, errorText) {
+                hasErrors = true;
+                if (!children[errorField]) {
+                    children[errorField] = {errors: []};
+                }
+                children[errorField].errors.push(errorText);
+            }
+            if (!item.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!item.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (_.find(items, function(value) {
+                return value.id !== item.id && value.dealer === item.dealer && value.site === item.site;
+            })) {
+                pushError('site', 'Это значение уже используется.');
+            }
+            if (!item.publicUrl.match(regexpUrl)) {
+                pushError('publicUrl', 'Значение не является допустимым URL.');
+            }
+            if (item.publicUrl && item.publicUrl.length > 255) {
+                pushError('publicUrl', 'Значение слишком длинное. Должно быть равно 255 символам или меньше.');
+            }
+            if (item.externalId && item.externalId.length > 10) {
+                pushError('externalId', 'Значение слишком длинное. Должно быть равно 10 символам или меньше.');
+            }
+            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
