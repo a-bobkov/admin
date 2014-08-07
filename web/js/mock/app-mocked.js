@@ -915,6 +915,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     ], multiplyCoef, function(i, len) {
         this.dealer = { id: dealers.getItems()[i].id };
     })).resolveRefs({dealers: dealers, sites: sites});
+    dealerSites.notFoundMessage = 'Регистрация на сайте не найдена.';
 
     var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
@@ -941,7 +942,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 pushError('site', 'Значение не должно быть пустым.');
             }
             if (_.find(items, {dealer: item.dealer, site: item.site})) {
-                pushError('site', 'Это значение уже используется.');
+                pushError(null, 'Регистрация салона по указанному сайту уже существует.');
             }
         });
     });
@@ -961,10 +962,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             if (_.find(items, function(value) {
                 return value.id !== item.id && value.dealer === item.dealer && value.site === item.site;
             })) {
-                pushError('site', 'Это значение уже используется.');
+                pushError(null, 'Регистрация салона по указанному сайту уже существует.');
             }
             if (!item.publicUrl.match(regexpUrl)) {
-                pushError('publicUrl', 'Значение не является допустимым URL.');
+                pushError('publicUrl', 'Не верное значение ссылки: \'' + item.publicUrl + '\'.');
             }
             if (item.publicUrl && item.publicUrl.length > 255) {
                 pushError('publicUrl', 'Значение слишком длинное. Должно быть равно 255 символам или меньше.');
@@ -1028,6 +1029,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     ], multiplyCoef, function(i, len) {
         this.dealer = { id: dealers.getItems()[i].id };
     })).resolveRefs({dealers: dealers, sites: sites});
+    dealerSiteLogins.notFoundMessage = 'Логин салона на сайте не найден.';
 
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {

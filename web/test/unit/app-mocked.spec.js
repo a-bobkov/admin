@@ -89,6 +89,8 @@ describe('app-mocked', function() {
                 return value.toISOString();
             } else if (_.isObject(value)) {
                 return value.id;
+            } else if (_.isString(value)) {
+                return value.toLowerCase();
             } else if (value === undefined) {
                 return -Infinity;
             } else {
@@ -3030,7 +3032,7 @@ describe('dealersitelogin', function() {
 
         runs(function() {
             var errorResponse = answer.respond.response.data;
-            expect(errorResponse.message).toEqual('Not Found');
+            expect(errorResponse.message).toEqual('Логин салона на сайте не найден.');
         });
     });
 });
@@ -3040,7 +3042,7 @@ describe('dealersite', function() {
     describe('Методы query должны фильтровать', function() {
 
         it('equal - по равенству dealer заданному значению', function() {
-            checkFilterEqual(tariffsLoader, ['dealer']);
+            checkFilterEqual(dealerSitesLoader, ['dealer']);
         });
 
         it('in - по равенству dealer одному из заданных значений', function() {
@@ -3072,7 +3074,7 @@ describe('dealersite', function() {
         });
 
         it('equal - по равенству site заданному значению', function() {
-            checkFilterEqual(tariffsLoader, ['site']);
+            checkFilterEqual(dealerSitesLoader, ['site']);
         });
 
         it('in - по равенству site одному из заданных значений', function() {
@@ -3282,7 +3284,7 @@ describe('dealersite', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+                expect(errorResponse.errors.errors).toContain('Регистрация салона по указанному сайту уже существует.');
             });
         });
 
@@ -3334,13 +3336,14 @@ describe('dealersite', function() {
 
         it('put - выдавать ошибку при неправильном формате publicUrl', function() {
             var answer = {};
+            var dealerSite;
 
             runSync(answer, function() {
                 return dealerSitesLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var dealerSite = answer.respond.getItems()[0];
+                dealerSite = answer.respond.getItems()[0];
                 dealerSite.externalId = String(Math.floor(Math.random() * 1000000));
                 dealerSite.publicUrl = '22222';
                 return dealerSite.save();
@@ -3349,7 +3352,7 @@ describe('dealersite', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.publicUrl.errors).toEqual(['Значение не является допустимым URL.']);
+                expect(errorResponse.errors.children.publicUrl.errors).toContain('Не верное значение ссылки: \'' + dealerSite.publicUrl + '\'.');
             });
         });
 
@@ -3520,7 +3523,7 @@ describe('dealersite', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+                expect(errorResponse.errors.errors).toContain('Регистрация салона по указанному сайту уже существует.');
             });
         });
 
@@ -3532,7 +3535,7 @@ describe('dealersite', function() {
             });
 
             runSync(answer, function() {
-                var dealerSite = answer.respond.getItems();
+                var dealerSite = answer.respond.getItems()[0];
                 return dealerSite.remove().then(function(respond) {
                     expect(respond).toEqual(null);
                     return dealerSite;
@@ -3546,7 +3549,7 @@ describe('dealersite', function() {
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Регистрация на сайте не найдена.');
             });
         });
     });
