@@ -239,7 +239,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
         function pushError(errorField, errorText) {
             hasErrors = true;
-            pushDeepError(errorObj, errorField && errorField.split('.'), errorText)
+            pushDeepError(errorObj, errorField && errorField.split('.'), errorText);
         }
         var hasErrors;
         var errorObj = cloneObj(item);
@@ -467,7 +467,8 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 20, name: 'Метро три в питере', city: {id: 2}},
         {id: 21, name: 'Метро четыре в питере', city: {id: 2}},
         {id: 30, name: 'Метро пять в питере', city: {id: 2}},
-        {id: 31, name: 'Метро шесть в питере', city: {id: 2}}
+        {id: 31, name: 'Метро шесть в питере', city: {id: 2}},
+        {id: 174, name: 'Метро шесть в питере', city: {id: 2}}
     ]).resolveRefs({cities: cities});
 
     var regexMetrosQuery = /^\/api2\/metros(?:\?([\w_=&.]*))?$/;
@@ -792,6 +793,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             this.dealer.longitude = randomLongitude();
         }
     })).resolveRefs(userDirectories);
+    users.notFoundMessage = 'Пользователь не найден.';
     
     var regexUserDirectories = /^\/api2\/combined\/users$/;
     $httpBackend.whenGET(regexUserDirectories).respond(function(method, url, data) {
@@ -847,7 +849,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                     } else if (!itemData.site.id) {
                         pushError('site.id', 'Значение не должно быть пустым.');
                     } else if (!sites.get(itemData.site.id)) {
-                        pushError('site', 'Выбранное Вами значение недопустимо.');
+                        pushError('site.id', 'Сайт ' + itemData.site.id + ' не найден.');
                     }
                 }
                 if (itemData.status && !userStatuses.get(itemData.status)) {
@@ -856,20 +858,20 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 if (!itemData.email) {
                     pushError('email', 'Значение не должно быть пустым.');
                 } else if (!itemData.email.match(regexpEmail)) {
-                    pushError('email', 'Значение адреса электронной почты недопустимо.');
+                    pushError('email', 'Значение не верно.');
                 } else if (_.find(items, {email: itemData.email})) {
-                    pushError('email', 'Это значение уже используется.');
+                    pushError('email', 'Значение уже используется.');
                 }
                 if (!itemData.password) {
                     pushError('password', 'Значение не должно быть пустым.');
                 } else if (itemData.password.length > 128) {
-                    pushError('password', 'Значение слишком длинное. Должно быть равно 128 символам или меньше.');
+                    pushError('password', 'Превышена допустимая длина в 128 символов.');
                 }
                 if (itemData.dealer) {
                     if (!itemData.dealer.manager) {
                         pushError('dealer.manager', 'Значение не должно быть пустым.');
                     } else if (!managers.get(itemData.dealer.manager.id)) {
-                        pushError('dealer.manager', 'Значение недопустимо.');
+                        pushError(null, 'Менеджер ' + itemData.dealer.manager.id + ' не найден.');
                     }
                     if (!itemData.dealer.city) {
                         pushError('dealer.city', 'Значение не должно быть пустым.');
@@ -878,14 +880,14 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                     }
                     if (itemData.dealer.metro) {
                         if (!metros.get(itemData.dealer.metro.id)) {
-                            pushError('dealer.metro', 'Значение недопустимо.');
+                            pushError(null, 'Станция метро ' + itemData.dealer.metro.id + ' не найдена.');
                         } else if (metros.get(itemData.dealer.metro.id).city.id !== itemData.dealer.city.id) {
-                            pushError('dealer.metro', 'Значение недопустимо.');
+                            pushError('dealer.metro.id', 'Станция метро должна находиться в выбранном городе.');
                         }
                     }
                     if (itemData.dealer.market) {
                         if (!markets.get(itemData.dealer.market.id)) {
-                            pushError('dealer.market', 'Значение недопустимо.');
+                            pushError(null, 'Рынок ' + itemData.dealer.market.id + ' не найден.');
                         } else if (markets.get(itemData.dealer.market.id).city.id !== itemData.dealer.city.id) {
                             pushError('dealer.market', 'Значение недопустимо.');
                         }
@@ -907,7 +909,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                         pushError('dealer.email', 'Значение адреса электронной почты недопустимо.');
                     }
                     if (itemData.dealer.url && !itemData.dealer.url.match(regexpUrl)) {
-                        pushError('dealer.url', 'Значение не является допустимым URL.');
+                        pushError('dealer.url', 'Не верное значение ссылки: \'' + itemData.dealer.url + '\'.');
                     }
                     if (!itemData.dealer.phone) {
                         pushError('dealer.phone', 'Значение не должно быть пустым.');
@@ -952,7 +954,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                     } else if (!itemData.site.id) {
                         pushError('site.id', 'Значение не должно быть пустым.');
                     } else if (!sites.get(itemData.site.id)) {
-                        pushError('site', 'Выбранное Вами значение недопустимо.');
+                        pushError('site.id', 'Сайт ' + itemData.site.id + ' не найден.');
                     }
                 }
             }

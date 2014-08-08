@@ -3631,7 +3631,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.email.errors).toContain('Значение адреса электронной почты недопустимо.');
+                expect(errorResponse.errors.children.email.errors).toContain('Значение не верно.');
             });
         });
 
@@ -3655,7 +3655,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.email.errors).toContain('Это значение уже используется.');
+                expect(errorResponse.errors.children.email.errors).toContain('Значение уже используется.');
             });
         });
 
@@ -3692,7 +3692,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.password.errors).toContain('Значение слишком длинное. Должно быть равно 128 символам или меньше.');
+                expect(errorResponse.errors.children.password.errors).toContain('Превышена допустимая длина в 128 символов.');
             });
         });
 
@@ -3827,7 +3827,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
-                        city: { id: 1 }
+                        city: { id: 1 },
+                        companyName: '1',
+                        address: '1'
                     }
                 });
                 return user.save();
@@ -3842,15 +3844,18 @@ describe('user, dealer', function() {
 
         it('соответствие значения manager справочнику', function() {
             var answer = {};
+            var user;
 
             runSync(answer, function() {
-                var user = new User({
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
                         city: { id: 1 },
-                        manager: { id: 9999 }
+                        manager: { id: 9999 },
+                        companyName: '1',
+                        address: '1',
                     }
                 });
                 return user.save();
@@ -3859,7 +3864,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.manager.errors).toContain('Значение недопустимо.');
+                expect(errorResponse.errors.errors).toContain('Менеджер ' + user.dealer.manager.id + ' не найден.');
             });
         });
 
@@ -3872,6 +3877,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
                         manager: {id: 1}
                     }
                 });
@@ -3894,6 +3901,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
                         manager: {id: 1},
                         city: {id: 9999}
                     }
@@ -3910,13 +3919,16 @@ describe('user, dealer', function() {
 
         it('соответствие значения metro справочнику', function() {
             var answer = {};
+            var user;
 
             runSync(answer, function() {
-                var user = new User({
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
                         manager: {id: 1},
                         metro: {id: 9999}
                     }
@@ -3927,7 +3939,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.metro.errors).toContain('Значение недопустимо.');
+                expect(errorResponse.errors.errors).toContain('Станция метро ' + user.dealer.metro.id + ' не найдена.');
             });
         });
 
@@ -3940,6 +3952,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
                         manager: {id: 1},
                         city: {id: 1},
                         metro: {id: 174}
@@ -3951,19 +3965,22 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.metro.errors).toContain('Значение недопустимо.');
+                expect(errorResponse.errors.children.dealer.children.metro.children.id.errors).toContain('Станция метро должна находиться в выбранном городе.');
             });
         });
 
         it('соответствие значения market справочнику', function() {
             var answer = {};
+            var user;
 
             runSync(answer, function() {
-                var user = new User({
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
                         manager: {id: 1},
                         market: {id: 9999}
                     }
@@ -3974,7 +3991,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.market.errors).toContain('Значение недопустимо.');
+                expect(errorResponse.errors.errors).toContain('Рынок ' + user.dealer.market.id + ' не найден.');
             });
         });
 
@@ -3987,6 +4004,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
                         manager: {id: 1},
                         city: {id: 2},
                         market: {id: 7}
@@ -4149,9 +4168,10 @@ describe('user, dealer', function() {
 
         it('соответствие значения url формату', function() {
             var answer = {};
+            var user;
 
             runSync(answer, function() {
-                var user = new User({
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
@@ -4172,7 +4192,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.url.errors).toContain('Значение не является допустимым URL.');
+                expect(errorResponse.errors.children.dealer.children.url.errors).toContain('Не верное значение ссылки: \'' + user.dealer.url + '\'.');
             });
         });
 
@@ -4185,6 +4205,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
                         manager: {id: 1}
                     }
                 });
@@ -4723,28 +4745,6 @@ describe('user, dealer', function() {
             checkFilterEqual(usersLoader, ['status']);
         });
 
-        it('equal - фильтровать данные пользователей по равенству в нескольких полях', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return usersLoader.loadItems({
-                    filters: [
-                        { type: 'equal', fields: ['status', 'id'], value: 3 }
-                    ]
-                });
-            });
-
-            runs(function() {
-                var users = answer.respond.getItems();
-                expect(users.length).toBeTruthy();
-                _.forEach(users, function(user) {
-                    var status = String(user.status.id);
-                    var id = String(user.id);
-                    expect(status === '3' || id === '3').toBeTruthy();
-                });
-            });
-        });
-
         it('equal - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
             var answer = {};
 
@@ -4858,7 +4858,7 @@ describe('user, dealer', function() {
             runSync(answer, function() {
                 return usersLoader.loadItems({
                     filters: [
-                        { type: 'contain', fields: ['lastLogin'], value: ['2013'] }
+                        { type: 'contain', fields: ['id'], value: ['3'] }
                     ]
                 });
             });
@@ -4867,8 +4867,8 @@ describe('user, dealer', function() {
                 var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
                 _.forEach(users, function(user) {
-                    var lastLogin = String(user.lastLogin);
-                    expect(lastLogin.indexOf('2013') !== -1).toBeTruthy();
+                    var id = String(user.id);
+                    expect(id.indexOf('3') !== -1).toBeTruthy();
                 });
             });
         });
@@ -4888,8 +4888,8 @@ describe('user, dealer', function() {
                 var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
                 _.forEach(users, function(user) {
-                    var email = String(user.email).toLowerCase();
-                    var companyName = String(user.companyName).toLowerCase();
+                    var email = user.email.toLowerCase();
+                    var companyName = user.dealer && user.dealer.companyName && user.dealer.companyName.toLowerCase();
                     expect(email.indexOf('ac') !== -1 || companyName.indexOf('ac') !== -1).toBeTruthy();
                 });
             });
@@ -4901,7 +4901,7 @@ describe('user, dealer', function() {
             runSync(answer, function() {
                 return usersLoader.loadItems({
                     filters: [
-                        { type: 'contain', fields: ['lastLogin'], value: 2013 }
+                        { type: 'contain', fields: ['email'], value: 3 }
                     ]
                 });
             });
@@ -4910,8 +4910,8 @@ describe('user, dealer', function() {
                 var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
                 _.forEach(users, function(user) {
-                    var lastLogin = String(user.lastLogin);
-                    expect(lastLogin.indexOf('2013') !== -1).toBeTruthy();
+                    var email = String(user.email);
+                    expect(email.indexOf('3') !== -1).toBeTruthy();
                 });
             });
         });
@@ -5206,7 +5206,7 @@ describe('user, dealer', function() {
 
             runs(function() {
                 var errorResponse = s.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Пользователь не найден.');
             });
         });
 
@@ -5245,6 +5245,7 @@ describe('user, dealer', function() {
 
         it('put - возвращать ошибку при попытке сохранения пользователя со ссылками на объекты, не существующие в БД', function() {
             var s = {};
+            var user;
 
             runSyncS(s, function() {
                 return $q.all({
@@ -5253,7 +5254,7 @@ describe('user, dealer', function() {
             });
 
             runSyncS(s, function() {
-                var user = _.find(s.users.getItems(), function(user) {
+                user = _.find(s.users.getItems(), function(user) {
                     return user.group.id === 3;
                 });
                 user.site = new Site({id: 99});
@@ -5263,7 +5264,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = s.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toContain('Выбранное Вами значение недопустимо.');
+                expect(errorResponse.errors.children.site.children.id.errors).toContain('Сайт ' + user.site.id + ' не найден.');
             });
         });
 
@@ -5277,7 +5278,7 @@ describe('user, dealer', function() {
 
             runs(function() {
                 var errorResponse = s.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Пользователь не найден.');
             });
         });
 
@@ -5320,7 +5321,7 @@ describe('user, dealer', function() {
 
             runs(function() {
                 var errorResponse = s.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Пользователь не найден.');
             });
         });
     });
