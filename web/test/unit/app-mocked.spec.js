@@ -5121,11 +5121,11 @@ describe('user, dealer', function() {
                 var newUser = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru',
                     password: '1',
-                    lastLogin: '2013-12-01',
                     status: 'active',
                     group: {id: 2},
                     dealer: {
                         companyName: 'Новая компания',
+                        billingCompany: {id: 1},
                         city: {id: 1},
                         market: {id: 4},
                         metro: {id: 8},
@@ -5158,7 +5158,7 @@ describe('user, dealer', function() {
             runSyncS(s, function() {
                 var savedUserSerialized = s.savedUser.serialize();
                 _.forEach(s.newUser.serialize(), function(value, key) {
-                    if (!_.contains(['id', 'dealer'], key)) {
+                    if (!_.contains(['id', 'dealer', 'password'], key)) {
                         expect(value).toEqual(savedUserSerialized[key]);
                     }
                 });
