@@ -919,12 +919,12 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                             if (!itemData.dealer[prop].match(regexpPhoneNumber)) {
                                 pushError('dealer.' + prop, 'Неверный формат номера телефона.');
                             }
-                            if (!itemData.dealer[prop + 'From']) {
+                            if (!_.isNumber(itemData.dealer[prop + 'From'])) {
                                 pushError('dealer.' + prop, 'Неверно указано время для звонка на телефон.');
                             } else if (itemData.dealer[prop + 'From'] < 0 || itemData.dealer[prop + 'From'] > 24) {
                                 pushError('dealer.' + prop + 'From', 'Значение должно быть 24 или меньше.');
                             }
-                            if (!itemData.dealer[prop + 'To']) {
+                            if (!_.isNumber(itemData.dealer[prop + 'To'])) {
                                 pushError('dealer.' + prop, 'Неверно указано время для звонка на телефон.');
                             } else if (itemData.dealer[prop + 'To'] < 0 || itemData.dealer[prop + 'To'] > 24) {
                                 pushError('dealer.' + prop + 'To', 'Значение должно быть 24 или меньше.');
