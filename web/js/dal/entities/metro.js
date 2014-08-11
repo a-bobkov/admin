@@ -25,6 +25,18 @@ angular.module('max.dal.entities.metro', ['max.dal.entities.collection'])
         Collection.call(this, itemsData, queryParams, Metro, Metros);
     };
     _.assign(Metros.prototype, Collection.prototype);
+    Metros.prototype.lowerName = 'metros';
     return Metros;
+})
+
+.factory('metroApi', function(RestApi, Api) {
+    var metroApi = new RestApi('metros', 'metro');
+    return metroApi;
+})
+
+.service('metrosLoader', function metrosLoader(entityLoader, metroApi, Metro, Metros) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, metroApi, Metros);
+    };
 })
 ;

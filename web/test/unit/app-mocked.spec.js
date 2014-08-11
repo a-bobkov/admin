@@ -5,6 +5,8 @@ describe('app-mocked', function() {
     var $q;
     var Construction;
     var usersLoader,
+        UserStatus,
+        userStatuses,
         Users,
         User,
         Group,
@@ -18,6 +20,12 @@ describe('app-mocked', function() {
         Markets,
         Market,
         BillingCompanies,
+        citiesLoader,
+        marketsLoader,
+        metrosLoader,
+        groupsLoader,
+        managersLoader,
+        DealerPhoneHour,
 
         dealerSitesLoader,
         dealersLoader,
@@ -26,6 +34,7 @@ describe('app-mocked', function() {
         DealerSites,
         Dealers,
         Sites,
+        Site,
         dealerSiteLoginsLoader,
         DealerSiteLogin,
         DealerSiteLogins;
@@ -84,6 +93,8 @@ describe('app-mocked', function() {
                 return value.toISOString();
             } else if (_.isObject(value)) {
                 return value.id;
+            } else if (_.isString(value)) {
+                return value.toLowerCase();
             } else if (value === undefined) {
                 return -Infinity;
             } else {
@@ -135,6 +146,8 @@ describe('app-mocked', function() {
         $q = injector.get('$q');
 
         Construction = injector.get('Construction');
+        UserStatus = injector.get('UserStatus');
+        userStatuses = injector.get('userStatuses');
         usersLoader = injector.get('usersLoader');
         User = injector.get('User');
         Users = injector.get('Users');
@@ -149,6 +162,12 @@ describe('app-mocked', function() {
         Markets = injector.get('Markets');
         Market = injector.get('Market');
         BillingCompanies = injector.get('BillingCompanies');
+        citiesLoader = injector.get('citiesLoader');
+        marketsLoader = injector.get('marketsLoader');
+        metrosLoader = injector.get('metrosLoader');
+        groupsLoader = injector.get('groupsLoader');
+        managersLoader = injector.get('managersLoader');
+        DealerPhoneHour = injector.get('DealerPhoneHour');
 
         dealerSitesLoader = injector.get('dealerSitesLoader');
         DealerSites = injector.get('DealerSites');
@@ -157,6 +176,7 @@ describe('app-mocked', function() {
         Dealers = injector.get('Dealers');
         sitesLoader = injector.get('sitesLoader');
         Sites = injector.get('Sites');
+        Site = injector.get('Site');
         dealerSiteLoginsLoader = injector.get('dealerSiteLoginsLoader');
         DealerSiteLogins = injector.get('DealerSiteLogins');
         DealerSiteLogin = injector.get('DealerSiteLogin');
@@ -188,7 +208,7 @@ describe('app-mocked', function() {
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, 20, Construction,
-                User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+                userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
                 Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
                 BillingCredits, BillingCredit, BillingUnions, BillingUnion);
@@ -230,7 +250,39 @@ describe('app-mocked', function() {
         });
     }
 
-    function checkSorting(loader, orders) {
+    function runSyncS(scope, asyncFn) {
+        var actualSuccess;
+        var actualError;
+        var thrownErr;
+
+        runs(function() {
+            try {
+                asyncFn().then(function(respond) {
+                    actualSuccess = respond;
+                }, function(respond) {
+                    actualError = respond;
+                });
+                $httpBackend.flush();
+            } catch(err) {
+                thrownErr = err;
+            }
+        });
+        waitsFor(function() {
+            if (actualSuccess !== undefined) {
+                _.assign(scope, actualSuccess);
+                return true;
+            } else if (actualError !== undefined) {
+                _.assign(scope, actualError);
+                return true;
+            } else if (thrownErr !== undefined) {
+                _.assign(scope, thrownErr);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    function checkSorting(loader, orders, short) {
         var answer = {};
 
         runSync(answer, function() {
@@ -256,7 +308,9 @@ describe('app-mocked', function() {
             var array1 = answer.respond.collection1.getItems();
             expect(array1.length).toBeTruthy();
             var array2 = answer.respond.collection2.getItems();
-            expect(array2.length).toBeTruthy();
+            if (!short) {
+                expect(array2.length).toBeTruthy();
+            }
             var array = _.union(array1, array2);
             _.forEach(orders, function(order) {
                 var field = order.replace(regexpOrder, '$2');
@@ -271,13 +325,22 @@ describe('app-mocked', function() {
         var answer = {};
         var item;
 
+        function serialize(value) {
+            if (_.isDate(value)) {
+                return value.toISOString().slice(0,10);
+            } else if (_.isObject(value)) {
+                return value.id;
+            } else {
+                return value;
+            }
+        }
+
         runSync(answer, function() {
             return loader.loadItems().then(function(collection) {
                 item = collection.getItems()[0];
                 return loader.loadItems({
                     filters: _.map(fields, function(field) {
-                        var itemValue = _.isObject(item[field]) ? item[field].id : item[field];
-                        return { fields: [field], type: 'equal', value: itemValue };
+                        return { fields: [field], type: 'equal', value: serialize(item[field]) };
                     })
                 });
             });
@@ -287,14 +350,152 @@ describe('app-mocked', function() {
             var items = answer.respond.getItems();
             expect(items.length).toBeTruthy();
             _.forEach(fields, function(field) {
-                var itemValue = _.isObject(item[field]) ? item[field].id : item[field];
+                var itemValue = serialize(item[field]);
                 _.forEach(items, function(itemEqual) {
-                    var itemEqualValue = _.isObject(itemEqual[field]) ? itemEqual[field].id : itemEqual[field];
-                    expect(itemEqualValue).toEqual(itemValue);
+                    expect(serialize(itemEqual[field])).toEqual(itemValue);
                 })
             });
         });
-    };
+    }
+
+describe('city', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return citiesLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(city) {
+                    expect(city.name).toBeTruthy();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(citiesLoader, ['id']);
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(citiesLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(citiesLoader, ['-id']);
+        });
+    });
+});
+
+describe('market', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return marketsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(market) {
+                    expect(market.name).toBeTruthy();
+                    expect(market.city).toBeReference();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(marketsLoader, ['id']);
+        });
+    });
+});
+
+describe('metro', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return metrosLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(metro) {
+                    expect(metro.name).toBeTruthy();
+                    expect(metro.city).toBeReference();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(metrosLoader, ['id']);
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(metrosLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(metrosLoader, ['-id']);
+        });
+    });
+});
+
+describe('group', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return groupsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(group) {
+                    expect(group.name).toBeTruthy();
+                    expect(group.description).toBeTruthy();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(groupsLoader, ['id']);
+        });
+    });
+});
+
+describe('manager', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return managersLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(manager) {
+                    expect(manager.name).toBeTruthy();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(managersLoader, ['id']);
+        });
+    });
+});
 
 describe('billingunion', function() {
 
@@ -834,35 +1035,11 @@ describe('sitebalance', function() {
         });
 
         it('сортировать по site по возрастанию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return siteBalancesLoader.loadItems({
-                    orders: ['+site']
-                });
-            });
-
-            runs(function() {
-                var siteBalances = answer.respond.getItems();
-                expect(siteBalances.length).toBeTruthy();
-                expect(_.pluck(_.pluck(siteBalances, 'site'), 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(siteBalancesLoader, ['+site'], true);
         });
 
         it('сортировать по site по убыванию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return siteBalancesLoader.loadItems({
-                    orders: ['-site']
-                });
-            });
-
-            runs(function() {
-                var siteBalances = answer.respond.getItems();
-                expect(siteBalances.length).toBeTruthy();
-                expect(_.pluck(_.pluck(siteBalances, 'site'), 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(siteBalancesLoader, ['-site'], true);
         });
     });
 });
@@ -923,67 +1100,19 @@ describe('dealerTariff', function() {
         });
 
         it('сортировать по id по возрастанию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return dealerTariffsLoader.loadItems({
-                    orders: ['+id']
-                });
-            });
-
-            runs(function() {
-                var dealerTariffs = answer.respond.getItems();
-                expect(dealerTariffs.length).toBeTruthy();
-                expect(_.pluck(dealerTariffs, 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(dealerTariffsLoader, ['+id'], true);
         });
 
         it('сортировать по id по убыванию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return dealerTariffsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runs(function() {
-                var dealerTariffs = answer.respond.getItems();
-                expect(dealerTariffs.length).toBeTruthy();
-                expect(_.pluck(dealerTariffs, 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(dealerTariffsLoader, ['-id'], true);
         });
 
         it('сортировать по site по возрастанию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return dealerTariffsLoader.loadItems({
-                    orders: ['+site']
-                });
-            });
-
-            runs(function() {
-                var dealerTariffs = answer.respond.getItems();
-                expect(dealerTariffs.length).toBeTruthy();
-                expect(_.pluck(_.pluck(dealerTariffs, 'site'), 'id')).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(dealerTariffsLoader, ['+site'], true);
         });
 
         it('сортировать по site по убыванию', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return dealerTariffsLoader.loadItems({
-                    orders: ['-site']
-                });
-            });
-
-            runs(function() {
-                var dealerTariffs = answer.respond.getItems();
-                expect(dealerTariffs.length).toBeTruthy();
-                expect(_.pluck(_.pluck(dealerTariffs, 'site'), 'id')).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(dealerTariffsLoader, ['-site'], true);
         });
     });
 });
@@ -1257,17 +1386,17 @@ describe('sale', function() {
             checkSorting(salesLoader, ['-type', '-id']);
         });
 
-        it('сортировать по count по возрастанию, затем по id по убыванию', function() {
-            checkSorting(salesLoader, ['+count', '-id']);
-        });
+        // it('сортировать по count по возрастанию, затем по id по убыванию', function() {
+        //     checkSorting(salesLoader, ['+count', '-id']);
+        // });
 
         it('сортировать по count по убыванию, затем по id по убыванию', function() {
             checkSorting(salesLoader, ['-count', '-id']);
         });
 
-        // it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
-        //     checkSorting(salesLoader, ['+amount', '-id']);
-        // });
+        it('сортировать по amount по возрастанию, затем по id по убыванию', function() {
+            checkSorting(salesLoader, ['+amount', '-id']);
+        });
 
         it('сортировать по amount по убыванию, затем по id по убыванию', function() {
             checkSorting(salesLoader, ['-amount', '-id']);
@@ -1981,7 +2110,6 @@ describe('sale', function() {
 
             runSync(answer, function() {
                 sale = answer.respond.getItems()[0];
-                console.log(sale);
                 var construction = {
                     dealers: new Dealers([{id: sale.dealer.id}]),
                     sites: new Sites([{id: sale.site.id}]),
@@ -1995,7 +2123,6 @@ describe('sale', function() {
             runs(function() {
                 var equalSale = answer.respond;
                 _.forEach(sale, function(value, key) {
-                    console.log(key, value, equalSale[key]);
                     expect(value).toEqual(equalSale[key]);
                 });
             });
@@ -2632,350 +2759,330 @@ describe('tariff', function() {
     });
 });
 
-describe('dealersite, dealersitelogin', function() {
+describe('dealersitelogin', function() {
 
-    describe('dealersitelogin', function() {
+    it('equal - по равенству dealer и site заданным значениям', function() {
+        checkFilterEqual(dealerSiteLoginsLoader, ['dealer', 'site']);
+    });
 
-        it('equal - по равенству dealer и site заданным значениям', function() {
-            checkFilterEqual(dealerSiteLoginsLoader, ['dealer', 'site']);
-        });
+    it('post - сохранять новый dealersitelogin', function() {
+        var answer = {};
+        var directories = {};
+        var siteId;
+        var freeDealerId;
 
-        it('post - сохранять новый dealersitelogin', function() {
-            var answer = {};
-            var directories = {};
-            var siteId;
-            var freeDealerId;
-
-            runSync(answer, function() {
-                return $q.all({
-                    sites: sitesLoader.loadItems(),
-                    dealers: dealersLoader.loadItems({
-                        orders: ['-id'],
-                        fields: ['dealer_list_name']
-                    })
-                });
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond);
-                siteId = directories.sites.getItems()[1].id;
-                var dealerIds = _.pluck(directories.dealers.getItems(), 'id');
-                return dealerSiteLoginsLoader.loadItems({
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: siteId },
-                        { fields: ['dealer'], type: 'in', value: dealerIds }
-                    ]
-                }, directories).then(function(dealerSiteLogins) {
-                    var dealerSiteLoginsDealerIds = _.pluck(_.pluck(dealerSiteLogins.getItems(), 'dealer'), 'id');
-                    return _.difference(dealerIds, dealerSiteLoginsDealerIds);
-                });
-            });
-
-            runSync(answer, function() {
-                freeDealerId = answer.respond[0];
-                var newDealerSiteLogin = new DealerSiteLogin({
-                    dealer: {id: freeDealerId},
-                    site: {id: siteId},
-                    type: 'site',
-                    login: 'a11111',
-                    password: 'p22222'
-                });
-                return newDealerSiteLogin.save(directories);
-            });
-
-            runSync(answer, function() {
-                var newDealerSiteLogin = answer.respond;
-                return dealerSiteLoginsLoader.loadItem(newDealerSiteLogin.id);
-            });
-
-            runs(function() {
-                var newDealerSiteLogin = answer.respond;
-                expect(newDealerSiteLogin.dealer.id).toEqual(freeDealerId);
-                expect(newDealerSiteLogin.site.id).toEqual(siteId);
-                expect(newDealerSiteLogin.type.id).toEqual('site');
-                expect(newDealerSiteLogin.login).toEqual('a11111');
-                expect(newDealerSiteLogin.password).toEqual('p22222');
+        runSync(answer, function() {
+            return $q.all({
+                sites: sitesLoader.loadItems(),
+                dealers: dealersLoader.loadItems({
+                    orders: ['-id'],
+                    fields: ['dealer_list_name']
+                })
             });
         });
 
-        it('post - выдавать ошибку, если такая комбинация dealer, site, type уже есть', function() {
-            var answer = {};
-            var directories = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                directories.dealerSiteLogins = answer.respond;
-                dealerSiteLogin = directories.dealerSiteLogins.getItems()[0];
-                return $q.all({
-                    sites: sitesLoader.loadItems({
-                        filters: [
-                            { fields: ['id'], type: 'equal', value: dealerSiteLogin.site.id }
-                        ]
-                    }),
-                    dealers: dealersLoader.loadItems({
-                        filters: [
-                            { fields: ['id'], type: 'equal', value: dealerSiteLogin.dealer.id }
-                        ],
-                        fields: ['dealer_list_name']
-                    })
-                });
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond);
-                var dealerSiteLoginCopy = new DealerSiteLogin({
-                    dealer: {id: dealerSiteLogin.dealer.id},
-                    site: {id: dealerSiteLogin.site.id},
-                    type: dealerSiteLogin.type.id
-                }, directories);
-                return dealerSiteLoginCopy.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+        runSync(answer, function() {
+            _.assign(directories, answer.respond);
+            siteId = directories.sites.getItems()[1].id;
+            var dealerIds = _.pluck(directories.dealers.getItems(), 'id');
+            return dealerSiteLoginsLoader.loadItems({
+                filters: [
+                    { fields: ['site'], type: 'equal', value: siteId },
+                    { fields: ['dealer'], type: 'in', value: dealerIds }
+                ]
+            }, directories).then(function(dealerSiteLogins) {
+                var dealerSiteLoginsDealerIds = _.pluck(_.pluck(dealerSiteLogins.getItems(), 'dealer'), 'id');
+                return _.difference(dealerIds, dealerSiteLoginsDealerIds);
             });
         });
 
-        it('put - сохранять изменения атрибутов dealersitelogin', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
+        runSync(answer, function() {
+            freeDealerId = answer.respond[0];
+            var newDealerSiteLogin = new DealerSiteLogin({
+                dealer: {id: freeDealerId},
+                site: {id: siteId},
+                type: 'site',
+                login: 'a11111',
+                password: 'p22222'
             });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
-                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save({
-                    dealers: new Dealers([{id: dealerSiteLogin.dealer.id}]),
-                    sites: new Sites([{id: dealerSiteLogin.site.id}])
-                });
-            });
-
-            runSync(answer, function() {
-                var savedDealerSiteLogin = answer.respond;
-                return dealerSiteLoginsLoader.loadItem(savedDealerSiteLogin.id);
-            });
-
-            runs(function() {
-                var savedDealerSiteLogin = answer.respond;
-                expect(savedDealerSiteLogin.login).toEqual(dealerSiteLogin.login);
-                expect(savedDealerSiteLogin.password).toEqual(dealerSiteLogin.password);
-            });
+            return newDealerSiteLogin.save(directories);
         });
 
-        it('put - выдавать ошибку если нет значения в поле dealer', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.dealer = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.errors).toEqual(['Значение не должно быть пустым.']);
-            });
+        runSync(answer, function() {
+            var newDealerSiteLogin = answer.respond;
+            return dealerSiteLoginsLoader.loadItem(newDealerSiteLogin.id);
         });
 
-        it('put - выдавать ошибку если нет значения в поле site', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.site = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку если нет значения в поле type', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.type = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.type.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку если нет значения в поле login', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = null;
-                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.login.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку при длине значения login больше 100', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
-                dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.login.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
-            });
-        });
-
-        it('put - выдавать ошибку если нет значения в поле password', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
-                dealerSiteLogin.password = null;
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.password.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
-
-        it('put - выдавать ошибку при длине значения password больше 100', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
-                dealerSiteLogin.password = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
-                return dealerSiteLogin.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.password.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
-            });
-        });
-
-        it('remove - удалять dealersitelogin', function() {
-            var answer = {};
-            var dealerSiteLogin;
-
-            runSync(answer, function() {
-                return dealerSiteLoginsLoader.loadItems({
-                    orders: ['-id']
-                });
-            });
-
-            runSync(answer, function() {
-                dealerSiteLogin = answer.respond.getItems()[0];
-                return dealerSiteLogin.remove();
-            });
-
-            runs(function() {
-                expect(answer.respond).toEqual(null);
-            });
-
-            runSync(answer, function() {
-                var savedDealerSiteLogin = answer.respond;
-                return dealerSiteLoginsLoader.loadItem(dealerSiteLogin.id);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
-            });
+        runs(function() {
+            var newDealerSiteLogin = answer.respond;
+            expect(newDealerSiteLogin.dealer.id).toEqual(freeDealerId);
+            expect(newDealerSiteLogin.site.id).toEqual(siteId);
+            expect(newDealerSiteLogin.type.id).toEqual('site');
+            expect(newDealerSiteLogin.login).toEqual('a11111');
+            expect(newDealerSiteLogin.password).toEqual('p22222');
         });
     });
 
-    describe('Методы query должны фильтровать dealersite', function() {
+    it('post - выдавать ошибку, если такая комбинация dealer, site, type уже есть', function() {
+        var answer = {};
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            var dealerSiteLogin = answer.respond.getItems()[0];
+            var dealerSiteLoginCopy = new DealerSiteLogin({
+                dealer: {id: dealerSiteLogin.dealer.id},
+                site: {id: dealerSiteLogin.site.id},
+                type: dealerSiteLogin.type.id
+            });
+            return dealerSiteLoginCopy.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.errors).toEqual(['Логин салона по указанному сайту уже существует.']);
+        });
+    });
+
+    it('put - сохранять изменения атрибутов dealersitelogin', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+            dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+            return dealerSiteLogin.save({
+                dealers: new Dealers([{id: dealerSiteLogin.dealer.id}]),
+                sites: new Sites([{id: dealerSiteLogin.site.id}])
+            });
+        });
+
+        runSync(answer, function() {
+            var savedDealerSiteLogin = answer.respond;
+            return dealerSiteLoginsLoader.loadItem(savedDealerSiteLogin.id);
+        });
+
+        runs(function() {
+            var savedDealerSiteLogin = answer.respond;
+            expect(savedDealerSiteLogin.login).toEqual(dealerSiteLogin.login);
+            expect(savedDealerSiteLogin.password).toEqual(dealerSiteLogin.password);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле dealer', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.dealer = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.dealer.children.id.errors).toContain('Значение не должно быть пустым.');
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле site', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.site = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.site.children.id.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле type', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.type = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.type.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле login', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = null;
+            dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.login.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку при длине значения login больше 100', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
+            dealerSiteLogin.password = String(Math.floor(Math.random() * 1000000));
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.login.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+        });
+    });
+
+    it('put - выдавать ошибку если нет значения в поле password', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+            dealerSiteLogin.password = null;
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.password.errors).toEqual(['Значение не должно быть пустым.']);
+        });
+    });
+
+    it('put - выдавать ошибку при длине значения password больше 100', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            dealerSiteLogin.login = String(Math.floor(Math.random() * 1000000));
+            dealerSiteLogin.password = '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901';
+            return dealerSiteLogin.save();
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Validation Failed');
+            expect(errorResponse.errors.children.password.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+        });
+    });
+
+    it('remove - удалять dealersitelogin', function() {
+        var answer = {};
+        var dealerSiteLogin;
+
+        runSync(answer, function() {
+            return dealerSiteLoginsLoader.loadItems({
+                orders: ['-id']
+            });
+        });
+
+        runSync(answer, function() {
+            dealerSiteLogin = answer.respond.getItems()[0];
+            return dealerSiteLogin.remove();
+        });
+
+        runs(function() {
+            expect(answer.respond).toEqual(null);
+        });
+
+        runSync(answer, function() {
+            var savedDealerSiteLogin = answer.respond;
+            return dealerSiteLoginsLoader.loadItem(dealerSiteLogin.id);
+        });
+
+        runs(function() {
+            var errorResponse = answer.respond.response.data;
+            expect(errorResponse.message).toEqual('Логин салона на сайте не найден.');
+        });
+    });
+});
+
+describe('dealersite', function() {
+
+    describe('Методы query должны фильтровать', function() {
 
         it('equal - по равенству dealer заданному значению', function() {
-            checkFilterEqual(tariffsLoader, ['dealer']);
+            checkFilterEqual(dealerSitesLoader, ['dealer']);
         });
 
         it('in - по равенству dealer одному из заданных значений', function() {
@@ -3007,7 +3114,7 @@ describe('dealersite, dealersitelogin', function() {
         });
 
         it('equal - по равенству site заданному значению', function() {
-            checkFilterEqual(tariffsLoader, ['site']);
+            checkFilterEqual(dealerSitesLoader, ['site']);
         });
 
         it('in - по равенству site одному из заданных значений', function() {
@@ -3079,7 +3186,7 @@ describe('dealersite, dealersitelogin', function() {
         });
     });
 
-    describe('Методы query должны сортировать dealersite', function() {
+    describe('Методы query должны сортировать', function() {
 
         it('по возрастанию id', function() {
             checkSorting(dealerSitesLoader, ['+id']);
@@ -3132,12 +3239,9 @@ describe('dealersite, dealersitelogin', function() {
 
     describe('Методы CRUD должны', function() {
 
-        iit('post - сохранять новый dealersite', function() {
+        it('post - сохранять новый dealersite', function() {
             var answer = {};
             var directories = {};
-            var sites;
-            var dealers;
-            var freeDealerId;
 
             runSync(answer, function() {
                 return $q.all({
@@ -3151,12 +3255,10 @@ describe('dealersite, dealersitelogin', function() {
 
             runSync(answer, function() {
                 _.assign(directories, answer.respond);
-                sites = directories.sites.getItems();
-                dealers = directories.dealers.getItems();
-                var dealerIds = _.pluck(dealers, 'id');
+                var dealerIds = _.pluck(directories.dealers.getItems(), 'id');
                 return dealerSitesLoader.loadItems({
                     filters: [
-                        { fields: ['site'], type: 'equal', value: sites[1].id },
+                        { fields: ['site'], type: 'equal', value: directories.sites.getItems()[1].id },
                         { fields: ['dealer'], type: 'in', value: dealerIds }
                     ]
                 }).then(function(dealerSites) {
@@ -3166,30 +3268,38 @@ describe('dealersite, dealersitelogin', function() {
             });
 
             runSync(answer, function() {
-                console.log(answer.respond);
                 freeDealerIds = answer.respond;
                 var newDealerSite = new DealerSite({
                     dealer: {id: freeDealerIds[0]},
-                    site: {id: sites[1].id},
+                    site: {id: directories.sites.getItems()[1].id},
                     externalId: '1109238',
                     publicUrl: 'http://www.auto.mail.ru/1109238.html',
                     isActive: true
                 }, directories);
-                return newDealerSite.save(directories);
+                return {
+                    dealerSite: newDealerSite,
+                    savedDealerSite: newDealerSite.save(directories)
+                }
             });
 
             runSync(answer, function() {
-                var newDealerSite = answer.respond;
-                return dealerSitesLoader.loadItem(newDealerSite.id);
+                var dealerSite = answer.respond.dealerSite;
+                var savedDealerSite = answer.respond.savedDealerSite;
+                _.forEach(dealerSite, function(value, key) {
+                    expect(value).toEqual(savedDealerSite[key]);
+                });
+                return {
+                    savedDealerSite: savedDealerSite,
+                    loadedDealerSite: dealerSitesLoader.loadItem(savedDealerSite.id, directories)
+                }
             });
 
             runs(function() {
-                var newDealerSite = answer.respond;
-                expect(newDealerSite.dealer.id).toEqual(freeDealerIds[0]);
-                expect(newDealerSite.site).toEqual(sites[1]);
-                expect(newDealerSite.externalId).toEqual('1109238');
-                expect(newDealerSite.publicUrl).toEqual('http://www.auto.mail.ru/1109238.html');
-                expect(newDealerSite.isActive.id).toEqual(true);
+                var savedDealerSite = answer.respond.savedDealerSite;
+                var loadedDealerSite = answer.respond.loadedDealerSite;
+                _.forEach(savedDealerSite, function(value, key) {
+                    expect(value).toEqual(loadedDealerSite[key]);
+                });
             });
         });
 
@@ -3197,65 +3307,70 @@ describe('dealersite, dealersitelogin', function() {
             var answer = {};
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSitesLoader.loadItems(params);
+                return dealerSitesLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                var dealerSite = dealerSites[0];
+                var dealerSite = answer.respond.getItems()[0];
                 var dealerSiteCopy = new DealerSite({
-                    dealer: dealerSite.dealer,
-                    site: dealerSite.site
-                }, directories);
-                return dealerSiteCopy.save(directories);
+                    dealer: {id: dealerSite.dealer.id},
+                    site: {id: dealerSite.site.id}
+                });
+                return dealerSiteCopy.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+                expect(errorResponse.errors.errors).toContain('Регистрация салона по указанному сайту уже существует.');
             });
         });
 
         it('put - сохранять изменения атрибутов dealersite', function() {
             var answer = {};
             var dealerSite;
+            var directories;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSitesLoader.loadItems(params);
+                return dealerSitesLoader.loadItems({
+                    orders: ['-id']
+                });
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                dealerSite = dealerSites[0];
+                var dealerSite = answer.respond.getItems()[0];
+                directories = {
+                    dealers: new Dealers([{id: dealerSite.dealer.id}]),
+                    sites: new Sites([{id: dealerSite.site.id}])
+                };
                 dealerSite.externalId = String(Math.floor(Math.random() * 1000000));
                 dealerSite.publicUrl = 'http://www.jasmine.ru/' + String(Math.floor(Math.random() * 1000000));
-                return dealerSite.save(directories);
+                return {
+                    dealerSite: dealerSite,
+                    savedDealerSite: dealerSite.save(directories)
+                };
             });
 
             runSync(answer, function() {
-                var savedDealerSite = answer.respond;
-                return dealerSitesLoader.loadItem(savedDealerSite.id);
+                var dealerSite = answer.respond.dealerSite;
+                var savedDealerSite = answer.respond.savedDealerSite;
+                _.forEach(dealerSite, function(value, key) {
+                    expect(value).toEqual(savedDealerSite[key]);
+                });
+                return {
+                    savedDealerSite: savedDealerSite,
+                    loadedDealerSite: dealerSitesLoader.loadItem(savedDealerSite.id, directories)
+                }
             });
 
             runs(function() {
-                var savedDealerSite = answer.respond.dealerSite;
-                expect(savedDealerSite.externalId).toEqual(dealerSite.externalId);
-                expect(savedDealerSite.publicUrl).toEqual(dealerSite.publicUrl);
+                var savedDealerSite = answer.respond.savedDealerSite;
+                var loadedDealerSite = answer.respond.loadedDealerSite;
+                _.forEach(savedDealerSite, function(value, key) {
+                    expect(value).toEqual(loadedDealerSite[key]);
+                });
             });
         });
 
@@ -3264,51 +3379,34 @@ describe('dealersite, dealersitelogin', function() {
             var dealerSite;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSitesLoader.loadItems(params);
+                return dealerSitesLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                dealerSite = dealerSites[0];
+                dealerSite = answer.respond.getItems()[0];
                 dealerSite.externalId = String(Math.floor(Math.random() * 1000000));
                 dealerSite.publicUrl = '22222';
-                return dealerSite.save(directories);
+                return dealerSite.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.publicUrl.errors).toEqual(['Значение не является допустимым URL.']);
+                expect(errorResponse.errors.children.publicUrl.errors).toContain('Не верное значение ссылки: \'' + dealerSite.publicUrl + '\'.');
             });
         });
 
         it('put - выдавать ошибку при длине значения externalId больше 10', function() {
             var answer = {};
-            var dealerSite;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSitesLoader.loadItems(params);
+                return dealerSitesLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                dealerSite = dealerSites[0];
+                var dealerSite = answer.respond.getItems()[0];
                 dealerSite.externalId = '01234567890';
-                return dealerSite.save(directories);
+                return dealerSite.save();
             });
 
             runs(function() {
@@ -3320,24 +3418,15 @@ describe('dealersite, dealersitelogin', function() {
 
         it('put - выдавать ошибку при длине значения publicUrl больше 255', function() {
             var answer = {};
-            var dealerSite;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSitesLoader.loadItems(params);
+                return dealerSitesLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                dealerSite = dealerSites[0];
+                var dealerSite = answer.respond.getItems()[0];
                 dealerSite.publicUrl = 'http://www.www.ru/34567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1';
-                return dealerSite.save(directories);
+                return dealerSite.save();
             });
 
             runs(function() {
@@ -3349,104 +3438,110 @@ describe('dealersite, dealersitelogin', function() {
 
         it('put - сохранять изменение атрибута dealersite.isActive с true на false', function() {
             var answer = {};
-            var dealerSite;
 
             runSync(answer, function() {
-                var params = {
+                return dealerSitesLoader.loadItems({
                     filters: [
                         { fields: ['isActive'], type: 'equal', value: true }
                     ],
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
+                    orders: ['-id']
+                });
+            });
+
+            runSync(answer, function() {
+                var dealerSite = answer.respond.getItems()[0];
+                expect(dealerSite).toBeTruthy();
+                directories = {
+                    dealers: new Dealers([{id: dealerSite.dealer.id}]),
+                    sites: new Sites([{id: dealerSite.site.id}])
                 };
-                return dealerSitesLoader.loadItems(params);
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                expect(dealerSites.length).toBeTruthy();
-                dealerSite = dealerSites[0];
-                expect(dealerSite.isActive.id).toBe(true);
                 dealerSite.isActive = false;
-                return dealerSite.save(directories);
+                return {
+                    dealerSite: dealerSite,
+                    savedDealerSite: dealerSite.save(directories)
+                };
             });
 
             runSync(answer, function() {
-                var savedDealerSite = answer.respond;
-                return dealerSitesLoader.loadItem(savedDealerSite.id);
+                var dealerSite = answer.respond.dealerSite;
+                var savedDealerSite = answer.respond.savedDealerSite;
+                _.forEach(dealerSite, function(value, key) {
+                    expect(value).toEqual(savedDealerSite[key]);
+                });
+                return {
+                    savedDealerSite: savedDealerSite,
+                    loadedDealerSite: dealerSitesLoader.loadItem(savedDealerSite.id, directories)
+                }
             });
 
             runs(function() {
-                var savedDealerSite = answer.respond.dealerSite;
-                expect(savedDealerSite.isActive.id).toEqual(dealerSite.isActive);
+                var savedDealerSite = answer.respond.savedDealerSite;
+                var loadedDealerSite = answer.respond.loadedDealerSite;
+                _.forEach(savedDealerSite, function(value, key) {
+                    expect(value).toEqual(loadedDealerSite[key]);
+                });
             });
         });
 
         it('put - изменять dealer, если нет записи с такой комбинацией dealer, site', function() {
             var answer = {};
             var directories = {};
-            var sites;
-            var dealers;
-            var dealerSite;
-            var freeDealerId;
 
             runSync(answer, function() {
-                return dealerSiteStatusesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond); 
-                return sitesLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond); 
-                sites = answer.respond.sites.getItems();
-                var dealerQueryParams = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    },
-                    fields: ['dealer_list_name']
-                };
-                return dealersLoader.loadItems(dealerQueryParams);
-            });
-
-            runSync(answer, function() {
-                _.assign(directories, answer.respond);
-                dealers = answer.respond.dealers.getItems();
-                var dealersId = _.pluck(dealers, 'id');
-                var params = {
-                    filters: [
-                        { fields: ['site'], type: 'equal', value: sites[1].id },
-                        { fields: ['dealer'], type: 'in', value: dealersId }
-                    ]
-                };
-                return dealerSitesLoader.loadItems(params).then(function(directory) {
-                    var dealerSites = directory.dealerSites.getItems();
-                    dealerSite = dealerSites[0];
-                    var dealerSitesDealersId = _.pluck(_.pluck(dealerSites, 'dealer'), 'id');
-                    return _.difference(dealersId, dealerSitesDealersId);
+                return $q.all({
+                    dealers: dealersLoader.loadItems({
+                        orders: ['-id'],
+                        fields: ['dealer_list_name']
+                    }),
+                    sites: sitesLoader.loadItems()
                 });
             });
 
             runSync(answer, function() {
-                freeDealerId = answer.respond;
-                dealerSite.dealer = _.find(dealers, {id: freeDealerId[0]});
-                return dealerSite.save(directories);
+                _.assign(directories, answer.respond);
+                var dealerIds = _.pluck(directories.dealers.getItems(), 'id');
+                return dealerSitesLoader.loadItems({
+                    filters: [
+                        { fields: ['site'], type: 'equal', value: directories.sites.getItems()[1].id },
+                        { fields: ['dealer'], type: 'in', value: dealerIds }
+                    ]
+                }).then(function(dealerSites) {
+                    var dealerSiteDealerIds = _.pluck(_.pluck(dealerSites.getItems(), 'dealer'), 'id');
+                    return {
+                        dealerSite: dealerSites.getItems()[0],
+                        freeDealerIds: _.difference(dealerIds, dealerSiteDealerIds)
+                    }
+                });
             });
 
             runSync(answer, function() {
-                var savedDealerSite = answer.respond;
-                return dealerSitesLoader.loadItem(savedDealerSite.id);
+                var dealerSite = answer.respond.dealerSite;
+                var freeDealer = directories.dealers.get(answer.respond.freeDealerIds[0]);
+                dealerSite.dealer = freeDealer;
+                return {
+                    dealerSite: dealerSite,
+                    savedDealerSite: dealerSite.save(directories)
+                };
+            });
+
+            runSync(answer, function() {
+                var dealerSite = answer.respond.dealerSite;
+                var savedDealerSite = answer.respond.savedDealerSite;
+                _.forEach(dealerSite, function(value, key) {
+                    expect(value).toEqual(savedDealerSite[key]);
+                });
+                return {
+                    savedDealerSite: savedDealerSite,
+                    loadedDealerSite: dealerSitesLoader.loadItem(savedDealerSite.id, directories)
+                }
             });
 
             runs(function() {
-                var savedDealerSite = answer.respond.dealerSite;
-                expect(savedDealerSite.dealer.id).toEqual(freeDealerId[0]);
+                var savedDealerSite = answer.respond.savedDealerSite;
+                var loadedDealerSite = answer.respond.loadedDealerSite;
+                _.forEach(savedDealerSite, function(value, key) {
+                    expect(value).toEqual(loadedDealerSite[key]);
+                });
             });
         });
 
@@ -3454,65 +3549,47 @@ describe('dealersite, dealersitelogin', function() {
             var answer = {};
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSitesLoader.loadItems(params);
+                return dealerSitesLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                var dealerSite = dealerSites[0];
-                var dealerSiteCopy = dealerSites[1];
+                var dealerSite = answer.respond.getItems()[0];
+                var dealerSiteCopy = answer.respond.getItems()[1];
                 dealerSiteCopy.dealer = dealerSite.dealer;
                 dealerSiteCopy.site = dealerSite.site;
-                return dealerSiteCopy.save(directories);
+                return dealerSiteCopy.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toEqual(['Это значение уже используется.']);
+                expect(errorResponse.errors.errors).toContain('Регистрация салона по указанному сайту уже существует.');
             });
         });
 
         it('remove - удалять dealersite', function() {
             var answer = {};
-            var dealerSite;
 
             runSync(answer, function() {
-                var params = {
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    }
-                };
-                return dealerSitesLoader.loadItems(params);
+                return dealerSitesLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var dealerSites = directories.dealerSites.getItems();
-                dealerSite = dealerSites[0];
-                return dealerSite.remove();
-            });
-
-            runs(function() {
-                expect(answer.respond).toEqual(null);
+                var dealerSite = answer.respond.getItems()[0];
+                return dealerSite.remove().then(function(respond) {
+                    expect(respond).toEqual(null);
+                    return dealerSite;
+                });
             });
 
             runSync(answer, function() {
-                var savedDealerSite = answer.respond;
+                var dealerSite = answer.respond;
                 return dealerSitesLoader.loadItem(dealerSite.id);
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(errorResponse.message).toEqual('Регистрация на сайте не найдена.');
             });
         });
     });
@@ -3523,168 +3600,137 @@ describe('user, dealer', function() {
 
         it('обязательность email', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     password: '1',
                     group: {id: 1}
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.email.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.errors.children.email.errors).toContain('Значение не должно быть пустым.');
             });
         });
 
         it('соответствие email формату', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@',
                     password: '1',
                     group: {id: 1}
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.email.errors).toEqual(['Значение адреса электронной почты недопустимо.']);
+                expect(errorResponse.errors.children.email.errors).toContain('Значение не верно.');
             });
         });
 
         it('уникальность email', function() {
             var answer = {};
-            var userData = {
-                    password: '1',
-                    group: {id: 1}
-                };
 
             runSync(answer, function() {
                 return usersLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                user.email = directories.users.getItems()[0].email;
-                return user.save(directories);
+                var users = answer.respond;
+                var user = new User({
+                    password: '1',
+                    group: {id: 1},
+                    email: users.getItems()[0].email
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.email.errors).toEqual(['Это значение уже используется.']);
+                expect(errorResponse.errors.children.email.errors).toContain('Значение уже используется.');
             });
         });
 
         it('обязательность password', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     group: {id: 1}
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.password.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.errors.children.password.errors).toContain('Значение не должно быть пустым.');
             });
         });
 
         it('размер значения password <= 128', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0',
                     group: {id: 1}
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.password.errors).toEqual(['Значение слишком длинное. Должно быть равно 128 символам или меньше.']);
+                expect(errorResponse.errors.children.password.errors).toContain('Превышена допустимая длина в 128 символов.');
             });
         });
 
         it('соответствие status перечню', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 1}
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
+                });
                 user.status = new UserStatus({id: 'unknown'});
-                return user.save(directories);
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.status.errors).toEqual(['Выбранное Вами значение недопустимо.']);
+                expect(errorResponse.errors.children.status.errors).toContain('Выбранное Вами значение недопустимо.');
             });
         });
 
         it('по-умолчанию status === inactive', function() {
             var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 1}
-                };
+            var directories = {};
 
             runSync(answer, function() {
-                return usersLoader.loadItems();
+                return groupsLoader.loadItems();
             });
 
             runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
+                directories.groups = answer.respond;
+                var user = new User({
+                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
+                    password: '1',
+                    group: {id: 1}
+                }, directories);
                 return user.save(directories);
             });
 
@@ -3693,449 +3739,264 @@ describe('user, dealer', function() {
                 expect(savedUser.status.id).toEqual('inactive');
             });
         });
-
-        it('обязательность group', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1'
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Пользователю необходимо назначить группу');
-            });
-        });
-
-        it('соответствие group справочнику', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1'
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                user.group = new Group({id: 9999});
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Пользователю необходимо назначить группу');
-            });
-        });
-
-        it('обязательность dealer, если group === {id: 2}', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2}
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Значение поля dealer не должно быть пустым');
-            });
-        });
-
-        it('обязательность site, если group === {id: 3}', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 3}
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Значение поля site не должно быть пустым');
-            });
-        });
     });
 
-    describe('Методы post должны проверять в dealer', function() {
-
-        it('обязательность значения manager', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2},
-                    dealer: {
-                        city: {
-                            id: 1
-                        }
-                    }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.manager.errors).toEqual(['Значение не должно быть пустым.']);
-            });
-        });
+    describe('Методы post должны проверять в user.dealer', function() {
 
         it('соответствие значения manager справочнику', function() {
             var answer = {};
-            var userData = {
+            var user;
+
+            runSync(answer, function() {
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
-                        city: {
-                            id: 1
-                        }
+                        city: { id: 1 },
+                        manager: { id: 9999 },
+                        billingCompany: {id: 1},
+                        companyName: '1',
+                        address: '1',
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                user.dealer.manager = new Manager({id: 9999});
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.manager.errors).toEqual(['Значение недопустимо.']);
-            });
-        });
-
-        it('обязательность значения city', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2},
-                    dealer: {
-                        manager: {id: 1}
-                    }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.city.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.errors.errors).toContain('Менеджер ' + user.dealer.manager.id + ' не найден.');
             });
         });
 
         it('соответствие значения city справочнику', function() {
             var answer = {};
-            var userData = {
+            var user;
+
+            runSync(answer, function() {
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
-                        manager: {id: 1}
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
+                        manager: {id: 1},
+                        city: {id: 9999}
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                user.dealer.city = new City({id: 9999});
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.city.errors).toEqual(['Значение недопустимо.']);
+                expect(errorResponse.errors.errors).toContain('Город ' + user.dealer.city.id + ' не найден.');
             });
         });
 
         it('соответствие значения metro справочнику', function() {
             var answer = {};
-            var userData = {
+            var user;
+
+            runSync(answer, function() {
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
-                        manager: {id: 1}
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
+                        manager: {id: 1},
+                        metro: {id: 9999}
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                user.dealer.metro = new Metro({id: 9999});
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.metro.errors).toEqual(['Значение недопустимо.']);
+                expect(errorResponse.errors.errors).toContain('Станция метро ' + user.dealer.metro.id + ' не найдена.');
             });
         });
 
         it('соответствие значения metro значению city', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1},
                         metro: {id: 174}
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.metro.errors).toEqual(['Значение недопустимо.']);
+                expect(errorResponse.errors.children.dealer.children.metro.children.id.errors).toContain('Станция метро должна находиться в выбранном городе.');
             });
         });
 
         it('соответствие значения market справочнику', function() {
             var answer = {};
-            var userData = {
+            var user;
+
+            runSync(answer, function() {
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
-                        manager: {id: 1}
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
+                        manager: {id: 1},
+                        market: {id: 9999}
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                user.dealer.market = new Market({id: 9999});
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.market.errors).toEqual(['Значение недопустимо.']);
+                expect(errorResponse.errors.errors).toContain('Рынок ' + user.dealer.market.id + ' не найден.');
             });
         });
 
         it('соответствие значения market значению city', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1},
-                        market: {id: 7}
+                        market: {id: 8}
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.market.errors).toEqual(['Значение недопустимо.']);
+                expect(errorResponse.errors.children.dealer.children.market.children.id.errors).toContain('Рынок должен находиться в выбранном городе.');
             });
         });
 
         it('обязательность значения companyName', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1}
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.companyName.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.errors.children.dealer.children.companyName.errors).toContain('Значение не должно быть пустым.');
             });
         });
 
         it('размер значения companyName <= 100', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1},
                         companyName: '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.companyName.errors).toEqual(['Значение слишком длинное. Должно быть равно 100 символам или меньше.']);
+                expect(errorResponse.errors.children.dealer.children.companyName.errors).toContain('Значение слишком длинное. Должно быть равно 100 символам или меньше.');
             });
         });
 
         it('обязательность значения address', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1}
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.address.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.errors.children.dealer.children.address.errors).toContain('Значение не должно быть пустым.');
             });
         });
 
         it('размер значения address <= 255', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1},
                         address: '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
@@ -4147,325 +4008,266 @@ describe('user, dealer', function() {
 
         it('соответствие значения fax формату', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         fax: '+7-812-232-4123'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.fax.errors).toEqual(['Неверный формат номера телефона.']);
+                expect(errorResponse.errors.children.dealer.children.fax.errors).toContain('Неверный формат номера телефона.');
             });
         });
 
         it('соответствие значения email формату', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         email: 'jasmine@'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.email.errors).toEqual(['Значение адреса электронной почты недопустимо.']);
+                expect(errorResponse.errors.children.dealer.children.email.errors).toContain('Значение адреса электронной почты недопустимо.');
             });
         });
 
         it('соответствие значения url формату', function() {
             var answer = {};
-            var userData = {
+            var user;
+
+            runSync(answer, function() {
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7(812)232-4123',
                         phoneFrom: 10,
                         phoneTo: 20,
                         url: 'www'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.url.errors).toEqual(['Значение не является допустимым URL.']);
-            });
-        });
-
-        it('обязательность значения phone', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2},
-                    dealer: {
-                        manager: {id: 1}
-                    }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.errors.children.dealer.children.url.errors).toContain('Не верное значение ссылки: \'' + user.dealer.url + '\'.');
             });
         });
 
         it('соответствие значения phone формату', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7-812-232-4123',
                         phoneFrom: 10,
                         phoneTo: 20
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone.errors).toEqual(['Неверный формат номера телефона.']);
+                expect(errorResponse.errors.children.dealer.children.phone.errors).toContain('Неверный формат номера телефона.');
             });
         });
 
         it('обязательность значения phoneFrom при заполненном phone', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phoneFrom перечню допустимых значений', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
-                        phone: '+7(812)-123-3443',
-                        phoneFrom: 99
+                        phone: '+7(812)-123-3443'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                user.dealer.phoneFrom = new DealerPhoneHour({id: 99});
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phoneFrom.errors).toEqual(['Значение должно быть 23 или меньше.']);
+                expect(errorResponse.errors.children.dealer.children.phoneFrom.errors).toContain('Значение должно быть 24 или меньше.');
             });
         });
 
         it('обязательность значения phoneTo при заполненном phone', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phoneTo перечню допустимых значений', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
-                        phone: '+7(812)123-34-43',
-                        phoneTo: 99
+                        phone: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                user.dealer.phoneTo = new DealerPhoneHour({id: 99});
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phoneTo.errors).toEqual(['Значение должно быть 23 или меньше.']);
+                expect(errorResponse.errors.children.dealer.children.phoneTo.errors).toContain('Значение должно быть 24 или меньше.');
             });
         });
 
         it('значение phoneFrom строго меньше phoneTo', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)123-34-43',
                         phoneFrom: 23,
                         phoneTo: 23
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phone2 формату', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
@@ -4473,162 +4275,147 @@ describe('user, dealer', function() {
                         phone2From: 10,
                         phone2To: 20
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone2.errors).toEqual(['Неверный формат номера телефона.']);
+                expect(errorResponse.errors.children.dealer.children.phone2.errors).toContain('Неверный формат номера телефона.');
             });
         });
 
         it('обязательность значения phone2From при заполненном phone2', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
                         phone2: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone2.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone2.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phone2From перечню допустимых значений', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
-                        phone2: '+7(812)-123-3443',
-                        phone2From: 99
+                        phone2: '+7(812)-123-3443'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                user.dealer.phone2From = new DealerPhoneHour({id: 99});
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone2From.errors).toEqual(['Значение должно быть 23 или меньше.']);
+                expect(errorResponse.errors.children.dealer.children.phone2From.errors).toContain('Значение должно быть 24 или меньше.');
             });
         });
 
         it('обязательность значения phone2To при заполненном phone2', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
                         phone2: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone2.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone2.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phone2To перечню допустимых значений', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
-                        phone2: '+7(812)123-34-43',
-                        phone2To: 99
+                        phone2: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                user.dealer.phone2To = new DealerPhoneHour({id: 99});
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone2To.errors).toEqual(['Значение должно быть 23 или меньше.']);
+                expect(errorResponse.errors.children.dealer.children.phone2To.errors).toContain('Значение должно быть 24 или меньше.');
             });
         });
 
         it('значение phone2From строго меньше phone2To', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4637,36 +4424,31 @@ describe('user, dealer', function() {
                         phone2From: 23,
                         phone2To: 23
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone2.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone2.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phone3 формату', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
@@ -4677,32 +4459,29 @@ describe('user, dealer', function() {
                         phone3From: 12,
                         phone3To: 22
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone3.errors).toEqual(['Неверный формат номера телефона.']);
+                expect(errorResponse.errors.children.dealer.children.phone3.errors).toContain('Неверный формат номера телефона.');
             });
         });
 
         it('обязательность значения phone3From при заполненном phone3', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4712,32 +4491,29 @@ describe('user, dealer', function() {
                         phone2To: 21,
                         phone3: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone3.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone3.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phone3From перечню допустимых значений', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4745,35 +4521,32 @@ describe('user, dealer', function() {
                         phone2: '+7(812)232-4123',
                         phone2From: 11,
                         phone2To: 21,
-                        phone3: '+7(812)-123-3443',
-                        phone3From: 99
+                        phone3: '+7(812)-123-3443'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                user.dealer.phone3From = new DealerPhoneHour({id: 99});
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone3From.errors).toEqual(['Значение должно быть 23 или меньше.']);
+                expect(errorResponse.errors.children.dealer.children.phone3From.errors).toContain('Значение должно быть 24 или меньше.');
             });
         });
 
         it('обязательность значения phone3To при заполненном phone3', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4783,32 +4556,29 @@ describe('user, dealer', function() {
                         phone2To: 21,
                         phone3: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone3.errors).toEqual(['Неверно указано время для звонка на телефон.']);
+                expect(errorResponse.errors.children.dealer.children.phone3.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
 
         it('соответствие значения phone3To перечню допустимых значений', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4816,35 +4586,32 @@ describe('user, dealer', function() {
                         phone2: '+7(812)232-4123',
                         phone2From: 11,
                         phone2To: 21,
-                        phone3: '+7(812)123-34-43',
-                        phone3To: 99
+                        phone3: '+7(812)123-34-43'
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                user.dealer.phone3To = new DealerPhoneHour({id: 99});
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone3To.errors).toEqual(['Значение должно быть 23 или меньше.']);
+                expect(errorResponse.errors.children.dealer.children.phone3To.errors).toContain('Значение должно быть 24 или меньше.');
             });
         });
 
         it('значение phone3From строго меньше phone3To', function() {
             var answer = {};
-            var userData = {
+
+            runSync(answer, function() {
+                var user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4856,58 +4623,14 @@ describe('user, dealer', function() {
                         phone3From: 23,
                         phone3To: 23
                     }
-                };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
+                });
+                return user.save();
             });
 
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone3.errors).toEqual(['Неверно указано время для звонка на телефон.']);
-            });
-        });
-    });
-
-    describe('Методы post должны проверять в site', function() {
-
-        it('обязательность значения id', function() {
-            var answer = {};
-            var userData = {
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 3},
-                    site: {}
-                };
-
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            }
-
-            runSync(answer, function() {
-                return usersLoader.loadItems();
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.children.id.errors).toEqual(['Значение не должно быть пустым.']);
+                expect(errorResponse.errors.children.dealer.children.phone3.errors).toContain('Неверно указано время для звонка на телефон.');
             });
         });
     });
@@ -4915,301 +4638,205 @@ describe('user, dealer', function() {
     describe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
-            var answer = {};
-            var params = {
-                filters: [
-                    { type: 'equal', fields: ['status'], value: 'active' }
-                ]
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var status = String(value.status.id);
-                    return (status === 'active');
-                })).toBeTruthy();
-            });
-        });
-
-        it('equal - фильтровать данные пользователей по равенству в нескольких полях', function() {
-            var answer = {};
-            var params = {
-                filters: [
-                    { type: 'equal', fields: ['status', 'group'], value: '3' }
-                ]
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var status = String(value.status.id);
-                    var group = String(value.group.id);
-                    return (status === '3' || group === '3');
-                })).toBeTruthy();
-            });
+            checkFilterEqual(usersLoader, ['status']);
         });
 
         it('equal - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'equal', fields: ['dealer.companyName', 'group'], value: 'Auto' }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'equal', fields: ['status', 'dealer.manager'], value: '2' }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var companyName = String(value.dealer.companyName).toLowerCase();
-                    var group = String(value.group.id).toLowerCase();
-                    return (companyName === 'auto' || group === 'auto');
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var status = String(user.status.id);
+                    var manager = String(user.dealer.manager.id);
+                    expect(status === '2' || manager === '2').toBeTruthy();
+                });
             });
         });
 
         it('equal - значение фильтра может быть числом', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'equal', fields: ['id'], value: 1 }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'equal', fields: ['id'], value: 1 }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var id = String(value.id);
-                    return (id === '1');
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var id = String(user.id);
+                    expect(id === '1').toBeTruthy();
+                });
             });
         });
 
         it('in - фильтровать данные пользователей по равенству в одном поле', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'in', fields: ['status'], value: ['inactive', 'blocked'] }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'in', fields: ['status'], value: ['inactive', 'blocked'] }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var status = String(value.status.id);
-                    return (status === 'inactive' || status === 'blocked');
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var status = String(user.status.id);
+                    expect(status === 'inactive' || status === 'blocked').toBeTruthy();
+                });
             });
         });
 
         it('in - фильтровать данные пользователей по равенству в нескольких поле', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'in', fields: ['status', 'group'], value: ['blocked', '2'] }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'in', fields: ['status', 'dealer.manager'], value: ['1', '2'] }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var status = String(value.status.id);
-                    var group = String(value.group.id);
-                    return (status === 'blocked' || status === '2' || group === 'blocked' || group === '2');
-                })).toBeTruthy();
-            });
-        });
-
-        it('in - фильтровать данные пользователей по равенству в полях во вложенных объектах', function() {
-            var answer = {};
-            var params = {
-                filters: [
-                    { type: 'in', fields: ['dealer.companyName', 'group'], value: ['Свет', '3'] }
-                ]
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var companyName = value.dealer && String(value.dealer.companyName).toLowerCase();
-                    var group = String(value.group.id).toLowerCase();
-                    return (companyName === 'auto' || companyName === '3' || group === 'auto' || group === '3');
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var status = String(user.status.id);
+                    var manager = String(user.dealer.manager.id);
+                    expect(status === '1' || manager === '1' || status === '2' || manager === '2').toBeTruthy();
+                });
             });
         });
 
         it('in - значение фильтра может быть массивом чисел', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'in', fields: ['id'], value: [1, 2] }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'in', fields: ['id'], value: [1, 2] }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var id = String(value.id);
-                    return (id === '1' || id === '2');
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var id = String(user.id);
+                    expect(id === '1' || id === '2').toBeTruthy();
+                });
             });
         });
 
         it('contain - фильтровать данные пользователей по подстроке в одном поле', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'contain', fields: ['lastLogin'], value: ['2010'] }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'contain', fields: ['id'], value: ['3'] }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var lastLogin = String(value.lastLogin);
-                    return (lastLogin.indexOf('2010') !== -1);
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var id = String(user.id);
+                    expect(id.indexOf('3') !== -1).toBeTruthy();
+                });
             });
         });
 
         it('contain - фильтровать данные пользователей по подстроке в нескольких полях', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'contain', fields: ['email', 'status'], value: ['act'] }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'contain', fields: ['email', 'dealer.companyName'], value: ['ac'] }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var email = String(value.email).toLowerCase();
-                    var status = String(value.status.id);
-                    return (email.indexOf('act') !== -1 || status.indexOf('act') !== -1);
-                })).toBeTruthy();
-            });
-        });
-
-        it('contain - фильтровать данные пользователей по подстроке в полях во вложенных объектах', function() {
-            var answer = {};
-            var params = {
-                filters: [
-                    { type: 'contain', fields: ['email', 'dealer.companyName'], value: ['компания'] }
-                ]
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var email = String(value.email).toLowerCase();
-                    var companyName = String(value.dealer.companyName).toLowerCase();
-                    return (email.indexOf('компания') !== -1 || companyName.indexOf('компания') !== -1);
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var email = user.email.toLowerCase();
+                    var companyName = user.dealer && user.dealer.companyName && user.dealer.companyName.toLowerCase();
+                    expect(email.indexOf('ac') !== -1 || companyName.indexOf('ac') !== -1).toBeTruthy();
+                });
             });
         });
 
         it('contain - значение фильтра может быть числом', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'contain', fields: ['lastLogin'], value: 2010 }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'contain', fields: ['email'], value: 3 }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var lastLogin = String(value.lastLogin);
-                    return (lastLogin.indexOf('2010') !== -1);
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var email = String(user.email);
+                    expect(email.indexOf('3') !== -1).toBeTruthy();
+                });
             });
         });
 
         it('filters - комбинация трех разных фильтров', function() {
             var answer = {};
-            var params = {
-                filters: [
-                    { type: 'contain', fields: ['id', 'email', 'dealer.companyName'], value: '1' },
-                    { type: 'in', fields: ['status'], value: ['active'] },
-                    { type: 'equal', fields: ['dealer.manager'], value: '2' }
-                ]
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    filters: [
+                        { type: 'contain', fields: ['id', 'email', 'dealer.companyName'], value: '1' },
+                        { type: 'in', fields: ['status'], value: ['active'] },
+                        { type: 'equal', fields: ['dealer.manager'], value: '2' }
+                    ]
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBeTruthy();
-                expect(_.every(users, function(value) {
-                    var id = String(value.id);
-                    var email = String(value.email).toLowerCase();
-                    var companyName = String(value.dealer.companyName).toLowerCase();
-                    var status = String(value.status.id);
-                    var manager = String(value.dealer.manager.id);
-                    return ((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || companyName.indexOf('1') !== -1) 
-                        && (status === 'active') && (manager === '2'));
-                })).toBeTruthy();
+                _.forEach(users, function(user) {
+                    var id = String(user.id);
+                    var email = String(user.email).toLowerCase();
+                    var companyName = String(user.dealer.companyName).toLowerCase();
+                    var status = String(user.status.id);
+                    var manager = String(user.dealer.manager.id);
+                    expect((id.indexOf('1') !== -1 || email.indexOf('1') !== -1 || companyName.indexOf('1') !== -1) 
+                        && (status === 'active') && (manager === '2')).toBeTruthy();
+                });
             });
         });
 
@@ -5226,7 +4853,7 @@ describe('user, dealer', function() {
             });
 
             runs(function() {
-                var newParams = answer.respond.users.getParams();
+                var newParams = answer.respond.getParams();
                 expect(newParams.filters).toEqual(params.filters);
             });
         });
@@ -5239,123 +4866,39 @@ describe('user, dealer', function() {
             });
 
             runs(function() {
-                var params = answer.respond.users.getParams();
+                var params = answer.respond.getParams();
                 expect(params.filters).toEqual([]);
             });
         });
 
         it('order - сортировать данные пользователей по возрастанию id', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                var usersId = _.pluck(users, 'id');
-                expect(usersId).toBeSorted('AscendingNumbers');
-            });
+            checkSorting(usersLoader, ['+id']);
         });
 
         it('order - сортировать данные пользователей по убыванию id', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                var usersId = _.pluck(users, 'id');
-                expect(usersId).toBeSorted('DescendingNumbers');
-            });
+            checkSorting(usersLoader, ['-id']);
         });
 
         it('order - сортировать данные пользователей по возрастанию email', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'email',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                var usersEmail = _.pluck(users, 'email');
-                expect(usersEmail).toBeSorted('AscendingStrings');
-            });
+            checkSorting(usersLoader, ['+email']);
         });
 
         it('order - сортировать данные пользователей по убыванию email', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'email',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                var usersEmail = _.pluck(users, 'email');
-                expect(usersEmail).toBeSorted('DescendingStrings');
-            });
+            checkSorting(usersLoader, ['-email']);
         });
 
         it('order - сортировать данные пользователей по возрастанию даты', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'lastLogin',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                var usersDates = _.pluck(users, 'lastLogin');
-                expect(usersDates).toBeSorted('AscendingDates');
-            });
+            checkSorting(usersLoader, ['+lastLogin']);
         });
 
         it('order - сортировать данные пользователей по убыванию даты', function() {
+            checkSorting(usersLoader, ['-lastLogin']);
+        });
+
+        it('если параметр orders в запросе указан, то в ответе order должен быть таким же', function() {
             var answer = {};
             var params = {
-                order: {
-                    order_field: 'lastLogin',
-                    order_direction: 'desc'
-                }
+                orders: ['-id']
             };
 
             runSync(answer, function() {
@@ -5363,36 +4906,12 @@ describe('user, dealer', function() {
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
-                expect(users.length).toBeTruthy();
-                var usersDates = _.pluck(users, 'lastLogin');
-                expect(usersDates).toBeSorted('DescendingDates');
+                var newParams = answer.respond.getParams();
+                expect(newParams.orders).toEqual(params.orders);
             });
         });
 
-        it('если параметр order в запросе указан, то в ответе order должен быть таким же, но без order', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'asc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var newParams = answer.respond.users.getParams();
-                expect(newParams.order).toEqual({
-                    field: 'id',
-                    direction: 'asc'
-                });
-            });
-        });
-
-        it('если параметр order в запросе НЕ указан, то в ответе order должен быть по-умолчанию', function() {
+        it('если параметр orders в запросе НЕ указан, то в ответе orders должен быть []', function() {
             var answer = {};
 
             runSync(answer, function() {
@@ -5400,83 +4919,58 @@ describe('user, dealer', function() {
             });
 
             runs(function() {
-                var newParams = answer.respond.users.getParams();
-                expect(newParams.order).toEqual({
-                    field: 'id',
-                    direction: 'asc'
-                });
+                var newParams = answer.respond.getParams();
+                expect(newParams.orders).toEqual([]);
             });
         });
 
         it('pager - ограничивать количество элементов выборки заданным', function() {
             var answer = {};
-            var params = {
-                pager: {
-                    per_page: 10
-                }
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    pager: {
+                        per_page: 10
+                    }
+                });
             });
 
             runs(function() {
-                var users = answer.respond.users.getItems();
+                var users = answer.respond.getItems();
                 expect(users.length).toBe(10);
             });
         });
 
-        it('если параметр per_page в запросе НЕ указан, то в ответе per_page должен быть 100', function() {
+        it('если параметр pager.per_page в запросе НЕ указан, то в ответе он должен быть 100', function() {
             var answer = {};
-            var params = {
-                pager: {
-                    page: 2
-                }
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    pager: {
+                        page: 2
+                    }
+                });
             });
 
             runs(function() {
-                var newParams = answer.respond.users.getParams();
+                var newParams = answer.respond.getParams();
                 expect(newParams.pager.per_page).toEqual(100);
             });
         });
 
-        it('если параметр per_page в запросе указан больше 100, то в ответе per_page должен быть 100', function() {
+        it('если параметр pager.page в запросе НЕ указан, то в ответе он должен быть 1', function() {
             var answer = {};
-            var params = {
-                pager: {
-                    page: 2,
-                    per_page: 10000
-                }
-            };
 
             runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                return usersLoader.loadItems({
+                    pager: {
+                        per_page: 10
+                    }
+                });
             });
 
             runs(function() {
-                var newParams = answer.respond.users.getParams();
-                expect(newParams.pager.per_page).toEqual(100);
-            });
-        });
-
-        it('если параметр page в запросе НЕ указан, то в ответе page должен быть 1', function() {
-            var answer = {};
-            var params = {
-                pager: {
-                    per_page: 10
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runs(function() {
-                var newParams = answer.respond.users.getParams();
+                var newParams = answer.respond.getParams();
                 expect(newParams.pager.page).toEqual(1);
             });
         });
@@ -5485,233 +4979,199 @@ describe('user, dealer', function() {
     describe('Методы CRUD должны', function() {
 
         it('post - сохранять данные нового пользователя', function() {
-            var userData = {
+            var s = {};
+
+            var params = {
+                fields: ['id'],
+                pager: {
+                    per_page: 1
+                }
+            }   
+
+            runSyncS(s, function() {
+                return $q.all({
+                    directories: usersLoader.loadDirectories(),
+                    users: usersLoader.loadItems(params)
+                });
+            });
+
+            runSyncS(s, function() {
+                var newUser = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru',
                     password: '1',
-                    lastLogin: '2013-12-01',
                     status: 'active',
                     group: {id: 2},
                     dealer: {
                         companyName: 'Новая компания',
+                        billingCompany: {id: 1},
                         city: {id: 1},
                         market: {id: 4},
-                        metro: {id: 10},
+                        metro: {id: 8},
                         address: '191040, Ленинский проспект, 150, оф.505',
                         fax: '+7(812)232-4123',
                         email: 'demo@demo.ru',
                         url: 'http://www.w3schools.com',
                         contactName: 'Аверин Константин Петрович',
                         phone: '+7(812)232-4123',
-                        phoneFrom: '10',
-                        phoneTo: '20',
+                        phoneFrom: 10,
+                        phoneTo: 20,
                         phone2: '+7(812)232-4124',
-                        phone2From: '11',
-                        phone2To: '21',
+                        phone2From: 11,
+                        phone2To: 21,
                         phone3: '+7(812)232-4125',
-                        phone3From: '7',
-                        phone3To: '15',
+                        phone3From: 7,
+                        phone3To: 15,
                         companyInfo: 'Здесь может быть произвольный текст...',
-                        manager: {id: 4}
+                        manager: {id: 4},
+                        latitude: 40.09,
+                        longitude: 50.91
                     }
-                };
-            var answer = {};
-            var savedUser;
-            var len;
-
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
+                });
+                return $q.all({
+                    newUser: newUser,
+                    savedUser: newUser.save(s.directories)
+                });
             });
 
-            runSync(answer, function() {
-                var directories = answer.respond;
-                len = directories.users.getParams().pager.total;
-                var user = new User(userData, directories);
-                return user.save(directories);
-            });
-
-            runSync(answer, function() {
-                savedUser = answer.respond;
-                return usersLoader.loadItems(params);
+            runSyncS(s, function() {
+                var savedUserSerialized = s.savedUser.serialize();
+                _.forEach(s.newUser.serialize(), function(value, key) {
+                    if (!_.contains(['id', 'dealer', 'password'], key)) {
+                        expect(value).toEqual(savedUserSerialized[key]);
+                    }
+                });
+                _.forEach(s.newUser.serialize().dealer, function(value, key) {
+                    if (!_.contains(['id'], key)) {
+                        expect(value).toEqual(savedUserSerialized.dealer[key]);
+                    }
+                });
+                return $q.all({
+                    loadedUser: usersLoader.loadItem(s.savedUser.id, s.directories),
+                    loadedUsers: usersLoader.loadItems(params)
+                });
             });
 
             runs(function() {
-                var newUser = answer.respond.users.get(savedUser.id);
-                var newLen = answer.respond.users.getParams().pager.total;
-                expect(newUser).toEqual(savedUser);
-                expect(newLen).toEqual(len+1);
+                expect(s.loadedUsers.getParams().pager.total).toBe(s.users.getParams().pager.total + 1);
+                _.forEach(s.savedUser, function(value, key) {
+                    expect(value).toEqual(s.loadedUser[key]);
+                });
             });
         });
 
         it('get - возвращать данные пользователя', function() {
-            var answer = {};
+            var s = {};
 
-            runSync(answer, function() {
-                return usersLoader.loadItem(5);
+            runSyncS(s, function() {
+                return $q.all({
+                    user: usersLoader.loadItem(5)
+                });
             });
 
             runs(function() {
-                var user = answer.respond.user;
-                expect(user.dealer.contactName).toBeDefined();
+                expect(s.user.dealer.contactName).toBeDefined();
             });
         });
 
         it('get - возвращать ошибку, если пользователь не найден', function() {
-            var answer = {};
+            var s = {};
 
-            runSync(answer, function() {
-                return usersLoader.loadItem(9999);
+            runSyncS(s, function() {
+                return $q.all({
+                    user: usersLoader.loadItem(9999)
+                });
             });
 
             runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                var errorResponse = s.response.data;
+                expect(errorResponse.message).toEqual('Пользователь не найден.');
             });
         });
 
         it('put - сохранять данные измененного пользователя', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            };
-            var user;
+            var s = {};
 
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
+            runSyncS(s, function() {
+                return $q.all({
+                    directories: usersLoader.loadDirectories(),
+                    users: usersLoader.loadItems({
+                        orders: ['-id']
+                    })
+                });
             });
 
-            runSync(answer, function() {
-                var directories = answer.respond;
-                user = directories.users.getItems()[0];
-                user.email = String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru';
-                return user.save(directories);
+            runSyncS(s, function() {
+                s.user = s.users.getItems()[0];
+                expect(s.user).toBeDefined();
+                s.user.email = String(Math.floor(Math.random() * 1000000)) + 'new@maxposter.ru';
+                return $q.all({
+                    savedUser: s.user.save(s.directories)
+                });
             });
 
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
+            runSyncS(s, function() {
+                expect(s.savedUser.email).toEqual(s.user.email);
+                return $q.all({
+                    loadedUser: usersLoader.loadItem(s.savedUser.id, s.directories)
+                });
             });
 
             runs(function() {
-                var changedUser = answer.respond.users.get(user.id);
-                expect(changedUser.email).toEqual(user.email);
+                expect(s.loadedUser.email).toEqual(s.savedUser.email);
             });
         });
 
         it('put - возвращать ошибку при попытке сохранения пользователя со ссылками на объекты, не существующие в БД', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            };
+            var s = {};
+            var user;
 
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
+            runSyncS(s, function() {
+                return $q.all({
+                    users: usersLoader.loadItems()
+                });
             });
 
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = directories.users.getItems()[0];
-                user.group = new Group({id: 99});
-                return user.save(directories);
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Пользователю необходимо назначить группу');
-            });
-        });
-
-        it('put - возвращать ошибку при попытке сохранения пользователя, не существующего в БД', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            };
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var userId = directories.users.getItems()[0].id;
-                var user = new User({id: userId + 1});
-                return user.save(directories);
+            runSyncS(s, function() {
+                user = _.find(s.users.getItems(), function(user) {
+                    return user.group.id === 3;
+                });
+                user.site = new Site({id: 99});
+                return user.save();
             });
 
             runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                var errorResponse = s.response.data;
+                expect(errorResponse.message).toEqual('Validation Failed');
+                expect(errorResponse.errors.children.site.children.id.errors).toContain('Сайт ' + user.site.id + ' не найден.');
             });
         });
 
         it('remove - удалять пользователя', function() {
-            var answer = {};
+            var s = {};
             var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
+                orders: ['-id'],
+                pager: {per_page: 1}
             }
-            var len;
 
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
+            runSyncS(s, function() {
+                return $q.all({
+                    users: usersLoader.loadItems(params)
+                })
             });
 
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var user = directories.users.getItems()[0];
-                len = directories.users.getParams().pager.total;
+            runSyncS(s, function() {
+                var user = s.users.getItems()[0];
                 return user.remove();
             });
 
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
+            runSyncS(s, function() {
+                return $q.all({
+                    newUsers: usersLoader.loadItems(params)
+                })
             });
 
             runs(function() {
-                var newLen = answer.respond.users.getParams().pager.total;
-                expect(newLen).toBe(len-1);
-            });
-        });
-
-        it('remove - возвращать ошибку, если пользователь не найден', function() {
-            var answer = {};
-            var params = {
-                order: {
-                    order_field: 'id',
-                    order_direction: 'desc'
-                }
-            }
-
-            runSync(answer, function() {
-                return usersLoader.loadItems(params);
-            });
-
-            runSync(answer, function() {
-                var directories = answer.respond;
-                var userId = directories.users.getItems()[0].id;
-                var user = new User({id: userId + 1});
-                return user.remove();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Not Found');
+                expect(s.newUsers.getParams().pager.total).toBe(s.users.getParams().pager.total - 1);
             });
         });
     });

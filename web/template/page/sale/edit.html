@@ -154,10 +154,11 @@
 	        <tr>
 	            <th><label for="saleIsActive">Статус</label></th>
 	            <td>
-	                <select id="saleIsActive" name="saleIsActive" ng-model='saleEdited.isActive' ng-options='opt.name for opt in saleStatuses.getItems()' ng-disabled='formSaleKey.$invalid || saleNoDefaultTariff && !saleEdited.isActive.id'>
+	                <select id="saleIsActive" name="saleIsActive" ng-model='saleEdited.isActive' ng-options='opt.name for opt in saleStatuses.getItems()' ng-disabled='formSaleKey.$invalid || saleNoDefaultTariff && !saleEdited.isActive.id || saleNoActiveDealerSite && !saleEdited.isActive.id'>
 	                </select>
 					<ul class="warning_list">
-					    <li id='saleIsActiveDisabled' ng-show="saleNoDefaultTariff && !saleEdited.isActive.id">У салона не включен экспорт на сайт!</li>
+					    <li id='saleIsActiveDisabled' ng-show="saleNoDefaultTariff && !saleEdited.isActive.id">Активация невозможна, так как у салона не включен экспорт на выбранный сайт!</li>
+					    <li id='saleIsActiveDisabledNoActiveDealerSite' ng-show="saleNoActiveDealerSite && !saleEdited.isActive.id">Активация невозможна, так как у салона нет активной регистрации на выбранном сайте!</li>
 					</ul>
 	            </td>
 	        </tr>

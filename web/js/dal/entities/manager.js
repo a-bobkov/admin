@@ -15,6 +15,18 @@ angular.module('max.dal.entities.manager', ['max.dal.entities.collection'])
         Collection.call(this, itemsData, queryParams, Manager, Managers);
     };
     _.assign(Managers.prototype, Collection.prototype);
+    Managers.prototype.lowerName = 'managers';
     return Managers;
+})
+
+.factory('managerApi', function(RestApi, Api) {
+    var managerApi = new RestApi('managers', 'manager');
+    return managerApi;
+})
+
+.service('managersLoader', function managersLoader(entityLoader, managerApi, Manager, Managers) {
+    this.loadItems = function(queryParams, directories) {
+        return entityLoader.loadItems(queryParams, directories, managerApi, Managers);
+    };
 })
 ;

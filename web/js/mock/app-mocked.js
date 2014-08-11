@@ -2,14 +2,14 @@
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, Construction,
-    User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+    userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
-        User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+        userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
         BillingCredits, BillingCredit, BillingUnions, BillingUnion);
@@ -19,146 +19,31 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
  * мини-сервер http для комплексных тестов
  */
 function setHttpMock($httpBackend, multiplyCoef, Construction,
-    User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+    userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
-    function randomCoordinate(min, max) {
-        return (Math.random() * (max - min) + min).ceil(8);
-    }
+    var regexpUrl = /^(http|https):\/\/([\-\S]+\.)+([\-\S]{2,})/;
+    var regexpEmail = /.+\@.+\..+/;
+    var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/;
 
-    function randomLatitude() {
-        return randomCoordinate(40, 90);
-    }
+    function multiplyArrFn(arr, coef, fn) {
+        coef = coef || 1;
+        var multiplyArray = [];
 
-    function randomLongitude() {
-        return randomCoordinate(20, 180);
-    }
-
-    var userDirectories = new Construction({
-        groups: new Groups([
-            {id: 1, name: 'admin', description: 'Администратор'},
-            {id: 2, name: 'dealer', description: 'Автосалон'},
-            {id: 3, name: 'site', description: 'Автосайт'}
-        ]),
-        managers: new Managers([
-            {id: 1, name: 'Катя'},
-            {id: 2, name: 'Инна'},
-            {id: 4, name: 'Потеряшки'},
-            {id: 0, name: ''}
-        ]),
-        billingCompanies: new BillingCompanies([
-            {id: 1, name: 'Макспостер, ООО'},
-            {id: 2, name: 'Харитонов, ИП'}
-        ]),
-        cities: new Cities([
-            {id: 1, name: 'Москва'},
-            {id: 2, name: 'Питер'},
-            {id: 6, name: 'Екатеринбург'}
-        ]),
-        markets: new Markets([
-            {id: 4, name: 'Рынок один в москве', city: {id: 1}},
-            {id: 7, name: 'Рынок два в москве', city: {id: 1}},
-            {id: 8, name: 'Рынок один в питере', city: {id: 2}},
-            {id: 9, name: 'Рынок два в питере', city: {id: 2}}
-        ]),
-        metros: new Metros([
-            {id: 8, name: 'Метро один в москве', city: {id: 1}},
-            {id: 9, name: 'Метро два в москве', city: {id: 1}},
-            {id: 10, name: 'Метро один в питере', city: {id: 2}},
-            {id: 11, name: 'Метро два в питере', city: {id: 2}}
-        ]),
-        sites: new Sites([
-            {id: 1,  name: 'drom.ru'},
-            {id: 2,  name: 'bibika.ru'},
-            {id: 3,  name: 'autorambler.ru'},
-            {id: 4,  name: 'auto.mail.ru'},
-            {id: 5,  name: 'auto.ru'},
-            {id: 6,  name: 'irr.ru'},
-            {id: 7,  name: 'chance.ru'},
-            {id: 8,  name: 'auto.yandex.ru'},
-            {id: 9,  name: 'auto.dmir.ru'},
-            {id: 10, name: 'auto-mos.ru'},
-            {id: 11, name: 'cars.ru'},
-            {id: 12, name: 'usedcars.ru'},
-            {id: 13, name: 'quto.ru'},
-            {id: 14, name: 'avito.ru'},
-            {id: 15, name: 'fin-auto.ru'},
-            {id: 16, name: 'auto.exist.ru'},
-            {id: 17, name: 'am.ru'},
-            {id: 18, name: 'mercedes-benz.ru'}
-        ])
-    }).resolveRefs();
-
-    var users = new Users(multiplyArrFn([
-        {
-            id: 5,
-            email: 'demo@maxposter.ru',
-            lastLogin: '2013-12-01',
-            status: 'active',
-            group: {id: 2},
-            dealer: {
-                id: 5,
-                companyName: 'Демокомпания',
-                city: {id: 2},
-                market: {id: 8},
-                metro: {id: 10},
-                address: '191040, Лиговский проспект, 150, оф.505',
-                fax: '+7(812)232-4123',
-                email: 'demo@demo.ru',
-                url: 'http://www.w3schools.com',
-                contactName: 'Аверин Константин Петрович',
-                phone: '+7(812)232-4123',
-                phoneFrom: 10,
-                phoneTo: 20,
-                phone2: '+7(812)232-4124',
-                phone2From: 11,
-                phone2To: 21,
-                phone3: '+7(812)232-4125',
-                phone3From: 7,
-                phone3To: 15,
-                companyInfo: 'Здесь может быть произвольный текст...',
-                billingCompany: {id: 1},
-                manager: {id: 1}
-            }
-        },
-        {id: 1, email: 'a-bobkov@ab.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 1,
-            companyName: 'Ещё одна компания',
-            manager: {id: 2},
-            phone: '+7(812)232-4123',
-            phoneFrom: null,
-            phoneTo: null
-        }},
-        {id: 2, email: 'a-bobkov@abb.com', lastLogin: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 1}},
-        {id: 3, email: 'a-bobkov@abc.com', lastLogin: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
-            id: 3, companyName: 'Другая компания', manager: {id: 1}}},
-        {id: 4, email: 'a-bobkov@act.com', lastLogin: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 5}},
-        {id: 6, email: 'a-bobkov@abe.com', lastLogin: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
-            id: 6, companyName: 'Крутая компания', manager: {id: 2}}},
-        {id: 7, email: 'a-bobkov@abf.com', lastLogin: '2010-01-12', status: 'inactive', group: {id: 2}, dealer: {
-            id: 7, companyName: 'Auto', manager: {id: 2}}},
-        {id: 8, email: 'a-bobkov@abg.com', lastLogin: '2010-08-07', status: 'active', group: {id: 1}},
-        {id: 9, email: 'a-bobkov@abh.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 9, companyName: 'Битые корыта', manager: {id: 1}}},
-        {id: 10, email: 'a-bobkov@abi.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 10, companyName: 'Два в одном', manager: {id: 2}}},
-        {id: 11, email: 'a-bobkov@abj.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 1}},
-        {id: 12, email: 'a-bobkov@abk.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 12, companyName: 'Авто-мото', manager: {id: 0}}},
-        {id: 13, email: 'a-bobkov@abl.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
-            id: 13, companyName: 'Свет', manager: {id: 4}}},
-        {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 6}},
-        {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
-    ], multiplyCoef, function(i, len) {
-        this.email = i + this.email;
-        if (this.dealer) {
-            this.dealer.latitude = randomLatitude();
-            this.dealer.longitude = randomLongitude();
+        for (var i = 0; i < coef; i++) {
+            _.forEach(_.cloneDeep(arr), function(value) {
+                value.id = value.id + i * arr.length;
+                if (fn) {
+                    fn.call(value, i, arr.length);
+                }
+                multiplyArray.push(value);
+            });
         }
-    })).resolveRefs(userDirectories);
-    
+        return multiplyArray;
+    }
+
     function getDeepValue(item, field) {
         var value = item[field.shift()];
         if (field.length && value) {
@@ -331,11 +216,53 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         }
     }
 
-    var processPost = function(data, collection, itemName, itemConstuctor, directories, process, validation) {
+    function validationPost(validate, item, items) {
+        function cloneObj(obj) {
+            return _.isObject(obj) ? {children: _.mapValues(obj, cloneObj)} : {};
+        }
+        function pushDeepError(item, path, value) {
+            if (path && path.length) {
+                var prop = path.shift();
+                if (!item.children) {
+                    item.children = {};
+                }
+                if (!item.children[prop]) {
+                    item.children[prop] = {};
+                }
+                pushDeepError(item.children[prop], path, value);
+            } else {
+                if (!item.errors) {
+                    item.errors = [];
+                }
+                item.errors.push(value);
+            }
+        }
+        function pushError(errorField, errorText) {
+            hasErrors = true;
+            pushDeepError(errorObj, errorField && errorField.split('.'), errorText);
+        }
+        var hasErrors;
+        var errorObj = cloneObj(item);
+        validate(pushError, item, items);
+        return (hasErrors) ? errorObj : null;
+    }
+
+    var processPost = function(data, collection, itemName, itemConstuctor, directories, process, validate) {
+        var itemData = (angular.fromJson(data))[itemName];
         var items = collection.getItems();
+
+        var validationErrors = validate && validationPost(validate, itemData, items);
+        if (validationErrors) {
+            return [400, {
+                status: 'error',
+                message: 'Validation Failed',
+                errors: validationErrors
+            }];
+        }
+
         try {
-            var item = (new itemConstuctor((angular.fromJson(data))[itemName])).resolveRefs(directories);
-        } catch (err) {     // ошибка ссылочной целостности
+            var item = (new itemConstuctor(itemData)).resolveRefs(directories);
+        } catch (err) {     // ошибка ссылочной целостности, не определенная валидатором
             return [400, {
                 status: 'error',
                 message: 'Ошибка при создании',
@@ -350,15 +277,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             process.call(item);
         }
 
-        var validationError = validation && validation(item, items);
-        if (validationError) {
-            return [400, {
-                status: 'error',
-                message: 'Validation Failed',
-                errors: validationError
-            }];
-        }
-
         items.push(item);
         var respond = [200, {
             status: 'success',
@@ -368,9 +286,42 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return respond;
     };
 
-    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories, process, validation) {
-        var id = parseInt(url.replace(regex,'$1'));
+    function validationPut(validate, item, items, idx) {
+        function cloneObj(obj) {
+            return _.isObject(obj) ? {children: _.mapValues(obj, cloneObj)} : [];
+        }
+        function pushDeepError(item, path, value) {
+            if (path && path.length) {
+                var prop = path.shift();
+                if (!item.children) {
+                    item.children = {};
+                }
+                if (!item.children[prop]) {
+                    item.children[prop] = [];
+                }
+                pushDeepError(item.children[prop], path, value);
+            } else {
+                if (!item.errors) {
+                    item.errors = [];
+                }
+                item.errors.push(value);
+            }
+        }
+        function pushError(errorField, errorText) {
+            hasErrors = true;
+            pushDeepError(errorObj, errorField && errorField.split('.'), errorText)
+        }
+        var hasErrors;
+        var errorObj = cloneObj(item);
+        validate(pushError, item, items, idx);
+        return (hasErrors) ? errorObj : null;
+    }
+
+    var processPut = function(url, regex, data, collection, itemName, itemConstuctor, directories, process, validate) {
+        var itemData = (angular.fromJson(data))[itemName];
         var items = collection.getItems();
+
+        var id = parseInt(url.replace(regex,'$1'));
         var idx = _.findIndex(items, {id: id});
         if (idx === -1) {
             return [404, {
@@ -380,9 +331,18 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             }];
         }
 
+        var validationErrors = validate && validationPut(validate, itemData, items, idx);
+        if (validationErrors) {
+            return [400, {
+                status: 'error',
+                message: 'Validation Failed',
+                errors: validationErrors
+            }];
+        }
+
         try {
-            var item = (new itemConstuctor((angular.fromJson(data))[itemName])).resolveRefs(directories);
-        } catch (err) {     // ошибка ссылочной целостности
+            var item = (new itemConstuctor(itemData)).resolveRefs(directories);
+        } catch (err) {     // ошибка ссылочной целостности, не определенная валидатором
             return [400, {
                 status: 'error',
                 message: 'Ошибка при обновлении',
@@ -392,15 +352,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
         if (process) {
             process(item, items, idx);
-        }
-
-        var validationError = validation && validation(item, items, idx);
-        if (validationError) {
-            return [400, {
-                status: 'error',
-                message: 'Validation Failed',
-                errors: validationError
-            }];
         }
 
         items[idx] = item;
@@ -416,74 +367,116 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         var id = parseInt(url.replace(regex,'$1'));
         var items = collection.getItems();
         var idx = _.findIndex(items, {id: id});
-        if (idx !== -1) {
-            var validationError = validation && validation(items[idx]);
-            if (validationError) {
-                return [400, {
-                    status: 'error',
-                    message: validationError
-                }];
-            } else {
-                items.splice(idx, 1);
-                return [200, {
-                    status: 'success',
-                    data: null
-                }];
-            }
-        } else {
+        if (idx === -1) {
             return [404, {
                 status: 'error',
                 message: collection.notFoundMessage || 'Not Found',
                 errors: 'Не найден элемент с id: ' + id
             }];
         }
-    };
-
-    var regexUserDirectories = /^\/api2\/combined\/users$/;
-    $httpBackend.whenGET(regexUserDirectories).respond(function(method, url, data) {
-        try {
-            var directories = _.mapValues(userDirectories, function(directory) {
-               return directory.serialize();
-            });
-        } catch (err) {
+        var validationError = validation && validation(items[idx]);
+        if (validationError) {
             return [400, {
                 status: 'error',
-                message: 'Ошибка при загрузке справочников',
-                errors: err.message
+                message: validationError
+            }];
+        } else {
+            items.splice(idx, 1);
+            return [200, {
+                status: 'success',
+                data: null
             }];
         }
-        return [200, {
-            status: 'success',
-            data: directories
-        }];
+    };
+
+    var groups = new Groups([
+        {id: 1, name: 'admin', description: 'Администратор'},
+        {id: 2, name: 'dealer', description: 'Автосалон'},
+        {id: 3, name: 'site', description: 'Автосайт'}
+    ]);
+
+    var regexGroupsQuery = /^\/api2\/groups(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexGroupsQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexGroupsQuery, groups.getItems(), 'groups', Groups);
+    });
+    $httpBackend.whenPOST(regexGroupsQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexGroupsQuery, data, groups, 'groups', Groups);
     });
 
-    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexUserQuery, users.getItems(), 'users', Users);
+    var managers = new Managers([
+        {id: 1, name: 'Катя'},
+        {id: 2, name: 'Света'},
+        {id: 4, name: 'Потеряшки'}
+    ]);
+
+    var regexManagersQuery = /^\/api2\/managers(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexManagersQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexManagersQuery, managers.getItems(), 'managers', Managers);
     });
-    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
-        return processPostQuerySort(url, regexUserQuery, data, users, 'users', Users);
+    $httpBackend.whenPOST(regexManagersQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexManagersQuery, data, managers, 'managers', Managers);
     });
 
-    var regexUserGet = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenGET(regexUserGet).respond(function(method, url, data) {
-        return processGet(url, regexUserGet, users, 'user');
+    var cities = new Cities([
+        {id: 1, name: 'Москва'},
+        {id: 2, name: 'Санкт-Петербург'},
+        {id: 3, name: 'Томск'},
+        {id: 4, name: 'Новосибирск'},
+        {id: 6, name: 'Екатеринбург'},
+        {id: 7, name: 'Петрозаводск'},
+        {id: 8, name: 'Сочи'},
+        {id: 9, name: 'Чебоксары'},
+        {id: 10, name: 'Котлас'},
+        {id: 11, name: 'Мурманск'},
+        {id: 12, name: 'Волгоград'},
+        {id: 13, name: 'Коломна'}
+    ]);
+
+    var regexCitiesQuery = /^\/api2\/cities(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexCitiesQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexCitiesQuery, cities.getItems(), 'cities', Cities);
+    });
+    $httpBackend.whenPOST(regexCitiesQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexCitiesQuery, data, cities, 'cities', Cities);
     });
 
-    var regexUserPost = /^\/api2\/users\/new$/;
-    $httpBackend.whenPOST(regexUserPost).respond(function(method, url, data) {
-        return processPost(data, users, 'user', User, userDirectories);
+    var markets = new Markets([
+        {id: 4, name: 'Рынок один в москве', city: {id: 1}},
+        {id: 7, name: 'Рынок два в москве', city: {id: 1}},
+        {id: 8, name: 'Рынок один в питере', city: {id: 2}},
+        {id: 9, name: 'Рынок два в питере', city: {id: 2}}
+    ]).resolveRefs({cities: cities});
+
+    var regexMarketsQuery = /^\/api2\/markets(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexMarketsQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexMarketsQuery, markets.getItems(), 'markets', Markets);
+    });
+    $httpBackend.whenPOST(regexMarketsQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexMarketsQuery, data, markets, 'markets', Markets);
     });
 
-    var regexUserPut = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenPUT(regexUserPut).respond(function(method, url, data) {
-        return processPut(url, regexUserPut, data, users, 'user', User, userDirectories);
-    });
+    var metros = new Metros([
+        {id: 8, name: 'Метро один в москве', city: {id: 1}},
+        {id: 9, name: 'Метро два в москве', city: {id: 1}},
+        {id: 18, name: 'Метро три в москве', city: {id: 1}},
+        {id: 19, name: 'Метро четыре в москве', city: {id: 1}},
+        {id: 28, name: 'Метро пять в москве', city: {id: 1}},
+        {id: 29, name: 'Метро шесть в москве', city: {id: 1}},
+        {id: 10, name: 'Метро один в питере', city: {id: 2}},
+        {id: 11, name: 'Метро два в питере', city: {id: 2}},
+        {id: 20, name: 'Метро три в питере', city: {id: 2}},
+        {id: 21, name: 'Метро четыре в питере', city: {id: 2}},
+        {id: 30, name: 'Метро пять в питере', city: {id: 2}},
+        {id: 31, name: 'Метро шесть в питере', city: {id: 2}},
+        {id: 174, name: 'Метро шесть в питере', city: {id: 2}}
+    ]).resolveRefs({cities: cities});
 
-    var regexUserDelete = /^\/api2\/users\/(?:([^\/]+))$/;
-    $httpBackend.whenDELETE(regexUserDelete).respond(function(method, url, data) {
-        return processDelete(url, regexUserDelete, users);
+    var regexMetrosQuery = /^\/api2\/metros(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexMetrosQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexMetrosQuery, metros.getItems(), 'metros', Metros);
+    });
+    $httpBackend.whenPOST(regexMetrosQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexMetrosQuery, data, metros, 'metros', Metros);
     });
 
     var dealers = new Dealers([
@@ -639,7 +632,43 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 223, companyName: 'Автосалон "Эльва Моторс" официальный дилер SsangYong и FIAT', city: {id: 1}, isActive: true},
         {id: 413, companyName: 'Смольнинский Автоцентр - официальный дилер VOLVO', city: {id: 1}, isActive: true},
         {id: 553, companyName: 'Официальный дилер FORD компания ЗАО «ЕВРО-МОТОРС».', city: {id: 1}, isActive: true}
-    ]).resolveRefs(userDirectories);
+    ]).resolveRefs({cities: cities});
+
+    var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealersQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
+    });
+    $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
+
+        var applyFields = function(arr, fields) {
+            return _.map(arr, function(item) {
+                var newItem = {};
+                _.forEach(fields, function(group) {
+                    if (group === 'dealer_list_name') {
+                        newItem.id = item.id;
+                        if (item.companyName) {
+                            newItem.companyName = item.companyName;
+                        }
+                    }
+                });
+                return newItem;
+            });
+        }
+
+        var knownFields = function(fields) {
+            return _.filter(fields, function(group) {
+                return (group === 'dealer_list_name');
+            });
+        }
+
+        var respond = processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
+        var fields = angular.fromJson(data).fields;
+        if (_.size(fields)) {
+            respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
+            respond[1].data.params.fields = knownFields(fields);
+        }
+        return respond;
+    });
 
     var sites = new Sites([
         {id: 0,  name: 'maxposter.ru', isActive: true},
@@ -663,6 +692,279 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         {id: 18, name: 'mercedes-benz.ru', isActive: true},
         {id: 19, name: 'carsguru.ru', isActive: true}
     ]);
+
+    var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexSitesQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
+    });
+    $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexSitesQuery, data, sites, 'sites', Sites);
+    });
+
+    var userDirectories = new Construction({
+        groups: groups,
+        managers: managers,
+        cities: cities,
+        markets: markets,
+        metros: metros,
+        sites: sites,
+        billingCompanies: new BillingCompanies([
+            {id: 1, name: 'Макспостер, ООО'},
+            {id: 2, name: 'Харитонов, ИП'}
+        ])
+    });
+
+    var users = new Users(multiplyArrFn([
+        {
+            id: 5,
+            email: 'demo@maxposter.ru',
+            lastLogin: '2013-12-01',
+            status: 'active',
+            group: {id: 2},
+            dealer: {
+                id: 5,
+                companyName: 'Демокомпания',
+                city: {id: 2},
+                market: {id: 8},
+                metro: {id: 10},
+                address: '191040, Лиговский проспект, 150, оф.505',
+                fax: '+7(812)232-4123',
+                email: 'demo@demo.ru',
+                url: 'http://www.w3schools.com',
+                contactName: 'Аверин Константин Петрович',
+                phone: '+7(812)232-4123',
+                phoneFrom: 10,
+                phoneTo: 20,
+                phone2: '+7(812)232-4124',
+                phone2From: 11,
+                phone2To: 21,
+                phone3: '+7(812)232-4125',
+                phone3From: 7,
+                phone3To: 15,
+                companyInfo: 'Здесь может быть произвольный текст...',
+                billingCompany: {id: 1},
+                manager: {id: 1}
+            }
+        },
+        {id: 1, email: 'a-bobkov@ab.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 1,
+            companyName: 'Ещё одна компания',
+            manager: {id: 2},
+            phone: '+7(812)232-4123',
+            phoneFrom: null,
+            phoneTo: null
+        }},
+        {id: 2, email: 'a-bobkov@abb.com', lastLogin: '2011-03-11', status: 'active', group: {id: 3}, site: {id: 1}},
+        {id: 3, email: 'a-bobkov@abc.com', lastLogin: '2012-05-31', status: 'inactive', group: {id: 2}, dealer: {
+            id: 3, companyName: 'Другая компания', manager: {id: 1}}},
+        {id: 4, email: 'a-bobkov@act.com', lastLogin: '2011-12-12', status: 'blocked', group: {id: 3}, site: {id: 5}},
+        {id: 6, email: 'a-bobkov@abe.com', lastLogin: '2013-01-06', status: 'active', group: {id: 2}, dealer: {
+            id: 6, companyName: 'Крутая компания', manager: {id: 2}}},
+        {id: 7, email: 'a-bobkov@abf.com', lastLogin: '2010-01-12', status: 'inactive', group: {id: 2}, dealer: {
+            id: 7, companyName: 'Auto', manager: {id: 2}}},
+        {id: 8, email: 'a-bobkov@abg.com', lastLogin: '2010-08-07', status: 'active', group: {id: 1}},
+        {id: 9, email: 'a-bobkov@abh.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 9, companyName: 'Битые корыта', manager: {id: 1}}},
+        {id: 10, email: 'a-bobkov@abi.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 10, companyName: 'Два в одном', manager: {id: 2}}},
+        {id: 11, email: 'a-bobkov@abj.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 1}},
+        {id: 12, email: 'a-bobkov@abk.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 12, companyName: 'Авто-мото', manager: {id: 4}}},
+        {id: 13, email: 'a-bobkov@abl.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {
+            id: 13, companyName: 'Свет', manager: {id: 4}}},
+        {id: 14, email: 'a-bobkov@abo.com', lastLogin: '2012-01-01', status: 'blocked', group: {id: 3}, site: {id: 6}},
+        {id: 15, email: 'a-bobkov@abm.com', lastLogin: '2012-01-01', status: 'active', group: {id: 3}, site: {id: 1}}
+    ], multiplyCoef, function(i, len) {
+        function randomCoordinate(min, max) {
+            return (Math.random() * (max - min) + min).ceil(8);
+        }
+        function randomLatitude() {
+            return randomCoordinate(40, 90);
+        }
+        function randomLongitude() {
+            return randomCoordinate(20, 180);
+        }
+        this.email = i + this.email;
+        if (this.dealer) {
+            if (this.id) {
+                this.dealer.id = this.id;
+            }
+            this.dealer.latitude = randomLatitude();
+            this.dealer.longitude = randomLongitude();
+        }
+    })).resolveRefs(userDirectories);
+    users.notFoundMessage = 'Пользователь не найден.';
+    
+    var regexUserDirectories = /^\/api2\/combined\/users$/;
+    $httpBackend.whenGET(regexUserDirectories).respond(function(method, url, data) {
+        try {
+            var directories = _.mapValues(userDirectories, function(directory) {
+               return directory.serialize();
+            });
+        } catch (err) {
+            return [400, {
+                status: 'error',
+                message: 'Ошибка при загрузке справочников',
+                errors: err.message
+            }];
+        }
+        return [200, {
+            status: 'success',
+            data: directories
+        }];
+    });
+
+    var regexUserQuery = /^\/api2\/users(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexUserQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexUserQuery, users.getItems(), 'users', Users);
+    });
+    $httpBackend.whenPOST(regexUserQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexUserQuery, data, users, 'users', Users);
+    });
+
+    var regexUserGet = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexUserGet).respond(function(method, url, data) {
+        return processGet(url, regexUserGet, users, 'user');
+    });
+
+    var regexUserPost = /^\/api2\/users\/new$/;
+    $httpBackend.whenPOST(regexUserPost).respond(function(method, url, data) {
+        return processPost(data, users, 'user', User, userDirectories,
+            function process() {
+                if (!this.status) {
+                    this.status = userStatuses.get('inactive');
+                }
+            }, function validate(pushError, itemData, items) {
+                if (!itemData.group) {
+                    pushError('group', 'Пользователю необходимо назначить группу.');
+                } else if (!groups.get(itemData.group.id)) {
+                    pushError('group', 'Пользователю необходимо назначить группу.');
+                } else 
+                if (itemData.group && itemData.group.id === 2 && !itemData.dealer) {
+                    pushError('dealer', 'Значение поля dealer не должно быть пустым.');
+                }
+                if (itemData.group && itemData.group.id === 3) {
+                    if (!itemData.site) {
+                        pushError('site', 'Значение поля site не должно быть пустым.');
+                    } else if (!itemData.site.id) {
+                        pushError('site.id', 'Значение не должно быть пустым.');
+                    } else if (!sites.get(itemData.site.id)) {
+                        pushError('site.id', 'Сайт ' + itemData.site.id + ' не найден.');
+                    }
+                }
+                if (itemData.status && !userStatuses.get(itemData.status)) {
+                    pushError('status', 'Выбранное Вами значение недопустимо.');
+                }
+                if (!itemData.email) {
+                    pushError('email', 'Значение не должно быть пустым.');
+                } else if (!itemData.email.match(regexpEmail)) {
+                    pushError('email', 'Значение не верно.');
+                } else if (_.find(items, {email: itemData.email})) {
+                    pushError('email', 'Значение уже используется.');
+                }
+                if (!itemData.password) {
+                    pushError('password', 'Значение не должно быть пустым.');
+                } else if (itemData.password.length > 128) {
+                    pushError('password', 'Превышена допустимая длина в 128 символов.');
+                }
+                if (itemData.dealer) {
+                    if (!itemData.dealer.manager) {
+                        pushError('dealer.manager', 'Значение не должно быть пустым.');
+                    } else if (!managers.get(itemData.dealer.manager.id)) {
+                        pushError(null, 'Менеджер ' + itemData.dealer.manager.id + ' не найден.');
+                    }
+                    if (!itemData.dealer.city) {
+                        pushError('dealer.city', 'Значение не должно быть пустым.');
+                    } else if (!cities.get(itemData.dealer.city.id)) {
+                        pushError(null, 'Город ' + itemData.dealer.city.id + ' не найден.');
+                    }
+                    if (itemData.dealer.metro) {
+                        if (!metros.get(itemData.dealer.metro.id)) {
+                            pushError(null, 'Станция метро ' + itemData.dealer.metro.id + ' не найдена.');
+                        } else if (metros.get(itemData.dealer.metro.id).city.id !== itemData.dealer.city.id) {
+                            pushError('dealer.metro.id', 'Станция метро должна находиться в выбранном городе.');
+                        }
+                    }
+                    if (itemData.dealer.market) {
+                        if (!markets.get(itemData.dealer.market.id)) {
+                            pushError(null, 'Рынок ' + itemData.dealer.market.id + ' не найден.');
+                        } else if (markets.get(itemData.dealer.market.id).city.id !== itemData.dealer.city.id) {
+                            pushError('dealer.market.id', 'Рынок должен находиться в выбранном городе.');
+                        }
+                    }
+                    if (!itemData.dealer.companyName) {
+                        pushError('dealer.companyName', 'Значение не должно быть пустым.');
+                    } else if (itemData.dealer.companyName.length > 100) {
+                        pushError('dealer.companyName', 'Значение слишком длинное. Должно быть равно 100 символам или меньше.');
+                    }
+                    if (!itemData.dealer.address) {
+                        pushError('dealer.address', 'Значение не должно быть пустым.');
+                    } else if (itemData.dealer.address.length > 255) {
+                        pushError('dealer.address', 'Значение слишком длинное. Должно быть равно 255 символам или меньше.');
+                    }
+                    if (itemData.dealer.fax && !itemData.dealer.fax.match(regexpPhoneNumber)) {
+                        pushError('dealer.fax', 'Неверный формат номера телефона.');
+                    }
+                    if (itemData.dealer.email && !itemData.dealer.email.match(regexpEmail)) {
+                        pushError('dealer.email', 'Значение адреса электронной почты недопустимо.');
+                    }
+                    if (itemData.dealer.url && !itemData.dealer.url.match(regexpUrl)) {
+                        pushError('dealer.url', 'Не верное значение ссылки: \'' + itemData.dealer.url + '\'.');
+                    }
+                    if (!itemData.dealer.phone) {
+                        pushError('dealer.phone', 'Значение не должно быть пустым.');
+                    }
+                    function validatePhone(prop) {
+                        if (itemData.dealer[prop]) {
+                            if (!itemData.dealer[prop].match(regexpPhoneNumber)) {
+                                pushError('dealer.' + prop, 'Неверный формат номера телефона.');
+                            }
+                            if (!_.isNumber(itemData.dealer[prop + 'From'])) {
+                                pushError('dealer.' + prop, 'Неверно указано время для звонка на телефон.');
+                            } else if (itemData.dealer[prop + 'From'] < 0 || itemData.dealer[prop + 'From'] > 24) {
+                                pushError('dealer.' + prop + 'From', 'Значение должно быть 24 или меньше.');
+                            }
+                            if (!_.isNumber(itemData.dealer[prop + 'To'])) {
+                                pushError('dealer.' + prop, 'Неверно указано время для звонка на телефон.');
+                            } else if (itemData.dealer[prop + 'To'] < 0 || itemData.dealer[prop + 'To'] > 24) {
+                                pushError('dealer.' + prop + 'To', 'Значение должно быть 24 или меньше.');
+                            }
+                            if (itemData.dealer[prop + 'From'] && itemData.dealer[prop + 'To']
+                                && itemData.dealer[prop + 'From'] >= itemData.dealer[prop + 'To']) {
+                                pushError('dealer.' + prop, 'Неверно указано время для звонка на телефон.');
+                            }
+                        }
+                    }
+                    validatePhone('phone');
+                    validatePhone('phone2');
+                    validatePhone('phone3');
+                }
+            }
+        );
+    });
+
+    var regexUserPut = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexUserPut).respond(function(method, url, data) {
+        return processPut(url, regexUserPut, data, users, 'user', User, userDirectories,
+            function process() {
+            }, function validate(pushError, itemData, items, idx) {
+                if (itemData.group && itemData.group.id === 3) {
+                    if (!itemData.site) {
+                        pushError('site', 'Значение поля site не должно быть пустым.');
+                    } else if (!itemData.site.id) {
+                        pushError('site.id', 'Значение не должно быть пустым.');
+                    } else if (!sites.get(itemData.site.id)) {
+                        pushError('site.id', 'Сайт ' + itemData.site.id + ' не найден.');
+                    }
+                }
+            }
+        );
+    });
+
+    var regexUserDelete = /^\/api2\/users\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexUserDelete).respond(function(method, url, data) {
+        return processDelete(url, regexUserDelete, users);
+    });
 
     var dealerSites = new DealerSites(multiplyArrFn([
         {
@@ -747,6 +1049,75 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     ], multiplyCoef, function(i, len) {
         this.dealer = { id: dealers.getItems()[i].id };
     })).resolveRefs({dealers: dealers, sites: sites});
+    dealerSites.notFoundMessage = 'Регистрация на сайте не найдена.';
+
+    var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
+    });
+    $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
+    });
+    var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
+        return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
+    });
+    var regexDealerSitesPost = /^\/api2\/dealersites\/new$/;
+    $httpBackend.whenPOST(regexDealerSitesPost).respond(function(method, url, data) {
+        return processPost(data, dealerSites, 'dealerSite', DealerSite, {
+            dealers: dealers,
+            sites: sites
+        }, function process() {
+        }, function validate(pushError, itemData, items) {
+            if (!itemData.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!itemData.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (_.find(items, function(item) {
+                return (item.dealer.id === itemData.dealer.id)
+                    && (item.site.id === itemData.site.id);
+                })) {
+                pushError(null, 'Регистрация салона по указанному сайту уже существует.');
+            }
+        });
+    });
+    var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenPUT(regexDealerSitesPut).respond(function(method, url, data) {
+        return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
+            dealers: dealers,
+            sites: sites
+        }, function process() {
+        }, function validate(pushError, itemData, items, idx) {
+            if (!itemData.dealer) {
+                pushError('dealer', 'Значение не должно быть пустым.');
+            }
+            if (!itemData.site) {
+                pushError('site', 'Значение не должно быть пустым.');
+            }
+            if (_.find(items, function(item) {
+                return item.id !== itemData.id
+                    && item.dealer.id === itemData.dealer.id
+                    && item.site.id === itemData.site.id;
+            })) {
+                pushError(null, 'Регистрация салона по указанному сайту уже существует.');
+            }
+            if (!itemData.publicUrl.match(regexpUrl)) {
+                pushError('publicUrl', 'Не верное значение ссылки: \'' + itemData.publicUrl + '\'.');
+            }
+            if (itemData.publicUrl && itemData.publicUrl.length > 255) {
+                pushError('publicUrl', 'Значение слишком длинное. Должно быть равно 255 символам или меньше.');
+            }
+            if (itemData.externalId && itemData.externalId.length > 10) {
+                pushError('externalId', 'Значение слишком длинное. Должно быть равно 10 символам или меньше.');
+            }
+        });
+    });
+    var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
+    $httpBackend.whenDELETE(regexDealerSitesDelete).respond(function(method, url, data) {
+        return processDelete(url, regexDealerSitesDelete, dealerSites);
+    });
 
     var dealerSiteLogins = new DealerSiteLogins(multiplyArrFn([
         {
@@ -797,36 +1168,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     ], multiplyCoef, function(i, len) {
         this.dealer = { id: dealers.getItems()[i].id };
     })).resolveRefs({dealers: dealers, sites: sites});
-
-    var regexDealerSitesQuery = /^\/api2\/dealersites(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexDealerSitesQuery, dealerSites.getItems(), 'dealerSites', DealerSites);
-    });
-    $httpBackend.whenPOST(regexDealerSitesQuery).respond(function(method, url, data) {
-        return processPostQuerySort(url, regexDealerSitesQuery, data, dealerSites, 'dealerSites', DealerSites);
-    });
-    var regexDealerSitesGet = /^\/api2\/dealersites\/(?:([^\/]+))$/;
-    $httpBackend.whenGET(regexDealerSitesGet).respond(function(method, url, data) {
-        return processGet(url, regexDealerSitesGet, dealerSites, 'dealerSite');
-    });
-    var regexDealerSitesPost = /^\/api2\/dealersites\/new$/;
-    $httpBackend.whenPOST(regexDealerSitesPost).respond(function(method, url, data) {
-        return processPost(data, dealerSites, 'dealerSite', DealerSite, {
-            dealers: dealers,
-            sites: sites
-        });
-    });
-    var regexDealerSitesPut = /^\/api2\/dealersites\/(?:([^\/]+))$/;
-    $httpBackend.whenPUT(regexDealerSitesPut).respond(function(method, url, data) {
-        return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
-            dealers: dealers,
-            sites: sites
-        });
-    });
-    var regexDealerSitesDelete = /^\/api2\/dealersites\/(?:([^\/]+))$/;
-    $httpBackend.whenDELETE(regexDealerSitesDelete).respond(function(method, url, data) {
-        return processDelete(url, regexDealerSitesDelete, dealerSites);
-    });
+    dealerSiteLogins.notFoundMessage = 'Логин салона на сайте не найден.';
 
     var regexDealerSiteLoginsQuery = /^\/api2\/dealersitelogins(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexDealerSiteLoginsQuery).respond(function(method, url, data) {
@@ -845,26 +1187,20 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealers: dealers,
             sites: sites
         }, function process() {
-        }, function validation(item, items) {
-            var hasErrors;
-            var children = {};
-            function pushError(errorField, errorText) {
-                hasErrors = true;
-                if (!children[errorField]) {
-                    children[errorField] = {errors: []};
-                }
-                children[errorField].errors.push(errorText);
-            }
-            if (!item.dealer) {
+        }, function validate(pushError, itemData, items) {
+            if (!itemData.dealer) {
                 pushError('dealer', 'Значение не должно быть пустым.');
             }
-            if (!item.site) {
+            if (!itemData.site) {
                 pushError('site', 'Значение не должно быть пустым.');
             }
-            if (_.find(items, {dealer: item.dealer, site: item.site, type: item.type})) {
-                pushError('site', 'Это значение уже используется.');
+            if (_.find(items, function(item) {
+                return (item.type.id === itemData.type)
+                    && (item.dealer.id === itemData.dealer.id)
+                    && (item.site.id === itemData.site.id);
+                })) {
+                pushError(null, 'Логин салона по указанному сайту уже существует.');
             }
-            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSiteLoginsPut = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
@@ -873,85 +1209,31 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealers: dealers,
             sites: sites
         }, function process() {
-        }, function validation(item, items, idx) {
-            var hasErrors;
-            var children = {};
-            function pushError(errorField, errorText) {
-                hasErrors = true;
-                if (!children[errorField]) {
-                    children[errorField] = {errors: []};
-                }
-                children[errorField].errors.push(errorText);
+        }, function validate(pushError, itemData, items, idx) {
+            if (!itemData.dealer) {
+                pushError('dealer.id', 'Значение не должно быть пустым.');
             }
-            if (!item.dealer) {
-                pushError('dealer', 'Значение не должно быть пустым.');
+            if (!itemData.site) {
+                pushError('site.id', 'Значение не должно быть пустым.');
             }
-            if (!item.site) {
-                pushError('site', 'Значение не должно быть пустым.');
-            }
-            if (!item.type) {
+            if (!itemData.type) {
                 pushError('type', 'Значение не должно быть пустым.');
             }
-            if (!item.login) {
+            if (!itemData.login) {
                 pushError('login', 'Значение не должно быть пустым.');
-            } else if (item.login.length > 100){
+            } else if (itemData.login.length > 100){
                 pushError('login', 'Значение слишком длинное. Должно быть равно 100 символам или меньше.');
             }
-            if (!item.password) {
+            if (!itemData.password) {
                 pushError('password', 'Значение не должно быть пустым.');
-            } else if (item.password.length > 100){
+            } else if (itemData.password.length > 100){
                 pushError('password', 'Значение слишком длинное. Должно быть равно 100 символам или меньше.');
             }
-            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexDealerSiteLoginsDelete = /^\/api2\/dealersitelogins\/(?:([^\/]+))$/;
     $httpBackend.whenDELETE(regexDealerSiteLoginsDelete).respond(function(method, url, data) {
         return processDelete(url, regexDealerSiteLoginsDelete, dealerSiteLogins);
-    });
-
-    var regexDealersQuery = /^\/api2\/dealers(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexDealersQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
-    });
-    $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
-
-        var applyFields = function(arr, fields) {
-            return _.map(arr, function(item) {
-                var newItem = {};
-                _.forEach(fields, function(group) {
-                    if (group === 'dealer_list_name') {
-                        newItem.id = item.id;
-                        if (item.companyName) {
-                            newItem.companyName = item.companyName;
-                        }
-                    }
-                });
-                return newItem;
-            });
-        }
-
-        var knownFields = function(fields) {
-            return _.filter(fields, function(group) {
-                return (group === 'dealer_list_name');
-            });
-        }
-
-        var respond = processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
-        var fields = angular.fromJson(data).fields;
-        if (_.size(fields)) {
-            respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
-            respond[1].data.params.fields = knownFields(fields);
-        }
-        return respond;
-    });
-
-    var regexSitesQuery = /^\/api2\/sites(?:\?([\w_=&.]*))?$/;
-    $httpBackend.whenGET(regexSitesQuery).respond(function(method, url, data) {
-        return processQueryUrlSort(url, regexSitesQuery, sites.getItems(), 'sites', Sites);
-    });
-    $httpBackend.whenPOST(regexSitesQuery).respond(function(method, url, data) {
-        return processPostQuerySort(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 
     var tariffs = new Tariffs([
@@ -1738,22 +2020,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     })).resolveRefs({dealers: dealers, sites: sites, tariffs: tariffs});
     sales.notFoundMessage = 'Продажа не найдена.';
 
-    function multiplyArrFn(arr, coef, fn) {
-        coef = coef || 1;
-        var multiplyArray = [];
-
-        for (var i = 0; i < coef; i++) {
-            _.forEach(_.cloneDeep(arr), function(value) {
-                value.id = value.id + i * arr.length;
-                if (fn) {
-                    fn.call(value, i, arr.length);
-                }
-                multiplyArray.push(value);
-            });
-        }
-        return multiplyArray;
-    }
-
     var regexSalesQuery = /^\/api2\/sales(?:\?([\w_=&.]*))?$/;
     $httpBackend.whenGET(regexSalesQuery).respond(function(method, url, data) {
         return processQueryUrlSort(url, regexSalesQuery, sales.getItems(), 'sales', Sales);
@@ -1775,40 +2041,64 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             if (this.type.id === 'card' || this.type.id === 'addcard') {
                 this.cardId = this.id;
             }
-        }, function validation(item) {
-            var hasErrors;
-            var children = {};
-            function pushError(errorField, errorText) {
-                hasErrors = true;
-                if (!children[errorField]) {
-                    children[errorField] = {errors: []};
-                }
-                children[errorField].errors.push(errorText);
+        }, function validate(pushError, itemData, items) {
+            if (!itemData.site) {
+                pushError('site.id', 'Значение не должно быть пустым.');
+            } else if (!sites.get(itemData.site.id).isActive) {
+                pushError('site.id', 'Сайт ' + itemData.site.id +' не активен.');
             }
-            if (_.contains(['card', 'addcard'], item.type.id)) {
-                if (item.activeFrom > item.activeTo) {
+            if (itemData.amount < 0) {
+                pushError('amount', 'Значение должно быть больше или равно 0.');
+            } else if (itemData.amount >= 10000000 ) {
+                pushError('amount', 'Значение должно быть меньше чем 10000000.');
+            }
+            if (itemData.siteAmount < 0) {
+                pushError('siteAmount', 'Значение должно быть больше или равно 0.');
+            } else if (itemData.siteAmount >= 10000000 ) {
+                pushError('siteAmount', 'Значение должно быть меньше чем 10000000.');
+            }
+            if (_.contains(['card', 'addcard'], itemData.type)) {
+                if (!itemData.tariff) {
+                    pushError('tariff.id', 'Значение не должно быть пустым.');
+                } else if (!tariffs.get(itemData.tariff.id).isActive) {
+                    pushError('tariff.id', 'Тариф ' + itemData.tariff.id +' не активен.');
+                }
+                if (itemData.tariff && itemData.site) {
+                    if (tariffs.get(itemData.tariff.id).site.id !== itemData.site.id) {
+                        pushError(null, 'Сайт у тарифа должен совпадать с указанным сайтом.');
+                    }
+                }
+                if (itemData.count < 0) {
+                    pushError('count', 'Значение должно быть больше чем 0.');
+                }
+                if (itemData.cardAmount < 0) {
+                    pushError('cardAmount', 'Значение должно быть больше или равно 0.');
+                } else if (itemData.cardAmount >= 1000000 ) {
+                    pushError('cardAmount', 'Значение должно быть меньше чем 1000000.');
+                }
+                if (itemData.activeFrom > itemData.activeTo) {
                     pushError('activeFrom', 'Дата activeFrom должна быть меньше или равна дате activeTo.');
                 }
-                if (item.cardAmount > item.amount) {
+                if (itemData.cardAmount > itemData.amount) {
                     pushError('cardAmount', 'Стоимость продажи не должна быть меньше цены карточки.');
                 }
-                if (item.siteAmount > item.amount) {
+                if (itemData.siteAmount > itemData.amount) {
                     pushError('siteAmount', 'Стоимость продажи не должна быть меньше себестоимости.');
                 }
             }
-            if (_.contains(['card'], item.type.id)) {
-                var crossSales = _.filter(sales.getItems(), function(sale) {
-                    return (sale.type === item.type)
-                        && (sale.dealer.id === item.dealer.id)
-                        && (sale.site.id === item.site.id)
-                        && (sale.activeTo >= item.activeFrom) && (sale.activeFrom <= item.activeTo);
+            if (itemData.type === 'card') {
+                var crossSales = _.filter(items, function(item) {
+                    return (item.type.id === 'card')
+                        && (item.dealer.id === itemData.dealer.id)
+                        && (item.site.id === itemData.site.id)
+                        && (item.activeTo.toISOString().slice(0, 10) >= itemData.activeFrom)
+                        && (item.activeFrom.toISOString().slice(0, 10) <= itemData.activeTo);
                 });
                 if (crossSales.length) {
-                    pushError('activeFrom', 'В диапазоне от ' + item.activeFrom.toISOString().slice(0, 10)
-                        + ' до ' + item.activeTo.toISOString().slice(0, 10) + ' уже находятся продажи (' + crossSales.length + ').');
+                    pushError('activeFrom', 'В диапазоне от ' + itemData.activeFrom + ' до ' + itemData.activeTo
+                        + ' уже находятся продажи (' + crossSales.length + ').');
                 }
             }
-            return (hasErrors) ? {children: children} : null;
         });
     });
     var regexSalesPut = /^\/api2\/sales\/(?:([^\/]+))$/;
@@ -1818,10 +2108,6 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             sites: sites,
             tariffs: tariffs
         }, function process(item, items, idx) {
-            if (item.type.id === 'card' && item.activeTo !== items[idx].activeTo) {
-                updateAddsales(item);
-            }
-
             function updateAddsales(parentSale) {
                 var addSale = _.find(items, {
                     type: saleTypes.get('addcard'),
@@ -1833,6 +2119,10 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                     addSale.activeTo = _.clone(parentSale.activeTo);
                     return updateAddsales(addSale).concat(addSale);
                 }
+            }
+
+            if (item.type.id === 'card' && item.activeTo !== items[idx].activeTo) {
+                updateAddsales(item);
             }
         });
     });
@@ -1961,12 +2251,14 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var regexBillingUnionsPost = /^\/api2\/billingunions\/new$/;
     $httpBackend.whenPOST(regexBillingUnionsPost).respond(function(method, url, data) {
         return processPost(data, billingUnions, 'billingUnion', BillingUnion, {
+            sites: sites,
             dealers: dealers
         });
     });
     var regexBillingUnionsPut = /^\/api2\/billingunions\/(?:([^\/]+))$/;
     $httpBackend.whenPUT(regexBillingUnionsPut).respond(function(method, url, data) {
         return processPut(url, regexBillingUnionsPut, data, billingUnions, 'billingUnion', BillingUnion, {
+            sites: sites,
             dealers: dealers
         });
     });

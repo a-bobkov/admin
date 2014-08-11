@@ -1,6 +1,6 @@
 angular.module("ui.multicombo", [])
 
-.directive("uiMcomboLoader", function($document) {
+.directive("uiMcomboLoader", function($document, $q, $timeout) {
     var openedElement;
     var close;
 
@@ -106,7 +106,9 @@ angular.module("ui.multicombo", [])
                 }
             }
 
+            var numberLoads = 0;
             $scope.loadChoices = function() {
+                numberLoads++;
                 var choicesId = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'id' : 'id';
                 var choicesName = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'companyName' : 'name';
                 var choicesFields = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? ['dealer_list_name'] : [];
@@ -116,15 +118,21 @@ angular.module("ui.multicombo", [])
                 if ($scope._choicesLoader.constructor.name === 'dealersLoader') {
                     filters.push({fields: ['isActive'], type: 'equal', value: true});
                 }
-                $scope._choicesLoader.loadItems({
-                    filters: filters,
-                    fields: choicesFields,
-                    pager: {
-                        per_page: 9
+                $q.all({
+                    choices: $scope._choicesLoader.loadItems({
+                        filters: filters,
+                        fields: choicesFields,
+                        pager: {
+                            per_page: 9
+                        }
+                    }),
+                    numberLoads: numberLoads,
+                    timer: $timeout(function() {}, 300)
+                }).then(function(data) {
+                    if (numberLoads === data.numberLoads) {
+                        $scope._choices = data.choices;
+                        filterChoices();
                     }
-                }).then(function(collection) {
-                    $scope._choices = collection;
-                    filterChoices();
                 });
             }
 
