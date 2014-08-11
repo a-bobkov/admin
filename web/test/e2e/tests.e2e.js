@@ -2621,7 +2621,7 @@ describe('Sale App', function() {
 
     describe('Создание расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?archive=true&orders=-id&itemsPerPage=15');
+            browser.get('admin.html#/salelist?archive=true&orders=id&itemsPerPage=15');
         });
 
         it('показывает режим работы формы', function() {
@@ -3328,7 +3328,7 @@ describe('Sale App', function() {
                         var alert = browser.switchTo().alert();
                         alert.getText().then(function(text) {
                             var saleParams;
-                            if (text === "У салона не включен экспорт на сайт!") {
+                            if (text.match(/^Активация невозможна/)) {
                                 expect(isActive).toBe("Н\/А");
                                 alert.accept();
                                 expect(element.all(sales.column('sale.isActive')).get(saleIdx).getText()).toBe("Н\/А");

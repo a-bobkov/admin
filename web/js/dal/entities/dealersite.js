@@ -76,6 +76,17 @@ angular.module('max.dal.entities.dealersite', ['max.dal.entities.collection', 'm
     this.loadItem = function(id, directories) {
         return entityLoader.loadItem(id, directories, dealerSiteApi, DealerSite);
     };
+    this.loadItemActiveDealerSite = function(dealerId, siteId, directories) {
+        return this.loadItems({
+            filters: [
+                { fields: ['dealer'], type: 'equal', value: dealerId },
+                { fields: ['site'], type: 'equal', value: siteId },
+                { fields: ['isActive'], type: 'equal', value: true }
+            ]
+        }, directories).then(function(dealerSites) {
+            return dealerSites.getItems()[0];
+        });
+    };
 })
 
 .factory('DealerSiteStatus', function(Item) {
