@@ -3828,6 +3828,7 @@ describe('user, dealer', function() {
                     group: {id: 2},
                     dealer: {
                         city: { id: 1 },
+                        billingCompany: {id: 1},
                         companyName: '1',
                         address: '1'
                     }
@@ -3854,6 +3855,7 @@ describe('user, dealer', function() {
                     dealer: {
                         city: { id: 1 },
                         manager: { id: 9999 },
+                        billingCompany: {id: 1},
                         companyName: '1',
                         address: '1',
                     }
@@ -3879,6 +3881,7 @@ describe('user, dealer', function() {
                     dealer: {
                         companyName: '1',
                         address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1}
                     }
                 });
@@ -3894,15 +3897,17 @@ describe('user, dealer', function() {
 
         it('соответствие значения city справочнику', function() {
             var answer = {};
+            var user;
 
             runSync(answer, function() {
-                var user = new User({
+                user = new User({
                     email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
                     password: '1',
                     group: {id: 2},
                     dealer: {
                         companyName: '1',
                         address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 9999}
                     }
@@ -3913,7 +3918,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.city.errors).toContain('Значение недопустимо.');
+                expect(errorResponse.errors.errors).toContain('Город ' + user.dealer.city.id + ' не найден.');
             });
         });
 
@@ -3929,6 +3934,7 @@ describe('user, dealer', function() {
                     dealer: {
                         companyName: '1',
                         address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         metro: {id: 9999}
                     }
@@ -3954,6 +3960,7 @@ describe('user, dealer', function() {
                     dealer: {
                         companyName: '1',
                         address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1},
                         metro: {id: 174}
@@ -3981,6 +3988,7 @@ describe('user, dealer', function() {
                     dealer: {
                         companyName: '1',
                         address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         market: {id: 9999}
                     }
@@ -4006,6 +4014,7 @@ describe('user, dealer', function() {
                     dealer: {
                         companyName: '1',
                         address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 2},
                         market: {id: 7}
@@ -4017,7 +4026,7 @@ describe('user, dealer', function() {
             runs(function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.market.errors).toContain('Значение недопустимо.');
+                expect(errorResponse.errors.children.dealer.children.market.children.id.errors).toContain('Рынок должен находиться в выбранном городе.');
             });
         });
 
@@ -4030,6 +4039,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1}
                     }
@@ -4053,6 +4064,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1},
                         companyName: '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
@@ -4077,6 +4090,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1}
                     }
                 });
@@ -4099,6 +4114,8 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         city: {id: 1},
                         address: '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF'
@@ -4123,10 +4140,11 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         fax: '+7-812-232-4123'
                     }
                 });
@@ -4149,10 +4167,11 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         email: 'jasmine@'
                     }
                 });
@@ -4176,10 +4195,11 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7(812)232-4123',
                         phoneFrom: 10,
                         phoneTo: 20,
@@ -4207,7 +4227,9 @@ describe('user, dealer', function() {
                     dealer: {
                         companyName: '1',
                         address: '1',
-                        manager: {id: 1}
+                        billingCompany: {id: 1},
+                        manager: {id: 1},
+                        city: {id: 1}
                     }
                 });
                 return user.save();
@@ -4229,10 +4251,11 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7-812-232-4123',
                         phoneFrom: 10,
                         phoneTo: 20
@@ -4257,6 +4280,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)123-34-43'
                     }
@@ -4280,6 +4306,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)-123-3443'
                     }
@@ -4304,6 +4333,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)123-34-43'
                     }
@@ -4327,6 +4359,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)123-34-43'
                     }
@@ -4351,6 +4386,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)123-34-43',
                         phoneFrom: 23,
@@ -4376,10 +4414,11 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
@@ -4407,6 +4446,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4433,6 +4475,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4460,6 +4505,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4486,6 +4534,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4513,6 +4564,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4541,10 +4595,11 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 4},
                         city: {id: 1},
-                        companyName: 'Новая компания',
-                        address: '191040, Ленинский проспект, 150, оф.505',
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
                         phoneTo: 20,
@@ -4575,6 +4630,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4604,6 +4662,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4634,6 +4695,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4663,6 +4727,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,
@@ -4693,6 +4760,9 @@ describe('user, dealer', function() {
                     password: '1',
                     group: {id: 2},
                     dealer: {
+                        companyName: '1',
+                        address: '1',
+                        billingCompany: {id: 1},
                         manager: {id: 1},
                         phone: '+7(812)232-4124',
                         phoneFrom: 10,

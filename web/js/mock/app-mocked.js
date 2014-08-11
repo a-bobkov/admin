@@ -876,7 +876,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                     if (!itemData.dealer.city) {
                         pushError('dealer.city', 'Значение не должно быть пустым.');
                     } else if (!cities.get(itemData.dealer.city.id)) {
-                        pushError('dealer.city', 'Значение недопустимо.');
+                        pushError(null, 'Город ' + itemData.dealer.city.id + ' не найден.');
                     }
                     if (itemData.dealer.metro) {
                         if (!metros.get(itemData.dealer.metro.id)) {
@@ -889,7 +889,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                         if (!markets.get(itemData.dealer.market.id)) {
                             pushError(null, 'Рынок ' + itemData.dealer.market.id + ' не найден.');
                         } else if (markets.get(itemData.dealer.market.id).city.id !== itemData.dealer.city.id) {
-                            pushError('dealer.market', 'Значение недопустимо.');
+                            pushError('dealer.market.id', 'Рынок должен находиться в выбранном городе.');
                         }
                     }
                     if (!itemData.dealer.companyName) {
