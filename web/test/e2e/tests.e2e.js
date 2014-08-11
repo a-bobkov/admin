@@ -3222,6 +3222,9 @@ describe('Sale App', function() {
                 element.all(salesSelector.column('sale.activeTo')).get(saleIdx).getText().then(function(respond) {
                     saleData.activeToText = respond;
                 });
+                element.all(salesSelector.column('sale.isActive')).get(saleIdx).getText().then(function(respond) {
+                    saleData.isActiveText = respond;
+                });
                 saleExtras.get(saleIdx).click();
             });
 
@@ -3288,7 +3291,7 @@ describe('Sale App', function() {
                 expect(parseFloatRu(siteAmountText)).toBe(parseFloat(saleData.siteAmountText));
             });
             element.all(salesSelector.column('sale.isActive')).get(0).getText().then(function(isActiveText) {
-                expect(isActiveText).toBeFalsy();
+                expect(isActiveText).toBe(saleData.isActiveText);
             });
             expect(element.all(by.id('SaleListRowAdd')).get(0).isDisplayed()).toBeFalsy();
             expect(element.all(by.id('SaleListRowExtra')).get(0).isDisplayed()).toBeFalsy();
