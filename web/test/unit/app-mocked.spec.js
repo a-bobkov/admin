@@ -3739,109 +3739,9 @@ describe('user, dealer', function() {
                 expect(savedUser.status.id).toEqual('inactive');
             });
         });
-
-        it('обязательность group', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1'
-                });
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.group.errors).toContain('Пользователю необходимо назначить группу.');
-            });
-        });
-
-        it('соответствие group справочнику', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1'
-                });
-                user.group = new Group({id: 9999});
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.group.errors).toContain('Пользователю необходимо назначить группу.');
-            });
-        });
-
-        it('обязательность dealer, если group === {id: 2}', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2}
-                });
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.errors).toContain('Значение поля dealer не должно быть пустым.');
-            });
-        });
-
-        it('обязательность site, если group === {id: 3}', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 3}
-                });
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.errors).toContain('Значение поля site не должно быть пустым.');
-            });
-        });
     });
 
     describe('Методы post должны проверять в user.dealer', function() {
-
-        it('обязательность значения manager', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2},
-                    dealer: {
-                        city: { id: 1 },
-                        billingCompany: {id: 1},
-                        companyName: '1',
-                        address: '1'
-                    }
-                });
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.manager.errors).toContain('Значение не должно быть пустым.');
-            });
-        });
 
         it('соответствие значения manager справочнику', function() {
             var answer = {};
@@ -3867,31 +3767,6 @@ describe('user, dealer', function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
                 expect(errorResponse.errors.errors).toContain('Менеджер ' + user.dealer.manager.id + ' не найден.');
-            });
-        });
-
-        it('обязательность значения city', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2},
-                    dealer: {
-                        companyName: '1',
-                        address: '1',
-                        billingCompany: {id: 1},
-                        manager: {id: 1}
-                    }
-                });
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.city.errors).toContain('Значение не должно быть пустым.');
             });
         });
 
@@ -4016,8 +3891,8 @@ describe('user, dealer', function() {
                         address: '1',
                         billingCompany: {id: 1},
                         manager: {id: 1},
-                        city: {id: 2},
-                        market: {id: 7}
+                        city: {id: 1},
+                        market: {id: 8}
                     }
                 });
                 return user.save();
@@ -4213,32 +4088,6 @@ describe('user, dealer', function() {
                 var errorResponse = answer.respond.response.data;
                 expect(errorResponse.message).toEqual('Validation Failed');
                 expect(errorResponse.errors.children.dealer.children.url.errors).toContain('Не верное значение ссылки: \'' + user.dealer.url + '\'.');
-            });
-        });
-
-        it('обязательность значения phone', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 2},
-                    dealer: {
-                        companyName: '1',
-                        address: '1',
-                        billingCompany: {id: 1},
-                        manager: {id: 1},
-                        city: {id: 1}
-                    }
-                });
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.dealer.children.phone.errors).toContain('Значение не должно быть пустым.');
             });
         });
 
@@ -4786,29 +4635,6 @@ describe('user, dealer', function() {
         });
     });
 
-    describe('Методы post должны проверять в user.site', function() {
-
-        it('обязательность значения id', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                var user = new User({
-                    email: String(Math.floor(Math.random() * 1000000)) + 'jasmine@maxposter.ru',
-                    password: '1',
-                    group: {id: 3},
-                    site: {}
-                });
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = answer.respond.response.data;
-                expect(errorResponse.message).toEqual('Validation Failed');
-                expect(errorResponse.errors.children.site.children.id.errors).toContain('Значение не должно быть пустым.');
-            });
-        });
-    });
-
     describe('Методы query должны', function() {
 
         it('equal - фильтровать данные пользователей по равенству в одном поле', function() {
@@ -5132,24 +4958,6 @@ describe('user, dealer', function() {
             });
         });
 
-        it('если параметр pager.per_page в запросе указан больше 100, то в ответе он должен быть 100', function() {
-            var answer = {};
-
-            runSync(answer, function() {
-                return usersLoader.loadItems({
-                    pager: {
-                        page: 2,
-                        per_page: 10000
-                    }
-                });
-            });
-
-            runs(function() {
-                var newParams = answer.respond.getParams();
-                expect(newParams.pager.per_page).toEqual(100);
-            });
-        });
-
         it('если параметр pager.page в запросе НЕ указан, то в ответе он должен быть 1', function() {
             var answer = {};
 
@@ -5338,20 +5146,6 @@ describe('user, dealer', function() {
             });
         });
 
-        it('put - возвращать ошибку при попытке сохранения пользователя, не существующего в БД', function() {
-            var s = {};
-
-            runSyncS(s, function() {
-                var user = new User({id: 9999});
-                return user.save();
-            });
-
-            runs(function() {
-                var errorResponse = s.response.data;
-                expect(errorResponse.message).toEqual('Пользователь не найден.');
-            });
-        });
-
         it('remove - удалять пользователя', function() {
             var s = {};
             var params = {
@@ -5378,20 +5172,6 @@ describe('user, dealer', function() {
 
             runs(function() {
                 expect(s.newUsers.getParams().pager.total).toBe(s.users.getParams().pager.total - 1);
-            });
-        });
-
-        it('remove - возвращать ошибку, если пользователь не найден', function() {
-            var s = {};
-
-            runSyncS(s, function() {
-                var user = new User({id: 9999});
-                return user.remove();
-            });
-
-            runs(function() {
-                var errorResponse = s.response.data;
-                expect(errorResponse.message).toEqual('Пользователь не найден.');
             });
         });
     });
