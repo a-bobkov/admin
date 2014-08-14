@@ -276,6 +276,8 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
 
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
+    $scope.today = new Date;
+    $scope.today.setUTCHours(0, 0, 0, 0);
 
     if ($scope.billingCredit) {
         makeBillingCreditCopy();
