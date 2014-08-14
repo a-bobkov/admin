@@ -2534,7 +2534,7 @@ describe('Sale App', function() {
 
     describe('Редактирование расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=-id&itemsPerPage=15');
+            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=id&itemsPerPage=15');
             mapIsDisplayed(element.all(by.id('SaleListRowRemove'))).then(function(isDisplayedArray) {
                 var saleIdx = isDisplayedArray.indexOf(true);
                 expect(saleIdx).not.toBe(-1);

@@ -274,7 +274,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             return item.id;
         }).id;
         if (process) {
-            process.call(item);
+            process(item, items);
         }
 
         items.push(item);
@@ -830,9 +830,9 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var regexUserPost = /^\/api2\/users\/new$/;
     $httpBackend.whenPOST(regexUserPost).respond(function(method, url, data) {
         return processPost(data, users, 'user', User, userDirectories,
-            function process() {
-                if (!this.status) {
-                    this.status = userStatuses.get('inactive');
+            function process(item, items) {
+                if (!item.status) {
+                    item.status = userStatuses.get('inactive');
                 }
             }, function validate(pushError, itemData, items) {
                 if (!itemData.group) {
@@ -846,7 +846,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 if (itemData.group && itemData.group.id === 3) {
                     if (!itemData.site) {
                         pushError('site', 'Значение поля site не должно быть пустым.');
-                    } else if (!itemData.site.id) {
+                    } else if (!_.isNumber(itemData.site.id)) {
                         pushError('site.id', 'Значение не должно быть пустым.');
                     } else if (!sites.get(itemData.site.id)) {
                         pushError('site.id', 'Сайт ' + itemData.site.id + ' не найден.');
@@ -946,12 +946,12 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
     var regexUserPut = /^\/api2\/users\/(?:([^\/]+))$/;
     $httpBackend.whenPUT(regexUserPut).respond(function(method, url, data) {
         return processPut(url, regexUserPut, data, users, 'user', User, userDirectories,
-            function process() {
+            function process(item, items, idx) {
             }, function validate(pushError, itemData, items, idx) {
                 if (itemData.group && itemData.group.id === 3) {
                     if (!itemData.site) {
                         pushError('site', 'Значение поля site не должно быть пустым.');
-                    } else if (!itemData.site.id) {
+                    } else if (!_.isNumber(itemData.site.id)) {
                         pushError('site.id', 'Значение не должно быть пустым.');
                     } else if (!sites.get(itemData.site.id)) {
                         pushError('site.id', 'Сайт ' + itemData.site.id + ' не найден.');
@@ -1067,7 +1067,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPost(data, dealerSites, 'dealerSite', DealerSite, {
             dealers: dealers,
             sites: sites
-        }, function process() {
+        }, function process(item, items) {
         }, function validate(pushError, itemData, items) {
             if (!itemData.dealer) {
                 pushError('dealer', 'Значение не должно быть пустым.');
@@ -1088,7 +1088,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPut(url, regexDealerSitesPut, data, dealerSites, 'dealerSite', DealerSite, {
             dealers: dealers,
             sites: sites
-        }, function process() {
+        }, function process(item, items, idx) {
         }, function validate(pushError, itemData, items, idx) {
             if (!itemData.dealer) {
                 pushError('dealer', 'Значение не должно быть пустым.');
@@ -1103,7 +1103,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             })) {
                 pushError(null, 'Регистрация салона по указанному сайту уже существует.');
             }
-            if (!itemData.publicUrl.match(regexpUrl)) {
+            if (itemData.publicUrl && !itemData.publicUrl.match(regexpUrl)) {
                 pushError('publicUrl', 'Не верное значение ссылки: \'' + itemData.publicUrl + '\'.');
             }
             if (itemData.publicUrl && itemData.publicUrl.length > 255) {
@@ -1186,7 +1186,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPost(data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
             dealers: dealers,
             sites: sites
-        }, function process() {
+        }, function process(item, items) {
         }, function validate(pushError, itemData, items) {
             if (!itemData.dealer) {
                 pushError('dealer', 'Значение не должно быть пустым.');
@@ -1208,7 +1208,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPut(url, regexDealerSiteLoginsPut, data, dealerSiteLogins, 'dealerSiteLogin', DealerSiteLogin, {
             dealers: dealers,
             sites: sites
-        }, function process() {
+        }, function process(item, items, idx) {
         }, function validate(pushError, itemData, items, idx) {
             if (!itemData.dealer) {
                 pushError('dealer.id', 'Значение не должно быть пустым.');
@@ -2037,9 +2037,15 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
             dealers: dealers,
             sites: sites,
             tariffs: tariffs
-        }, function process() {
-            if (this.type.id === 'card' || this.type.id === 'addcard') {
-                this.cardId = this.id;
+        }, function process(item, items) {
+            if (item.type.id === 'card' || item.type.id === 'addcard') {
+                item.cardId = item.id;
+            }
+            if (item.type.id === 'extra') {
+                var card = _.find(items, {cardId: item.cardId});
+                item.activeFrom = _.clone(card.activeFrom);
+                item.activeTo = _.clone(card.activeTo);
+                item.isActive = card.isActive;
             }
         }, function validate(pushError, itemData, items) {
             if (!itemData.site) {
@@ -2123,6 +2129,27 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
 
             if (item.type.id === 'card' && item.activeTo !== items[idx].activeTo) {
                 updateAddsales(item);
+            }
+            if (item.type.id === 'card') {
+                _.forEach(sales.getItems(), function(sale) {
+                    if (sale.type.id === 'extra' && sale.cardId === item.cardId) {
+                        if (item.activeFrom !== items[idx].activeFrom) {
+                            sale.activeFrom = _.clone(item.activeFrom);
+                        }
+                        if (item.activeTo !== items[idx].activeTo) {
+                            sale.activeTo = _.clone(item.activeTo);
+                        }
+                        if (item.isActive !== items[idx].isActive) {
+                            sale.isActive = item.isActive;
+                        }
+                    }
+                })
+            }
+            if (item.type.id === 'extra') {
+                var card = _.find(sales.getItems(), {cardId: item.cardId});
+                item.activeFrom = _.clone(card.activeFrom);
+                item.activeTo = _.clone(card.activeTo);
+                item.isActive = card.isActive;
             }
         });
     });
