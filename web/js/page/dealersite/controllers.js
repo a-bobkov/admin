@@ -3,7 +3,8 @@
 angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multicombo',
     'max.dal.entities.dealersite', 
     'max.dal.entities.dealersitelogin', 
-    'max.dal.entities.user', 
+    'max.dal.entities.dealertariff', 
+    'max.dal.entities.user'
 ])
 
 .config(['$routeProvider', function($routeProvider) {
