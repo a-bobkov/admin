@@ -371,8 +371,9 @@ describe('User App', function() {
         });
 
         it('выводит ошибку, если email не соответствует формату', function() {
+            element(by.model('userEdited.email')).clear();
             element(by.model('userEdited.email')).sendKeys('@@@');
-            expect(element(by.id('UserEditEmailErrorEmail')).isDisplayed()).toBeTruthy();
+            expect(element(by.id('UserEditEmailErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит пустой пароль', function() {
@@ -496,6 +497,12 @@ describe('User App', function() {
 
         it('выводит значение мэйла', function() {
             expect(element(by.model('dealerEdited.email')).getAttribute('value')).toMatch(regexpEmail);
+        });
+
+        it('выводит ошибку, если email дилера не соответствует формату', function() {
+            element(by.model('dealerEdited.email')).clear();
+            element(by.model('dealerEdited.email')).sendKeys('@@@');
+            expect(element(by.id('DealerEmailErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение сайта', function() {
