@@ -317,8 +317,12 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
         require: 'ngModel',
         link: function (scope, elem, attrs, ctrl) {
             scope.$watch('billingCreditEdited.dealer', function (newValue, oldValue) {
-                if (newValue === oldValue || !newValue) {
-                    ctrl.$setValidity('unique', true);
+                if (newValue === oldValue) {
+                    ctrl.$setValidity('unique', !!scope.billingCredit);
+                    return;
+                }
+                if (!newValue) {
+                    ctrl.$setValidity('unique', false);
                     return;
                 }
                 billingCreditsLoader.loadItems({

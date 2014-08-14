@@ -10,7 +10,7 @@
                     </div>
 					<ul class="error_list" ng-show='formBillingCredit.billingCreditDealer.$invalid'>
 					    <li id='billingCreditDealerErrorRequired' ng-show="formBillingCredit.billingCreditDealer.$error.required">Необходимо выбрать салон.</li>
-					    <li id='billingCreditDealerErrorUnique' ng-show="formBillingCredit.billingCreditDealer.$error.unique">Для данного салона есть другой кредитный лимит.</li>
+					    <li id='billingCreditDealerErrorUnique' ng-show="billingCreditEdited.dealer && formBillingCredit.billingCreditDealer.$error.unique">Для данного салона есть другой кредитный лимит!</li>
 					</ul>
 	            </td>
 	        </tr>
