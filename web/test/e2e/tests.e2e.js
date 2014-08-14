@@ -491,8 +491,14 @@ describe('User App', function() {
             expect(element(by.model('dealerEdited.address')).getAttribute('value')).toBeTruthy();
         });
 
-        it('выводит значение факса', function() {
+        it('выводит значение dealer.fax', function() {
             expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toMatch(regexpPhoneNumber);
+        });
+
+        it('выводит ошибку, если dealer.fax не соответствует формату', function() {
+            element(by.model('dealerEdited.fax')).clear();
+            element(by.model('dealerEdited.fax')).sendKeys('122-23-32');
+            expect(element(by.id('UserEditDealerFaxNumber')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение мэйла', function() {

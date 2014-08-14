@@ -144,7 +144,7 @@
 		        <td>
 		        	<input type="text" name="user_dealer_fax" ng-model='dealerEdited.fax' maxlength='20' ui-phone-number/>
 					<ul class="error_list" ng-show='formUser.user_dealer_fax.$invalid'>
-					    <li id='UserEditDealerFaxNumber' ng-show="formUser.user_dealer_fax.$error.number">Необходимо ввести номер факса в правильном формате.</li>
+					    <li id='UserEditDealerFaxNumber' ng-show="formUser.user_dealer_fax.$error.number">Необходимо ввести номер факса в международном формате.</li>
 					</ul>
 		        </td>
 		    </tr>
@@ -195,7 +195,7 @@
 		            <br>
 					<ul class="error_list" ng-show='phoneForm.user_dealer_phone.$invalid'>
 					    <li id='UserEditPhoneErrorConsistent' ng-show="phoneForm.user_dealer_phone.$error.consistent">Необходимо заполнить все три поля - "номер", "с" и "по".</li>
-					    <li id='UserEditPhoneErrorNumber' ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в правильном формате.</li>
+					    <li id='UserEditPhoneErrorNumber' ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в международном формате.</li>
 					    <li id='UserEditPhoneErrorPeriod' ng-show="phoneForm.user_dealer_phone.$error.period">Необходимо указать время "с" меньше, чем время "по".</li>
 					</ul>
 		        </td>
