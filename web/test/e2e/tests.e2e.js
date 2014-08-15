@@ -371,8 +371,9 @@ describe('User App', function() {
         });
 
         it('выводит ошибку, если email не соответствует формату', function() {
+            element(by.model('userEdited.email')).clear();
             element(by.model('userEdited.email')).sendKeys('@@@');
-            expect(element(by.id('UserEditEmailErrorEmail')).isDisplayed()).toBeTruthy();
+            expect(element(by.id('UserEditEmailErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит пустой пароль', function() {
@@ -490,12 +491,24 @@ describe('User App', function() {
             expect(element(by.model('dealerEdited.address')).getAttribute('value')).toBeTruthy();
         });
 
-        it('выводит значение факса', function() {
+        it('выводит значение dealer.fax', function() {
             expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toMatch(regexpPhoneNumber);
+        });
+
+        it('выводит ошибку, если dealer.fax не соответствует формату', function() {
+            element(by.model('dealerEdited.fax')).clear();
+            element(by.model('dealerEdited.fax')).sendKeys('122-23-32');
+            expect(element(by.id('UserEditDealerFaxNumber')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение мэйла', function() {
             expect(element(by.model('dealerEdited.email')).getAttribute('value')).toMatch(regexpEmail);
+        });
+
+        it('выводит ошибку, если email дилера не соответствует формату', function() {
+            element(by.model('dealerEdited.email')).clear();
+            element(by.model('dealerEdited.email')).sendKeys('@@@');
+            expect(element(by.id('DealerEmailErrorPattern')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит значение сайта', function() {
@@ -2521,7 +2534,7 @@ describe('Sale App', function() {
 
     describe('Редактирование расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=-id&itemsPerPage=15');
+            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=id&itemsPerPage=15');
             mapIsDisplayed(element.all(by.id('SaleListRowRemove'))).then(function(isDisplayedArray) {
                 var saleIdx = isDisplayedArray.indexOf(true);
                 expect(saleIdx).not.toBe(-1);

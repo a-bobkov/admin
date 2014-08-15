@@ -414,7 +414,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             _number: '=ngModel'
         },
         link: function (scope, elem, attrs, ctrl) {
-            var regexpPhoneNumber = /^\+7[ ]?(?:(?:\(\d{3}\)[ ]?\d{3})|(?:\(\d{4}\)[ ]?\d{2})|(?:\(\d{5}\)[ ]?\d{1}))-?\d{2}-?\d{2}$/
+            var regexpPhoneNumber = /^\+\d{1,3}\040?\(\d{3}(?:\-?\d{1,2})?\)\040?\d{1,3}\-?\d{2,3}(?:\-?\d{1,3})?(?:\040\d{1,6})?$/
             function validatePhoneNumber(newValue) {
                 if ((!newValue) || (newValue.match(regexpPhoneNumber))) {
                     ctrl.$setValidity('number', true);

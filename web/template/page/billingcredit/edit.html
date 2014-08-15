@@ -10,7 +10,7 @@
                     </div>
 					<ul class="error_list" ng-show='formBillingCredit.billingCreditDealer.$invalid'>
 					    <li id='billingCreditDealerErrorRequired' ng-show="formBillingCredit.billingCreditDealer.$error.required">Необходимо выбрать салон.</li>
-					    <li id='billingCreditDealerErrorUnique' ng-show="formBillingCredit.billingCreditDealer.$error.unique">Для данного салона есть другой кредитный лимит.</li>
+					    <li id='billingCreditDealerErrorUnique' ng-show="billingCreditEdited.dealer && formBillingCredit.billingCreditDealer.$error.unique">Для данного салона есть другой кредитный лимит!</li>
 					</ul>
 	            </td>
 	        </tr>
@@ -32,9 +32,10 @@
 	        <tr>
 	            <th><label for="billingCreditExpiresAt">Срок окончания</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="billingCreditExpiresAt" id="billingCreditExpiresAt" ng-model='billingCreditEdited.expiresAt' required>
+	                <input class="span-8" type="date" name="billingCreditExpiresAt" id="billingCreditExpiresAt" ng-model='billingCreditEdited.expiresAt' ui-greater-or-equal="today" ng-required='true'>
 					<ul class="error_list" ng-show='formBillingCredit.billingCreditExpiresAt.$invalid'>
 					    <li id='billingCreditExpiresAtErrorRequired' ng-show="formBillingCredit.billingCreditExpiresAt.$error.required">Необходимо ввести последнюю дату действия кредитного лимита.</li>
+					    <li id='billingCreditExpiresAtErrorGreater' ng-show="formBillingCredit.billingCreditExpiresAt.$error.greaterOrEqual">Дата действия кредитного лимита должна быть сегодня или позже.</li>
 					</ul>
 	           </td>
 	        </tr>

@@ -7,10 +7,10 @@
 	        <tr>
 	            <th><label for="user_email">Email</label></th>
 	            <td>
-	                <input class="span-6 required" type="email" name="user_email" ng-model="userEdited.email" maxlength="50" required ui-user-email-unique/>
+	                <input class="span-6" type="text" id="user_email" name="user_email" ng-model="userEdited.email" ng-pattern="/.+\@.+\..+/" maxlength="50" required ui-user-email-unique/>
 					<ul class="error_list" ng-show='formUser.user_email.$invalid'>
 					    <li id='UserEditEmailErrorRequired' ng-show="formUser.user_email.$error.required">Необходимо ввести адрес электронной почты.</li>
-					    <li id='UserEditEmailErrorEmail' ng-show="formUser.user_email.$error.email">Адрес электронной почты должен быть вида: aaa@bbb.cc</li>
+					    <li id='UserEditEmailErrorPattern' ng-show="formUser.user_email.$error.pattern">Адрес электронной почты должен быть вида: aaa@bbb.cc</li>
 					    <li id='UserEditEmailErrorUnique' ng-show="formUser.user_email.$error.unique">Адрес электронной почты должен быть уникальным среди пользователей.</li>
 					</ul>
 	            </td>
@@ -97,7 +97,7 @@
 	        <tr>
 	            <th><label for="user_dealer_company_name">Название компании</label></th>
 	            <td>
-	                <input class="span-8 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_company_name" id="user_dealer_company_name" ng-model='dealerEdited.companyName'/>
+	                <input class="span-8 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_company_name" id="user_dealer_company_name" ng-model='dealerEdited.companyName' maxlength="100">
 					<ul class="error_list" ng-show='formUser.user_dealer_company_name.$invalid'>
 					    <li id='UserEditDealerCompanyNameRequired' ng-show="formUser.user_dealer_company_name.$error.required">Необходимо ввести название компании.</li>
 					</ul>
@@ -133,7 +133,7 @@
 		    <tr>
 		        <th><label for="user_dealer_address">Адрес</label></th>
 		        <td>
-		        	<input class="span-18 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_address" ng-model='dealerEdited.address'/>
+		        	<input class="span-18 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_address" ng-model='dealerEdited.address' maxlength='255'>
 					<ul class="error_list" ng-show='formUser.user_dealer_address.$invalid'>
 					    <li id='UserEditDealerAddressRequired' ng-show="formUser.user_dealer_address.$error.required">Необходимо ввести адрес компании.</li>
 					</ul>
@@ -142,20 +142,25 @@
 		    <tr>
 		        <th><label for="user_dealer_fax">Факс</label></th>
 		        <td>
-		        	<input type="text" name="user_dealer_fax" ng-model='dealerEdited.fax' ui-phone-number/>
+		        	<input type="text" name="user_dealer_fax" ng-model='dealerEdited.fax' maxlength='20' ui-phone-number/>
 					<ul class="error_list" ng-show='formUser.user_dealer_fax.$invalid'>
-					    <li id='UserEditDealerFaxNumber' ng-show="formUser.user_dealer_fax.$error.number">Необходимо ввести номер факса в правильном формате.</li>
+					    <li id='UserEditDealerFaxNumber' ng-show="formUser.user_dealer_fax.$error.number">Необходимо ввести номер факса в международном формате.</li>
 					</ul>
 		        </td>
 		    </tr>
 		    <tr>
 		        <th><label for="user_dealer_email">Email</label></th>
-		        <td><input class="span-8" type="email" id="user_dealer_email" ng-model='dealerEdited.email'/></td>
+		        <td>
+		        	<input class="span-8" type="text" id="user_dealer_email" name="user_dealer_email" ng-model='dealerEdited.email' ng-pattern="/.+\@.+\..+/" maxlength='50'>
+					<ul class="error_list" ng-show='formUser.user_dealer_email.$invalid'>
+					    <li id='DealerEmailErrorPattern' ng-show="formUser.user_dealer_email.$error.pattern">Адрес электронной почты должен быть вида: aaa@bbb.cc</li>
+					</ul>
+		        </td>
 		    </tr>
 		    <tr>
 		        <th><label for="user_dealer_url">Сайт</label></th>
 		        <td>
-		            <input class="span-8" type="text" ng-pattern="/^(http|https):\/\/([\-\S]+\.)+([\-\S]{2,})/" id="user_dealer_url" name="user_dealer_url" ng-model='dealerEdited.url'/>
+		            <input class="span-8" type="text" ng-pattern="/^(http|https):\/\/([\-\S]+\.)+([\-\S]{2,})/" id="user_dealer_url" name="user_dealer_url" ng-model='dealerEdited.url' maxlength='50'>
 					<ul class="error_list" ng-show='formUser.user_dealer_url.$invalid'>
 					    <li id='DealerUrlErrorPattern' ng-show="formUser.user_dealer_url.$error.pattern">Адрес сайта должен быть в формате http://www.mysite.ru (обязательно начиная с "http://")</li>
 					</ul>
@@ -178,7 +183,7 @@
 		    </tr>
 		    <tr ng-repeat='phone in dealerEditedPhones'>
 		        <td ng-form='phoneForm'>
-		            <input type="text" name="user_dealer_phone" ng-model='phone.phoneNumber' ui-phone-fields='phone' ui-phone-number/>
+		            <input type="text" name="user_dealer_phone" ng-model='phone.phoneNumber' maxlength='20' ui-phone-fields='phone' ui-phone-number/>
 		            звонить с
 		            <select id="user_dealer_phone_from_{{$index}}" ng-model='phone.phoneFrom' ng-options='opt.name for opt in dealerPhoneHours.getItems()'>
 		                <option value=''></option>
@@ -190,7 +195,7 @@
 		            <br>
 					<ul class="error_list" ng-show='phoneForm.user_dealer_phone.$invalid'>
 					    <li id='UserEditPhoneErrorConsistent' ng-show="phoneForm.user_dealer_phone.$error.consistent">Необходимо заполнить все три поля - "номер", "с" и "по".</li>
-					    <li id='UserEditPhoneErrorNumber' ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в правильном формате.</li>
+					    <li id='UserEditPhoneErrorNumber' ng-show="phoneForm.user_dealer_phone.$error.number">Необходимо ввести номер телефона в международном формате.</li>
 					    <li id='UserEditPhoneErrorPeriod' ng-show="phoneForm.user_dealer_phone.$error.period">Необходимо указать время "с" меньше, чем время "по".</li>
 					</ul>
 		        </td>
