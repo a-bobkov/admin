@@ -7,8 +7,8 @@ module.exports = function(grunt) {
             }
         },
         admin: {
-            dev: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js', 'web/js/mock/**/*.js'],
-            prod: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js']
+            dev: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js', 'web/css/*.css', 'web/js/mock/**/*.js'],
+            prod: ['web/js/dal/**/*.js', 'web/js/page/**/*.js', 'web/js/lib/**/*.js', 'web/css/*.css']
         }
     });
 
@@ -17,13 +17,19 @@ module.exports = function(grunt) {
         var hash = (this.target === 'dev') ? '' : '?' + new Date().getTime();
         var app = (this.target === 'dev') ? 'RootApp-mocked' : 'RootApp';
         var scripts = '';
+        var cssInclude = '';
         grunt.file.expand(this.data).forEach(function(file) {
             file = file.replace(/^web\//, '');
-            scripts += '    <script src="' + file + hash + '"></script>\n';
+            if (file.match(/\.js$/)) {
+                scripts += '\n    <script src="' + file + hash + '"></script>';
+            } else if (file.match(/\.css$/)) {
+                cssInclude += '\n    <link rel="stylesheet" href="' + file + hash + '">';
+            }
         });
         grunt.file.write('web/admin.html', grunt.template.process(grunt.file.read('web/admin.html.tmpl'), {
             data: {
                 path: path,
+                cssInclude: cssInclude,
                 scripts: scripts,
                 hash: hash,
                 app: app

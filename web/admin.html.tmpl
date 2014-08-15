@@ -9,12 +9,11 @@
     <link rel="shortcut icon" href="http://maxposter.ru/favicon.ico<%=hash%>">
     <link rel="stylesheet" href="http://maxposter.ru/css/blueprint/screen.css<%=hash%>" type="text/css" media="screen, projection">
     <link rel="stylesheet" href="http://maxposter.ru/css/blueprint/print.css<%=hash%>" type="text/css" media="print">
-    <link rel="stylesheet" href="css/admin.css<%=hash%>">
-    <link rel="stylesheet" href="js/lib/ui-multicombo/css/ui-multicombo.css<%=hash%>">
     <!--[if IE 8]>
     <link rel="stylesheet" href="http://maxposter.ru/css/blueprint/ie.css<%=hash%>" type="text/css" media="screen, projection"/>
     <script src="js/vendor/es5-shim/es5-shim.min.js<%=hash%>"></script>
     <![endif]-->
+<%=cssInclude%>
     <script src="js/page/setupga.js<%=hash%>"></script>
 </head>
 <body ng-app="<%=app%>">
@@ -106,7 +105,6 @@
     <script src="js/vendor/angular/i18n/angular-locale_ru-ru.js"></script>
     <script src="js/vendor/lodash/lodash.min.js"></script>
     <script src="js/vendor/ui-bootstrap/pagination-0.7.0.js"></script>
-
 <%=scripts%>
 </body>
 </html>
