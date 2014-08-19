@@ -1,5 +1,6 @@
 var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-48884503-1']);
+var account = (window.location.hostname === "maxposter.ru") ? 'UA-48884503-1' : 'UA-53861564-1';
+_gaq.push(['_setAccount', account]);
 (function() {
     var ga = document.createElement('script');
     ga.type = 'text/javascript';

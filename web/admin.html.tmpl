@@ -4,24 +4,23 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="title" content="MaxPoster - Управление пользователями"/>
     <meta name="description" content="MaxPoster - Управление пользователями"/>
-    <base href="<%=path%>">
+    <base href="<%=base%>">
     <title>MaxPoster - Управление пользователями</title>
-    <link rel="shortcut icon" href="favicon.ico<%=hash%>">
-    <link rel="stylesheet" href="css/blueprint/screen.css<%=hash%>" type="text/css" media="screen, projection">
-    <link rel="stylesheet" href="css/blueprint/print.css<%=hash%>" type="text/css" media="print">
-    <link rel="stylesheet" href="css/admin.css<%=hash%>">
-    <link rel="stylesheet" href="js/lib/ui-multicombo/css/ui-multicombo.css<%=hash%>">
+    <link rel="shortcut icon" href="<%=path%>favicon.ico<%=hashFavicon%>">
+    <link rel="stylesheet" href="<%=path%>css/blueprint/screen.css<%=hashScreen%>" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="<%=path%>css/blueprint/print.css<%=hashPrint%>" type="text/css" media="print">
     <!--[if IE 8]>
-    <link rel="stylesheet" href="css/blueprint/ie.css<%=hash%>" type="text/css" media="screen, projection"/>
-    <script src="js/vendor/es5-shim/es5-shim.min.js<%=hash%>"></script>
+    <link rel="stylesheet" href="<%=path%>css/blueprint/ie.css<%=hashIE%>" type="text/css" media="screen, projection"/>
+    <script src="js/vendor/es5-shim/es5-shim.min.js<%=hashShim%>"></script>
     <![endif]-->
-    <script src="js/page/setupga.js<%=hash%>"></script>
+<%=cssInclude%>
+    <script src="js/page/setupga.js<%=hashGA%>"></script>
 </head>
 <body ng-app="<%=app%>">
     <div class="container" id="container">
         <div id="top">
             <div class="span-7">
-                <a href="/"><img src="images/logo.png<%=hash%>" id="logo" alt="Логотип MaxPoster"/></a>
+                <a href="/"><img src="images/logo.png<%=hashLogo%>" id="logo" alt="Логотип MaxPoster"/></a>
             </div>
             <div class="mainmenu span-17 last">
                 <div><a href="/">Главная</a></div>
@@ -103,11 +102,9 @@
 
     <script src="js/vendor/angular/angular.js"></script>
     <script src="js/vendor/angular/angular-route.js"></script>
-    <script src="js/vendor/angular/angular-mocks.js"></script>
     <script src="js/vendor/angular/i18n/angular-locale_ru-ru.js"></script>
     <script src="js/vendor/lodash/lodash.min.js"></script>
     <script src="js/vendor/ui-bootstrap/pagination-0.7.0.js"></script>
-
 <%=scripts%>
 </body>
 </html>

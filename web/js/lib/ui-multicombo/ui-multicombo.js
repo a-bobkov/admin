@@ -39,6 +39,7 @@ angular.module("ui.multicombo", [])
             var preSearch;
 
             $scope._single = !_.isArray($scope._selected);
+            $scope._filteredChoices = [];
 
             $scope.close = function() {
                 if (close) {
