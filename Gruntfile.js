@@ -46,7 +46,8 @@ module.exports = function(grunt) {
         function fileHash(file, target) {
             return (target === 'dev') ? '' : '?' + require('crypto').createHash('md5').update(grunt.file.read(file)).digest('hex').slice(0, 8);
         }
-        var path = (this.target === 'dev') ? '' : '/fend/admin.html#/';
+        var base = (this.target === 'dev') ? '' : '/fend/admin.html#/';
+        var path = (this.target === 'dev') ? '' : '/';
         var app = (this.target === 'dev') ? 'RootApp-mocked' : 'RootApp';
         var scripts = '';
         var cssInclude = '';
@@ -62,6 +63,7 @@ module.exports = function(grunt) {
         });
         grunt.file.write('web/admin.html', grunt.template.process(grunt.file.read('web/admin.html.tmpl'), {
             data: {
+                base: base,
                 path: path,
                 cssInclude: cssInclude,
                 scripts: scripts,
