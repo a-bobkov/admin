@@ -1940,22 +1940,19 @@ describe('Sale App', function() {
 
         it('показывает реквизиты продаж', function() {
             var sales = by.repeater('sale in sales');
-            element.all(sales).count().then(function(count) {
-                for(var i = count; i--; ) {
-                    var sale = sales.row(i);
-                    expect(element(sale.column('sale.date')).getText()).toMatch(regexpDate);
-                    expect(element(sale.column('sale.dealer.id')).getText()).toMatch(regexpIdName);
-                    expect(element(sale.column('sale.site.id')).getText()).toMatch(regexpIdName);
-                    expect(element(sale.column('sale.type')).getText()).toMatch(/^(Осн|Расш|Доп)$/);
-                    expect(element(sale.column('sale.count')).getText()).toMatchOrEmpty(regexpInt);
-                    expect(element(sale.column('sale.activeFrom')).getText()).toMatch(regexpDate);
-                    expect(element(sale.column('sale.activeTo')).getText()).toMatch(regexpDate);
-                    expect(element(sale.column('sale.amount')).getText()).toMatch(regexpFloatRu);
-                    expect(element(sale.column('sale.siteAmount')).getText()).toMatch(regexpFloatRu);
-                    expect(element(sale.column('sale.isActive')).getText()).toMatchOrEmpty(/^(А|Н\/А)$/);
-                    expect(element(sale).getText()).toMatch(/(Осн(?=[\s\S]+доплатить))|(Расш(?![\s\S]+доплатить))|(Доп(?![\s\S]+доплатить))/);
-                    expect(element(sale).getText()).toMatch(/(Осн)|(Расш)|(Доп(?![\s\S]+расширить))/);
-                }
+            element.all(sales).each(function(sale) {
+                expect(sale.element(by.binding('sale.date')).getText()).toMatch(regexpDate);
+                expect(sale.element(by.binding('sale.dealer.id')).getText()).toMatch(regexpIdName);
+                expect(sale.element(by.binding('sale.site.id')).getText()).toMatch(regexpIdName);
+                expect(sale.element(by.binding('sale.type')).getText()).toMatch(/^(Осн|Расш|Доп)$/);
+                expect(sale.element(by.binding('sale.count')).getText()).toMatchOrEmpty(regexpInt);
+                expect(sale.element(by.binding('sale.activeFrom')).getText()).toMatch(regexpDate);
+                expect(sale.element(by.binding('sale.activeTo')).getText()).toMatch(regexpDate);
+                expect(sale.element(by.binding('sale.amount')).getText()).toMatch(regexpFloatRu);
+                expect(sale.element(by.binding('sale.siteAmount')).getText()).toMatch(regexpFloatRu);
+                expect(sale.element(by.binding('sale.isActive')).getText()).toMatchOrEmpty(/^(А|Н\/А)$/);
+                expect(sale.getText()).toMatch(/(Осн(?=[\s\S]+доплатить))|(Расш(?![\s\S]+доплатить))|(Доп(?![\s\S]+доплатить))/);
+                expect(sale.getText()).toMatch(/(Осн)|(Расш)|(Доп(?![\s\S]+расширить))/);
             });
         });
 
