@@ -11,7 +11,7 @@ angular.module("ui.multicombo", [])
         template:
             '<div class="mcombo-container mcombo-container-multi">' +
             '    <ul class="mcombo-selected-choices">' +
-            '        <li class="selected-choice" ng-repeat="choice in _selectedChoices" ng-click="removeFromSelected(choice)">'+
+            '        <li class="selected-choice" ng-repeat="choice in _selectedChoices" ng-click="removeFromSelected(choice, $event)">'+
             '            <span id="McomboSelectedItem_{{$index}}">{{choice.idName()}}</span>' +
             '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete"></a>' +
             '        </li>' +
@@ -80,7 +80,7 @@ angular.module("ui.multicombo", [])
                 });
             }
 
-            $scope.moveToSelected = function(choice, $event) {
+            $scope.moveToSelected = function(choice, event) {
                 event.preventDefault();
                 event.stopPropagation();
                 if ($scope._single) {
@@ -91,7 +91,7 @@ angular.module("ui.multicombo", [])
                 $scope.close();
             };
 
-            $scope.removeFromSelected = function(choice) {
+            $scope.removeFromSelected = function(choice, event) {
                 if ($scope._disabled) {
                     return;
                 }
@@ -100,12 +100,6 @@ angular.module("ui.multicombo", [])
                 $scope._selectedChoices.splice($scope._selectedChoices.indexOf(choice), 1);
                 filterChoices();
             };
-
-            $scope.clickChoice = function(choice) {
-                if (!_.isArray($scope._selected)) {
-                    $scope.removeFromSelected(choice);
-                }
-            }
 
             var numberLoads = 0;
             $scope.loadChoices = function() {
@@ -138,23 +132,23 @@ angular.module("ui.multicombo", [])
             }
 
             $scope.watchControls = function(event) {
-                if (event.keyIdentifier === 'Up') {
+                if (event.keyCode === 38) {     // Up
                     $scope.hover = Math.max(0, $scope.hover - 1);
-                } else if (event.keyIdentifier === 'Down') {
+                } else if (event.keyCode === 40) {  // Down
                     $scope.hover = Math.min($scope._filteredChoices.length - 1, $scope.hover + 1);
-                } else if (event.keyIdentifier === 'Enter') {
+                } else if (event.keyCode === 13) {  // Enter
                     var choice = $scope._filteredChoices[$scope.hover];
                     if (choice) {
                         $scope.moveToSelected(choice, event);
                         $scope.hover = Math.min($scope._filteredChoices.length - 1, $scope.hover);
                     }
-                } else if (event.keyIdentifier === 'U+001B') {  // Esc
+                } else if (event.keyCode === 27) {  // Esc
                     $scope.close();
                 }
             }
 
             $scope.watchSearch = function(event) {
-                if (event.keyIdentifier === 'Enter') {
+                if (event.keyCode === 13) {  // Enter
                     return;
                 }
                 var newSearch = $scope._search && $scope._search.trim();
