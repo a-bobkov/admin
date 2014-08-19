@@ -4,16 +4,16 @@ var _ = require('lodash');
 
 // выбирает в селекте значение по порядковому номеру, начиная с 0
 var setSelect = function (elem, optIndex) {
-    return elem.findElements(by.tagName('option')).then(function(options) {
+    return elem.all(by.tagName('option')).then(function(options) {
         options[optIndex].click();
     });
 };
 
 var getSelectOptions = function(elem) {
-    return elem.element.all(by.css('option'));
+    return elem.all(by.css('option'));
 }
 
-var getSelectedOptionElem = function(elem) {
+var selectedOption = function(elem) {
     return elem.element(by.css('option:checked'));
 }
 
@@ -317,11 +317,11 @@ describe('User App', function() {
         });
 
         it('накладывает фильтр по менеджеру', function() {
-            var managerElem = element(by.select('patterns.manager'));
+            var managerElem = element(by.model('patterns.manager'));
             setSelect(managerElem, 1);
 
             var selectedValue;
-            getSelectedOptionElem(managerElem).getText().then(function(respond) {
+            selectedOption(managerElem).getText().then(function(respond) {
                 selectedValue = respond;
             });
 
@@ -340,7 +340,7 @@ describe('User App', function() {
         it('инициализирует фильтры по кнопке', function() {
             element(by.model('patterns.complex')).sendKeys('1');
             element(by.id('checkbox_group_2')).click();
-            var managerElem = element(by.select('patterns.manager'));
+            var managerElem = element(by.model('patterns.manager'));
             setSelect(managerElem, 1);
 
             element(by.id('UserListFilterSetDefault')).click();
@@ -348,7 +348,7 @@ describe('User App', function() {
             expect(element(by.model('patterns.complex')).getAttribute('value')).toBeFalsy();
             expect(element(by.id('checkbox_group_1')).isSelected()).toBeTruthy();
             expect(element(by.id('checkbox_group_2')).isSelected()).toBeFalsy();
-            expect(getSelectedOptionElem(managerElem).getText()).toBeFalsy();
+            expect(selectedOption(managerElem).getText()).toBeFalsy();
         });
     });
 
@@ -395,43 +395,43 @@ describe('User App', function() {
         });
 
         it('заполняет список статусов', function() {
-            element(by.select('userEdited.status')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('userEdited.status'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение статуса', function() {
-            expect(element(by.selectedOption('userEdited.status')).getText()).toBeTruthy();
+            expect(selectedOption(element(by.model('userEdited.status'))).getText()).toBeTruthy();
         });
 
         it('заполняет список групп', function() {
-            element(by.select('userEdited.group')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('userEdited.group'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение группы', function() {
-            expect(element(by.selectedOption('userEdited.group')).getText()).toBeTruthy();
+            expect(selectedOption(element(by.model('userEdited.group'))).getText()).toBeTruthy();
         });
 
         it('заполняет список менеджеров', function() {
-            element(by.select('dealerEdited.manager')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('dealerEdited.manager'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение менеджера', function() {
-            expect(element(by.selectedOption('dealerEdited.manager')).getText()).toBeTruthy();
+            expect(selectedOption(element(by.model('dealerEdited.manager'))).getText()).toBeTruthy();
         });
 
         it('заполняет список компаний', function() {
-            element(by.select('dealerEdited.billingCompany')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('dealerEdited.billingCompany'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение компании', function() {
-            expect(element(by.selectedOption('dealerEdited.billingCompany')).getText()).toBeTruthy();
+            expect(selectedOption(element(by.model('dealerEdited.billingCompany'))).getText()).toBeTruthy();
         });
 
         it('выводит название дилера', function() {
@@ -439,52 +439,52 @@ describe('User App', function() {
         });
 
         it('заполняет список городов', function() {
-            element(by.select('dealerEdited.city')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('dealerEdited.city'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение города', function() {
-            expect(element(by.selectedOption('dealerEdited.city')).getText()).toBeTruthy();
+            expect(selectedOption(element(by.model('dealerEdited.city'))).getText()).toBeTruthy();
         });
 
         it('выводит ошибку, если город не выбран', function() {
-            setSelect(element(by.select('dealerEdited.city')), 0);
+            setSelect(element(by.model('dealerEdited.city')), 0);
             expect(element(by.id('UserEditCityErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
         it('заполняет список рынков', function() {
-            element(by.select('dealerEdited.market')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('dealerEdited.market'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение рынка', function() {
-            expect(element(by.selectedOption('dealerEdited.market')).getText()).toBeTruthy();
+            expect(selectedOption(element(by.model('dealerEdited.market'))).getText()).toBeTruthy();
         });
 
         it('при очистке значения города, значение рынка очищается и делается недоступным', function() {
-            expect(element(by.selectedOption('dealerEdited.market')).isEnabled()).toBeTruthy();
-            setSelect(element(by.select('dealerEdited.city')), 0);
-            expect(element(by.selectedOption('dealerEdited.market')).getText()).toBeFalsy();
-            expect(element(by.selectedOption('dealerEdited.market')).isEnabled()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.market'))).isEnabled()).toBeTruthy();
+            setSelect(element(by.model('dealerEdited.city')), 0);
+            expect(selectedOption(element(by.model('dealerEdited.market'))).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.market'))).isEnabled()).toBeFalsy();
         });
 
         it('заполняет список метро', function() {
-            element(by.select('dealerEdited.metro')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('dealerEdited.metro'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение метро', function() {
-            expect(element(by.selectedOption('dealerEdited.metro')).getText()).toBeTruthy();
+            expect(selectedOption(element(by.model('dealerEdited.metro'))).getText()).toBeTruthy();
         });
 
         it('при очистке значения города, значение метро очищается и делается недоступным', function() {
-            expect(element(by.selectedOption('dealerEdited.metro')).isEnabled()).toBeTruthy();
-            setSelect(element(by.select('dealerEdited.city')), 0);
-            expect(element(by.selectedOption('dealerEdited.metro')).getText()).toBeFalsy();
-            expect(element(by.selectedOption('dealerEdited.metro')).isEnabled()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.metro'))).isEnabled()).toBeTruthy();
+            setSelect(element(by.model('dealerEdited.city')), 0);
+            expect(selectedOption(element(by.model('dealerEdited.metro'))).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.metro'))).isEnabled()).toBeFalsy();
         });
 
         it('выводит значение адреса', function() {
@@ -535,7 +535,7 @@ describe('User App', function() {
         });
 
         it('заполняет список часов С', function() {
-            element.all(by.model('phone.phoneFrom')).get(0).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element.all(by.model('phone.phoneFrom')).get(0)).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
@@ -545,7 +545,7 @@ describe('User App', function() {
         });
 
         it('заполняет список часов ДО', function() {
-            element.all(by.model('phone.phoneTo')).get(0).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element.all(by.model('phone.phoneTo')).get(0)).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
@@ -594,38 +594,38 @@ describe('User App', function() {
         });
 
         it('заполняет список сайтов', function() {
-            element(by.select('userEdited.site')).findElements(by.tagName('option')).then(function(options) {
+            getSelectOptions(element(by.model('userEdited.site'))).then(function(options) {
                 expect(options.length).toBeGreaterThan(1);
             });
         });
 
         it('выводит значение сайта', function() {
-            setSelect(element(by.select('userEdited.group')), 3);
-            setSelect(element(by.select('userEdited.site')), 1);
-            expect(element(by.selectedOption('userEdited.site')).getText()).toBeTruthy();
+            setSelect(element(by.model('userEdited.group')), 3);
+            setSelect(element(by.model('userEdited.site')), 1);
+            expect(selectedOption(element(by.model('userEdited.site'))).getText()).toBeTruthy();
         });
 
         it('если группа - автосалон, то выводит данные дилера, а данные сайта - нет', function() {
-            setSelect(element(by.select('userEdited.group')), 2);
+            setSelect(element(by.model('userEdited.group')), 2);
             expect(element(by.id('user_dealer_manager_id')).isDisplayed()).toBeTruthy();
             expect(element(by.id('user_dealer_company_name')).isDisplayed()).toBeTruthy();
             expect(element(by.id('user_sites_list')).isDisplayed()).toBeFalsy();
         });
 
         it('если группа - сайт, то выводит данные сайта, а данные дилера - нет', function() {
-            setSelect(element(by.select('userEdited.group')), 3);
+            setSelect(element(by.model('userEdited.group')), 3);
             expect(element(by.id('user_sites_list')).isDisplayed()).toBeTruthy();
             expect(element(by.id('user_dealer_manager_id')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_company_name')).isDisplayed()).toBeFalsy();
         });
 
         it('если группа - админ или не выбрана, то не выводит данные сайта и данные дилера', function() {
-            setSelect(element(by.select('userEdited.group')), 0);
+            setSelect(element(by.model('userEdited.group')), 0);
             expect(element(by.id('user_sites_list')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_manager_id')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_company_name')).isDisplayed()).toBeFalsy();
 
-            setSelect(element(by.select('userEdited.group')), 1);
+            setSelect(element(by.model('userEdited.group')), 1);
             expect(element(by.id('user_sites_list')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_manager_id')).isDisplayed()).toBeFalsy();
             expect(element(by.id('user_dealer_company_name')).isDisplayed()).toBeFalsy();
@@ -664,7 +664,7 @@ describe('User App', function() {
             element.all(by.model('phone.phoneNumber')).get(0).clear();
             expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
 
-            setSelect(element(by.select('userEdited.group')), 1);
+            setSelect(element(by.model('userEdited.group')), 1);
             expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
         });
     });
@@ -688,13 +688,13 @@ describe('User App', function() {
             expect(element(by.model('userEdited.email')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('userEdited.password')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('userPasswordConfirm')).getAttribute('value')).toBeFalsy();
-            expect(element(by.selectedOption('userEdited.status')).getText()).toBe('Неактивный');
-            expect(element(by.selectedOption('userEdited.group')).getText()).toBeFalsy();
-            expect(element(by.selectedOption('dealerEdited.manager')).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('userEdited.status'))).getText()).toBe('Неактивный');
+            expect(selectedOption(element(by.model('userEdited.group'))).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.manager'))).getText()).toBeFalsy();
             expect(element(by.model('dealerEdited.companyName')).getAttribute('value')).toBeFalsy();
-            expect(element(by.selectedOption('dealerEdited.city')).getText()).toBeFalsy();
-            expect(element(by.selectedOption('dealerEdited.market')).getText()).toBeFalsy();
-            expect(element(by.selectedOption('dealerEdited.metro')).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.city'))).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.market'))).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('dealerEdited.metro'))).getText()).toBeFalsy();
             expect(element(by.model('dealerEdited.address')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.fax')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('dealerEdited.email')).getAttribute('value')).toBeFalsy();
@@ -710,7 +710,7 @@ describe('User App', function() {
             expect(element.all(by.model('phone.phoneFrom')).get(2).getText()).toBeFalsy();
             expect(element.all(by.model('phone.phoneTo')).get(2).getText()).toBeFalsy();
             expect(element(by.model('dealerEdited.companyInfo')).getAttribute('value')).toBeFalsy();
-            expect(element(by.selectedOption('userEdited.site')).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('userEdited.site'))).getText()).toBeFalsy();
         });
 
         it('разрешает сохранение, если нет видимых ошибок', function() {
@@ -743,10 +743,10 @@ describe('User App', function() {
 
             expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
 
-            setSelect(element(by.select('userEdited.group')), 2);
+            setSelect(element(by.model('userEdited.group')), 2);
             expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
 
-            setSelect(element(by.select('dealerEdited.city')), 1);
+            setSelect(element(by.model('dealerEdited.city')), 1);
             expect(element(by.id('UserEditSaveUser')).isEnabled()).toEqual(noDisplayed(getErrors()));
         });
 
@@ -776,10 +776,10 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 userData.email = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 userData.status = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 userData.group = respond;
             });
 
@@ -803,10 +803,10 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(userData.email);
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.status);
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.group);
             });
         });
@@ -851,30 +851,30 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 userData.email = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 userData.status = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 userData.group = respond;
             });
 
             var dealerData = {};
-            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
                 dealerData.manager = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
                 dealerData.billingCompany = respond;
             });
             element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
                 dealerData.companyName = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
                 dealerData.city = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
                 dealerData.market = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
                 dealerData.metro = respond;
             });
             element(by.model('dealerEdited.address')).getAttribute('value').then(function(respond) {
@@ -896,28 +896,28 @@ describe('User App', function() {
             element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
                 dealerData.phone = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
                 dealerData.phoneFrom = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
                 dealerData.phoneTo = respond;
             });
             element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
                 dealerData.phone2 = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
                 dealerData.phone2From = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
                 dealerData.phone2To = respond;
             });
             element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
                 dealerData.phone3 = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
                 dealerData.phone3From = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
                 dealerData.phone3To = respond;
             });
 
@@ -951,29 +951,29 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(userData.email);
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.status);
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.group);
             });
 
-            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.manager);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.billingCompany);
             });
             element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.companyName);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.city);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.market);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.metro);
             });
 
@@ -996,28 +996,28 @@ describe('User App', function() {
             element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phoneFrom);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phoneTo);
             });
             element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone2);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone2From);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone2To);
             });
             element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone3);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone3From);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone3To);
             });
 
@@ -1078,30 +1078,30 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 userData.email = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 userData.status = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 userData.group = respond;
             });
 
             var dealerData = {};
-            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
                 dealerData.manager = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
                 dealerData.billingCompany = respond;
             });
             element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
                 dealerData.companyName = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
                 dealerData.city = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
                 dealerData.market = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
                 dealerData.metro = respond;
             });
             element(by.model('dealerEdited.address')).getAttribute('value').then(function(respond) {
@@ -1123,28 +1123,28 @@ describe('User App', function() {
             element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
                 dealerData.phone = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
                 dealerData.phoneFrom = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
                 dealerData.phoneTo = respond;
             });
             element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
                 dealerData.phone2 = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
                 dealerData.phone2From = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
                 dealerData.phone2To = respond;
             });
             element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
                 dealerData.phone3 = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
                 dealerData.phone3From = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
                 dealerData.phone3To = respond;
             });
 
@@ -1178,29 +1178,29 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(userData.email);
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.status);
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.group);
             });
 
-            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.manager);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.billingCompany);
             });
             element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.companyName);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.city);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.market);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.metro);
             });
 
@@ -1223,28 +1223,28 @@ describe('User App', function() {
             element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phoneFrom);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phoneTo);
             });
             element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone2);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone2From);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone2To);
             });
             element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone3);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone3From);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone3To);
             });
 
@@ -1273,13 +1273,13 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 userData.email = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 userData.status = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 userData.group = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.site'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.site'))).getText().then(function(respond) {
                 userData.site = respond;
             });
 
@@ -1303,13 +1303,13 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(userData.email);
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.status);
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.group);
             });
-            getSelectedOptionElem(element(by.model('userEdited.site'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.site'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.site);
             });
         });
@@ -1342,13 +1342,13 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 userData.email = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 userData.status = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 userData.group = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.site'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.site'))).getText().then(function(respond) {
                 userData.site = respond;
             });
 
@@ -1376,13 +1376,13 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(userData.email);
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.status);
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.group);
             });
-            getSelectedOptionElem(element(by.model('userEdited.site'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.site'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.site);
             });
         });
@@ -1444,30 +1444,30 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 userData.email = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 userData.status = respond;
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 userData.group = respond;
             });
 
             var dealerData = {};
-            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
                 dealerData.manager = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
                 dealerData.billingCompany = respond;
             });
             element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
                 dealerData.companyName = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
                 dealerData.city = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
                 dealerData.market = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
                 dealerData.metro = respond;
             });
             element(by.model('dealerEdited.address')).getAttribute('value').then(function(respond) {
@@ -1489,28 +1489,28 @@ describe('User App', function() {
             element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
                 dealerData.phone = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
                 dealerData.phoneFrom = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
                 dealerData.phoneTo = respond;
             });
             element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
                 dealerData.phone2 = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
                 dealerData.phone2From = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
                 dealerData.phone2To = respond;
             });
             element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
                 dealerData.phone3 = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
                 dealerData.phone3From = respond;
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
                 dealerData.phone3To = respond;
             });
 
@@ -1540,29 +1540,29 @@ describe('User App', function() {
             element(by.model('userEdited.email')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(userData.email);
             });
-            getSelectedOptionElem(element(by.model('userEdited.status'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.status'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.status);
             });
-            getSelectedOptionElem(element(by.model('userEdited.group'))).getText().then(function(respond) {
+            selectedOption(element(by.model('userEdited.group'))).getText().then(function(respond) {
                 expect(respond).toBe(userData.group);
             });
 
-            getSelectedOptionElem(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.manager'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.manager);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.billingCompany'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.billingCompany);
             });
             element(by.model('dealerEdited.companyName')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.companyName);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.city'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.city);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.market'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.market);
             });
-            getSelectedOptionElem(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerEdited.metro'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.metro);
             });
 
@@ -1585,28 +1585,28 @@ describe('User App', function() {
             element.all(by.model('phone.phoneNumber')).get(0).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_0'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phoneFrom);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_0'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phoneTo);
             });
             element.all(by.model('phone.phoneNumber')).get(1).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone2);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_1'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone2From);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_1'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone2To);
             });
             element.all(by.model('phone.phoneNumber')).get(2).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerData.phone3);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_from_2'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone3From);
             });
-            getSelectedOptionElem(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
+            selectedOption(element(by.id('user_dealer_phone_to_2'))).getText().then(function(respond) {
                 expect(respond).toBe(dealerData.phone3To);
             });
 
@@ -1632,9 +1632,9 @@ describe('Sale App', function() {
             });
 
             var dealerElem = element(by.model('saleEdited.dealer'));
-            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var selectedElems = dealerElem.all(by.repeater('choice in _selectedChoices'));
             var searchElem = dealerElem.element(by.id('McomboSearchInput'));
-            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var dropElems = dealerElem.all(by.id('McomboDropChoiceItem'));
             var noResultsElem = dealerElem.element(by.css('.no-results'));
 
             // показывает контрол в исходном состоянии
@@ -1745,9 +1745,9 @@ describe('Sale App', function() {
 
         it('выбирает несколько дилеров с помощью загружающего контрола', function() {
             var dealerElem = element(by.model('patterns.dealers'));
-            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var selectedElems = dealerElem.all(by.repeater('choice in _selectedChoices'));
             var searchElem = dealerElem.element(by.id('McomboSearchInput'));
-            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var dropElems = dealerElem.all(by.id('McomboDropChoiceItem'));
             var noResultsElem = dealerElem.element(by.css('.no-results'));
 
             // показывает контрол в исходном состоянии
@@ -1971,7 +1971,7 @@ describe('Sale App', function() {
         });
 
         it('переходит к url создания расширения для карточки по ссылке в "расширить"', function() {
-            var setElem = element(by.select('patterns.type'));
+            var setElem = element(by.model('patterns.type'));
             setSelect(setElem, 1);
             element.all(by.id('SaleListTableHeaderRef')).get(6).click();
             var saleAdd = element.all(by.id('SaleListRowAdd'));
@@ -1984,7 +1984,7 @@ describe('Sale App', function() {
         });
 
         it('переходит к url создания расширения для расширения по ссылке в "расширить"', function() {
-            setSelect(element(by.select('patterns.type')), 2);
+            setSelect(element(by.model('patterns.type')), 2);
             var saleAdd = element.all(by.id('SaleListRowAdd'));
             mapIsDisplayed(saleAdd).then(function(displayed) {
                 var saleIdx = displayed.indexOf(true);
@@ -1995,7 +1995,7 @@ describe('Sale App', function() {
         });
 
         it('переходит к url создания дополнительной продажи по ссылке в "доплатить"', function() {
-            setSelect(element(by.select('patterns.type')), 1);
+            setSelect(element(by.model('patterns.type')), 1);
             var saleAdd = element.all(by.id('SaleListRowExtra'));
             mapIsDisplayed(saleAdd).then(function(displayed) {
                 var saleIdx = displayed.indexOf(true);
@@ -2018,7 +2018,7 @@ describe('Sale App', function() {
             var searchElem = dealerElem.element(by.id('McomboSearchInput'));
             searchElem.click();
             searchElem.sendKeys('3');
-            var dropElem = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2);
+            var dropElem = dealerElem.all(by.id('McomboDropChoiceItem')).get(2);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
                 expect(dealerElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
@@ -2035,7 +2035,7 @@ describe('Sale App', function() {
             var searchElem = siteElem.element(by.id('McomboSearchInput'));
             searchElem.click();
             searchElem.sendKeys('17');
-            var dropElem = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            var dropElem = siteElem.all(by.id('McomboDropChoiceItem')).get(0);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
                 expect(siteElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
@@ -2048,7 +2048,7 @@ describe('Sale App', function() {
         });
 
         it('накладывает фильтр по статусу true', function() {
-            var setElem = element(by.select('patterns.isActive'));
+            var setElem = element(by.model('patterns.isActive'));
             setSelect(setElem, 1);
             setElem.element(by.css('option:checked')).getText().then(function(selectedValue) {
                 mapText(element.all(by.repeater('sale in sales').column('sale.isActive'))).then(function(data) {
@@ -2061,7 +2061,7 @@ describe('Sale App', function() {
         });
 
         it('накладывает фильтр по статусу false', function() {
-            var setElem = element(by.select('patterns.isActive'));
+            var setElem = element(by.model('patterns.isActive'));
             setSelect(setElem, 2);
             setElem.element(by.css('option:checked')).getText().then(function(selectedValue) {
                 mapText(element.all(by.repeater('sale in sales').column('sale.isActive'))).then(function(data) {
@@ -2074,7 +2074,7 @@ describe('Sale App', function() {
         });
 
         it('накладывает фильтр по типу', function() {
-            var setElem = element(by.select('patterns.type'));
+            var setElem = element(by.model('patterns.type'));
             setSelect(setElem, 1);
             setElem.element(by.css('option:checked')).getText().then(function(selectedValue) {
                 mapText(element.all(by.repeater('sale in sales').column('sale.type'))).then(function(data) {
@@ -2102,10 +2102,10 @@ describe('Sale App', function() {
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
             dealerElemSearch.sendKeys('1');
-            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            var dealerElemDrop = dealerElem.all(by.id('McomboDropChoiceItem')).get(0);
             dealerElemDrop.getText().then(function(selectedValue) {
                 dealerElemDrop.click();
-                expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
+                expect(dealerElem.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
             });
             element(by.id('SaleListNumberSales')).click();
 
@@ -2113,18 +2113,18 @@ describe('Sale App', function() {
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
             siteElemSearch.sendKeys('1');
-            var siteElemDrop = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            var siteElemDrop = siteElem.all(by.id('McomboDropChoiceItem')).get(0);
             siteElemDrop.getText().then(function(selectedValue) {
                 siteElemDrop.click();
-                expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
+                expect(siteElem.all(by.id('McomboSelectedItem_0')).get(0).getText()).toBe(selectedValue);
             });
             element(by.id('SaleListNumberSales')).click();
 
-            var isActive = element(by.select('patterns.isActive'));
+            var isActive = element(by.model('patterns.isActive'));
             setSelect(isActive, 1);
             expect(isActive.element(by.css('option:checked')).getText()).toBeTruthy();
 
-            var type = element(by.select('patterns.type'));
+            var type = element(by.model('patterns.type'));
             setSelect(type, 1);
             expect(type.element(by.css('option:checked')).getText()).toBeTruthy();
 
@@ -2132,8 +2132,8 @@ describe('Sale App', function() {
             expect(archive.isSelected()).toBeTruthy();
 
             element(by.id('SaleListFilterSetDefault')).click();
-            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
-            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
+            expect(dealerElem.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
+            expect(siteElem.all(by.id('McomboSelectedItem_0')).count()).toBe(0);
             expect(isActive.element(by.css('option:checked')).getText()).toBe('Н\/А');
             expect(type.element(by.css('option:checked')).getText()).toBeFalsy();
             expect(archive.isSelected()).toBeFalsy();
@@ -2185,14 +2185,14 @@ describe('Sale App', function() {
 
         it('выводит значение тарифа', function() {
             var tariffElem = element(by.model('saleEdited.tariff'));
-            expect(getSelectedOptionElem(tariffElem).getText()).toMatch(regexpTariff);
+            expect(selectedOption(tariffElem).getText()).toMatch(regexpTariff);
         });
 
         it('при выборе сайта перезаполняет список тарифов', function() {
             var tariffElem = element(by.model('saleEdited.tariff'));
             var tariffElemOptions = getSelectOptions(tariffElem);
             var siteElem = element(by.model('saleEdited.site'));
-            var siteDropElems = siteElem.element.all(by.id('McomboDropChoiceItem'));
+            var siteDropElems = siteElem.all(by.id('McomboDropChoiceItem'));
 
             var preTariffs;
             mapText(tariffElemOptions).then(function(tariffs) {
@@ -2262,7 +2262,7 @@ describe('Sale App', function() {
         });
 
         it('выводит предупреждение, если count отличается от tariff.count', function() {
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 var tariffCount = _.parseInt(tariffText.replace(regexpTariff, '$4'));
                 var countElem = element(by.model('saleEdited.count'));
                 countElem.clear();
@@ -2398,7 +2398,7 @@ describe('Sale App', function() {
 
         it('выводит значение isActive', function() {
             var isActiveElem = element(by.model('saleEdited.isActive'));
-            expect(getSelectedOptionElem(isActiveElem).getText()).toMatch(/^(А|Н\/А)$/);
+            expect(selectedOption(isActiveElem).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
@@ -2459,7 +2459,7 @@ describe('Sale App', function() {
         it('выводит начальные значения полей', function() {
             expect(element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).isPresent()).toBeFalsy();
             expect(element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).isPresent()).toBeFalsy();
-            expect(getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText()).toBeFalsy();
+            expect(selectedOption(element(by.model('saleEdited.tariff'))).getText()).toBeFalsy();
 
             var today = new Date;
             today.setUTCHours(0, 0, 0, 0);
@@ -2474,7 +2474,7 @@ describe('Sale App', function() {
             expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toBeFalsy();
             expect(element(by.model('saleEdited.info')).getAttribute('value')).toBeFalsy();
 
-            expect(getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText()).toBe('Н\/А');
+            expect(selectedOption(element(by.model('saleEdited.isActive'))).getText()).toBe('Н\/А');
         });
 
         it('выводит ошибку, если tariff пустой', function() {
@@ -2486,7 +2486,7 @@ describe('Sale App', function() {
             var searchElem = dealerElem.element(by.id('McomboSearchInput'));
             searchElem.click();
             searchElem.sendKeys('3');
-            var dropElem = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2);
+            var dropElem = dealerElem.all(by.id('McomboDropChoiceItem')).get(2);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
                 expect(dealerElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
@@ -2498,7 +2498,7 @@ describe('Sale App', function() {
             var searchElem = siteElem.element(by.id('McomboSearchInput'));
             searchElem.click();
             searchElem.sendKeys('17');
-            var dropElem = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            var dropElem = siteElem.all(by.id('McomboDropChoiceItem')).get(0);
             dropElem.getText().then(function(selectedValue) {
                 dropElem.click();
                 expect(siteElem.element(by.id('McomboSelectedItem_0')).getText()).toBe(selectedValue);
@@ -2509,18 +2509,18 @@ describe('Sale App', function() {
             var dealerElem = element(by.model('saleEdited.dealer'));
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
-            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            var dealerElemDrop = dealerElem.all(by.id('McomboDropChoiceItem')).get(0);
             dealerElemDrop.click();
 
             var siteElem = element(by.model('saleEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
-            var siteElemsDrop = siteElem.element.all(by.id('McomboDropChoiceItem'));
+            var siteElemsDrop = siteElem.all(by.id('McomboDropChoiceItem'));
             mapText(siteElemsDrop).then(function(sites) {
                 var tariffElem = element(by.model('saleEdited.tariff'));
                 _.forEach(sites, function(site, siteIdx) {
                     siteElemsDrop.get(siteIdx).click();
-                    getSelectedOptionElem(tariffElem).getText().then(function(tariffText) {
+                    selectedOption(tariffElem).getText().then(function(tariffText) {
                         if (!tariffText) {
                             expect(element(by.id('saleNoDefaultTariff')).isDisplayed()).toBeTruthy();
                         }
@@ -2568,7 +2568,7 @@ describe('Sale App', function() {
 
         it('выводит ошибку, если activeFrom меньше activeFrom родительской карточки', function() {
             var tariffElem = element(by.model('saleEdited.tariff'));
-            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+            mapText(tariffElem.all(by.css('option'))).then(function(options) {
                 var tariffIdx = _.findIndex(options, function(value) {
                     return !!value;
                 })
@@ -2591,12 +2591,12 @@ describe('Sale App', function() {
         });
 
         it('выводит значение isActive', function() {
-            expect(getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText()).toMatch(/^(А|Н\/А)$/);
+            expect(selectedOption(element(by.model('saleEdited.isActive'))).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
             element(by.id('saleEditCancel')).click();
-            setSelect(element(by.select('patterns.isActive')), 2);
+            setSelect(element(by.model('patterns.isActive')), 2);
 
             var noDefaultTariffSum = 0;
             var isDefaultTariffSum = 0;
@@ -2866,13 +2866,13 @@ describe('Sale App', function() {
         it('не позволяет очистить dealer', function() {
             var dealerElem = element(by.id('saleDealer'));
             dealerElem.element(by.id('McomboRemoveItem_0')).click();
-            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+            expect(dealerElem.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
         });
 
         it('не позволяет очистить site', function() {
             var siteElem = element(by.id('saleSite'));
             siteElem.element(by.id('McomboRemoveItem_0')).click();
-            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+            expect(siteElem.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
         });
 
         it('не выводит tariff', function() {
@@ -2916,12 +2916,12 @@ describe('Sale App', function() {
 
         it('выводит значение дилера', function() {
             var dealerElem = element(by.id('saleDealer'));
-            expect(dealerElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+            expect(dealerElem.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
         });
 
         it('выводит значение сайта', function() {
             var siteElem = element(by.id('saleSite'));
-            expect(siteElem.element.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
+            expect(siteElem.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
         });
 
         it('выводит ошибку, если info не дописано', function() {
@@ -2949,18 +2949,18 @@ describe('Sale App', function() {
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
             dealerElemSearch.sendKeys('5');
-            var dealerElemDrop = dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2);
+            var dealerElemDrop = dealerElem.all(by.id('McomboDropChoiceItem')).get(2);
             dealerElemDrop.click();
 
             var siteElem = element(by.model('saleEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
             siteElemSearch.sendKeys('1');
-            var siteElemDrop = siteElem.element.all(by.id('McomboDropChoiceItem')).get(0);
+            var siteElemDrop = siteElem.all(by.id('McomboDropChoiceItem')).get(0);
             siteElemDrop.click();
 
             var tariffElem = element(by.model('saleEdited.tariff'));
-            mapText(tariffElem.element.all(by.css('option'))).then(function(options) {
+            mapText(tariffElem.all(by.css('option'))).then(function(options) {
                 var tariffIdx = _.findIndex(options, function(value) {
                     return !!value;
                 })
@@ -2982,7 +2982,7 @@ describe('Sale App', function() {
             siteElem.element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -3009,7 +3009,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -3055,7 +3055,7 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -3088,7 +3088,7 @@ describe('Sale App', function() {
             });
 
             var tariffParentText;
-            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(tariffText) {
+            selectedOption(element(by.model('tariffParent'))).getText().then(function(tariffText) {
                 tariffParentText = tariffText;
             });
 
@@ -3124,10 +3124,10 @@ describe('Sale App', function() {
             element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(respond) {
+            selectedOption(element(by.model('tariffParent'))).getText().then(function(respond) {
                 saleData.parentTariffText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -3154,7 +3154,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -3200,10 +3200,10 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
+            selectedOption(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
                 expect(parentTariffText).toBe(saleData.parentTariffText);
             });
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -3408,7 +3408,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -3435,7 +3435,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -3485,7 +3485,7 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -3499,7 +3499,7 @@ describe('Sale App', function() {
         it('Изменение расширения', function() {
             var salesSelector = by.repeater('sale in sales');
 
-            setSelect(element(by.select('patterns.type')), 2);
+            setSelect(element(by.model('patterns.type')), 2);
 
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
@@ -3517,7 +3517,7 @@ describe('Sale App', function() {
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
             var tariffParentText;
-            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(tariffText) {
+            selectedOption(element(by.model('tariffParent'))).getText().then(function(tariffText) {
                 tariffParentText = tariffText;
             });
 
@@ -3547,10 +3547,10 @@ describe('Sale App', function() {
             element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText().then(function(respond) {
                 saleData.siteText = respond;
             });
-            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(respond) {
+            selectedOption(element(by.model('tariffParent'))).getText().then(function(respond) {
                 saleData.parentTariffText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(respond) {
                 saleData.tariffText = respond;
             });
             element(by.model('saleEdited.date')).getAttribute('value').then(function(respond) {
@@ -3577,7 +3577,7 @@ describe('Sale App', function() {
             element(by.model('saleEdited.info')).getAttribute('value').then(function(respond) {
                 saleData.infoText = respond;
             });
-            getSelectedOptionElem(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
+            selectedOption(element(by.model('saleEdited.isActive'))).getText().then(function(respond) {
                 saleData.isActiveText = respond;
             });
 
@@ -3627,10 +3627,10 @@ describe('Sale App', function() {
 
             element.all(by.id('SaleListRowEdit')).get(0).click();
 
-            getSelectedOptionElem(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
+            selectedOption(element(by.model('tariffParent'))).getText().then(function(parentTariffText) {
                 expect(parentTariffText).toBe(saleData.parentTariffText);
             });
-            getSelectedOptionElem(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
+            selectedOption(element(by.model('saleEdited.tariff'))).getText().then(function(tariffText) {
                 expect(tariffText).toBe(saleData.tariffText);
             });
             element(by.model('saleEdited.cardAmount')).getAttribute('value').then(function(cardAmountText) {
@@ -3644,7 +3644,7 @@ describe('Sale App', function() {
         it('Изменение доплаты', function() {
             var salesSelector = by.repeater('sale in sales');
 
-            setSelect(element(by.select('patterns.type')), 3);
+            setSelect(element(by.model('patterns.type')), 3);
 
             var preAmountText;
             element.all(salesSelector.column('sale.amount')).get(0).getText().then(function(respond) {
@@ -3737,7 +3737,7 @@ describe('Sale App', function() {
         });
 
         it('Удаление расширения', function() {
-            setSelect(element(by.select('patterns.type')), 2);
+            setSelect(element(by.model('patterns.type')), 2);
 
             var totalItems;
             element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
@@ -3772,7 +3772,7 @@ describe('Sale App', function() {
         });
 
         it('Удаление доплаты', function() {
-            setSelect(element(by.select('patterns.type')), 3);
+            setSelect(element(by.model('patterns.type')), 3);
 
             var totalItems;
             element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
@@ -3807,7 +3807,7 @@ describe('Sale App', function() {
         });
 
         it('Удаление карточки', function() {
-            setSelect(element(by.select('patterns.type')), 1);
+            setSelect(element(by.model('patterns.type')), 1);
 
             var totalItems;
             element(by.binding('{{totalItems}}')).getText().then(function(totalItemsText) {
@@ -3854,9 +3854,9 @@ describe('DealerSite App', function() {
             element.all(by.id('DealerSiteListRowEdit')).get(0).click();
 
             var dealerElem = element(by.model('dealerSiteEdited.dealer'));
-            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var selectedElems = dealerElem.all(by.repeater('choice in _selectedChoices'));
             var searchElem = dealerElem.element(by.id('McomboSearchInput'));
-            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var dropElems = dealerElem.all(by.id('McomboDropChoiceItem'));
             var noResultsElem = dealerElem.element(by.css('.no-results'));
 
             // показывает контрол в исходном состоянии
@@ -3967,9 +3967,9 @@ describe('DealerSite App', function() {
 
         it('выбирает несколько дилеров с помощью загружающего контрола', function() {
             var dealerElem = element(by.model('patterns.dealers'));
-            var selectedElems = dealerElem.element.all(by.repeater('choice in _selectedChoices'));
+            var selectedElems = dealerElem.all(by.repeater('choice in _selectedChoices'));
             var searchElem = dealerElem.element(by.id('McomboSearchInput'));
-            var dropElems = dealerElem.element.all(by.id('McomboDropChoiceItem'));
+            var dropElems = dealerElem.all(by.id('McomboDropChoiceItem'));
             var noResultsElem = dealerElem.element(by.css('.no-results'));
 
             // показывает контрол в исходном состоянии
@@ -4239,7 +4239,7 @@ describe('DealerSite App', function() {
                 element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
                 element.all(by.id('McomboDropChoiceItem')).get(1).click();
 
-                setSelect(element(by.select('patterns.isActive')), 1);
+                setSelect(element(by.model('patterns.isActive')), 1);
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 0$/);
 
                 element(by.id('DealerSiteListFilterSetDefault')).click();
@@ -4253,7 +4253,7 @@ describe('DealerSite App', function() {
                 element.all(by.id('McomboSearchInput')).get(1).sendKeys('1');
                 element.all(by.id('McomboDropChoiceItem')).get(1).click();
 
-                setSelect(element(by.select('patterns.isActive')), 1);
+                setSelect(element(by.model('patterns.isActive')), 1);
                 expect(element(by.binding('{{totalItems}}')).getText()).toMatch(/ 100$/);
 
                 element(by.id('DealerSiteListFilterSetDefault')).click();
@@ -4268,7 +4268,7 @@ describe('DealerSite App', function() {
             element.all(by.id('McomboSearchInput')).get(1).click();
             element.all(by.id('McomboSearchInput')).get(1).sendKeys('6');
             element.all(by.id('McomboDropChoiceItem')).get(0).click();
-            setSelect(element(by.select('patterns.isActive')), 1);
+            setSelect(element(by.model('patterns.isActive')), 1);
             element.all(by.id('DealerSiteListRowEdit')).get(0).click();
         });
 
@@ -4399,13 +4399,13 @@ describe('DealerSite App', function() {
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
             dealerElemSearch.sendKeys('5');
-            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
+            dealerElem.all(by.id('McomboDropChoiceItem')).get(2).click();
 
             var siteElem = element(by.id('DealerSiteListFilterSites'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
             siteElemSearch.sendKeys('19');
-            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            siteElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             expect(element.all(dealerSitesSelector).count()).toBe(0);
             element(by.id('DealerSiteListAddDealerSiteUp')).click();
@@ -4414,13 +4414,13 @@ describe('DealerSite App', function() {
             var dealerElemSearch = dealerElem.element(by.id('McomboSearchInput'));
             dealerElemSearch.click();
             dealerElemSearch.sendKeys('5');
-            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(2).click();
+            dealerElem.all(by.id('McomboDropChoiceItem')).get(2).click();
 
             var siteElem = element(by.model('dealerSiteEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click();
             siteElemSearch.sendKeys('19');
-            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            siteElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             element(by.model('dealerSiteEdited.externalId')).sendKeys(randomMillion());
             element(by.model('dealerSiteEdited.publicUrl')).sendKeys('http://www.protractor.ru/' + randomMillion());
@@ -4450,7 +4450,7 @@ describe('DealerSite App', function() {
             element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value').then(function(respond) {
                 dealerSiteData.sitePassword = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
                 dealerSiteData.isActiveText = respond;
             });
             element(by.model('userEdited.dealer.latitude')).getAttribute('value').then(function(respond) {
@@ -4522,14 +4522,14 @@ describe('DealerSite App', function() {
                 dealerElemSearch.click().then(function() {
                     dealerElemSearch.sendKeys(dealerSiteData.dealerText.replace(regexpIdName, '$1'));
                 });
-                dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                dealerElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
                 var siteElem = element(by.id('DealerSiteListFilterSites'));
                 var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
                 siteElemSearch.click().then(function() {
                     siteElemSearch.sendKeys(dealerSiteData.siteText.replace(regexpIdName, '$1'));
                 });
-                siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                siteElem.all(by.id('McomboDropChoiceItem')).get(0).click();
             });
 
             expect(element.all(dealerSitesSelector).count()).toBe(1);
@@ -4567,7 +4567,7 @@ describe('DealerSite App', function() {
             element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value').then(function(respond) {
                 dealerSiteData.sitePassword = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
                 dealerSiteData.isActiveText = respond;
             });
 
@@ -4626,14 +4626,14 @@ describe('DealerSite App', function() {
                 dealerElemSearch.click().then(function() {
                     dealerElemSearch.sendKeys(dealerSiteData.dealerText.replace(regexpIdName, '$1'));
                 });
-                dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                dealerElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
                 var siteElem = element(by.id('DealerSiteListFilterSites'));
                 var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
                 siteElemSearch.click().then(function() {
                     siteElemSearch.sendKeys(dealerSiteData.siteText.replace(regexpIdName, '$1'));
                 });
-                siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                siteElem.all(by.id('McomboDropChoiceItem')).get(0).click();
             });
 
             expect(element.all(dealerSitesSelector).count()).toBe(1);
@@ -4668,7 +4668,7 @@ describe('DealerSite App', function() {
             element(by.model('dealerSiteLoginsEdited.site.password')).getAttribute('value').then(function(respond) {
                 dealerSiteData.sitePassword = respond;
             });
-            getSelectedOptionElem(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
+            selectedOption(element(by.model('dealerSiteEdited.isActive'))).getText().then(function(respond) {
                 dealerSiteData.isActiveText = respond;
             });
 
@@ -4738,14 +4738,14 @@ describe('DealerSite App', function() {
                 dealerElemSearch.click().then(function() {
                     dealerElemSearch.sendKeys(dealerSiteData.dealerText.replace(regexpIdName, '$1'));
                 });
-                dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                dealerElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
                 var siteElem = element(by.id('DealerSiteListFilterSites'));
                 var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
                 siteElemSearch.click().then(function() {
                     siteElemSearch.sendKeys(dealerSiteData.siteText.replace(regexpIdName, '$1'));
                 });
-                siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                siteElem.all(by.id('McomboDropChoiceItem')).get(0).click();
             });
 
             expect(element.all(dealerSitesSelector).count()).toBe(1);
@@ -4804,14 +4804,14 @@ describe('DealerSite App', function() {
                 dealerElemSearch.click().then(function() {
                     dealerElemSearch.sendKeys(dealerSiteData.dealerText.replace(regexpIdName, '$1'));
                 });
-                dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                dealerElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
                 var siteElem = element(by.id('DealerSiteListFilterSites'));
                 var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
                 siteElemSearch.click().then(function() {
                     siteElemSearch.sendKeys(dealerSiteData.siteText.replace(regexpIdName, '$1'));
                 });
-                siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+                siteElem.all(by.id('McomboDropChoiceItem')).get(0).click();
             });
 
             expect(element.all(dealerSitesSelector).count()).toBe(1);
@@ -4855,14 +4855,14 @@ describe('DealerSite App', function() {
             dealerElemSearch.click().then(function() {
                 dealerElemSearch.sendKeys(dealerSiteData.dealerText.replace(regexpIdName, '$1'));
             });
-            dealerElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            dealerElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             var siteElem = element(by.model('dealerSiteEdited.site'));
             var siteElemSearch = siteElem.element(by.id('McomboSearchInput'));
             siteElemSearch.click().then(function() {
                 siteElemSearch.sendKeys(dealerSiteData.siteText.replace(regexpIdName, '$1'));
             });
-            siteElem.element.all(by.id('McomboDropChoiceItem')).get(0).click();
+            siteElem.all(by.id('McomboDropChoiceItem')).get(0).click();
 
             element(by.model('dealerSiteLoginsEdited.site.login')).getAttribute('value').then(function(respond) {
                 expect(respond).toBe(dealerSiteData.siteLogin);
