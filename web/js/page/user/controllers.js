@@ -129,13 +129,18 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
                 $location.search($rootScope.savedUserListLocationSearch);
                 $scope.users = data.users;
                 $scope.totalItems = data.users.getParams().pager.total;
-                var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
-                if (topUserList < 0) {
-                    window.scrollBy(0, topUserList);
-                }
+                viewTop('UserListAddUserUp');
             }
         });
     };
+
+    function viewTop(elemId) {
+        var topElem = document.getElementById(elemId);
+        var topList = topElem && topElem.getBoundingClientRect().top;
+        if (topList < 0) {
+            window.scrollBy(0, topList);
+        }
+    }
 
     var ls = $location.search();
     if (_.isEmpty(ls)) {

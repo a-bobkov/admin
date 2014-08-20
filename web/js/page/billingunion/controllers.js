@@ -176,13 +176,18 @@ angular.module('BillingUnionApp', ['ngRoute', 'ui.bootstrap.pagination',
             }).then(function(collections) {
                 _.assign(construction, collections);
                 _.assign($scope, construction.resolveRefs());
-                var topList = document.getElementById('addBillingUnionUp').getBoundingClientRect().top;
-                if (topList < 0) {
-                    window.scrollBy(0, topList);
-                }
+                viewTop('addBillingUnionUp');
             });
         });
     };
+
+    function viewTop(elemId) {
+        var topElem = document.getElementById(elemId);
+        var topList = topElem && topElem.getBoundingClientRect().top;
+        if (topList < 0) {
+            window.scrollBy(0, topList);
+        }
+    }
 
     var ls = $location.search();
     if (_.size(ls)) {

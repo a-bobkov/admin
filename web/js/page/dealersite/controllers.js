@@ -193,14 +193,18 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             }).then(function(collections) {
                 _.assign(construction, collections);
                 _.assign($scope, construction.resolveRefs());
-                var topElem = document.getElementById('DealerSiteListAddDealerSiteUp');
-                var topList = topElem && topElem.getBoundingClientRect().top;
-                if (topList < 0) {
-                    window.scrollBy(0, topList);
-                }
+                viewTop('DealerSiteListAddDealerSiteUp');
             });
         });
     };
+
+    function viewTop(elemId) {
+        var topElem = document.getElementById(elemId);
+        var topList = topElem && topElem.getBoundingClientRect().top;
+        if (topList < 0) {
+            window.scrollBy(0, topList);
+        }
+    }
 
     var ls = $location.search();
     if (_.size(ls)) {
