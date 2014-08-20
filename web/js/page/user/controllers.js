@@ -244,7 +244,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     }
 })
 
-.controller('UserCtrl', function($scope, $rootScope, $location, $window, data,
+.controller('UserCtrl', function($scope, $rootScope, $location, $window, $q, $timeout, data,
     User, userStatuses, Dealer, dealerPhoneHours) {
 
     _.assign($scope, data);
@@ -355,6 +355,11 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             zoom: 13
         });
         myMap.controls.add("smallZoomControl");
+        myMap.events.add('click', function (e) {
+            unsetPlacemark();
+            var coordinates = e.get('coordPosition');
+            setPlacemark(coordinates[0], coordinates[1]);
+        });
 
         if (_.isNumber($scope.dealerEdited.latitude) && _.isNumber($scope.dealerEdited.longitude)) {
             setPlacemark($scope.dealerEdited.latitude, $scope.dealerEdited.longitude);
@@ -390,28 +395,32 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         }
     }
 
-    $scope.setCoordinates = function() {
-        if ($scope.dealerEdited.address) {
-            ymaps.geocode($scope.dealerEdited.address).then(function(respond) {
-                var geoObject = respond.geoObjects.get(0);
-                if (geoObject) {
-                    var coordinates = geoObject.geometry.getCoordinates();
-                    setPlacemark(coordinates[0], coordinates[1]);
-                    myMap.setCenter(coordinates);
-                } else {
-                    alert('Координаты введенного адреса не определены Яндексом!');
+    var numberLoads = 0;
+    $scope.$watch('dealerEdited.address', function setCoordinates(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        numberLoads++;
+        if (!newValue) {
+            unsetPlacemark();
+        } else {
+            $q.all({
+                geoCode: ymaps.geocode(newValue),
+                timer: $timeout(function() {}, 300),
+                numberLoads: numberLoads
+            }).then(function(data) {
+                if (numberLoads === data.numberLoads) {
+                    var geoObject = data.geoCode.geoObjects.get(0);
+                    $scope.invalidAddressWarning = !geoObject;
+                    if (geoObject) {
+                        var coordinates = geoObject.geometry.getCoordinates();
+                        setPlacemark(coordinates[0], coordinates[1]);
+                        myMap.setCenter(coordinates);
+                    }
                 }
             });
-        } else {
-            alert('Для определения координат необходимо ввести адрес!');
         }
-    };
-
-    $scope.unsetCoordinates = function() {
-        if (confirm('Вы уверены, что нужно убрать маркер с карты?')) {
-            unsetPlacemark();
-        };
-    };
+    });
 })
 
 // from https://github.com/andreev-artem/angular_experiments/tree/master/ui-equal-to

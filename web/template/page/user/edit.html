@@ -137,11 +137,11 @@
 					<ul class="error_list" ng-show='formUser.user_dealer_address.$invalid'>
 					    <li id='UserEditDealerAddressRequired' ng-show="formUser.user_dealer_address.$error.required">Необходимо ввести адрес компании.</li>
 					</ul>
-				    <ul class="row append-bottom top15">
-				        <li><input type="button" value="Поставить маркер на карту" id="map-point-search" ng-click='setCoordinates()'></li>
-				        <li><input type="button" value="Убрать маркер с карты" id="map-point-clear" ng-click='unsetCoordinates()'></li>
-				    </ul>
-				    <div id="map" class='map'></div>
+					<ul class="warning_list">
+					    <li id='dealerEditHasAddressWarning' ng-show='invalidAddressWarning && dealerEdited.address'>Так как Яндекс не узнал указанный адрес, координаты можно задать только вручную на карте.</li>
+					    <li id='dealerEditNoAddressWarning' ng-show='invalidAddressWarning && !dealerEdited.address'>Так как адрес не указан, координаты можно задать только вручную на карте.</li>
+					</ul>
+				    <div class='map help' id='map'></div>
 		        </td>
 		    </tr>
 		    <tr>
