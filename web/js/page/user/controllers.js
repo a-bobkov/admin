@@ -337,6 +337,76 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             }
         }
     };
+
+    var myMap;
+    var myPlacemark;
+
+    ymaps.ready(function init() {
+        myMap = new ymaps.Map("map", {
+            center: [
+                $scope.dealerEdited.latitude > 0 ? $scope.dealerEdited.latitude : ymaps.geolocation.latitude,
+                $scope.dealerEdited.longitude > 0 ? $scope.dealerEdited.longitude : ymaps.geolocation.longitude
+            ],
+            zoom: 13
+        });
+        myMap.controls.add("smallZoomControl");
+
+        if (_.isNumber($scope.dealerEdited.latitude) && _.isNumber($scope.dealerEdited.longitude)) {
+            setPlacemark($scope.dealerEdited.latitude, $scope.dealerEdited.longitude);
+        }
+    });
+
+    function setPlacemark(lat, lng) {
+        unsetPlacemark();
+        myPlacemark = new ymaps.Placemark(
+            [lat, lng], {}, {
+                preset: "twirl#redDotIcon",
+                draggable: true
+            }
+        );
+        myPlacemark.events.add("dragend", setDealerCoordinates);
+        myMap.geoObjects.add(myPlacemark);
+
+        setDealerCoordinates();
+
+        function setDealerCoordinates() {
+            var coordinates = myPlacemark.geometry.getCoordinates();
+            $scope.dealerEdited.latitude = coordinates[0].ceil(8);
+            $scope.dealerEdited.longitude = coordinates[1].ceil(8);
+        }
+    }
+
+    function unsetPlacemark() {
+        if (myMap && myPlacemark) {
+            myMap.geoObjects.remove(myPlacemark);
+            myPlacemark = null;
+            $scope.dealerEdited.latitude = 0;
+            $scope.dealerEdited.longitude = 0;
+        }
+    }
+
+    $scope.setCoordinates = function() {
+        if ($scope.dealerEdited.address) {
+            ymaps.geocode($scope.dealerEdited.address).then(function(respond) {
+                var geoObject = respond.geoObjects.get(0);
+                if (geoObject) {
+                    var coordinates = geoObject.geometry.getCoordinates();
+                    setPlacemark(coordinates[0], coordinates[1]);
+                    myMap.setCenter(coordinates);
+                } else {
+                    alert('Координаты введенного адреса не определены Яндексом!');
+                }
+            });
+        } else {
+            alert('Для определения координат необходимо ввести адрес!');
+        }
+    };
+
+    $scope.unsetCoordinates = function() {
+        if (confirm('Вы уверены, что нужно убрать маркер с карты?')) {
+            unsetPlacemark();
+        };
+    };
 })
 
 // from https://github.com/andreev-artem/angular_experiments/tree/master/ui-equal-to
