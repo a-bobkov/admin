@@ -5,9 +5,9 @@
             <a id="paginationFirst" ng-click="selectPage(pages[0].number)" class="smaller">Первая</a>
         </td>
         <td class="pages">
-            <b id="paginationPages" ng-repeat="page in pages.slice(2, pages.length-2)">
+            <b ng-repeat="page in pages.slice(2, pages.length-2)">
                 <span ng-click="selectPage(page.number)" ng-hide="!page.active">{{page.text}}</span>
-                <a ng-click="selectPage(page.number)" ng-hide="page.active">{{page.text}}</a>
+                <a id="paginationPages" ng-click="selectPage(page.number)" ng-hide="page.active">{{page.text}}</a>
             </b>
         </td>
         <td class="forward">
