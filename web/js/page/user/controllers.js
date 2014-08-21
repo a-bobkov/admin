@@ -354,6 +354,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             ],
             zoom: 13
         });
+        myMap.cursors.push('pointer');
         myMap.controls.add("smallZoomControl");
         myMap.events.add('click', function (e) {
             unsetPlacemark();
@@ -370,7 +371,8 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         unsetPlacemark();
         myPlacemark = new ymaps.Placemark(
             [lat, lng], {}, {
-                preset: "twirl#redDotIcon",
+                preset: "twirl#carIcon",
+                cursor: 'grab',
                 draggable: true
             }
         );
