@@ -15,7 +15,7 @@ angular.module("ui.multicombo", [])
             '            <span id="McomboSelectedItem_{{$index}}">{{choice.idName()}}</span>' +
             '            <a id="McomboRemoveItem_{{$index}}" class="selected-choice-delete"></a>' +
             '        </li>' +
-            '        <li class="search-field" ng-click="openElem($event)" ng-keydown="watchControls($event)" ng-keyup="watchSearch($event)">' +
+            '        <li class="search-field" ng-click="openElem($event)" ng-keydown="watchControls($event)">' +
             '            <input type="text" id="McomboSearchInput" placeholder="Введите фильтр" autocomplete="off" ng-model="_search" ng-hide="_disabled">' +
             '        </li>' +
             '    </ul>' +
@@ -36,7 +36,7 @@ angular.module("ui.multicombo", [])
         },
         controller: ['$scope', '$filter', '$element', function($scope, $filter, $element) {
             var _searchElem = $element.children().eq(0).children().eq(-1).children().eq(0)[0];
-            var preSearch;
+            var constructorName = $scope._choicesLoader.constructor.toString().replace(/^function (\S+)\s*\((?:\S|\s)+/, '$1');
 
             $scope._single = !_.isArray($scope._selected);
             $scope._filteredChoices = [];
@@ -72,7 +72,7 @@ angular.module("ui.multicombo", [])
 
             var filterChoices = function() {
                 var selectedIds = _.pluck($scope._selectedChoices, 'id');
-                if ($scope._choicesLoader.constructor.name === 'sitesLoader') {
+                if (constructorName === 'sitesLoader') {
                     selectedIds.push(0, 12, 15);    // нельзя выбирать эти сайты
                 }
                 $scope._filteredChoices = _.filter($scope._choices && $scope._choices.getItems(), function(value) {
@@ -104,13 +104,13 @@ angular.module("ui.multicombo", [])
             var numberLoads = 0;
             $scope.loadChoices = function() {
                 numberLoads++;
-                var choicesId = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'id' : 'id';
-                var choicesName = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? 'companyName' : 'name';
-                var choicesFields = ($scope._choicesLoader.constructor.name === 'dealersLoader') ? ['dealer_list_name'] : [];
+                var choicesId = (constructorName === 'dealersLoader') ? 'id' : 'id';
+                var choicesName = (constructorName === 'dealersLoader') ? 'companyName' : 'name';
+                var choicesFields = (constructorName === 'dealersLoader') ? ['dealer_list_name'] : [];
                 var filters = _.invoke($scope._search && $scope._search.split(' '), function() {
                     return { fields: [choicesId, choicesName], type: 'contain', value: this };
                 });
-                if ($scope._choicesLoader.constructor.name === 'dealersLoader') {
+                if (constructorName === 'dealersLoader') {
                     filters.push({fields: ['isActive'], type: 'equal', value: true});
                 }
                 $q.all({
@@ -147,17 +147,6 @@ angular.module("ui.multicombo", [])
                 }
             }
 
-            $scope.watchSearch = function(event) {
-                if (event.keyCode === 13) {  // Enter
-                    return;
-                }
-                var newSearch = $scope._search && $scope._search.trim();
-                if (newSearch !== preSearch) {
-                    $scope.loadChoices();
-                    preSearch = newSearch;
-                }
-            }
-
             $scope.openElem = function(event) {
                 // otherwise 'close' will be called immediately
                 event.preventDefault();
@@ -169,6 +158,7 @@ angular.module("ui.multicombo", [])
                 openedElement = $element;
                 preSearch = '';
                 $element.addClass('mcombo-container-active');
+                var unWatchSearch = $scope.$watch('_search', $scope.loadChoices);
                 close = function (event) {
                     event && event.preventDefault();
                     event && event.stopPropagation();
@@ -176,13 +166,13 @@ angular.module("ui.multicombo", [])
                     $element.removeClass('mcombo-container-active');
                     openedElement = null;
                     close = null;
+                    unWatchSearch();
                     $scope._search = '';
                     if (event) {
                         $scope.$digest();
                     }
                 }
                 $document.bind('click', close);
-                $scope.loadChoices();
                 $scope.hover = 0;
                 _searchElem.focus();
             };
