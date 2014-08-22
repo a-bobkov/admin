@@ -716,6 +716,8 @@ input[type="submit"]:hover, input[type="button"]:hover {
 #auto_form select,
 #auto_form textarea {
   border:1px solid #999;
+  padding: 5px;
+  margin: 0;
 }
 
 #auto_form td > label { /* лэйблы за чекбоксами */
@@ -1111,4 +1113,15 @@ div.vehicle_filters {
     text-decoration: none;
     border-bottom: 1px dashed black;
 }
-.clien-code
+
+/* Карта на странице объявлений */
+.map_block .append-bottom, .map_block .error_list {
+    margin-bottom: 1em;
+}
+
+.map {
+    width: 780px;
+    height: 300px;
+    margin: 0;
+    border: 1px solid #999;
+}
