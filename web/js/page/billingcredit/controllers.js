@@ -144,13 +144,18 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
                 construction.dealers = dealers;
                 _.assign($scope, construction.resolveRefs());
                 $scope.groupSelectionAll = $scope.groupSelectionAll ? false : changeGroupSelection(false);
-                var topList = document.getElementById('addBillingCreditUp').getBoundingClientRect().top;
-                if (topList < 0) {
-                    window.scrollBy(0, topList);
-                }
+                viewTop('addBillingCreditUp');
             });
         });
     };
+
+    function viewTop(elemId) {
+        var topElem = document.getElementById(elemId);
+        var topList = topElem && topElem.getBoundingClientRect().top;
+        if (topList < 0) {
+            window.scrollBy(0, topList);
+        }
+    }
 
     var ls = $location.search();
     if (_.size(ls)) {

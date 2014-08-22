@@ -423,15 +423,19 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 }).then(function(tariffs) {
                     construction.tariffs = tariffs;
                     _.assign($scope, construction.resolveRefs());
-                    var topElem = document.getElementById('SaleListAddSaleUp');
-                    var topList = topElem && topElem.getBoundingClientRect().top;
-                    if (topList < 0) {
-                        window.scrollBy(0, topList);
-                    }
+                    viewTop('SaleListAddSaleUp');
                 });
             });
         });
     };
+
+    function viewTop(elemId) {
+        var topElem = document.getElementById(elemId);
+        var topList = topElem && topElem.getBoundingClientRect().top;
+        if (topList < 0) {
+            window.scrollBy(0, topList);
+        }
+    }
 
     $scope.isAddable = function(sale) {
         return (sale.isCard() || sale.isAddcard()) && sale.tariff && !_.find($scope.addSales.getItems(), {parentId: sale.cardId});

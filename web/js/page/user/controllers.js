@@ -129,13 +129,18 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
                 $location.search($rootScope.savedUserListLocationSearch);
                 $scope.users = data.users;
                 $scope.totalItems = data.users.getParams().pager.total;
-                var topUserList = document.getElementById('UserListAddUserUp').getBoundingClientRect().top;
-                if (topUserList < 0) {
-                    window.scrollBy(0, topUserList);
-                }
+                viewTop('UserListAddUserUp');
             }
         });
     };
+
+    function viewTop(elemId) {
+        var topElem = document.getElementById(elemId);
+        var topList = topElem && topElem.getBoundingClientRect().top;
+        if (topList < 0) {
+            window.scrollBy(0, topList);
+        }
+    }
 
     var ls = $location.search();
     if (_.isEmpty(ls)) {
@@ -239,7 +244,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
     }
 })
 
-.controller('UserCtrl', function($scope, $rootScope, $location, $window, data,
+.controller('UserCtrl', function($scope, $rootScope, $location, $window, $q, $timeout, data,
     User, userStatuses, Dealer, dealerPhoneHours) {
 
     _.assign($scope, data);
@@ -337,6 +342,87 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             }
         }
     };
+
+    var myMap;
+    var myPlacemark;
+
+    ymaps.ready(function init() {
+        myMap = new ymaps.Map("map", {
+            center: [
+                $scope.dealerEdited.latitude > 0 ? $scope.dealerEdited.latitude : ymaps.geolocation.latitude,
+                $scope.dealerEdited.longitude > 0 ? $scope.dealerEdited.longitude : ymaps.geolocation.longitude
+            ],
+            zoom: 13
+        });
+        myMap.cursors.push('pointer');
+        myMap.controls.add("smallZoomControl");
+        myMap.events.add('click', function (e) {
+            unsetPlacemark();
+            var coordinates = e.get('coordPosition');
+            setPlacemark(coordinates[0], coordinates[1]);
+        });
+
+        if (_.isNumber($scope.dealerEdited.latitude) && _.isNumber($scope.dealerEdited.longitude)) {
+            setPlacemark($scope.dealerEdited.latitude, $scope.dealerEdited.longitude);
+        }
+    });
+
+    function setPlacemark(lat, lng) {
+        unsetPlacemark();
+        myPlacemark = new ymaps.Placemark(
+            [lat, lng], {}, {
+                preset: "twirl#carIcon",
+                cursor: 'grab',
+                draggable: true
+            }
+        );
+        myPlacemark.events.add("dragend", setDealerCoordinates);
+        myMap.geoObjects.add(myPlacemark);
+
+        setDealerCoordinates();
+
+        function setDealerCoordinates() {
+            var coordinates = myPlacemark.geometry.getCoordinates();
+            $scope.dealerEdited.latitude = coordinates[0].ceil(8);
+            $scope.dealerEdited.longitude = coordinates[1].ceil(8);
+        }
+    }
+
+    function unsetPlacemark() {
+        if (myMap && myPlacemark) {
+            myMap.geoObjects.remove(myPlacemark);
+            myPlacemark = null;
+            $scope.dealerEdited.latitude = 0;
+            $scope.dealerEdited.longitude = 0;
+        }
+    }
+
+    var numberLoads = 0;
+    $scope.$watch('dealerEdited.address', function setCoordinates(newValue, oldValue) {
+        if (newValue === oldValue) {
+            return;
+        }
+        numberLoads++;
+        if (!newValue) {
+            unsetPlacemark();
+        } else {
+            $q.all({
+                geoCode: ymaps.geocode(newValue),
+                timer: $timeout(function() {}, 300),
+                numberLoads: numberLoads
+            }).then(function(data) {
+                if (numberLoads === data.numberLoads) {
+                    var geoObject = data.geoCode.geoObjects.get(0);
+                    $scope.invalidAddressWarning = !geoObject;
+                    if (geoObject) {
+                        var coordinates = geoObject.geometry.getCoordinates();
+                        setPlacemark(coordinates[0], coordinates[1]);
+                        myMap.setCenter(coordinates);
+                    }
+                }
+            });
+        }
+    });
 })
 
 // from https://github.com/andreev-artem/angular_experiments/tree/master/ui-equal-to
