@@ -13,7 +13,7 @@ cd maxposter_frontend
 npm install
 ```
 
-3. Установить средство для запуска e2e-тестов
+3. Установить protractor - средство для запуска e2e-тестов
 ```
 npm install -g protractor
 webdriver-manager update
@@ -21,12 +21,15 @@ webdriver-manager update
 если не установлен JDK, то установить его (http://www.oracle.com/technetwork/java/javase/downloads/index.html) и 
 включить в переменную PATH каталог с java.exe (я включил C:\Windows\SysWOW64)
 
+установить драйвер для работы protractor с IE, а также настроить IE:
+https://code.google.com/p/selenium/wiki/InternetExplorerDriver#Required_Configuration
+http://elgalu.github.io/2014/run-protractor-against-internet-explorer-vm/
+
 перед запуском e2e-тестов необходимо запускать сервер:
 webdriver-manager start
-
 ```
 
-4. Скопировать конфиги и адаптировать их под локальные условия
+4. Скопировать конфигурационные файлы и адаптировать их под локальные условия
 
 ```
 cp config/karma.conf.js-distrib config/karma.conf.js

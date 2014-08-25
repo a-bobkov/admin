@@ -3,7 +3,7 @@ exports.config = {
     seleniumAddress: 'http://localhost:4444/wd/hub',
 
     capabilities: {
-      'browserName': 'chrome'
+      'browserName': 'chrome'   // firefox, ie
     },
 
     // localhost http-mock testing
@@ -18,6 +18,6 @@ exports.config = {
     jasmineNodeOpts: {
         isVerbose: true,
         showColors: true,
-        defaultTimeoutInterval: 30000
+        defaultTimeoutInterval: 300000
     }
 };

@@ -67,7 +67,10 @@ if (browser.baseUrl.match(/maxposter.ru/)) {
     var emailInput = browser.driver.findElement(by.id('signin_email'));
     emailInput.sendKeys('protractor@maxposter.ru');
     var passwordInput = browser.driver.findElement(by.id('signin_password'));
-    passwordInput.sendKeys('protractor\n');
+    passwordInput.sendKeys('protractor' + protractor.Key.ENTER);
+    browser.driver.wait(function() {
+        return browser.driver.isElementPresent(by.className("client-code"));
+    });
 }
 
 var regexpInt = /^\d+$/;
@@ -2116,16 +2119,26 @@ describe('Sale App', function() {
                 var saleIdx = isDisplayedArray.indexOf(true);
                 expect(saleIdx).not.toBe(-1);
                 element.all(by.id('SaleListRowEdit')).get(saleIdx).click();
-                browser.waitForAngular();
             });
         });
 
-        it('показывает режим работы формы', function() {
+        it('показывает начальные значения', function() {
+            browser.waitForAngular();
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Изменение карточки$/);
-        });
-
-        it('выводит значение дилера', function() {
             expect(element(by.model('saleEdited.dealer')).element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
+            expect(element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
+            expect(element(by.model('tariffParent')).isDisplayed()).toBeFalsy();
+            expect(selectedOption(element(by.model('saleEdited.tariff'))).getText()).toMatch(regexpTariff);
+            expect(element(by.model('saleEdited.date')).getAttribute('value')).toMatch(regexpDateISO);
+            expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatchOrEmpty(regexpInt);
+            expect(element(by.id('saleCountErrorPattern')).isDisplayed()).toBeFalsy();
+            expect(element(by.model('saleEdited.activeFrom')).getAttribute('value')).toMatch(regexpDateISO);
+            expect(element(by.model('saleEdited.activeTo')).getAttribute('value')).toMatch(regexpDateISO);
+            expect(element(by.model('saleEdited.cardAmount')).getAttribute('value')).toMatch(regexpFloat);
+            expect(element(by.model('saleEdited.amount')).getAttribute('value')).toMatch(regexpFloat);
+            expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toMatch(regexpFloat);
+            expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toBeTruthy();
+            expect(selectedOption(element(by.model('saleEdited.isActive'))).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('выводит ошибку, если dealer пустой', function() {
@@ -2133,29 +2146,15 @@ describe('Sale App', function() {
             expect(element(by.id('saleEditDealerErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит значение сайта', function() {
-            expect(element(by.model('saleEdited.site')).element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
-        });
-
         it('выводит ошибку, если site пустой', function() {
             element(by.model('saleEdited.site')).element(by.id('McomboRemoveItem_0')).click();
             expect(element(by.id('saleEditSiteErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
-        it('не выводит tariffParent', function() {
-            expect(element(by.model('tariffParent')).isDisplayed()).toBeFalsy();
-        });
-
         it('заполняет список тарифов', function() {
-            var tariffElem = element(by.model('saleEdited.tariff'));
-            mapText(getSelectOptions(tariffElem)).then(function(options) {
+            mapText(getSelectOptions(element(by.model('saleEdited.tariff')))).then(function(options) {
                 expect(_.compact(options).length).toBeTruthy();
             });
-        });
-
-        it('выводит значение тарифа', function() {
-            var tariffElem = element(by.model('saleEdited.tariff'));
-            expect(selectedOption(tariffElem).getText()).toMatch(regexpTariff);
         });
 
         it('при выборе сайта перезаполняет список тарифов', function() {
@@ -2194,18 +2193,10 @@ describe('Sale App', function() {
             });
         });
 
-        it('выводит значение date', function() {
-            expect(element(by.model('saleEdited.date')).getAttribute('value')).toMatch(regexpDateISO);
-        });
-
         it('выводит ошибку, если date пустое', function() {
+            browser.waitForAngular();
             clearDate('saleDate', 'saleEdited.date');
             expect(element(by.id('saleDateErrorRequired')).isDisplayed()).toBeTruthy();
-        });
-
-        it('выводит значение count без ошибки', function() {
-            expect(element(by.model('saleEdited.count')).getAttribute('value')).toMatchOrEmpty(regexpInt);
-            expect(element(by.id('saleCountErrorPattern')).isDisplayed()).toBeFalsy();
         });
 
         it('выводит ошибку, если count отрицательный', function() {
@@ -2239,31 +2230,22 @@ describe('Sale App', function() {
             })
         });
 
-        it('выводит значение activeFrom', function() {
-            expect(element(by.model('saleEdited.activeFrom')).getAttribute('value')).toMatch(regexpDateISO);
-        });
-
         it('выводит ошибку, если activeFrom не дата', function() {
+            browser.waitForAngular();
             clearDate('saleActiveFrom', 'saleEdited.activeFrom');
             expect(element(by.id('saleActiveFromErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит значение activeTo', function() {
-            expect(element(by.model('saleEdited.activeTo')).getAttribute('value')).toMatch(regexpDateISO);
-        });
-
         it('выводит ошибку, если activeTo пустой', function() {
+            browser.waitForAngular();
             clearDate('saleActiveTo', 'saleEdited.activeTo');
             expect(element(by.id('saleActiveToErrorRequired')).isDisplayed()).toBeTruthy();
         });
 
         it('выводит ошибку, если activeTo меньше activeFrom', function() {
+            browser.waitForAngular();
             setDate('saleActiveTo', 'saleEdited.activeTo', '2001-01-01');
             expect(element(by.id('saleActiveToErrorGreater')).isDisplayed()).toBeTruthy();
-        });
-
-        it('выводит значение cardAmount', function() {
-            expect(element(by.model('saleEdited.cardAmount')).getAttribute('value')).toMatch(regexpFloat);
         });
 
         it('выводит ошибку, если cardAmount пустой', function() {
@@ -2282,10 +2264,6 @@ describe('Sale App', function() {
             cardAmountElem.clear();
             cardAmountElem.sendKeys('123456.123');
             expect(element(by.id('saleCardAmountErrorPattern')).isDisplayed()).toBeTruthy();
-        });
-
-        it('выводит значение amount', function() {
-            expect(element(by.model('saleEdited.amount')).getAttribute('value')).toMatch(regexpFloat);
         });
 
         it('выводит ошибку, если amount пустой', function() {
@@ -2316,10 +2294,6 @@ describe('Sale App', function() {
             expect(element(by.id('saleCardAmountErrorLessAmount')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит значение siteAmount', function() {
-            expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toMatch(regexpFloat);
-        });
-
         it('выводит ошибку, если siteAmount пустой', function() {
             element(by.model('saleEdited.siteAmount')).clear();
             expect(element(by.id('saleSiteAmountErrorRequired')).isDisplayed()).toBeTruthy();
@@ -2348,10 +2322,6 @@ describe('Sale App', function() {
             expect(element(by.id('saleSiteAmountErrorLessAmount')).isDisplayed()).toBeTruthy();
         });
 
-        it('выводит значение info', function() {
-            expect(element(by.model('saleEdited.siteAmount')).getAttribute('value')).toBeTruthy();
-        });
-
         it('выводит ошибку, если info пустой', function() {
             element(by.model('saleEdited.info')).clear();
             expect(element(by.id('saleInfoErrorRequired')).isDisplayed()).toBeTruthy();
@@ -2362,11 +2332,6 @@ describe('Sale App', function() {
             mapText(getSelectOptions(isActiveElem)).then(function(options) {
                 expect(_.compact(options).length).toBeTruthy();
             });
-        });
-
-        it('выводит значение isActive', function() {
-            var isActiveElem = element(by.model('saleEdited.isActive'));
-            expect(selectedOption(isActiveElem).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
@@ -2502,17 +2467,21 @@ describe('Sale App', function() {
 
     describe('Редактирование расширения', function() {
         beforeEach(function() {
-            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=id&itemsPerPage=15');
+            browser.get('admin.html#/salelist?type=addcard&archive=true&orders=-id&itemsPerPage=15');
             mapIsDisplayed(element.all(by.id('SaleListRowRemove'))).then(function(isDisplayedArray) {
                 var saleIdx = isDisplayedArray.indexOf(true);
                 expect(saleIdx).not.toBe(-1);
                 element.all(by.id('SaleListRowEdit')).get(saleIdx).click();
-                browser.waitForAngular();
             });
         });
 
-        it('показывает режим работы формы', function() {
+        it('показывает начальные значения', function() {
+            browser.waitForAngular();
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Изменение расширения$/);
+            expect(element(by.model('tariffParent')).isDisplayed()).toBeTruthy();
+            expect(element(by.model('tariffParent')).isEnabled()).toBeFalsy();
+            expect(element(by.model('saleEdited.activeTo')).isEnabled()).toBeFalsy();
+            expect(selectedOption(element(by.model('saleEdited.isActive'))).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('не позволяет очистить dealer', function() {
@@ -2525,14 +2494,6 @@ describe('Sale App', function() {
             var siteElem = element(by.model('saleEdited.dealer'));
             siteElem.element(by.id('McomboRemoveItem_0')).click();
             expect(siteElem.element(by.id('McomboSelectedItem_0')).getText()).toMatch(regexpIdName);
-        });
-
-        it('выводит tariffParent', function() {
-            expect(element(by.model('tariffParent')).isDisplayed()).toBeTruthy();
-        });
-
-        it('не позволяет изменить tariffParent', function() {
-            expect(element(by.model('tariffParent')).isEnabled()).toBeFalsy();
         });
 
         it('выводит ошибку, если activeFrom меньше activeFrom родительской карточки', function() {
@@ -2549,18 +2510,10 @@ describe('Sale App', function() {
             expect(element(by.id('saleActiveFromErrorGreater')).isDisplayed()).toBeTruthy();
         });
 
-        it('не позволяет изменить activeTo', function() {
-            expect(element(by.model('saleEdited.activeTo')).isEnabled()).toBeFalsy();
-        });
-
         it('заполняет список isActive', function() {
             mapText(getSelectOptions(element(by.model('saleEdited.isActive')))).then(function(options) {
                 expect(_.compact(options).length).toBeTruthy();
             });
-        });
-
-        it('выводит значение isActive', function() {
-            expect(selectedOption(element(by.model('saleEdited.isActive'))).getText()).toMatch(/^(А|Н\/А)$/);
         });
 
         it('выводит предупреждение статуса и запрещает его изменение, если статус Н/А и нет тарифа по-умолчанию', function() {
@@ -2611,7 +2564,6 @@ describe('Sale App', function() {
                 var saleIdx = rows.indexOf('расширить');
                 element.all(by.id('SaleListRowAdd')).get(saleIdx).click();
             });
-
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание расширения$/);
         });
 
@@ -2826,11 +2778,18 @@ describe('Sale App', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist?type=extra&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowEdit')).get(0).click();
-            browser.waitForAngular();
         });
 
-        it('выводит режим работы формы', function() {
+        it('показывает начальные значения', function() {
+            browser.waitForAngular();
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Изменение доплаты$/);
+            expect(element(by.id('saleTariff')).isDisplayed()).toBeFalsy();
+            expect(element(by.id('saleTariffParent')).isDisplayed()).toBeFalsy();
+            expect(element(by.id('saleCount')).isDisplayed()).toBeFalsy();
+            expect(element(by.id('saleActiveFrom')).isDisplayed()).toBeFalsy();
+            expect(element(by.id('saleActiveTo')).isDisplayed()).toBeFalsy();
+            expect(element(by.id('saleCardAmount')).isDisplayed()).toBeFalsy();
+            expect(element(by.id('saleIsActive')).isDisplayed()).toBeFalsy();
         });
 
         it('не позволяет очистить dealer', function() {
@@ -2844,44 +2803,16 @@ describe('Sale App', function() {
             siteElem.element(by.id('McomboRemoveItem_0')).click();
             expect(siteElem.all(by.id('McomboSelectedItem_0')).get(0).getText()).toMatch(regexpIdName);
         });
-
-        it('не выводит tariff', function() {
-            expect(element(by.id('saleTariff')).isDisplayed()).toBeFalsy();
-        });
-
-        it('не выводит tariffParent', function() {
-            expect(element(by.id('saleTariffParent')).isDisplayed()).toBeFalsy();
-        });
-
-        it('не выводит count', function() {
-            expect(element(by.id('saleCount')).isDisplayed()).toBeFalsy();
-        });
-
-        it('не выводит activeFrom', function() {
-            expect(element(by.id('saleActiveFrom')).isDisplayed()).toBeFalsy();
-        });
-
-        it('не выводит activeTo', function() {
-            expect(element(by.id('saleActiveTo')).isDisplayed()).toBeFalsy();
-        });
-
-        it('не выводит cardAmount', function() {
-            expect(element(by.id('saleCardAmount')).isDisplayed()).toBeFalsy();
-        });
-
-        it('не выводит isActive', function() {
-            expect(element(by.id('saleIsActive')).isDisplayed()).toBeFalsy();
-        });
     });
 
     describe('Создание доплаты', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist?type=card&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowExtra')).get(0).click();
-            browser.waitForAngular();
         });
 
-        it('показывает режим работы формы', function() {
+        it('показывает начальные значения', function() {
+            browser.waitForAngular();
             expect(element(by.binding('{{actionName}}')).getText()).toMatch(/^Создание доплаты$/);
         });
 
@@ -2896,7 +2827,8 @@ describe('Sale App', function() {
         });
 
         it('выводит ошибку, если info не дописано', function() {
-            expect(element(by.id('saleInfoErrorPattern')).isDisplayed()).toBeTruthy();
+            var infoErrorElem = element(by.id('saleInfoErrorPattern'));
+            expect(infoErrorElem.isDisplayed()).toBeTruthy();
         });
     });
 
@@ -3291,7 +3223,7 @@ describe('Sale App', function() {
         });
 
         it('Активация и дезактивация карточек и расширений', function() {
-            browser.get('admin.html#/salelist?archive=true&orders=id&itemsPerPage=15');
+            browser.get('admin.html#/salelist?archive=true&orders=-id&itemsPerPage=15');
             var sales = by.repeater('sale in sales');
             mapText(element.all(sales.column('sale.type'))).then(function(typeArr) {
                 mapText(element.all(sales.column('sale.isActive'))).then(function(isActiveArr) {
@@ -3328,7 +3260,7 @@ describe('Sale App', function() {
                                 expect(isActive).toBe("А");
                                 alert.accept();
                                 expect(element.all(sales.column('sale.isActive')).get(saleIdx).getText()).toBe("Н\/А");
-                                expect(element(by.binding("savedSaleListNotice")).getText()).toMatch('Дезактивирована продажа салона "' + saleParams[1] + '" на сайте "' + saleParams[2] + '"');
+                                expect(element(by.binding("savedSaleListNotice")).getText()).toBe('Дезактивирована продажа салона "' + saleParams[1] + '" на сайте "' + saleParams[2] + '"');
                                 ++salesDeactivated;
                             } else {
                                 ++salesUnknown;
