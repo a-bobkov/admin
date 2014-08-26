@@ -343,86 +343,104 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         }
     };
 
-    var myMap;
-    var myPlacemark;
+    ymaps.ready(function() {
+        $timeout(function() {
+            var myMap;
+            var myPlacemark;
 
-    ymaps.ready(function init() {
-        myMap = new ymaps.Map("map", {
-            center: [
-                $scope.dealerEdited.latitude > 0 ? $scope.dealerEdited.latitude : ymaps.geolocation.latitude,
-                $scope.dealerEdited.longitude > 0 ? $scope.dealerEdited.longitude : ymaps.geolocation.longitude
-            ],
-            zoom: 13
-        });
-        myMap.cursors.push('pointer');
-        myMap.controls.add("smallZoomControl");
-        myMap.events.add('click', function (e) {
-            unsetPlacemark();
-            var coordinates = e.get('coordPosition');
-            setPlacemark(coordinates[0], coordinates[1]);
-        });
+            myMap = new ymaps.Map("map", {
+                center: [
+                    $scope.dealerEdited.latitude > 0 ? $scope.dealerEdited.latitude : ymaps.geolocation.latitude,
+                    $scope.dealerEdited.longitude > 0 ? $scope.dealerEdited.longitude : ymaps.geolocation.longitude
+                ],
+                zoom: 13
+            });
+            myMap.controls.add("smallZoomControl");
 
-        if (_.isNumber($scope.dealerEdited.latitude) && _.isNumber($scope.dealerEdited.longitude)) {
-            setPlacemark($scope.dealerEdited.latitude, $scope.dealerEdited.longitude);
-        }
-    });
-
-    function setPlacemark(lat, lng) {
-        unsetPlacemark();
-        myPlacemark = new ymaps.Placemark(
-            [lat, lng], {}, {
-                preset: "twirl#carIcon",
-                cursor: 'grab',
-                draggable: true
-            }
-        );
-        myPlacemark.events.add("dragend", setDealerCoordinates);
-        myMap.geoObjects.add(myPlacemark);
-
-        setDealerCoordinates();
-
-        function setDealerCoordinates() {
-            var coordinates = myPlacemark.geometry.getCoordinates();
-            $scope.dealerEdited.latitude = coordinates[0].ceil(8);
-            $scope.dealerEdited.longitude = coordinates[1].ceil(8);
-        }
-    }
-
-    function unsetPlacemark() {
-        if (myMap && myPlacemark) {
-            myMap.geoObjects.remove(myPlacemark);
-            myPlacemark = null;
-            $scope.dealerEdited.latitude = 0;
-            $scope.dealerEdited.longitude = 0;
-        }
-    }
-
-    var numberLoads = 0;
-    $scope.$watch('dealerEdited.address', function setCoordinates(newValue, oldValue) {
-        if (newValue === oldValue) {
-            return;
-        }
-        numberLoads++;
-        if (!newValue) {
-            unsetPlacemark();
-        } else {
-            $q.all({
-                geoCode: ymaps.geocode(newValue),
-                timer: $timeout(function() {}, 300),
-                numberLoads: numberLoads
-            }).then(function(data) {
-                if (numberLoads === data.numberLoads) {
-                    var geoObject = data.geoCode.geoObjects.get(0);
-                    $scope.invalidAddressWarning = !geoObject;
-                    if (geoObject) {
-                        var coordinates = geoObject.geometry.getCoordinates();
-                        setPlacemark(coordinates[0], coordinates[1]);
-                        myMap.setCenter(coordinates);
-                    }
+            myPlacemark = new ymaps.Placemark([$scope.dealerEdited.latitude, $scope.dealerEdited.longitude], {}, {
+                    preset: "twirl#carIcon",
+                    cursor: 'grab',
+                    draggable: true
+                }
+            );
+            myPlacemark.events.add("dragend", setDealerCoordinates);
+            myMap.geoObjects.add(myPlacemark);
+            myMap.events.add('click', function setClickCoordinates(e) {
+                if ($scope.dealerEdited.address) {
+                    myPlacemark.geometry.setCoordinates(e.get('coordPosition'));
+                    setDealerCoordinates();
                 }
             });
-        }
+            setMapCursor();
+
+            function setDealerCoordinates() {
+                $timeout(function() {
+                    var coordinates = myPlacemark.geometry.getCoordinates();
+                    $scope.dealerEdited.latitude = coordinates[0] && coordinates[0].ceil(8);
+                    $scope.dealerEdited.longitude = coordinates[1] && coordinates[1].ceil(8);
+                });
+            }
+
+            function setMapCursor() {
+                if ($scope.dealerEdited.address) {
+                    myMap.cursors.push('pointer');
+                } else {
+                    myMap.cursors.push('grab');
+                }
+            }
+
+            var numberLoads = 0;
+            $scope.$watch('dealerEdited.address', function manageCoordinates(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+                numberLoads++;
+                setMapCursor();
+                if (!newValue) {
+                    myPlacemark.geometry.setCoordinates([null, null]);
+                    setDealerCoordinates();
+                } else {
+                    $q.all({
+                        geoCode: ymaps.geocode(newValue),
+                        timer: $timeout(function() {}, 300),
+                        numberLoads: numberLoads
+                    }).then(function(data) {
+                        if (numberLoads === data.numberLoads) {
+                            var geoObject = data.geoCode.geoObjects.get(0);
+                            if (geoObject) {
+                                var coordinates = geoObject.geometry.getCoordinates();
+                                myPlacemark.geometry.setCoordinates(coordinates);
+                                myMap.setCenter(coordinates);
+                                setDealerCoordinates();
+                            }
+                        }
+                    });
+                }
+            });
+        });
     });
+})
+
+.directive('coordinates', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        scope: {
+            _required: '=ngRequired',
+            _address: '=ngModel',
+            _latitude: '=latitude',
+            _longitude: '=longitude'
+        },
+        link: function (scope, elem, attrs, ctrl) {
+            scope.$watch('[_address, _latitude, _longitude]', function validateCoordinates(newValue, oldValue) {
+                if (newValue === oldValue) {
+                    return;
+                }
+                ctrl.$setValidity('coordinates', !scope._required || !scope._address
+                    || _.isNumber(scope._latitude) && _.isNumber(scope._longitude));
+            }, true);
+        }
+    };
 })
 
 // from https://github.com/andreev-artem/angular_experiments/tree/master/ui-equal-to

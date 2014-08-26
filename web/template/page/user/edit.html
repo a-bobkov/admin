@@ -134,13 +134,11 @@
 		        <th><label for="user_dealer_address">Адрес</label></th>
 		        <td class="map_block">
                     <div class="append-bottom">
-                        <input class="span-18 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_address" ng-model='dealerEdited.address' maxlength='255'>
+                        <input class="span-18 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_address" ng-model='dealerEdited.address' coordinates latitude='dealerEdited.latitude' longitude='dealerEdited.longitude' maxlength='255'>
                     </div>
 					<ul class="error_list" ng-show='formUser.user_dealer_address.$invalid'>
 					    <li id='UserEditDealerAddressRequired' ng-show="formUser.user_dealer_address.$error.required">Необходимо ввести адрес компании.</li>
-					</ul>
-					<ul class="error_list">
-					    <li id='dealerEditHasAddressWarning' ng-show='invalidAddressWarning && dealerEdited.address'>Не удалось автоматически определить координаты по адресу. Вам необходимо вручную указать на карте адрес с помощью маркера.</li>
+					    <li id='UserEditDealerAddressCordinates' ng-show='formUser.user_dealer_address.$error.coordinates'>Необходимо указать на карте координаты.</li>
 					</ul>
 				    <div class='map' id='map'></div>
 		        </td>
