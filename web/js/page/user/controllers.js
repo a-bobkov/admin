@@ -343,6 +343,11 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         }
     };
 
+    $scope.addressHasCity = function() {
+        return $scope.dealerEdited.address && $scope.dealerEdited.city
+            && $scope.dealerEdited.address.toLowerCase().indexOf($scope.dealerEdited.city.name.toLowerCase()) !== -1;
+    }
+
     ymaps.ready(function() {
         $timeout(function() {
             var myMap;
@@ -382,41 +387,41 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
             }
 
             function setMapCursor() {
-                if ($scope.dealerEdited.address) {
-                    myMap.cursors.push('pointer');
-                } else {
+                if (!$scope.dealerEdited.city || !$scope.dealerEdited.address) {
                     myMap.cursors.push('grab');
+                } else {
+                    myMap.cursors.push('pointer');
                 }
             }
 
             var numberLoads = 0;
-            $scope.$watch('dealerEdited.address', function manageCoordinates(newValue, oldValue) {
+            $scope.$watch('[dealerEdited.city, dealerEdited.address]', function manageCoordinates(newValue, oldValue) {
                 if (newValue === oldValue) {
                     return;
                 }
                 numberLoads++;
                 setMapCursor();
-                if (!newValue) {
+                if (!$scope.dealerEdited.city || !$scope.dealerEdited.address) {
                     myPlacemark.geometry.setCoordinates([null, null]);
                     setDealerCoordinates();
-                } else {
-                    $q.all({
-                        geoCode: ymaps.geocode(newValue),
-                        timer: $timeout(function() {}, 300),
-                        numberLoads: numberLoads
-                    }).then(function(data) {
-                        if (numberLoads === data.numberLoads) {
-                            var geoObject = data.geoCode.geoObjects.get(0);
-                            if (geoObject) {
-                                var coordinates = geoObject.geometry.getCoordinates();
-                                myPlacemark.geometry.setCoordinates(coordinates);
-                                myMap.setCenter(coordinates);
-                                setDealerCoordinates();
-                            }
-                        }
-                    });
+                    return;
                 }
-            });
+                $q.all({
+                    geoCode: ymaps.geocode($scope.dealerEdited.city.name + ', ' + $scope.dealerEdited.address),
+                    timer: $timeout(function() {}, 300),
+                    numberLoads: numberLoads
+                }).then(function(data) {
+                    if (numberLoads === data.numberLoads) {
+                        var geoObject = data.geoCode.geoObjects.get(0);
+                        if (geoObject) {
+                            var coordinates = geoObject.geometry.getCoordinates();
+                            myPlacemark.geometry.setCoordinates(coordinates);
+                            myMap.setCenter(coordinates);
+                            setDealerCoordinates();
+                        }
+                    }
+                });
+            }, true);
         });
     });
 })

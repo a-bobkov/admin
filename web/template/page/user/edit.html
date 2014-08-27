@@ -134,8 +134,11 @@
 		        <th><label for="user_dealer_address">Адрес</label></th>
 		        <td class="map_block">
                     <div class="append-bottom">
-                        <input class="span-18 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_address" ng-model='dealerEdited.address' coordinates latitude='dealerEdited.latitude' longitude='dealerEdited.longitude' maxlength='255'>
+                        <input class="span-18 required" ng-required='userEdited.isDealer()' type="text" name="user_dealer_address" ng-model='dealerEdited.address' coordinates latitude='dealerEdited.latitude' longitude='dealerEdited.longitude' placeholder='Улица, дом (без города)' maxlength='255'>
                     </div>
+					<ul class="warning_list">
+					    <li id='UserEditDealerAddressCity' ng-show='addressHasCity()'>Город в адресе указывать не нужно.</li>
+					</ul>
 					<ul class="error_list" ng-show='formUser.user_dealer_address.$invalid'>
 					    <li id='UserEditDealerAddressRequired' ng-show="formUser.user_dealer_address.$error.required">Необходимо ввести адрес компании.</li>
 					    <li id='UserEditDealerAddressCordinates' ng-show='formUser.user_dealer_address.$error.coordinates'>Необходимо указать на карте координаты.</li>
