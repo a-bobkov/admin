@@ -29,7 +29,7 @@ blockquote {margin:1.5em;padding:1em;font-style:italic;font-size:.9em;}
 
 /* MaxPoster.ru */
 /* Отчеты */
-#top, #bottom, .dont_print, .vlaCalendarPicker {
+#top, #bottom, .dont_print {
   display:none;
 }
 DIV.report {

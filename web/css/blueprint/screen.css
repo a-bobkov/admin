@@ -315,8 +315,10 @@ DIV#top {
 }
 
 .submenu INPUT {
-  margin: 0;
+  margin: 4px;
   margin-right: 1em;
+  padding: 3px;
+  border:1px solid #999;
 }
 
 .submenu .tdr {
@@ -708,16 +710,12 @@ input[type="submit"]:hover, input[type="button"]:hover {
 
 
 /* повесил только на форму авто, возможно стоит рамки, паддинги сделать глобальными? */
-#auto_form table th,
-#auto_form table td {
-  padding:6px 10px 6px 5px;
-}
 #auto_form input,
 #auto_form select,
 #auto_form textarea {
   border:1px solid #999;
-  padding: 5px;
-  margin: 0;
+  padding: 3px;
+  margin: 2px;
 }
 
 #auto_form td > label { /* лэйблы за чекбоксами */
