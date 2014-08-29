@@ -361,9 +361,11 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 
     $scope.changeSorting = function(column) {
         if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
-            $scope.sorting[0] = (($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? '' : '-') + column;
+            var newDirection = ($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? '' : '-';
+            $scope.sorting[0] = newDirection + column;
+            $scope.sorting[1] = newDirection + 'id';
         } else {
-            $scope.sorting = [column, '-id'];
+            $scope.sorting = [column, 'id'];
         }
         onSortingChange();
     }
