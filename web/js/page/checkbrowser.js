@@ -1,7 +1,8 @@
 // from http://stackoverflow.com/questions/5916900/detect-version-of-browser
 navigator.sayswho= (function(){
-    var ua= navigator.userAgent, tem, 
-    M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*([\d\.]+)/i) || [];
+    var ua = navigator.userAgent;
+    var tem;
+    var M = ua.match(/(yabrowser(?=\/))\/?\s*([\d\.]+)/i) || ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*([\d\.]+)/i) || [];
     if(/trident/i.test(M[1])){
         tem=  /\brv[ :]+(\d+(\.\d+)?)/g.exec(ua) || [];
         return ['MSIE',(tem[1] || '')];
