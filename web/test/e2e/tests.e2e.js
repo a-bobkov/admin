@@ -3250,7 +3250,7 @@ describe('Sale App', function() {
                                 alert.accept();
                                 expect(element.all(sales.column('sale.isActive')).get(saleIdx).getText()).toBe("Н\/А");
                                 ++salesNoExport;
-                            } else if (saleParams = text.match(/^Активировать продажу салона \"(.+)\" на сайте \"(.+)\"\?$/)) {
+                            } else if (saleParams = text.match(/Активировать продажу салона \"(.+)\" на сайте \"(.+)\"\?$/)) {
                                 expect(isActive).toBe("Н\/А");
                                 alert.accept();
                                 expect(element.all(sales.column('sale.isActive')).get(saleIdx).getText()).toBe("А");

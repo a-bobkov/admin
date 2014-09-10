@@ -24,7 +24,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
                         filters: [
                             { fields: ['id'], type: 'in', value: ls.dealers.split(';') } // user.id
                         ],
-                        fields: ['companyName']
+                        fields: ['companyName', 'isActive']
                     });
                 }
                 return $q.all(toResolve).then(function(construction) {
@@ -139,7 +139,7 @@ angular.module('BillingCreditApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInp
                 filters: [
                     { fields: ['id'], type: 'in', value: _.pluck(_.pluck(billingCredits.getItems(), 'dealer'), 'id') }
                 ],
-                fields: ['companyName']
+                fields: ['companyName', 'isActive']
             }).then(function(dealers) {
                 construction.dealers = dealers;
                 _.assign($scope, construction.resolveRefs());

@@ -104,16 +104,14 @@ angular.module("ui.multicombo", [])
             var numberLoads = 0;
             $scope.loadChoices = function() {
                 numberLoads++;
-                var choicesId = (constructorName === 'dealersLoader') ? 'id' : 'id';
                 var choicesName = (constructorName === 'dealersLoader') ? 'companyName' : 'name';
-                var choicesFields = (constructorName === 'dealersLoader') ? ['companyName'] : [];
                 var filters = _.invoke($scope._search && $scope._search.split(' '), function() {
-                    return { fields: [choicesId, choicesName], type: 'contain', value: this };
+                    return { fields: ['id', choicesName], type: 'contain', value: this };
                 });
                 $q.all({
                     choices: $scope._choicesLoader.loadItems({
                         filters: filters,
-                        fields: choicesFields,
+                        fields: [choicesName, 'isActive'],
                         pager: {
                             per_page: 9
                         }

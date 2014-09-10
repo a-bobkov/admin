@@ -50,7 +50,7 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
         };
 
         Dealer.prototype.idName = function() {
-            return this.id + ': ' + this.companyName;
+            return this.id + ': ' + this.companyName + (this.isActive === false ? ' (Н/А)': '');
         }
 
         return Dealer;
