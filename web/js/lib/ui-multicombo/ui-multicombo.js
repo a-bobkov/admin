@@ -110,9 +110,6 @@ angular.module("ui.multicombo", [])
                 var filters = _.invoke($scope._search && $scope._search.split(' '), function() {
                     return { fields: [choicesId, choicesName], type: 'contain', value: this };
                 });
-                if (constructorName === 'dealersLoader') {
-                    filters.push({fields: ['isActive'], type: 'equal', value: true});
-                }
                 $q.all({
                     choices: $scope._choicesLoader.loadItems({
                         filters: filters,
