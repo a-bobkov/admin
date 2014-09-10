@@ -402,6 +402,133 @@ describe('app-mocked', function() {
         });
     }
 
+ddescribe('dealer', function() {
+
+    describe('Метод get', function() {
+
+        it('возвращать те же значения, что и query', function() {
+            var answer = {};
+            var dealer;
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems();
+            });
+
+            runSync(answer, function() {
+                dealer = answer.respond.getItems()[0];
+                return dealersLoader.loadItems(dealer.id);
+            });
+
+            runs(function() {
+                var dealerEqual = answer.respond;
+                expect(dealerEqual).toMatch(dealer);
+            });
+        });
+    });
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(dealer) {
+                    expect(dealer.id).toBeInteger();
+                    // expect(dealer.manager).toBeReference();
+                    // expect(dealer.billingCompany).toBeReference();
+                    // expect(dealer.companyName).toBeString();
+                    // expect(dealer.contactName).toBeString();
+                    expect(dealer.city).toBeReference();
+                    // expect(dealer.metro).toBeReferenceOrNull();
+                    // expect(dealer.market).toBeReferenceOrNull();
+                    // expect(dealer.address).toBeString();
+                    // expect(dealer.fax).toBeString();
+                    // expect(dealer.email).toBeString();
+                    // expect(dealer.url).toBeString();
+                    // expect(dealer.companyInfo).toBeString();
+                    // expect(dealer.phone2).toBeString();
+                    // expect(dealer.phone2From).toBeReferenceOrNull();
+                    // expect(dealer.phone2To).toBeReferenceOrNull();
+                    // expect(dealer.phone3).toBeString();
+                    // expect(dealer.phone3From).toBeReferenceOrNull();
+                    // expect(dealer.phone3To).toBeReferenceOrNull();
+                    // expect(dealer.lat).toBeNumber();
+                    // expect(dealer.lng).toBeNumber();
+                    expect(dealer.isActive).toBeBoolean();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(dealersLoader, ['id']);
+        });
+
+        it('equal - фильтровать по равенству companyName заданному значению', function() {
+            checkFilterEqual(dealersLoader, ['companyName']);
+        });
+
+        it('equal - фильтровать по равенству isActive значению true', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: true }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var items = answer.respond.getItems();
+                expect(items.length).toBeTruthy();
+                _.forEach(items, function(item) {
+                    expect(item.isActive).toEqual(true);
+                });
+            });
+        });
+
+        it('equal - фильтровать по равенству isActive значению false', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return dealersLoader.loadItems({
+                    filters: [
+                        { fields: ['isActive'], type: 'equal', value: false }
+                    ]
+                });
+            });
+
+            runs(function() {
+                var items = answer.respond.getItems();
+                expect(items.length).toBeTruthy();
+                _.forEach(items, function(item) {
+                    expect(item.isActive).toEqual(false);
+                });
+            });
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(dealersLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(dealersLoader, ['-id']);
+        });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(dealersLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(dealersLoader);
+        });
+    });
+});
+
 describe('city', function() {
 
     describe('Метод query', function() {
