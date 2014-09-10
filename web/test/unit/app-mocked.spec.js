@@ -402,7 +402,7 @@ describe('app-mocked', function() {
         });
     }
 
-ddescribe('dealer', function() {
+describe('dealer', function() {
 
     describe('Метод get', function() {
 

@@ -106,7 +106,7 @@ angular.module("ui.multicombo", [])
                 numberLoads++;
                 var choicesId = (constructorName === 'dealersLoader') ? 'id' : 'id';
                 var choicesName = (constructorName === 'dealersLoader') ? 'companyName' : 'name';
-                var choicesFields = (constructorName === 'dealersLoader') ? ['dealer_list_name'] : [];
+                var choicesFields = (constructorName === 'dealersLoader') ? ['companyName'] : [];
                 var filters = _.invoke($scope._search && $scope._search.split(' '), function() {
                     return { fields: [choicesId, choicesName], type: 'contain', value: this };
                 });

@@ -41,7 +41,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                         filters: [
                             { fields: ['id'], type: 'in', value: ls.dealers.split(';') }
                         ],
-                        fields: ['dealer_list_name']
+                        fields: ['companyName']
                     });
                 }
                 if (!_.isEmpty(ls.sites)) {
@@ -255,7 +255,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                                 filters: [
                                     { fields: ['id'], type: 'equal', value: directories.parentSale.dealer.id }
                                 ],
-                                fields: ['dealer_list_name']
+                                fields: ['companyName']
                             }),
                             sites: sitesLoader.loadItems({
                                 filters: [
@@ -407,7 +407,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                     filters: [
                         { fields: ['id'], type: 'in', value: _.pluck(_.pluck(salesItems, 'dealer'), 'id') }
                     ],
-                    fields: ['dealer_list_name']
+                    fields: ['companyName']
                 }),
                 sites: sitesLoader.loadItems({
                     filters: [

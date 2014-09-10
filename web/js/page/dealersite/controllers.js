@@ -26,7 +26,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
                         filters: [
                             { fields: ['id'], type: 'in', value: ls.dealers.split(';') }
                         ],
-                        fields: ['dealer_list_name']
+                        fields: ['companyName']
                     });
                 }
                 if (!_.isEmpty(ls.sites)) {
@@ -60,7 +60,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
                                     filters: [
                                         { fields: ['id'], type: 'equal', value: dealerSite.dealer.id }
                                     ],
-                                    fields: ['dealer_list_name']
+                                    fields: ['companyName']
                                 }),
                                 sites: sitesLoader.loadItems({
                                     filters: [
@@ -183,7 +183,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
                     filters: [
                         { fields: ['id'], type: 'in', value: _.pluck(_.pluck(dealerSitesItems, 'dealer'), 'id') }
                     ],
-                    fields: ['dealer_list_name']
+                    fields: ['companyName']
                 }),
                 sites: sitesLoader.loadItems({
                     filters: [

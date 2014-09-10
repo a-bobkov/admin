@@ -25,7 +25,7 @@ angular.module('BillingUnionApp', ['ngRoute', 'ui.bootstrap.pagination',
                         filters: [
                             { fields: ['id'], type: 'in', value: ls.slaveDealers.split(';') } // user.id
                         ],
-                        fields: ['dealer_list_name']
+                        fields: ['companyName']
                     });
                 }
                 if (!_.isEmpty(ls.masterDealers)) {
@@ -33,7 +33,7 @@ angular.module('BillingUnionApp', ['ngRoute', 'ui.bootstrap.pagination',
                         filters: [
                             { fields: ['id'], type: 'in', value: ls.masterDealers.split(';') } // user.id
                         ],
-                        fields: ['dealer_list_name']
+                        fields: ['companyName']
                     });
                 }
                 if (!_.isEmpty(ls.sites)) {
@@ -64,7 +64,7 @@ angular.module('BillingUnionApp', ['ngRoute', 'ui.bootstrap.pagination',
                                 filters: [    // user.id
                                     { fields: ['id'], type: 'in', value: [billingUnion.masterDealer.id, billingUnion.slaveDealer.id] }
                                 ],
-                                fields: [ 'dealer_list_name' ]
+                                fields: [ 'companyName' ]
                             }),
                             sites: sitesLoader.loadItems({
                                 filters: [
@@ -166,7 +166,7 @@ angular.module('BillingUnionApp', ['ngRoute', 'ui.bootstrap.pagination',
                     filters: [
                         { fields: ['id'], type: 'in', value: dealerIds }
                     ],
-                    fields: ['dealer_list_name']
+                    fields: ['companyName']
                 }),
                 sites: sitesLoader.loadItems({
                     filters: [
