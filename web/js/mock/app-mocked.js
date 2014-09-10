@@ -102,7 +102,13 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         })
     }
 
-    var processQueryUrlSort = function(url, regex, arr, collectionName, collectionConstructor) {
+    function fieldArr(arr, fields) {
+        return _.map(arr, function(value) {
+            return _.pick(value, fields);
+        });
+    }
+
+    var processQueryUrlSort = function(url, regex, arr, collectionName, collectionConstructor, fields) {
 
         var search = url.replace(regex, '$1');
         var pairs = search.split('&');
@@ -132,8 +138,12 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 }
             }
         }];
-        respond[1].data[collectionName] = _.invoke(paged_arr, 'serialize');
-
+        var serArr = _.invoke(paged_arr, 'serialize');
+        if (!_.isEmpty(fields)) {
+            serArr = fieldArr(serArr, fields);
+        }
+        
+        respond[1].data[collectionName] = serArr;
         return respond;
     }
 
@@ -190,10 +200,15 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         var filtered_arr = filterArr(collection.getItems(), filters);
         var orders = angular.fromJson(data).orders || ['+id'];
         var ordered_arr = sortByOrders(filtered_arr, orders);
+        var fields = angular.fromJson(data).fields || [];
+        if (fields.length && fields.indexOf('id') === -1) {
+            fields.push('id');
+        }
 
-        var respond = processQueryUrlSort(url, regex, ordered_arr, collectionName, collectionConstructor);
+        var respond = processQueryUrlSort(url, regex, ordered_arr, collectionName, collectionConstructor, fields);
         respond[1].data.params.filters = filters;
         respond[1].data.params.orders = orders;
+        respond[1].data.params.fields = fields;
         return respond;
     }
 
@@ -639,35 +654,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processQueryUrlSort(url, regexDealersQuery, dealers.getItems(), 'dealers', Dealers);
     });
     $httpBackend.whenPOST(regexDealersQuery).respond(function(method, url, data) {
-
-        var applyFields = function(arr, fields) {
-            return _.map(arr, function(item) {
-                var newItem = {};
-                _.forEach(fields, function(group) {
-                    if (group === 'dealer_list_name') {
-                        newItem.id = item.id;
-                        if (item.companyName) {
-                            newItem.companyName = item.companyName;
-                        }
-                    }
-                });
-                return newItem;
-            });
-        }
-
-        var knownFields = function(fields) {
-            return _.filter(fields, function(group) {
-                return (group === 'dealer_list_name');
-            });
-        }
-
-        var respond = processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
-        var fields = angular.fromJson(data).fields;
-        if (_.size(fields)) {
-            respond[1].data.dealers = applyFields(respond[1].data.dealers, fields);
-            respond[1].data.params.fields = knownFields(fields);
-        }
-        return respond;
+        return processPostQuerySort(url, regexDealersQuery, data, dealers, 'dealers', Dealers);
     });
 
     var sites = new Sites([

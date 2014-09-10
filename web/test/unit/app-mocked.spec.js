@@ -358,6 +358,50 @@ describe('app-mocked', function() {
         });
     }
 
+    function checkFieldingId(loader) {
+        var answer = {};
+
+        runSync(answer, function() {
+            return loader.loadItems({
+                fields: ['id']
+            });
+        });
+
+        runs(function() {
+            _.forEach(answer.respond.getItems(), function(item) {
+                expect(_.keys(item)).toEqual(['id']);
+            })
+        });
+    }
+
+    function checkFieldingAll(loader, params) {
+        var s = {};
+
+        runSync(s, function() {
+            return loader.loadItems(_.assign({
+                pager: {
+                    per_page: 1
+                }
+            }, params));
+        });
+
+        runSync(s, function() {
+            s.item = s.respond.getItems()[0];
+            expect(s.item).toBeDefined();
+            s.keys = _.keys(s.item);
+            return loader.loadItems({
+                fields: s.keys
+            });
+        });
+
+        runs(function() {
+            var items = s.respond.getItems();
+            _.forEach(s.keys, function(key) {
+                expect(_.pluck(items, key).length).toBeTruthy();
+            });
+        });
+    }
+
 describe('city', function() {
 
     describe('Метод query', function() {
@@ -387,6 +431,14 @@ describe('city', function() {
         it('сортировать по id по убыванию', function() {
             checkSorting(citiesLoader, ['-id']);
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(citiesLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(citiesLoader);
+        });
     });
 });
 
@@ -411,6 +463,14 @@ describe('market', function() {
 
         it('equal - фильтровать по равенству id заданному значению', function() {
             checkFilterEqual(marketsLoader, ['id']);
+        });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(marketsLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(marketsLoader);
         });
     });
 });
@@ -445,6 +505,14 @@ describe('metro', function() {
         it('сортировать по id по убыванию', function() {
             checkSorting(metrosLoader, ['-id']);
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(metrosLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(metrosLoader);
+        });
     });
 });
 
@@ -470,6 +538,14 @@ describe('group', function() {
         it('equal - фильтровать по равенству id заданному значению', function() {
             checkFilterEqual(groupsLoader, ['id']);
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(groupsLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(groupsLoader);
+        });
     });
 });
 
@@ -493,6 +569,14 @@ describe('manager', function() {
 
         it('equal - фильтровать по равенству id заданному значению', function() {
             checkFilterEqual(managersLoader, ['id']);
+        });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(managersLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(managersLoader);
         });
     });
 });
@@ -587,6 +671,14 @@ describe('billingunion', function() {
         it('сортировать по slaveDealer по убыванию', function() {
             checkSorting(billingUnionsLoader, ['-slaveDealer']);
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(billingUnionsLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(billingUnionsLoader);
+        });
     });
 
     describe('Метод post', function() {
@@ -600,11 +692,8 @@ describe('billingunion', function() {
                     filters: [
                         { fields: ['isActive'], type: 'equal', value: true }
                     ],
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'asc'
-                    },
-                    fields: ['dealer_list_name']
+                    order: ['+id'],
+                    fields: ['companyName']
                 }).then(function(dealers) {
                     var dealerIds = _.pluck(dealers.getItems(), 'id');
                     return $q.all({
@@ -668,11 +757,8 @@ describe('billingunion', function() {
                     filters: [
                         { fields: ['isActive'], type: 'equal', value: true }
                     ],
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'asc'
-                    },
-                    fields: ['dealer_list_name']
+                    order: ['+id'],
+                    fields: ['companyName']
                 }).then(function(dealers) {
                     var dealerIds = _.pluck(dealers.getItems(), 'id');
                     return $q.all({
@@ -841,6 +927,14 @@ describe('billingcredit', function() {
         it('сортировать по expiresAt по убыванию', function() {
             checkSorting(billingCreditsLoader, ['-expiresAt']);
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(billingCreditsLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(billingCreditsLoader);
+        });
     });
 
     describe('Метод post', function() {
@@ -854,11 +948,8 @@ describe('billingcredit', function() {
                     filters: [
                         { fields: ['isActive'], type: 'equal', value: true }
                     ],
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    },
-                    fields: ['dealer_list_name']
+                    order: ['-id'],
+                    fields: ['companyName']
                 }).then(function(dealers) {
                     var dealerIds = _.pluck(dealers.getItems(), 'id');
                     return billingCreditsLoader.loadItems({
@@ -904,11 +995,8 @@ describe('billingcredit', function() {
 
             runSync(answer, function() {
                 return dealersLoader.loadItems({
-                    order: {
-                        order_field: 'id',
-                        order_direction: 'desc'
-                    },
-                    fields: ['dealer_list_name']
+                    order: ['-id'],
+                    fields: ['companyName']
                 }).then(function(dealers) {
                     return billingCreditsLoader.loadItems({
                         filters: [
@@ -1113,6 +1201,14 @@ describe('dealerTariff', function() {
 
         it('сортировать по site по убыванию', function() {
             checkSorting(dealerTariffsLoader, ['-site'], true);
+        });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(dealerTariffsLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(dealerTariffsLoader);
         });
     });
 });
@@ -1432,6 +1528,18 @@ describe('sale', function() {
 
         it('сортировать по isActive по убыванию, затем по id по убыванию', function() {
             checkSorting(salesLoader, ['-isActive', '-id']);
+        });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(salesLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(salesLoader, {
+                filters: [
+                    { fields: ['type'], type: 'equal', value: 'addcard' }
+                ]
+            });
         });
     });
 
@@ -2633,6 +2741,14 @@ describe('tariffRate', function() {
         it('сортировать по activeFrom по убыванию', function() {
             checkSorting(tariffRatesLoader, ['-activeFrom']);
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(tariffRatesLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(tariffRatesLoader);
+        });
     });
 });
 
@@ -2756,6 +2872,14 @@ describe('tariff', function() {
         it('сортировать по site по убыванию', function() {
             checkSorting(tariffsLoader, ['-site']);
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(tariffsLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(tariffsLoader);
+        });
     });
 });
 
@@ -2763,6 +2887,14 @@ describe('dealersitelogin', function() {
 
     it('equal - по равенству dealer и site заданным значениям', function() {
         checkFilterEqual(dealerSiteLoginsLoader, ['dealer', 'site']);
+    });
+
+    it('fields - выдавать только id', function() {
+        checkFieldingId(dealerSiteLoginsLoader);
+    });
+
+    it('fields - выдавать все указанные поля', function() {
+        checkFieldingAll(dealerSiteLoginsLoader);
     });
 
     it('post - сохранять новый dealersitelogin', function() {
@@ -2776,7 +2908,7 @@ describe('dealersitelogin', function() {
                 sites: sitesLoader.loadItems(),
                 dealers: dealersLoader.loadItems({
                     orders: ['-id'],
-                    fields: ['dealer_list_name']
+                    fields: ['companyName']
                 })
             });
         });
@@ -3184,6 +3316,14 @@ describe('dealersite', function() {
                 })).toBeTruthy();
             });
         });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(dealerSitesLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(dealerSitesLoader);
+        });
     });
 
     describe('Методы query должны сортировать', function() {
@@ -3247,7 +3387,7 @@ describe('dealersite', function() {
                 return $q.all({
                     dealers: dealersLoader.loadItems({
                         orders: ['-id'],
-                        fields: ['dealer_list_name']
+                        fields: ['companyName']
                     }),
                     sites: sitesLoader.loadItems()
                 });
@@ -3491,7 +3631,7 @@ describe('dealersite', function() {
                 return $q.all({
                     dealers: dealersLoader.loadItems({
                         orders: ['-id'],
-                        fields: ['dealer_list_name']
+                        fields: ['companyName']
                     }),
                     sites: sitesLoader.loadItems()
                 });
