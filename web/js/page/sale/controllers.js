@@ -583,6 +583,12 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 }
                 if (!possible) {
                     alert(alertText);
+                } else {
+                    var today = new Date;
+                    today.setUTCHours(0, 0, 0, 0);
+                    if (sale.activeFrom < today) {
+                        confirmMessage = 'ВНИМАНИЕ! Дата начала продажи находится в прошлом!\n' + confirmMessage;
+                    }
                 }
                 return possible;
             });
