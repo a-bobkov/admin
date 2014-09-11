@@ -30,14 +30,9 @@ var Item = (function() {
         var entityParams = this.entityParams;
         var self = this;
         return _.forOwn(self, function(value, key) {
-            // var newValue;
             if (_.isObject(value)) {
-            //     if (_.has(entityParams.enumFields, key)) {
-            //         return;
-                // } else 
                 if (_.has(entityParams.objectFields, key)) {
                     value.resolveRefs(directories);
-                    // return;
                 } else if (_.has(entityParams.refArrays, key)) {
                     _.forEach(value, function(item, idx) {
                         value[idx] = directories[entityParams.refArrays[key]].get(item.id);
@@ -45,7 +40,6 @@ var Item = (function() {
                             throw new CollectionError('Не найден элемент по ссылке ' + idx + ': ' + angular.toJson(item));
                         }
                     });
-                    // console.log(value);
                 } else if (_.has(entityParams.refFields, key)) {
                     self[key] = directories[entityParams.refFields[key]].get(value.id);
                     if (!self[key]) {

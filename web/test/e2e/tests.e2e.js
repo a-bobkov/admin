@@ -1035,7 +1035,7 @@ describe('User App', function() {
 
             element(by.model('userEdited.email')).clear();
             element(by.model('userEdited.email')).sendKeys(randomMillion() + '@protractor.ru');
-            setSelect(element(by.model('userEdited.status')), 2);
+            setSelect(element(by.model('userEdited.status')), 1);
 
             setSelect(element(by.model('dealerEdited.manager')), 2);
             setSelect(element(by.model('dealerEdited.billingCompany')), 2);
@@ -1389,7 +1389,7 @@ describe('User App', function() {
 
             element(by.model('userEdited.email')).clear();
             element(by.model('userEdited.email')).sendKeys(randomMillion() + '@protractor.ru');
-            setSelect(element(by.model('userEdited.status')), 2);
+            setSelect(element(by.model('userEdited.status')), 0);
 
             setSelect(element(by.model('dealerEdited.manager')), 2);
             setSelect(element(by.model('dealerEdited.billingCompany')), 2);
