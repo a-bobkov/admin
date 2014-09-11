@@ -20,11 +20,13 @@ describe('app-mocked', function() {
         Markets,
         Market,
         BillingCompanies,
+        Brands,
         citiesLoader,
         marketsLoader,
         metrosLoader,
         groupsLoader,
         managersLoader,
+        brandsLoader,
         DealerPhoneHour,
 
         dealerSitesLoader,
@@ -162,11 +164,13 @@ describe('app-mocked', function() {
         Markets = injector.get('Markets');
         Market = injector.get('Market');
         BillingCompanies = injector.get('BillingCompanies');
+        Brands = injector.get('Brands');
         citiesLoader = injector.get('citiesLoader');
         marketsLoader = injector.get('marketsLoader');
         metrosLoader = injector.get('metrosLoader');
         groupsLoader = injector.get('groupsLoader');
         managersLoader = injector.get('managersLoader');
+        brandsLoader = injector.get('brandsLoader');
         DealerPhoneHour = injector.get('DealerPhoneHour');
 
         dealerSitesLoader = injector.get('dealerSitesLoader');
@@ -208,7 +212,7 @@ describe('app-mocked', function() {
         if (ngMock) {
             $httpBackend = injector.get('$httpBackend');
             setHttpMock($httpBackend, 20, Construction,
-                userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+                userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies, Brands,
                 Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
                 Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
                 BillingCredits, BillingCredit, BillingUnions, BillingUnion);
@@ -525,6 +529,50 @@ describe('dealer', function() {
 
         it('fields - выдавать все указанные поля', function() {
             checkFieldingAll(dealersLoader);
+        });
+    });
+});
+
+describe('brand', function() {
+
+    describe('Метод query', function() {
+
+        it('возвращать все значения', function() {
+            var answer = {};
+
+            runSync(answer, function() {
+                return brandsLoader.loadItems();
+            });
+
+            runs(function() {
+                _.forEach(answer.respond.getItems(), function(brand) {
+                    expect(brand.name).toBeTruthy();
+                })
+            });
+        });
+
+        it('equal - фильтровать по равенству id заданному значению', function() {
+            checkFilterEqual(brandsLoader, ['id']);
+        });
+
+        it('equal - фильтровать по равенству name заданному значению', function() {
+            checkFilterEqual(brandsLoader, ['name']);
+        });
+
+        it('сортировать по id по возрастанию', function() {
+            checkSorting(brandsLoader, ['+id']);
+        });
+
+        it('сортировать по id по убыванию', function() {
+            checkSorting(brandsLoader, ['-id']);
+        });
+
+        it('fields - выдавать только id', function() {
+            checkFieldingId(brandsLoader);
+        });
+
+        it('fields - выдавать все указанные поля', function() {
+            checkFieldingAll(brandsLoader);
         });
     });
 });

@@ -7,7 +7,7 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
     return dealerApi;
 })
 
-.factory('Dealer', function(dealerApi, Item, dealerPhoneHours) {
+.factory('Dealer', function(dealerApi, Item, dealerPhoneHours, Brands) {
     var Dealer = (function() {
         function Dealer(itemData) {
             Item.call(this, itemData);
@@ -31,6 +31,9 @@ angular.module('max.dal.entities.dealer', ['max.dal.entities.collection', 'max.d
                 city: 'cities',
                 market: 'markets',
                 metro: 'metros'
+            },
+            refArrays: {
+                brand: 'brands'
             }
         };
 

@@ -2,14 +2,14 @@
 angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
 
 .run(function($httpBackend, Construction,
-    userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+    userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies, Brands,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
 
     $httpBackend.whenGET(/template\/.*/).passThrough();
     setHttpMock($httpBackend, 100, Construction,
-        userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+        userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies, Brands,
         Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
         Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
         BillingCredits, BillingCredit, BillingUnions, BillingUnion);
@@ -19,7 +19,7 @@ angular.module('RootApp-mocked', ['RootApp', 'ngMockE2E'])
  * мини-сервер http для комплексных тестов
  */
 function setHttpMock($httpBackend, multiplyCoef, Construction,
-    userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies,
+    userStatuses, User, Users, Groups, Managers, Markets, Metros, Cities, BillingCompanies, Brands,
     Dealers, Sites, DealerSite, DealerSites, DealerSiteLogins, DealerSiteLogin,
     Tariffs, TariffRates, DealerTariffs, Sales, Sale, saleTypes, SiteBalances, DealerBalances,
     BillingCredits, BillingCredit, BillingUnions, BillingUnion) {
@@ -688,6 +688,30 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         return processPostQuerySort(url, regexSitesQuery, data, sites, 'sites', Sites);
     });
 
+    var brands = new Brands([
+        {id: 1, name: 'AC'},
+        {id: 2, name: 'Acura'},
+        {id: 3, name: 'Alfa Romeo'},
+        {id: 4, name: 'BMW Alpina'},
+        {id: 5, name: 'Alpine'},
+        {id: 6, name: 'Aro'},
+        {id: 7, name: 'Asia'},
+        {id: 8, name: 'Aston Martin'},
+        {id: 9, name: 'Audi'},
+        {id: 10, name: 'Austin'},
+        {id: 11, name: 'Beijing'},
+        {id: 12, name: 'Bentley'},
+        {id: 13, name: 'Bertone'}
+    ]);
+
+    var regexBrandsQuery = /^\/api2\/brands(?:\?([\w_=&.]*))?$/;
+    $httpBackend.whenGET(regexBrandsQuery).respond(function(method, url, data) {
+        return processQueryUrlSort(url, regexBrandsQuery, brands.getItems(), 'brands', Brands);
+    });
+    $httpBackend.whenPOST(regexBrandsQuery).respond(function(method, url, data) {
+        return processPostQuerySort(url, regexBrandsQuery, data, brands, 'brands', Brands);
+    });
+
     var userDirectories = new Construction({
         groups: groups,
         managers: managers,
@@ -695,6 +719,7 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
         markets: markets,
         metros: metros,
         sites: sites,
+        brands: brands,
         billingCompanies: new BillingCompanies([
             {id: 1, name: 'Макспостер, ООО'},
             {id: 2, name: 'Харитонов, ИП'}
@@ -730,7 +755,11 @@ function setHttpMock($httpBackend, multiplyCoef, Construction,
                 phone3To: 15,
                 companyInfo: 'Здесь может быть произвольный текст...',
                 billingCompany: {id: 1},
-                manager: {id: 1}
+                manager: {id: 1},
+                brand: [
+                    {id: 1},
+                    {id: 10}
+                ]
             }
         },
         {id: 1, email: 'a-bobkov@ab.com', lastLogin: '2012-01-01', status: 'active', group: {id: 2}, dealer: {

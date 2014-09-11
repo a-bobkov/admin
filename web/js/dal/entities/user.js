@@ -7,7 +7,8 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
     'max.dal.entities.manager',
     'max.dal.entities.city',
     'max.dal.entities.market',
-    'max.dal.entities.metro'
+    'max.dal.entities.metro',
+    'max.dal.entities.brand'
 ])
 
 .factory('userApi', function(RestApi, Api) {
@@ -124,7 +125,7 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
 })
 
 .service('usersLoader', function(entityLoader, userApi, User, Users, Construction, 
-    Groups, Sites, Managers, BillingCompanies, Cities, Markets, Metros) {
+    Groups, Sites, Managers, BillingCompanies, Cities, Markets, Metros, Brands) {
     
     this.loadItems = function(queryParams, directories) {
         return entityLoader.loadItems(queryParams, directories, userApi, Users);
@@ -141,7 +142,8 @@ angular.module('max.dal.entities.user', ['max.dal.entities.collection', 'max.dal
                 billingCompanies: new BillingCompanies(collections.billingCompanies),
                 cities: new Cities(collections.cities),
                 markets: new Markets(collections.markets),
-                metros: new Metros(collections.metros)
+                metros: new Metros(collections.metros),
+                brands: new Brands(collections.brands)
             });
         });
     };

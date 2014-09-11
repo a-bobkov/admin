@@ -30,22 +30,28 @@ var Item = (function() {
         var entityParams = this.entityParams;
         var self = this;
         return _.forOwn(self, function(value, key) {
-            var newValue;
-            if (_.has(value, 'id')) {
-                if (_.has(entityParams.enumFields, key)) {
-                    return;
-                } else if (_.has(entityParams.objectFields, key)) {
+            // var newValue;
+            if (_.isObject(value)) {
+            //     if (_.has(entityParams.enumFields, key)) {
+            //         return;
+                // } else 
+                if (_.has(entityParams.objectFields, key)) {
                     value.resolveRefs(directories);
-                    return;
+                    // return;
+                } else if (_.has(entityParams.refArrays, key)) {
+                    _.forEach(value, function(item, idx) {
+                        value[idx] = directories[entityParams.refArrays[key]].get(item.id);
+                        if (!value[idx]) {
+                            throw new CollectionError('Не найден элемент по ссылке ' + idx + ': ' + angular.toJson(item));
+                        }
+                    });
+                    // console.log(value);
                 } else if (_.has(entityParams.refFields, key)) {
-                    newValue = directories[entityParams.refFields[key]].get(value.id);
-                } else {
-                    throw new CollectionError('Не найдена коллекция по ссылке ' + key + ': ' +angular.toJson(value));
+                    self[key] = directories[entityParams.refFields[key]].get(value.id);
+                    if (!self[key]) {
+                        throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' + angular.toJson(value));
+                    }
                 }
-                if (!newValue) {
-                    throw new CollectionError('Не найден элемент по ссылке ' + key + ': ' +angular.toJson(value));
-                }
-                self[key] = newValue;
             }
         });
     };

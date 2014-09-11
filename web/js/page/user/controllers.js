@@ -245,11 +245,12 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
 })
 
 .controller('UserCtrl', function($scope, $rootScope, $location, $window, $q, $timeout, data,
-    User, userStatuses, Dealer, dealerPhoneHours) {
+    User, userStatuses, Dealer, dealerPhoneHours, brandsLoader) {
 
     _.assign($scope, data);
     $scope.userStatuses = userStatuses;
     $scope.dealerPhoneHours = dealerPhoneHours;
+    $scope.brandsLoader = brandsLoader;
 
     if (data.user) {
         makeUserCopy();
