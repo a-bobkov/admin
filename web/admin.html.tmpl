@@ -47,6 +47,29 @@
                     </tr>
                 </table>
             </div>
+            <div class="span-24 hide" id="browserReminder">
+                <div class="notice">
+                <table class='bottom'>
+                    <tr>
+                        <td class="span-20 first">
+                            Уважаемый пользователь сервиса MaxPoster!<br>
+                            Для надежности оказываемых вам услуг, рекомендуем вам <span id='recommendedAction1'></span>.<br><span id='actionInstruction'></span>.<br>
+                            Если вы не можете <span id='recommendedAction2'></span>, пожалуйста, оперативно сообщите об этом Александру Воробьёву по электропочте <span id='emailReference'></span> или по телефону в Москве <b>+7 (499) 703-39-17</b> или Санкт-Петербурге <b>+7 (812) 309-83-51</b>.<br>
+                            С уважением,<br>
+                            Команда MaxPoster
+                        </td>
+                        <td class="span-3 last">
+                            <input type="submit" value="Осознал, напомнить завтра" onclick='
+                                var date = new Date;
+                                date.setHours(24, 0, 0, 0);
+                                document.cookie="browserReminder=1; expires="+date.toUTCString();
+                                document.getElementById("browserReminder").style.display="none"
+                            '>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </div>
         </div>
 
         <div id="content_frame" class="span-24 last" ng-controller="AppCtrl">
