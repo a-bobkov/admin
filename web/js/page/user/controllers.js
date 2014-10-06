@@ -292,6 +292,7 @@ angular.module('UsersApp', ['ngRoute', 'max.dal.entities.user', 'ui.bootstrap.pa
         $scope.userEdited.status = userStatuses.get('inactive');
         $scope.dealerEdited = new Dealer;
         $scope.userEdited.dealer = $scope.dealerEdited;
+        $scope.userEdited.dealer.brand = [];
         $scope.dealerEditedPhones = [{}, {}, {}];
     }
 
