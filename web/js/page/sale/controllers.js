@@ -643,10 +643,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             dealerBalance: dealerBalancesLoader.loadItemDealer($scope.saleEdited.dealer.id),
             billingCredit: billingCreditsLoader.loadItemDealer($scope.saleEdited.dealer.id)
         }).then(function(collections) {
-            var today = new Date;
-            today.setUTCHours(0, 0, 0, 0);
             var balance = collections.dealerBalance && collections.dealerBalance.balance || 0;
-            var limit = collections.billingCredit && collections.billingCredit.expiresAt >= today && -collections.billingCredit.amount || 0;
+            var limit = collections.billingCredit && collections.billingCredit.expiresAt >= $scope.today && -collections.billingCredit.amount || 0;
             var newBalance = balance - $scope.saleEdited.amount + (($scope.sale && $scope.sale.dealer.id === $scope.saleEdited.dealer.id) ? $scope.sale.amount : 0);
             if (newBalance >= limit || (newBalance < limit && confirm('После сохранения баланс клиента будет меньше лимита (' + newBalance.ceil(2) + ' < ' + limit.ceil(2) + ')! Продолжить сохранение?'))) {
                 $scope.saleEdited.save($scope).then(function(sale) {
@@ -673,6 +671,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $scope.sitesLoader = sitesLoader;
 
     $scope.tariffFieldTitle = "Тариф";
+
+    $scope.today = new Date;
+    $scope.today.setUTCHours(0, 0, 0, 0);
 
     if ($scope.sale) {
         makeSaleCopy();
@@ -908,6 +909,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     $scope.sitesLoader = sitesLoader;
     $scope.tariffFieldTitle = "Новый тариф";
 
+    $scope.today = new Date;
+    $scope.today.setUTCHours(0, 0, 0, 0);
+
     if ($scope.sale) {
         makeSaleCopy();
     } else {
@@ -1009,6 +1013,9 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
     _.assign($scope, data);
     $scope.dealersLoader = dealersLoader;
     $scope.sitesLoader = sitesLoader;
+
+    $scope.today = new Date;
+    $scope.today.setUTCHours(0, 0, 0, 0);
 
     if ($scope.sale) {
         makeSaleCopy();

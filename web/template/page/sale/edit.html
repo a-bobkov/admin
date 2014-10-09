@@ -61,9 +61,10 @@
 	        <tr>
 	            <th><label for="saleDate">Дата</label></th>
 	            <td>
-	                <input class="span-8" type="date" name="saleDate" id="saleDate" ng-model='saleEdited.date' required ng-disabled='formSaleKey.$invalid'>
+	                <input class="span-8" type="date" name="saleDate" id="saleDate" ng-model='saleEdited.date' ng-required='true' ui-less-or-equal='today' ng-disabled='formSaleKey.$invalid'>
 					<ul class="error_list" ng-show='formSale.saleDate.$invalid'>
 					    <li id='saleDateErrorRequired' ng-show="formSale.saleDate.$error.required">Необходимо ввести дату продажи.</li>
+					    <li id='saleDateErrorLess' ng-show="formSale.saleDate.$error.lessOrEqual">Дата должна быть меньше или равна сегодняшней.</li>
 					</ul>
 	           </td>
 	        </tr>
