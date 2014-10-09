@@ -828,6 +828,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         } else {
             throw Error('Неизвестное значение единицы периода тарифа: ' + tariff.periodUnit);
         }
+        activeTo.setUTCHours(0, 0, 0, 0);
         return activeTo;
     }
 
@@ -847,6 +848,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             $scope.saleEdited.activeFrom.setUTCHours(0, 0, 0, 0);
         }
         $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
+        $scope.saleEdited.activeFrom.setUTCHours(0, 0, 0, 0);   // для учета перехода на зимнее/летнее время
         $scope.saleEdited.activeTo = $scope.activeTo($scope.saleEdited.activeFrom, $scope.saleEdited.tariff);
     }, true);
 
@@ -949,6 +951,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         $scope.saleEdited.activeFrom.setUTCHours(0, 0, 0, 0);
         if ($scope.saleEdited.site.id !== 1 && $scope.saleEdited.site.id !== 5) {   // Дром и Ауто.ру
             $scope.saleEdited.activeFrom.setDate($scope.saleEdited.activeFrom.getDate() + 1);
+            $scope.saleEdited.activeFrom.setUTCHours(0, 0, 0, 0);   // для учета перехода на зимнее/летнее время
         }
         $scope.saleEdited.activeTo = $scope.parentSale.activeTo;
     }
