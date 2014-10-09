@@ -279,7 +279,7 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
 ;
 }])
 
-.controller('SaleListCtrl', function($scope, $rootScope, $location, $q, data, 
+.controller('SaleListCtrl', function($scope, $rootScope, $location, $q, data, SaleCommonCtrl,
     Sale, saleStatuses, saleTypes, salesLoader, dealersLoader, sitesLoader, tariffsLoader, dealerTariffsLoader, dealerSitesLoader,
     Construction, siteBalancesLoader) {
 
@@ -584,10 +584,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 if (!possible) {
                     alert(alertText);
                 } else {
-                    var today = new Date;
-                    today.setUTCHours(0, 0, 0, 0);
-                    if (sale.activeFrom < today) {
-                        confirmMessage = 'ВНИМАНИЕ! Дата начала продажи находится в прошлом!\n' + confirmMessage;
+                    if (SaleCommonCtrl.activeFromPast(sale)) {
+                        confirmMessage = 'ВНИМАНИЕ! Дата начала продажи должна быть завтрашняя (для auto.ru - сегодняшняя) или позже!\n' + confirmMessage;
                     }
                 }
                 return possible;
@@ -653,6 +651,16 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
                 });
             }
         });
+    };
+
+    this.activeFromPast = function(sale) {
+        var checkDate = new Date;
+        checkDate.setUTCHours(0, 0, 0, 0);
+        if (sale.site && sale.site.id !== 5) {
+            checkDate.setDate(checkDate.getDate() + 1);
+            checkDate.setUTCHours(0, 0, 0, 0);
+        }
+        return sale.activeFrom && sale.activeFrom < checkDate;
     };
 })
 
@@ -897,6 +905,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             return (tariff === selectedTariff || tariff.isActive && tariff.getLastRate($scope.city, $scope.tariffRates));
         }
     }
+
+    $scope.activeFromPast = SaleCommonCtrl.activeFromPast;
 })
 
 .controller('SaleAddcardEditCtrl', function($scope, $rootScope, $location, $window, data, SaleCommonCtrl,
@@ -1008,6 +1018,8 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
             return (tariff === selectedTariff || tariff.isActive && tariff.getLastRate($scope.city, $scope.tariffRates));
         }
     }
+
+    $scope.activeFromPast = SaleCommonCtrl.activeFromPast;
 })
 
 .controller('SaleExtraEditCtrl', function($scope, $rootScope, $location, $window, data, SaleCommonCtrl,

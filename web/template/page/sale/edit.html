@@ -160,6 +160,7 @@
 					<ul class="warning_list">
 					    <li id='saleIsActiveDisabled' ng-show="saleNoDefaultTariff && !saleEdited.isActive.id">Активация невозможна, так как у салона не включен экспорт на выбранный сайт!</li>
 					    <li id='saleIsActiveDisabledNoActiveDealerSite' ng-show="saleNoActiveDealerSite && !saleEdited.isActive.id">Активация невозможна, так как у салона нет активной регистрации на выбранном сайте!</li>
+					    <li id='saleActiveFromPast' ng-show="activeFromPast(saleEdited) && !saleEdited.isActive.id">Дата начала продажи должна быть завтрашняя (для auto.ru - сегодняшняя) или позже!</li>
 					</ul>
 	            </td>
 	        </tr>
