@@ -485,7 +485,8 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     }, true);
 
     $scope.$watch('[dealerSiteEdited.dealer, dealerSiteEdited.site]', function loadUser() {
-        if (!$scope.dealerSiteEdited.dealer || !$scope.dealerSiteEdited.site || !$scope.requiredFields[$scope.dealerSiteEdited.site.id].coordinates) {
+        if (!$scope.dealerSiteEdited.dealer || !$scope.dealerSiteEdited.site || !$scope.requiredFields[$scope.dealerSiteEdited.site.id]
+            || !$scope.requiredFields[$scope.dealerSiteEdited.site.id].coordinates) {
             delete $scope.userEdited;
             return;
         }
