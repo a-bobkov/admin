@@ -129,7 +129,7 @@ beforeEach(function() {
     });
 });
 
-xdescribe('User App', function() {
+describe('User App', function() {
 
     describe('Список пользователей', function() {
         beforeEach(function() {
@@ -3744,7 +3744,7 @@ describe('Sale App', function() {
     });
 });
 
-xdescribe('DealerSite App', function() {
+describe('DealerSite App', function() {
 
     describe('Одиночный выбор значений, загружаемых с сервера', function() {
         beforeEach(function() {
