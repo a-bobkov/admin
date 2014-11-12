@@ -90,7 +90,9 @@
 					    <li id='saleActiveFromErrorCrossCards' ng-show="formSale.saleActiveFrom.$error.crossCards">По паре "Салон-Сайт" между датами "С" и "По" не должно быть других карточек.</li>
 					</ul>
 					<ul class="warning_list" ng-show='saleEdited.isCard()'>
-					    <li id='saleEditActiveFromWarningDifferent' ng-show='saleEdited.activeTo - activeTo(saleEdited.activeFrom, saleEdited.tariff)'>Разница дат "По" - "С" не соответствует тарифу.</li>
+					    <li id='saleEditActiveFromWarningDifferent' ng-show='saleEdited.activeTo - activeTo(saleEdited.activeFrom, saleEdited.tariff)'>Разница дат "По" - "С" не соответствует тарифу.
+					    	<a ng-click="setSumsByDates()">Пересчитать суммы по датам</a>
+					    </li>
 					</ul>
 	           </td>
 	        </tr>

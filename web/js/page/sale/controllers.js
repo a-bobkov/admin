@@ -883,6 +883,22 @@ angular.module('SaleApp', ['ngRoute', 'ui.bootstrap.pagination', 'ngInputDate',
         }
     }, true);
 
+    $scope.setSumsByDates = function() {
+        var intervalTariff = ($scope.activeTo($scope.saleEdited.activeFrom, $scope.saleEdited.tariff) - $scope.saleEdited.activeFrom) / (1000 * 60 * 60 * 24) + 1;
+        var intervalCurrent = ($scope.saleEdited.activeTo - $scope.saleEdited.activeFrom) / (1000 * 60 * 60 * 24) + 1;
+        var k = intervalCurrent / intervalTariff;
+        var tariffRate = $scope.saleEdited.tariff.getLastRate($scope.city, $scope.tariffRates);
+        if (tariffRate) {
+            $scope.saleEdited.cardAmount = (tariffRate.rate * k).ceil(2);
+            $scope.saleEdited.amount = $scope.saleEdited.cardAmount;
+            $scope.saleEdited.siteAmount = (tariffRate.siteRate * k).ceil(2);
+        } else {
+            $scope.saleEdited.cardAmount = 0;
+            $scope.saleEdited.amount = 0;
+            $scope.saleEdited.siteAmount = 0;
+        }
+    };
+
     $scope.$watch('[saleEdited.site, saleEdited.count, saleEdited.tariff]', function setInfo(newValue, oldValue) {
         if (newValue === oldValue) {
             return;
