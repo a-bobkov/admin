@@ -32,7 +32,7 @@ angular.module('max.dal.api', [])
          * @returns {Promise}
          */
         var errorHandler = function(response) {
-            throw new CollectionError(response.data.message, response);
+            throw new CollectionError(response.data && response.data.message, response);
         };
 
         var responseHandler = function(response) {
