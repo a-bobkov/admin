@@ -96,7 +96,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     19: {                                                             coordinates: true}
 })
 
-.controller('DealerSiteListCtrl', function($scope, $rootScope, $location, $q, data, Construction,
+.controller('DealerSiteListCtrl', function($scope, $rootScope, $location, $q, $timeout, data, Construction,
     DealerSite, dealerSiteStatuses, dealerSitesLoader, dealersLoader, sitesLoader, salesLoader, dealerTariffsLoader,
     dealerSiteLoginsLoader, dealerSiteLoginTypes, DealerSiteRequiredFields, Dealers, Sites, usersLoader) {
 
@@ -121,12 +121,7 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
             isActive: null
         };
     }
-
-    $scope.onPatternChange = function () {
-        onSortingChange();
-    };
-
-    $scope.$watch('patterns', $scope.onPatternChange, true);
+    $scope.setPatternsDefault();    // только для множественного выбора в загружающих списках
 
     $scope.sortableColumns = [
         {id: "dealer", name: "Салон", width: '30%'},
@@ -139,18 +134,18 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
     var regexpOrder = /^([+-]?)(\w+)$/;
 
     $scope.sortingColumn = function() {
-        return $scope.sorting[0].replace(regexpOrder, '$2');
+        return $scope.sorting && $scope.sorting[0].replace(regexpOrder, '$2');
     }
 
     $scope.sortingMark = function(column) {
-        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+        if ($scope.sorting && column === $scope.sorting[0].replace(regexpOrder, '$2')) {
             return ($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? ' ↑' : ' ↓';
         }
         return '   ';
     }
 
     $scope.changeSorting = function(column) {
-        if (column === $scope.sorting[0].replace(regexpOrder, '$2')) {
+        if ($scope.sorting && column === $scope.sorting[0].replace(regexpOrder, '$2')) {
             $scope.sorting[0] = (($scope.sorting[0].replace(regexpOrder, '$1') === '-') ? '' : '-') + column;
         } else {
             $scope.sorting = [column];
@@ -206,30 +201,40 @@ angular.module('DealerSiteApp', ['ngRoute', 'ui.bootstrap.pagination', 'ui.multi
         }
     }
 
-    var ls = $location.search();
-    if (_.size(ls)) {
-        $scope.patterns = {
-            dealers: (!ls.dealers) ? [] : _.invoke(ls.dealers.split(';'), function() {
-                return $scope.dealers.get(_.parseInt(this));
-            }),
-            sites: (!ls.sites) ? [] : _.invoke(ls.sites.split(';'), function() {
-                return $scope.sites.get(_.parseInt(this));
-            }),
-            isActive: dealerSiteStatuses.get((ls.isActive === 'true') ? true : (ls.isActive === 'false') ? false : null)
-        };
-        $scope.sorting = ls.orders && ls.orders.split(';') || ['-id'];
-        $scope.paging = {
-            currentPage: _.parseInt(ls.currentPage),
-            itemsPerPage: _.parseInt(ls.itemsPerPage)
-        };
-    } else {
-        $scope.setPatternsDefault();
-        $scope.sorting = ['-id'];
-        $scope.paging = {
-            itemsPerPage: 25
-        };
-    }
-    $scope.maxSizePaging = 9;
+    $timeout(function() {
+        var ls = $location.search();
+        if (_.size(ls)) {
+            $scope.patterns = {
+                dealers: (!ls.dealers) ? [] : _.invoke(ls.dealers.split(';'), function() {
+                    return $scope.dealers.get(_.parseInt(this));
+                }),
+                sites: (!ls.sites) ? [] : _.invoke(ls.sites.split(';'), function() {
+                    return $scope.sites.get(_.parseInt(this));
+                }),
+                isActive: dealerSiteStatuses.get((ls.isActive === 'true') ? true : (ls.isActive === 'false') ? false : null)
+            };
+            $scope.sorting = ls.orders && ls.orders.split(';') || ['-id'];
+            $scope.paging = {
+                currentPage: _.parseInt(ls.currentPage),
+                itemsPerPage: _.parseInt(ls.itemsPerPage)
+            };
+        } else {
+            $scope.setPatternsDefault();
+            $scope.sorting = ['-id'];
+            $scope.paging = {
+                itemsPerPage: 25
+            };
+        }
+        $scope.maxSizePaging = 9;
+        $scope.onSelectPage();
+
+        $scope.$watch('patterns', function onPatternChange(newValue, oldValue) {
+            if (newValue === oldValue) {
+                return;
+            }
+            onSortingChange();
+        }, true);
+    });
 
     function makeQueryParams(ls) {
         if (_.size(ls)) {

@@ -129,7 +129,7 @@ beforeEach(function() {
     });
 });
 
-xdescribe('User App', function() {
+describe('User App', function() {
 
     describe('Список пользователей', function() {
         beforeEach(function() {
@@ -2774,7 +2774,7 @@ describe('Sale App', function() {
         });
     });
 
-    xdescribe('Редактирование доплаты', function() {
+    describe('Редактирование доплаты', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist?type=extra&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowEdit')).get(0).click();
@@ -2805,7 +2805,7 @@ describe('Sale App', function() {
         });
     });
 
-    xdescribe('Создание доплаты', function() {
+    describe('Создание доплаты', function() {
         beforeEach(function() {
             browser.get('admin.html#/salelist?type=card&archive=true&itemsPerPage=15');
             element.all(by.id('SaleListRowExtra')).get(0).click();
@@ -2832,7 +2832,7 @@ describe('Sale App', function() {
         });
     });
 
-    xdescribe('Сценарии использования', function() {
+    describe('Сценарии использования', function() {
 
         beforeEach(function() {
             browser.get('admin.html#/salelist?archive=true&orders=-amount&itemsPerPage=15');
@@ -3744,7 +3744,7 @@ describe('Sale App', function() {
     });
 });
 
-xdescribe('DealerSite App', function() {
+describe('DealerSite App', function() {
 
     describe('Одиночный выбор значений, загружаемых с сервера', function() {
         beforeEach(function() {

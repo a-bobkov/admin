@@ -2,13 +2,26 @@
 
 angular.module('max.dal.api', [])
 
+.service('requestCanceler', function($q, $rootScope) {
+    this.defer = $q.defer();
+    var that = this;
+    $rootScope.$on('$routeChangeStart', function() {
+        that.defer.resolve();
+        that.defer = $q.defer();
+    });
+    window.addEventListener('beforeunload', function() {
+        $rootScope.$apply(that.defer.resolve);
+        that.defer = $q.defer();
+    });
+})
+
 .provider('Api', function(){
 
     var options = this.options = {
         apiUrl: '/api2'
     };
 
-    this.$get = function($http, $q, $log) {
+    this.$get = function($http, requestCanceler) {
 
         var Api = {};
 
@@ -19,7 +32,7 @@ angular.module('max.dal.api', [])
          * @returns {Promise}
          */
         var errorHandler = function(response) {
-            throw new CollectionError(response.data.message, response);
+            throw new CollectionError(response.data && response.data.message, response);
         };
 
         var responseHandler = function(response) {
@@ -58,7 +71,8 @@ angular.module('max.dal.api', [])
                 method: 'GET',
                 url: options.apiUrl + name,
                 params: params,
-                withCredentials: true
+                withCredentials: true,
+                timeout: requestCanceler.defer.promise
             }).then(responseHandler, errorHandler);
         };
 
@@ -74,7 +88,8 @@ angular.module('max.dal.api', [])
                 url: options.apiUrl + name,
                 params: params,
                 data: data,
-                withCredentials: true
+                withCredentials: true,
+                timeout: requestCanceler.defer.promise
             }).then(responseHandler, errorHandler);
         };
 
@@ -89,7 +104,8 @@ angular.module('max.dal.api', [])
                 method: 'PUT',
                 url: options.apiUrl + name,
                 data: data,
-                withCredentials: true
+                withCredentials: true,
+                timeout: requestCanceler.defer.promise
             }).then(responseHandler, errorHandler);
         };
 
@@ -104,7 +120,8 @@ angular.module('max.dal.api', [])
                 method: 'DELETE',
                 url: options.apiUrl + name,
                 params: params,
-                withCredentials: true
+                withCredentials: true,
+                timeout: requestCanceler.defer.promise
             }).then(responseHandler, errorHandler);
         };
 
