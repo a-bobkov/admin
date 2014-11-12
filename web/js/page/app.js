@@ -50,7 +50,10 @@ angular.module('RootApp', ['UsersApp', 'DealerSiteApp', 'SaleApp', 'BillingCredi
     	} else if (errorObj.message === 'Forbidden') {
     		alert('Для работы с данной формой необходимы права администратора.')
 			return;
-    	}
+    	} else if (errorObj.respond.status === 0 && errorObj.respond.data === null) {
+            console.log('canceled: ', errorObj.respond);
+    		return;		// отмененный запрос
+		}
     	$log.error(errorObj);
 	    document.getElementById('content_frame').style.display = 'none';
 	    document.getElementById('javascriptErrorMessage').innerHTML = errorObj.message;
