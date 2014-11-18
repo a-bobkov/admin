@@ -34,7 +34,7 @@ angular.module('TestApp', ['ngRoute'])
                         method: 'GET',
                         url: 'http://127.0.0.1:1337',
                         params: {
-                            value: 500
+                            value: 200
                         },
                         withCredentials: true,
                         timeout: requestCanceler.defer.promise
@@ -104,7 +104,7 @@ angular.module('TestApp', ['ngRoute'])
                         method: 'GET',
                         url: 'http://127.0.0.1:1337',
                         params: {
-                            value: 500
+                            value: 200
                         },
                         withCredentials: true,
                         timeout: requestCanceler.defer.promise
@@ -158,8 +158,28 @@ angular.module('TestApp', ['ngRoute'])
         });
         window.addEventListener('beforeunload', function() {
             console.log('beforeunload');
-            $rootScope.$apply(that.defer.resolve);
-            that.defer = $q.defer();
+            // $rootScope.$apply(that.defer.resolve);
+            console.log($rootScope.$$phase);
+            // window.removeEventListener('beforeunload');
+            // setTimeout(function() {
+            //     console.log('apply1');
+            //     $rootScope.$apply(function() {
+            //   });
+            // }, 1);
+            // setTimeout(function() {
+            // console.log('apply2');
+            if ($rootScope.$$phase) {
+                // $rootScope.$evalAsync(function() {
+                    console.log('resolve eval');
+                    that.defer.resolve();
+                // });
+            } else {
+                $rootScope.$apply(function() {
+                    console.log('resolve apply');
+                    that.defer.resolve();
+                });
+            }
+            // }, 1);
         });
         // window.onbeforeunload = function() {
         //     console.log('beforeunload');
@@ -177,17 +197,30 @@ angular.module('TestApp', ['ngRoute'])
     // return RequestCanceler;
 })
 
-.controller('AppCtrl', function($rootScope, $http, $q) {
+.controller('AppCtrl', function($rootScope, $http, $q, $interval) {
     console.log('AppCtrl');
+    $interval(function() {
+        $rootScope.collection = _.shuffle($rootScope.collection);
+        // $rootScope.$apply();
+    }, 100);
+
+    $rootScope.collection = _.range(1000);
+    $rootScope.$watch('collection', function() {var a=[1]}, true);
+
+    // $rootScope.$watch('collection', function, true);
 })
 
-.controller('TestCtrl', function($rootScope, $http, data, requestCanceler) {
+.run(function($http) {
+    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+})
+
+.controller('TestCtrl', function($rootScope, $http, $window, data, requestCanceler) {
     console.log('TestCtrl', data);
     $http({
         method: 'GET',
         url: 'http://127.0.0.1:1337',
         params: {
-            value: 5000
+            value: 2500
         },
         withCredentials: true,
         timeout: requestCanceler.defer.promise
@@ -200,6 +233,11 @@ angular.module('TestApp', ['ngRoute'])
         } else {
             console.log('error 4: ', respond);
         }
-    })
+    });
+    // $window.location.href = "http://127.0.0.1:1337/?value=1000";
+    // $window.location.href = "http://127.0.0.1:1337/?value=1000";
+    // $window.location.href = "http://127.0.0.1:1337/?value=1000";
+    // $window.location.href = "http://127.0.0.1:1337/?value=1000";
+    // $window.location.href = "http://127.0.0.1:1337/?value=1000";
 })
 ;
