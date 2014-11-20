@@ -10,8 +10,11 @@ angular.module('max.dal.api', [])
         that.defer = $q.defer();
     });
     window.addEventListener('beforeunload', function() {
-        $rootScope.$apply(that.defer.resolve);
-        that.defer = $q.defer();
+        if ($rootScope.$$phase) {
+            that.defer.resolve();   // для FF
+        } else {
+            $rootScope.$apply(that.defer.resolve);
+        }
     });
 })
 
